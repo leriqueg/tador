@@ -19,7 +19,8 @@ La meta es construir una herramienta:
 - segura para datos financieros personales,
 - preparada para multiusuario,
 - basada en un plan de cuentas claro,
-- capaz de crecer mediante plantillas y entidades.
+- capaz de crecer mediante plantillas y entidades,
+- con un dashboard PYG mínimo para entender ingresos, gastos y resultado del ejercicio.
 
 ## Stack previsto
 
@@ -43,8 +44,14 @@ Infraestructura:
 
 - Docker
 
+IA local:
+
+- modelo local pequeño
+- uso inicial como interpretador de lenguaje natural
+- sugerencia de plantillas en Modo Hogar
+
 ## Estado actual
 
 El proyecto está en fase foundation. Todavía no hay implementación de producto; los documentos iniciales viven en `specs/foundation/` y sirven como insumo para que Spec Kit ayude a definir constitución, specs y fases del MVP.
 
-La primera etapa técnica se enfocará en backend con TDD.
+La primera etapa técnica se enfocará en backend con TDD. Luego vendrá el frontend base y, al cierre del MVP, una capa de IA local para interpretar frases simples y sugerir apuntes/plantillas sin ejecutar contabilidad de forma autónoma.

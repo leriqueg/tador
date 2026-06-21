@@ -19,8 +19,10 @@ Este documento describe los conceptos del dominio de TADOR sin definir todavía 
 | Asiento | Registro contable atómico y balanceado. | Es la unidad persistente de integridad contable. |
 | Línea de asiento | Afectación individual de una cuenta dentro de un asiento. | Las líneas hacen que el asiento cuadre. |
 | Plantilla | Regla de generación de asientos a partir de datos simples. | Permite mantener UI simple y motor contable correcto. |
+| Asistente IA v0 | Interpretador local de lenguaje natural para Modo Hogar. | Sugiere plantillas y datos, pero no ejecuta asientos directamente. |
 | Cuenta puente | Cuenta para acumular o netear contextos de paso. | Útil para tarjetas, proyectos, años, dependientes o fondos de terceros. |
 | Periodo anual | Ejercicio que puede cerrarse y reabrirse. | El MVP considera cierre anual. |
+| Dashboard PYG | Reporte mínimo del MVP para ingresos, egresos y neto por ejercicio. | Incluye gráfico mensual y Top 10 de ingresos/egresos. |
 
 ## Relaciones conceptuales
 
@@ -32,11 +34,14 @@ Usuario
         │     └── Cuenta
         ├── Entidad
         ├── Tag
+        ├── Asistente IA v0
+        │     └── Sugerencia de plantilla
         ├── Apunte
         │     └── Plantilla
         │           └── Asiento
         │                 └── Línea de asiento
-        └── Periodo anual
+        ├── Periodo anual
+        └── Dashboard PYG
 ```
 
 ## Reglas conceptuales
@@ -50,6 +55,8 @@ Usuario
 - Las Entidades dan nombre propio a bancos, personas, clientes, proveedores, plataformas y emisores.
 - CxC/CxP y facturas no están en el MVP, pero deberán referenciar Entidades cuando existan.
 - Las cuentas puente ayudan a separar la pregunta “dónde está/debo el dinero” de “qué ingreso/gasto ocurrió”.
+- El asistente IA v0 solo interpreta texto y sugiere plantillas; la ejecución contable siempre pasa por el backend.
+- El dashboard PYG MVP se calcula desde cuentas de ingreso y egreso, no desde cuentas puente ni saldos de balance.
 
 ## Fuera de este modelo por ahora
 

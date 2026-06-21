@@ -38,7 +38,13 @@ TADOR arranca desde cero en el repo nuevo.
 
 - Docker
 
-El backend se desarrollará primero, con TDD. En una segunda iteración se trabajará el diseño de páginas, pero desde el inicio se necesita inventariar controllers/endpoints/vistas para que la API nazca orientada al producto real.
+### IA local
+
+- Modelo local pequeño, ejecutado en infraestructura propia o VPS.
+- Uso inicial: interpretar lenguaje natural y sugerir plantillas.
+- La IA no ejecuta asientos directamente ni decide contabilidad de forma autónoma.
+
+El backend se desarrollará primero, con TDD. En una segunda iteración se trabajará el frontend y el diseño de páginas. Después de tener backend y frontend funcionales, se incorporará una capa IA para Modo Hogar como interpretador de apuntes y sugeridor de plantillas.
 
 ## Principios de producto
 
@@ -129,8 +135,10 @@ La transición Hogar -> PRO debe permitir que una persona que empieza un negocio
 - Tags o etiquetas simples para contexto no estructurado.
 - Cuentas puente/bypass para acumular y controlar gastos, proyectos o contextos.
 - Saldos actuales por cuenta en Modo Hogar y Modo PRO.
+- Dashboard PYG sencillo por ejercicio como único reporte obligatorio del MVP.
 - Cierre anual con opción de reapertura para modificaciones.
 - UI mobile-first, pero compatible con desktop para el MVP.
+- Asistente IA v0 en Modo Hogar, después de backend y frontend, para interpretar frases simples y sugerir plantillas.
 
 ### Fuera del MVP
 
@@ -144,7 +152,9 @@ La transición Hogar -> PRO debe permitir que una persona que empieza un negocio
 - Inventarios.
 - Kardex.
 - Control de materia prima como módulo de inventario.
-- Asistente avanzado de lenguaje natural o personalidad de Pacho.
+- Reportes avanzados, comparativos, índices o exportaciones formales.
+- Asistente IA avanzado que tome decisiones contables autónomas.
+- Personalidad de Pacho como guía conversacional completa.
 
 ## Plan de cuentas
 
@@ -352,6 +362,32 @@ Queda pendiente definir exactamente qué bloquea el cierre anual:
 - consultas,
 - o solo modificaciones directas.
 
+## Reporte PYG MVP
+
+El MVP tendrá un único reporte obligatorio: un dashboard sencillo de PYG por ejercicio. Este reporte es indispensable porque ya existe conceptualmente en el proyecto legacy y TADOR no debería perder esa lectura mínima.
+
+Ejemplo:
+
+```text
+Ejercicio: 2026
+Total Ingresos: $102,000
+Total Gastos: $101,500
+Neto: $500
+```
+
+El dashboard debe incluir:
+
+- gráfico mensual con eje X por meses y eje Y por importe,
+- ingresos mensuales como barras verdes con valores positivos,
+- egresos mensuales como barras rojas con valores positivos,
+- saldo mensual como línea negra con nodos,
+- gráfico pie azul con Top 10 de ingresos acumulados del ejercicio,
+- gráfico pie rojo con Top 10 de egresos acumulados del ejercicio.
+
+Este reporte debe agregarse desde cuentas de ingreso y egreso. No debe confundirse con saldos de balance ni cuentas puente.
+
+Detalle separado: `reporte-pyg-mvp.md`.
+
 ## Seguridad y datos
 
 Aunque el autoregistro no necesariamente sea la primera pantalla construida, el MVP debe modelarse desde el inicio como multiusuario y seguro.
@@ -377,6 +413,66 @@ El botón principal de creación puede llevar a una navegación guiada por inten
 - Quiero registrar un regalo.
 
 La discusión detallada de UI/UX queda para una iteración posterior. El backend debe prepararse con endpoints y plantillas que soporten este flujo.
+
+## Asistente IA v0
+
+TADOR incorporará una capa de IA local después de implementar el backend y el frontend base. Esta capacidad forma parte del cierre del MVP en Modo Hogar, pero no debe bloquear el diseño del motor contable.
+
+El objetivo inicial no es tener un contador autónomo, sino un interpretador de lenguaje natural que ayude al usuario a llegar rápido a una plantilla.
+
+Ejemplo:
+
+```text
+Usuario: Acabo de gastar $50.00 en un almuerzo.
+IA: Entiendo. Lo registraré como alimentación usando efectivo. ¿Confirmas?
+```
+
+Flujo esperado:
+
+```text
+Texto del usuario
+  -> IA interpreta intención, monto, concepto y posibles cuentas
+  -> Backend valida plantilla, usuario, cuentas, periodo y permisos
+  -> Usuario confirma
+  -> Backend ejecuta la plantilla normal
+```
+
+La IA debe producir una sugerencia estructurada, por ejemplo:
+
+```json
+{
+  "intent": "registrar_gasto",
+  "template": "alimentacion_efectivo",
+  "amount": 50,
+  "concept": "almuerzo",
+  "confidence": 0.91,
+  "needsConfirmation": true
+}
+```
+
+Reglas:
+
+- La IA no crea asientos directamente.
+- La IA no salta validaciones del backend.
+- La IA no modifica periodos cerrados.
+- La IA no debe decidir casos contables complejos sin confirmación o preguntas adicionales.
+- La IA debe sugerir plantillas conocidas y pedir datos faltantes.
+- La ejecución final siempre pasa por las APIs normales de TADOR.
+
+Casos adecuados para IA v0:
+
+- "Gasté 50 en almuerzo".
+- "Compré medicina con efectivo".
+- "Recibí 100 de Mariuxi por mi cumpleaños".
+- "Pagué internet con tarjeta".
+
+Casos fuera de IA v0:
+
+- Diferidos de tarjeta.
+- Facturas y documentos.
+- CxC/CxP formal.
+- Retenciones, impuestos complejos o decisiones profesionales ambiguas.
+- Ejecución sin confirmación.
 
 ## Mascota y tono
 

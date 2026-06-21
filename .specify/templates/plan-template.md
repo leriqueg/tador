@@ -40,7 +40,26 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+Document PASS/FAIL for each TADOR constitution gate:
+
+- **MVP Scope & Sprint Fit**: Does this plan implement one sprint/capability only,
+  and does it stay inside `specs/foundation/mvp-scope.md` or explicitly document an
+  approved scope change?
+- **Tenant & Privacy**: Are all user-owned data reads/writes scoped by authenticated
+  user, with no cross-user access path and no sensitive financial/PII leakage in logs?
+- **Accounting Integrity**: If this plan touches financial records, are all persisted
+  events represented as balanced Asientos with traceable correction behavior?
+- **Plantilla Discipline**: If this plan adds common user operations, are they modeled
+  as versioned Plantillas rather than hard-coded controller/UI accounting logic?
+- **Plan de Cuentas & Entidades**: Does this plan preserve the split between global
+  chart structure, user-owned accounts, and Entidades as named objects?
+- **PYG vs Balance**: If this plan touches reports/saldos/bridges, does it keep PYG
+  aggregation separate from balance and bridge/payment account balances?
+- **TDD & Tests**: Does this plan define test tooling or tests first for core backend
+  behavior, especially auth, tenant isolation, accounting, templates, reports, periods,
+  or AI interpretation?
+- **AI Safety**: If this plan touches IA v0, does AI only suggest templates/fields and
+  route execution through validated backend APIs with user confirmation?
 
 ## Project Structure
 

@@ -98,6 +98,13 @@
 - **FR-006**: System MUST authenticate users via [NEEDS CLARIFICATION: auth method not specified - email/password, SSO, OAuth?]
 - **FR-007**: System MUST retain user data for [NEEDS CLARIFICATION: retention period not specified]
 
+### Constitution Alignment *(mandatory for TADOR)*
+
+- **Tenant & Privacy**: [How this feature prevents cross-user access and avoids leaking sensitive financial/PII data]
+- **Accounting Impact**: [Whether this feature creates/modifies Asientos, lines, balances, reports, periods, or templates; if yes, state required integrity rules]
+- **MVP/Sprint Boundary**: [Which sprint/capability this belongs to and what is explicitly out of scope]
+- **Testing Obligation**: [Independent tests required for this feature, or tooling setup required if no runner exists]
+
 ### Key Entities *(include if feature involves data)*
 
 - **[Entity 1]**: [What it represents, key attributes without implementation]

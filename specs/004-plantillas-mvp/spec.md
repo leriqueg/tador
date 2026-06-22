@@ -8,6 +8,12 @@
 
 **Input**: Sprint 04 and `specs/foundation/plantillas-mvp-v0.md`: plantillas prioritarias para registrar apuntes Hogar y asiento manual PRO.
 
+## Clarifications
+
+### Session 2026-06-22
+
+- Q: ¿Cuántos Asientos puede generar un Apunte? → A: Todo Apunte debe generar exactamente un Asiento, incluso si tiene muchas líneas.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Registrar apunte cotidiano (Priority: P1)
@@ -73,6 +79,7 @@ Como usuario PRO, quiero crear un asiento más abierto cuando una plantilla no c
 - Periodo cerrado.
 - Usuario intenta usar plantilla PRO desde Hogar.
 - La plantilla genera asiento descuadrado por configuración incorrecta.
+- Flujo compuesto que requiere varios hechos económicos; debe registrarse como varios Apuntes/Asientos separados.
 
 ## Requirements *(mandatory)*
 
@@ -85,6 +92,8 @@ Como usuario PRO, quiero crear un asiento más abierto cuando una plantilla no c
 - **FR-005**: Las plantillas MUST declarar si aplican a Hogar, PRO o ambos.
 - **FR-006**: El asiento manual MUST estar limitado a Modo PRO.
 - **FR-007**: Las plantillas con puente MUST preservar PYG separado de saldos de balance.
+- **FR-008**: Cada Apunte MUST generar exactamente un Asiento.
+- **FR-009**: Los flujos compuestos MUST registrarse como varios Apuntes/Asientos separados, cada uno balanceado por sí mismo.
 
 ### Constitution Alignment *(mandatory for TADOR)*
 
@@ -108,9 +117,11 @@ Como usuario PRO, quiero crear un asiento más abierto cuando una plantilla no c
 - **SC-002**: Los casos de taxi AMEX, Alekey, Tía Toya y Proyecto UP pueden reproducirse.
 - **SC-003**: Un usuario Hogar puede registrar un gasto común sin ver líneas contables.
 - **SC-004**: Asiento manual PRO rechaza cualquier descuadre.
+- **SC-005**: Cada Apunte registrado queda vinculado a un único Asiento verificable.
 
 ## Assumptions
 
 - Las plantillas MVP pueden vivir inicialmente como JSON versionado en el repositorio.
 - La lista exacta puede ajustarse durante clarificación, pero no debe ampliar el MVP fuera de los casos prioritarios.
+- Los casos compuestos, como envío de dinero más comisión y cruce de fondos, se representan con varios Apuntes consecutivos.
 - La IA v0 usará estas plantillas en un sprint posterior.

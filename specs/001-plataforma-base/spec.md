@@ -8,6 +8,12 @@
 
 **Input**: Sprint 01 from `specs/foundation/estrategia-incremental-sprints.md`: base multiusuario segura con registro, login, recuperación, libro/configuración inicial y aislamiento por usuario.
 
+## Clarifications
+
+### Session 2026-06-22
+
+- Q: ¿Debe verificarse el correo antes de acceder al libro financiero? → A: El usuario debe verificar correo antes de acceder al libro financiero.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Registro y primer libro (Priority: P1)
@@ -21,7 +27,8 @@ Como visitante, quiero crear una cuenta con correo y configurar mi libro inicial
 **Acceptance Scenarios**:
 
 1. **Given** un visitante sin cuenta, **When** se registra con correo válido, **Then** se crea un usuario y un libro propio.
-2. **Given** un usuario recién creado, **When** define moneda y formato, **Then** esa configuración queda asociada a su libro.
+2. **Given** un usuario recién creado sin correo verificado, **When** intenta acceder al libro financiero, **Then** el sistema bloquea el acceso hasta completar verificación de correo.
+3. **Given** un usuario con correo verificado, **When** define moneda y formato, **Then** esa configuración queda asociada a su libro.
 
 ---
 
@@ -72,6 +79,7 @@ Como titular de un libro, quiero que ningún otro usuario pueda consultar o modi
 - **FR-006**: La moneda MUST quedar bloqueada después de existir actividad financiera.
 - **FR-007**: Todo dato de libro MUST pertenecer a un usuario.
 - **FR-008**: El sistema MUST impedir lectura y escritura cruzada entre usuarios.
+- **FR-009**: El sistema MUST requerir verificación de correo antes de permitir acceso al libro financiero.
 
 ### Constitution Alignment *(mandatory for TADOR)*
 
@@ -99,5 +107,5 @@ Como titular de un libro, quiero que ningún otro usuario pueda consultar o modi
 ## Assumptions
 
 - El MVP usa correo y contraseña como método inicial de autenticación.
-- La verificación de correo puede planificarse en detalle durante `/speckit-plan`.
+- La verificación de correo es obligatoria antes de acceder al libro financiero.
 - Un usuario tiene un libro principal en el MVP.

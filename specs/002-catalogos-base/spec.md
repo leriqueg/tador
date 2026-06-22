@@ -8,6 +8,13 @@
 
 **Input**: Sprint 02: plan de cuentas global, plan personalizado, cuentas madre/postables, creación guiada de cuentas, Entidades básicas y tags simples.
 
+## Clarifications
+
+### Session 2026-06-22
+
+- Q: ¿Cómo se materializa el plan de cuentas global en cada usuario? → A: Híbrido: catálogo global compartido + activación/override por usuario cuando una cuenta se usa o personaliza.
+- Q: ¿Cómo se relacionan Tags y Entidades en el MVP? → A: Entidades y tags son catálogos separados; pueden duplicar nombres y se resuelve en reportes.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Recibir plan inicial (Priority: P1)
@@ -22,6 +29,7 @@ Como usuario nuevo, quiero que TADOR tenga una estructura inicial de cuentas par
 
 1. **Given** un usuario con libro nuevo, **When** consulta su plan, **Then** ve cuentas base disponibles.
 2. **Given** Modo Hogar, **When** el usuario navega cuentas, **Then** no necesita ver códigos contables.
+3. **Given** una cuenta global no usada, **When** el usuario la selecciona por primera vez, **Then** queda activada en su plan sin copiar todo el catálogo global.
 
 ---
 
@@ -52,6 +60,7 @@ Como usuario, quiero registrar nombres propios y etiquetas para relacionarlos co
 
 1. **Given** una persona llamada Mariuxi, **When** la creo como Entidad, **Then** queda disponible como dimensión de referencia.
 2. **Given** una etiqueta libre, **When** la creo, **Then** puede usarse para contexto no estructurado.
+3. **Given** una Entidad y un tag con el mismo nombre, **When** se consultan reportes o búsquedas, **Then** el sistema distingue claramente si el filtro apunta a Entidad, tag o ambos.
 
 ### Edge Cases
 
@@ -59,6 +68,8 @@ Como usuario, quiero registrar nombres propios y etiquetas para relacionarlos co
 - Entidad duplicada para el mismo usuario.
 - Tag con nombre igual a una Entidad existente.
 - Intento de postear contra una cuenta madre.
+- Usuario personaliza una cuenta global ya activada.
+- Reporte o búsqueda con nombre duplicado entre Entidad y tag.
 
 ## Requirements *(mandatory)*
 
@@ -72,6 +83,11 @@ Como usuario, quiero registrar nombres propios y etiquetas para relacionarlos co
 - **FR-006**: El sistema MUST permitir tags simples por usuario.
 - **FR-007**: El sistema MUST asociar cuentas del usuario con Entidades cuando aplique.
 - **FR-008**: El sistema MUST preservar referencia legacy cuando una cuenta venga de migración.
+- **FR-009**: El sistema MUST mantener el catálogo global compartido sin copiarlo completo a cada usuario.
+- **FR-010**: El sistema MUST activar una cuenta global para un usuario cuando se usa o personaliza.
+- **FR-011**: El sistema MUST permitir overrides por usuario sin modificar la definición global.
+- **FR-012**: El sistema MUST mantener Entidades y tags como catálogos separados en el MVP.
+- **FR-013**: El sistema MUST permitir nombres duplicados entre Entidades y tags, distinguiendo explícitamente el tipo de filtro o referencia.
 
 ### Constitution Alignment *(mandatory for TADOR)*
 
@@ -86,6 +102,7 @@ Como usuario, quiero registrar nombres propios y etiquetas para relacionarlos co
 - **Cuenta de usuario**: Cuenta concreta creada o activada para un libro.
 - **Entidad**: Objeto con nombre propio.
 - **Tag**: Etiqueta contextual simple.
+- **Activación de cuenta global**: Relación que habilita una cuenta global dentro del plan de un usuario.
 
 ## Success Criteria *(mandatory)*
 
@@ -95,9 +112,13 @@ Como usuario, quiero registrar nombres propios y etiquetas para relacionarlos co
 - **SC-002**: 100 % de cuentas postables creadas tienen cuenta madre válida.
 - **SC-003**: Ninguna cuenta madre permite registros operativos.
 - **SC-004**: Dos usuarios pueden tener Entidades con el mismo nombre sin compartir datos.
+- **SC-005**: Un usuario puede usar una cuenta global común sin que se copie todo el catálogo a su libro.
+- **SC-006**: Una búsqueda o reporte puede diferenciar entre una Entidad y un tag aunque compartan nombre.
 
 ## Assumptions
 
 - El plan legacy en foundation es insumo de revisión, no catálogo final.
+- El plan de usuario combina cuentas propias y cuentas globales activadas.
 - En MVP, Entidad no implica CxC/CxP ni documento.
+- En MVP, Entidades y tags son catálogos separados y pueden tener nombres duplicados.
 - Hogar oculta códigos, PRO puede mostrarlos.

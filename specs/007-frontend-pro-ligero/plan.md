@@ -41,6 +41,9 @@ Add lightweight PRO controls: account codes, parent selection, manual balanced e
 - **PYG vs Balance**: PASS — PYG reporting is separated from balance, bridge and payment accounts.
 - **TDD & Tests**: PASS — each sprint defines test obligations; Sprint 01 establishes runnable tooling.
 - **AI Safety**: PASS — IA v0 only suggests templates and never persists accounting directly.
+- **Concurrency & Idempotency**: PASS — mutating backend behavior must define duplicate-request and concurrent update handling before implementation.
+- **Secure Design & Architecture**: PASS — plans must preserve Clean Architecture boundaries, authorization, validation, privacy-safe logs, and fail-closed tenant access.
+- **Maintainability Standards**: PASS — implementation must follow SOLID/DRY with judgment, English code/endpoint naming, and rare English comments for complex procedures only.
 
 
 ## Project Structure
@@ -103,3 +106,5 @@ See [data-model.md](./data-model.md), [quickstart.md](./quickstart.md), and cont
 - **Tenant & Privacy**: PASS — privacy/tenant impact is documented for this sprint.
 - **Accounting Integrity**: PASS — accounting impact is either absent or routed through balanced Asientos.
 - **TDD & Tests**: PASS — test expectations are documented for planning and task generation.
+- **Concurrency & Idempotency**: PASS — implementation tasks must cover duplicate submissions and concurrent writes when mutating state.
+- **Secure Design & Architecture**: PASS — design must maintain secure boundaries and Clean Architecture separation.

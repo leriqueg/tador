@@ -1,9 +1,9 @@
 <!--
 Sync Impact Report
-- Version change: template → 1.0.0
-- Modified principles: template placeholders → TADOR product/engineering principles
-- Added sections: Product & Domain Constraints; Technical Direction; Development Workflow
-- Removed sections: placeholder Section 2/Section 3
+- Version change: 1.0.0 → 1.1.0
+- Modified principles: VII (expanded plan checks); added VIII (Secure, concurrent and maintainable implementation)
+- Added sections: none
+- Removed sections: none
 - Templates requiring updates:
   ✅ .specify/templates/plan-template.md
   ✅ .specify/templates/spec-template.md
@@ -98,6 +98,21 @@ criteria before implementation tasks are generated.
 Rationale: The domain is subtle. Small, testable vertical slices protect accounting
 integrity and keep the MVP from becoming an unreviewable rewrite.
 
+### VIII. Secure, concurrent and maintainable implementation
+
+Backend endpoints that create or mutate financial state MUST define concurrency and
+idempotency behavior before implementation. Secure design MUST be applied by default:
+validate inputs, enforce authorization at boundaries, avoid sensitive logs, and fail
+closed for tenant-owned data. Code MUST follow Clean Architecture boundaries, SOLID,
+and DRY with judgment, avoiding premature abstractions. Class names, variables,
+procedures, files, and endpoint route paths MUST be in English. Code comments MUST be
+rare, written in English, and limited to complex procedures, non-obvious invariants,
+or security/accounting reasoning.
+
+Rationale: TADOR will mutate sensitive financial state. Idempotency, concurrency,
+security, clear naming, and disciplined architecture reduce data corruption and
+long-term maintenance risk.
+
 ## Product & Domain Constraints
 
 - MVP scope is defined in `specs/foundation/mvp-scope.md`.
@@ -124,6 +139,8 @@ integrity and keep the MVP from becoming an unreviewable rewrite.
   closed periods, or execute without user confirmation.
 - Until implementation manifests exist, specs MUST treat this stack as planned and
   confirm concrete tooling in each `plan.md`.
+- Mutating backend features MUST document idempotency and concurrency strategy in
+  their implementation plans.
 
 ## Development Workflow
 
@@ -131,7 +148,8 @@ integrity and keep the MVP from becoming an unreviewable rewrite.
 - Do not create a full-MVP mega-spec; create one spec per sprint/capability.
 - Every `plan.md` MUST include a Constitution Check covering tenant isolation,
   accounting balance, templates, PYG/Balance separation, TDD/test strategy, and MVP
-  scope.
+  scope, plus secure design, concurrency/idempotency, architecture boundaries, and
+  naming/comment standards when code is involved.
 - Every `tasks.md` for backend behavior MUST include test tasks once the test runner
   exists. If no runner exists, the spec MUST make tooling setup part of the sprint.
 - Documentation changes that alter domain meaning MUST update foundation docs or cite
@@ -158,4 +176,4 @@ Each new Spec Kit plan MUST pass the Constitution Check before Phase 0 research 
 again after Phase 1 design. Violations MUST be listed in Complexity Tracking with the
 simpler alternative that was rejected.
 
-**Version**: 1.0.0 | **Ratified**: 2026-06-20 | **Last Amended**: 2026-06-20
+**Version**: 1.1.0 | **Ratified**: 2026-06-20 | **Last Amended**: 2026-06-22

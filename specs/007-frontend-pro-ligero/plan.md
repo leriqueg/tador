@@ -44,6 +44,7 @@ Add lightweight PRO controls: account codes, parent selection, manual balanced e
 - **Concurrency & Idempotency**: PASS — mutating backend behavior must define duplicate-request and concurrent update handling before implementation.
 - **Secure Design & Architecture**: PASS — plans must preserve Clean Architecture boundaries, authorization, validation, privacy-safe logs, and fail-closed tenant access.
 - **Maintainability Standards**: PASS — implementation must follow SOLID/DRY with judgment, English code/endpoint naming, and rare English comments for complex procedures only.
+- **Dependency Hygiene**: PASS — package additions must use stable releases, lock exact resolved versions, avoid prerelease/untested packages, and prefer reputable OSS/framework features.
 
 
 ## Project Structure

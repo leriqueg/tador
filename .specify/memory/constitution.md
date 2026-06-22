@@ -1,7 +1,7 @@
 <!--
 Sync Impact Report
-- Version change: 1.0.0 → 1.1.0
-- Modified principles: VII (expanded plan checks); added VIII (Secure, concurrent and maintainable implementation)
+- Version change: 1.1.0 → 1.2.0
+- Modified principles: VIII (stable dependency and reputable OSS requirements)
 - Added sections: none
 - Removed sections: none
 - Templates requiring updates:
@@ -103,15 +103,20 @@ integrity and keep the MVP from becoming an unreviewable rewrite.
 Backend endpoints that create or mutate financial state MUST define concurrency and
 idempotency behavior before implementation. Secure design MUST be applied by default:
 validate inputs, enforce authorization at boundaries, avoid sensitive logs, and fail
-closed for tenant-owned data. Code MUST follow Clean Architecture boundaries, SOLID,
-and DRY with judgment, avoiding premature abstractions. Class names, variables,
-procedures, files, and endpoint route paths MUST be in English. Code comments MUST be
-rare, written in English, and limited to complex procedures, non-obvious invariants,
-or security/accounting reasoning.
+closed for tenant-owned data. Package manifests MUST use stable releases, avoid
+untested prerelease dependencies, and preserve exact resolved versions through the
+package-manager lockfile. Technical infrastructure such as authentication,
+encryption, token handling, validation, migrations, logging, and security controls
+MUST prefer reputable open-source libraries or framework features over custom
+implementations. Code MUST follow Clean Architecture boundaries, SOLID, and DRY with
+judgment, avoiding premature abstractions. Class names, variables, procedures, files,
+and endpoint route paths MUST be in English. Code comments MUST be rare, written in
+English, and limited to complex procedures, non-obvious invariants, or
+security/accounting reasoning.
 
 Rationale: TADOR will mutate sensitive financial state. Idempotency, concurrency,
-security, clear naming, and disciplined architecture reduce data corruption and
-long-term maintenance risk.
+dependency hygiene, security, clear naming, and disciplined architecture reduce data
+corruption, supply-chain, and long-term maintenance risk.
 
 ## Product & Domain Constraints
 
@@ -141,6 +146,8 @@ long-term maintenance risk.
   confirm concrete tooling in each `plan.md`.
 - Mutating backend features MUST document idempotency and concurrency strategy in
   their implementation plans.
+- Plans that introduce dependencies MUST include a dependency research section that
+  prefers stable, reputable OSS packages and documents rejected risky alternatives.
 
 ## Development Workflow
 
@@ -176,4 +183,4 @@ Each new Spec Kit plan MUST pass the Constitution Check before Phase 0 research 
 again after Phase 1 design. Violations MUST be listed in Complexity Tracking with the
 simpler alternative that was rejected.
 
-**Version**: 1.1.0 | **Ratified**: 2026-06-20 | **Last Amended**: 2026-06-22
+**Version**: 1.2.0 | **Ratified**: 2026-06-20 | **Last Amended**: 2026-06-22

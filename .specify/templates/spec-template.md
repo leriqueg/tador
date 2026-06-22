@@ -106,6 +106,7 @@
 - **Testing Obligation**: [Independent tests required for this feature, or tooling setup required if no runner exists]
 - **Concurrency & Idempotency**: [If backend state changes are involved, state duplicate-request and concurrent update expectations]
 - **Secure Design & Maintainability**: [Security/privacy constraints, Clean Architecture boundary expectations, naming/comment standards if code is involved]
+- **Dependency Hygiene**: [If packages are introduced, state stable-release and reputable OSS expectations]
 
 ### Key Entities *(include if feature involves data)*
 

@@ -68,6 +68,10 @@ Document PASS/FAIL for each TADOR constitution gate:
 - **Maintainability Standards**: Does the plan follow SOLID/DRY without premature
   abstraction, use English names for code/endpoints, and limit English comments to
   complex procedures or non-obvious invariants?
+- **Dependency Hygiene**: If this plan creates or changes package manifests, does it
+  use stable releases, lock exact resolved versions, avoid prerelease/untested
+  packages, and prefer reputable OSS libraries/framework features for security and
+  infrastructure?
 
 ## Project Structure
 

@@ -10,12 +10,29 @@ services:
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 10s
       timeout: 5s
       retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: tador-backend
+    restart: unless-stopped
+    ports:
+      - "${BACKEND_PORT:-3000}:3000"
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-tador}:${POSTGRES_PASSWORD:-tador_dev_password}@postgres:5432/${POSTGRES_DB:-tador_dev}
+      SESSION_SECRET: ${SESSION_SECRET:-change-me-in-production}
+      PORT: 3000
+      HOST: 0.0.0.0
+    depends_on:
+      postgres:
+        condition: service_healthy
 
 volumes:
   postgres_data:

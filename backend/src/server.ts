@@ -2,7 +2,7 @@
  * TADOR Backend — Fastify server bootstrap.
  */
 
-import Fastify from 'fastify';
+import Fastify, { type FastifyInstance } from 'fastify';
 import fastifyCookie from '@fastify/cookie';
 
 import { createUserRepository } from './infrastructure/repositories/user-repo.js';

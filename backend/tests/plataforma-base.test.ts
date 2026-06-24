@@ -43,6 +43,8 @@ describe('US1 — Registration and first book', () => {
       headers: { cookie: cookies.join('; ') },
     });
 
+    expect(bookRes.statusCode).toBe(403);
+
     await app.close();
   });
 
@@ -147,6 +149,14 @@ describe('US3 — Tenant isolation', () => {
     });
     expect(resA.statusCode).toBe(201);
     const cookiesA = resA.cookies.map((c) => `${c.name}=${c.value}`);
+    const userAResult = resA.json();
+
+    // Verify user A's email so they can access their book (FR-009)
+    const verifyA = await app.inject({
+      method: 'GET',
+      url: `/auth/verify/${userAResult.verificationToken}`,
+    });
+    expect(verifyA.statusCode).toBe(200);
 
     // Register user B
     const resB = await app.inject({
@@ -156,6 +166,14 @@ describe('US3 — Tenant isolation', () => {
     });
     expect(resB.statusCode).toBe(201);
     const cookiesB = resB.cookies.map((c) => `${c.name}=${c.value}`);
+    const userBResult = resB.json();
+
+    // Verify user B's email
+    const verifyB = await app.inject({
+      method: 'GET',
+      url: `/auth/verify/${userBResult.verificationToken}`,
+    });
+    expect(verifyB.statusCode).toBe(200);
 
     // User A gets their book
     const bookA = await app.inject({
@@ -166,9 +184,7 @@ describe('US3 — Tenant isolation', () => {
     expect(bookA.statusCode).toBe(200);
     const bookAData = bookA.json();
 
-    // User B tries to access User A's book directly
-    // (Since there's no direct endpoint for accessing another user's book,
-    // we verify that the middleware correctly scopes data by userId)
+    // User B gets their book (different scope)
     const bookB = await app.inject({
       method: 'GET',
       url: '/book',
@@ -176,7 +192,7 @@ describe('US3 — Tenant isolation', () => {
     });
     expect(bookB.statusCode).toBe(200);
 
-    // Verify each user sees different book IDs
+    // Verify each user sees different book IDs (tenant isolation)
     const bookBData = bookB.json();
     expect(bookAData.book.id).not.toBe(bookBData.book.id);
 

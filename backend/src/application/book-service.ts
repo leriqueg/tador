@@ -42,6 +42,14 @@ export function createBookApplicationService(
     ): Promise<Book> {
       ensureOwnership(userId, authenticatedUserId);
 
+      // FR-009: Must be verified to access financial book
+      const isVerified = await getUserVerifiedStatus(userId);
+      if (!isVerified) {
+        throw new Error(
+          'Email verification required before accessing financial book',
+        );
+      }
+
       const book = await bookRepo.findByUserId(userId);
       if (!book) {
         throw new Error('Book not found');

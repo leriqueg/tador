@@ -43,6 +43,11 @@ export function registerBookRoutes(
       if (message === 'Book not found' || message === 'Book config not found') {
         return reply.status(404).send({ error: message });
       }
+      if (
+        message === 'Email verification required before accessing financial book'
+      ) {
+        return reply.status(403).send({ error: message });
+      }
       request.log.error(err, 'Failed to get book');
       return reply.status(500).send({ error: 'Failed to get book' });
     }

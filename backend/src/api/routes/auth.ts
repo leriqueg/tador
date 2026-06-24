@@ -40,6 +40,7 @@ export function registerAuthRoutes(
           email: result.user.email,
           verifiedAt: result.user.verifiedAt,
         },
+        verificationToken: result.verificationToken,
       });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Registration failed';

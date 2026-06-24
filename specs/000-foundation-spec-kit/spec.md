@@ -4,7 +4,7 @@
 
 **Created**: 2026-06-22
 
-**Status**: Draft
+**Status**: Ratified
 
 **Input**: Foundation documents in `specs/foundation/` and the decision that each sprint becomes one Spec Kit specification.
 

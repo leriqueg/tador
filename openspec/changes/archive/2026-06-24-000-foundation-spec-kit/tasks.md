@@ -36,7 +36,6 @@ Chain strategy: size-exception
 - [x] 2.3 Verificar FR-005 en sprints 01–08: ningún spec.md debe contener decisiones de implementación (nombres de librerías, frameworks, APIs, estructura de directorios de código)
 - [x] 2.4 Verificar FR-002: existe un spec por cada sprint MVP (01–08) con spec.md presente
 - [x] 2.5 Corregir cualquier brecha encontrada en 2.1–2.4 (p. ej., agregar sección faltante, mover decisión de implementación al plan.md o design.md correspondiente)
-  - Sin brechas encontradas: todos los specs 01–08 cumplen FR-002, FR-003, FR-004 y FR-005.
 
 ## Fase 3: Cierre del sprint
 

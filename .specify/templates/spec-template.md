@@ -104,6 +104,9 @@
 - **Accounting Impact**: [Whether this feature creates/modifies Asientos, lines, balances, reports, periods, or templates; if yes, state required integrity rules]
 - **MVP/Sprint Boundary**: [Which sprint/capability this belongs to and what is explicitly out of scope]
 - **Testing Obligation**: [Independent tests required for this feature, or tooling setup required if no runner exists]
+- **Concurrency & Idempotency**: [If backend state changes are involved, state duplicate-request and concurrent update expectations]
+- **Secure Design & Maintainability**: [Security/privacy constraints, Clean Architecture boundary expectations, naming/comment standards if code is involved]
+- **Dependency Hygiene**: [If packages are introduced, state stable-release and reputable OSS expectations]
 
 ### Key Entities *(include if feature involves data)*
 

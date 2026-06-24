@@ -60,6 +60,18 @@ Document PASS/FAIL for each TADOR constitution gate:
   or AI interpretation?
 - **AI Safety**: If this plan touches IA v0, does AI only suggest templates/fields and
   route execution through validated backend APIs with user confirmation?
+- **Concurrency & Idempotency**: If this plan creates or mutates backend state, does it
+  define duplicate-request behavior, concurrent update handling, and retry safety?
+- **Secure Design & Architecture**: Does the plan preserve Clean Architecture
+  boundaries, validate inputs, enforce authorization, avoid sensitive logs, and fail
+  closed for tenant-owned data?
+- **Maintainability Standards**: Does the plan follow SOLID/DRY without premature
+  abstraction, use English names for code/endpoints, and limit English comments to
+  complex procedures or non-obvious invariants?
+- **Dependency Hygiene**: If this plan creates or changes package manifests, does it
+  use stable releases, lock exact resolved versions, avoid prerelease/untested
+  packages, and prefer reputable OSS libraries/framework features for security and
+  infrastructure?
 
 ## Project Structure
 

@@ -1,0 +1,26 @@
+---
+description: TADOR implementation standards for backend/frontend code
+alwaysApply: true
+---
+
+# TADOR Implementation Standards
+
+- Design backend endpoints for concurrency and idempotency when they create or mutate
+  financial state. Mutating operations SHOULD have a clear duplicate-request strategy.
+- Apply secure design by default: validate input, enforce authorization at boundaries,
+  avoid sensitive logs, and fail closed for tenant-owned data.
+- When creating or changing `package.json`, use stable package releases only. Avoid
+  prerelease/untested versions, pin versions through the package manager lockfile, and
+  review dependency reputation/security before adding packages.
+- For technical or infrastructure procedures (authentication, encryption, token
+  handling, validation, migrations, logging, security), prefer reputable open-source
+  libraries/framework features over custom implementations.
+- Use Clean Architecture boundaries: domain rules stay out of controllers/UI; adapters
+  and infrastructure depend inward on application/domain contracts.
+- Follow SOLID and DRY with judgment. Remove meaningful duplication, but do not create
+  abstractions before there is real repeated complexity.
+- Comments must be rare and only explain complex procedures, non-obvious invariants, or
+  security/accounting reasoning. Write code comments in English.
+- Use English for class names, variables, functions/procedures, file names, and endpoint
+  route paths.
+- User-facing product language may remain Spanish where the UX/spec requires it.

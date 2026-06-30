@@ -7,10 +7,14 @@ import fastifyCookie from '@fastify/cookie';
 
 import { createUserRepository } from './infrastructure/repositories/user-repo.js';
 import { createBookRepository } from './infrastructure/repositories/book-repo.js';
+import { createAsientoRepository } from './infrastructure/repositories/asiento-repo.js';
+import { createPeriodoRepository } from './infrastructure/repositories/periodo-repo.js';
 import { createEmailService } from './infrastructure/services/email-service.js';
 import { createSessionService } from './infrastructure/services/session-service.js';
 import { createAuthApplicationService } from './application/auth-service.js';
 import { createBookApplicationService } from './application/book-service.js';
+import { createAsientoApplicationService } from './application/asiento-service.js';
+import { createPeriodoApplicationService } from './application/periodo-service.js';
 import { registerAuthRoutes } from './api/routes/auth.js';
 import { registerVerificationRoutes } from './api/routes/verification.js';
 import { registerRecoveryRoutes } from './api/routes/recovery.js';
@@ -19,6 +23,9 @@ import { registerChartRoutes } from './api/routes/chart.js';
 import { registerAccountRoutes } from './api/routes/accounts.js';
 import { registerEntityRoutes } from './api/routes/entities.js';
 import { registerTagRoutes } from './api/routes/tags.js';
+import { registerEntryRoutes } from './api/routes/entries.js';
+import { registerBalanceRoutes } from './api/routes/balances.js';
+import { registerPeriodRoutes } from './api/routes/periods.js';
 
 const PORT = parseInt(process.env.PORT || '3000', 10);
 const HOST = process.env.HOST || '0.0.0.0';
@@ -54,6 +61,8 @@ export async function buildApp(opts?: { logger?: boolean | object }) {
   // Dependencies
   const userRepo = createUserRepository();
   const bookRepo = createBookRepository();
+  const asientoRepo = createAsientoRepository();
+  const periodoRepo = createPeriodoRepository();
   const emailService = createEmailService();
   const sessionService = createSessionService();
 
@@ -69,6 +78,9 @@ export async function buildApp(opts?: { logger?: boolean | object }) {
     return user !== null && user !== undefined && user.verifiedAt !== null;
   });
 
+  const asientoService = createAsientoApplicationService(asientoRepo, periodoRepo);
+  const periodoService = createPeriodoApplicationService(periodoRepo);
+
   // Routes
   registerAuthRoutes(app, authService);
   registerVerificationRoutes(app, authService);
@@ -78,6 +90,9 @@ export async function buildApp(opts?: { logger?: boolean | object }) {
   registerAccountRoutes(app, authService);
   registerEntityRoutes(app, authService);
   registerTagRoutes(app, authService);
+  registerEntryRoutes(app, authService, asientoService, bookRepo);
+  registerBalanceRoutes(app, authService, asientoService, bookRepo);
+  registerPeriodRoutes(app, authService, periodoService, bookRepo);
 
   return app;
 }

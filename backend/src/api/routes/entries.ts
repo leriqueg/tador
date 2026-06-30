@@ -120,7 +120,8 @@ export function registerEntryRoutes(
       const { id } = request.params as { id: string };
 
       try {
-        const asiento = await asientoService.obtenerAsiento(id, userId);
+        const bookId = await resolveBookId(userId);
+        const asiento = await asientoService.obtenerAsiento(id, userId, bookId);
         return reply.status(200).send({ asiento });
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to get entry';

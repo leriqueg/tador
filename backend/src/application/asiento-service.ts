@@ -53,6 +53,7 @@ export interface AsientoApplicationService {
   obtenerAsiento(
     id: string,
     userId: string,
+    bookId: string,
   ): Promise<AsientoWithLines>;
 
   editarAsiento(
@@ -116,9 +117,14 @@ export function createAsientoApplicationService(
     async obtenerAsiento(
       id: string,
       userId: string,
+      bookId: string,
     ): Promise<AsientoWithLines> {
       const asiento = await asientoRepo.findById(id);
       if (!asiento) {
+        throw new Error('Entry not found');
+      }
+      // Tenant isolation: verify entry belongs to user's book
+      if (asiento.bookId !== bookId) {
         throw new Error('Entry not found');
       }
       return asiento;

@@ -13,6 +13,12 @@ beforeAll(async () => {
     env: { ...process.env, DATABASE_URL: process.env.DATABASE_URL! },
     stdio: 'pipe',
   });
+
+  // Seed global chart of accounts (cuentas_globales)
+  execSync('npx tsx prisma/seed/catalogos.ts', {
+    env: { ...process.env, DATABASE_URL: process.env.DATABASE_URL! },
+    stdio: 'pipe',
+  });
 });
 
 afterAll(async () => {

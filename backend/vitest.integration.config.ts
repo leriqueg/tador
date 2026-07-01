@@ -7,11 +7,14 @@ export default defineConfig({
     include: ['tests/**/*.test.ts'],
     exclude: ['node_modules', 'dist'],
     setupFiles: ['./tests/setup.ts'],
+    fileParallelism: false,
+    pool: 'forks',
     testTimeout: 30000,
     hookTimeout: 30000,
     env: {
       DATABASE_URL: 'postgresql://tador:tador_dev_password@localhost:5432/tador_test',
       SESSION_SECRET: 'test-secret-for-integration-tests',
+      PORT: '0',
     },
   },
 });

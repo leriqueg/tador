@@ -7,6 +7,24 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum TipoCuenta {
+  bank
+  card
+  wallet
+  bridge
+
+  @@map("tipo_cuenta")
+}
+
+enum TipoEntidad {
+  person
+  organization
+  bank
+  issuer
+
+  @@map("tipo_entidad")
+}
+
 model User {
   id           String    @id @default(cuid())
   email        String    @unique
@@ -15,8 +33,12 @@ model User {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
-  books    Book[]
-  sessions Session[]
+  books            Book[]
+  sessions         Session[]
+  cuentasUsuario   CuentaUsuario[]
+  entidades        Entidad[]
+  tags             Tag[]
+  activaciones     ActivacionCuentaGlobal[]
 
   @@map("users")
 }
@@ -58,4 +80,86 @@ model Session {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("sessions")
+}
+
+model CuentaGlobal {
+  id          String   @id @default(cuid())
+  parentId    String?
+  codigo      String   @unique
+  nombre      String
+  descripcion String   @default("")
+  esPostable  Boolean  @default(false)
+  legacyId    Int?
+  legacyCode  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  parent          CuentaGlobal?            @relation("GlobalAccountHierarchy", fields: [parentId], references: [id])
+  children        CuentaGlobal[]            @relation("GlobalAccountHierarchy")
+  cuentasUsuario  CuentaUsuario[]
+  activaciones    ActivacionCuentaGlobal[]
+
+  @@map("cuentas_globales")
+}
+
+model CuentaUsuario {
+  id                 String     @id @default(cuid())
+  userId             String
+  globalId           String?
+  entidadId          String?
+  tipoCuenta         TipoCuenta
+  nombre             String
+  codigoPersonalizado String?
+  activa             Boolean    @default(true)
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+
+  user    User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  global  CuentaGlobal? @relation(fields: [globalId], references: [id])
+  entidad Entidad?      @relation(fields: [entidadId], references: [id])
+
+  @@map("cuentas_usuario")
+}
+
+model Entidad {
+  id        String      @id @default(cuid())
+  userId    String
+  nombre    String
+  tipo      TipoEntidad
+  notas     String?
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cuentasUsuario CuentaUsuario[]
+
+  @@unique([userId, nombre])
+  @@map("entidades")
+}
+
+model Tag {
+  id        String   @id @default(cuid())
+  userId    String
+  nombre    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, nombre])
+  @@map("tags")
+}
+
+model ActivacionCuentaGlobal {
+  id             String   @id @default(cuid())
+  userId         String
+  globalId       String
+  activa         Boolean  @default(true)
+  nombreOverride String?
+  createdAt      DateTime @default(now())
+
+  user   User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  global CuentaGlobal @relation(fields: [globalId], references: [id])
+
+  @@unique([userId, globalId])
+  @@map("activaciones_cuenta_global")
 }

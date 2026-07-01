@@ -15,6 +15,10 @@ import { registerAuthRoutes } from './api/routes/auth.js';
 import { registerVerificationRoutes } from './api/routes/verification.js';
 import { registerRecoveryRoutes } from './api/routes/recovery.js';
 import { registerBookRoutes } from './api/routes/book.js';
+import { registerChartRoutes } from './api/routes/chart.js';
+import { registerAccountRoutes } from './api/routes/accounts.js';
+import { registerEntityRoutes } from './api/routes/entities.js';
+import { registerTagRoutes } from './api/routes/tags.js';
 
 const PORT = parseInt(process.env.PORT || '3000', 10);
 const HOST = process.env.HOST || '0.0.0.0';
@@ -70,6 +74,10 @@ export async function buildApp(opts?: { logger?: boolean | object }) {
   registerVerificationRoutes(app, authService);
   registerRecoveryRoutes(app, authService);
   registerBookRoutes(app, authService, bookService);
+  registerChartRoutes(app, authService);
+  registerAccountRoutes(app, authService);
+  registerEntityRoutes(app, authService);
+  registerTagRoutes(app, authService);
 
   return app;
 }

@@ -13,6 +13,7 @@
     "db:migrate": "prisma migrate dev",
     "db:generate": "prisma generate",
     "db:studio": "prisma studio",
+    "seed:catalogos": "npx tsx prisma/seed/catalogos.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

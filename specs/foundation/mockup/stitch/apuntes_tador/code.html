@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .squishy-button:active {
+            transform: scale(0.96);
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #f7f9fb 0%, #eefcf8 50%, #fcfdeb 100%);
+        }
+        .custom-shadow {
+            box-shadow: 0 4px 12px rgba(19, 78, 74, 0.05);
+        }
+        .category-card.active {
+            border-color: #003633;
+            background-color: #b5ede7;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "background": "#f7f9fb",
+                        "primary-fixed-dim": "#9ad1cb",
+                        "error-container": "#ffdad6",
+                        "on-primary-fixed-variant": "#144f4b",
+                        "on-error": "#ffffff",
+                        "secondary-fixed": "#62fae3",
+                        "surface-tint": "#316763",
+                        "on-surface-variant": "#404847",
+                        "on-secondary": "#ffffff",
+                        "on-background": "#191c1e",
+                        "surface-container": "#eceef0",
+                        "surface-variant": "#e0e3e5",
+                        "on-tertiary-container": "#a9b6b4",
+                        "text-muted": "#64748B",
+                        "tertiary": "#263230",
+                        "secondary-container": "#62fae3",
+                        "outline-variant": "#bfc8c6",
+                        "surface-container-highest": "#e0e3e5",
+                        "primary-fixed": "#b5ede7",
+                        "on-secondary-fixed-variant": "#005047",
+                        "text-main": "#1E293B",
+                        "inverse-on-surface": "#eff1f3",
+                        "surface-container-low": "#f2f4f6",
+                        "on-primary": "#ffffff",
+                        "on-secondary-fixed": "#00201c",
+                        "tertiary-fixed-dim": "#bcc9c6",
+                        "on-error-container": "#93000a",
+                        "tertiary-fixed": "#d8e5e2",
+                        "surface-container-lowest": "#ffffff",
+                        "surface": "#f7f9fb",
+                        "on-tertiary": "#ffffff",
+                        "warning-amber": "#F59E0B",
+                        "primary": "#003633",
+                        "primary-container": "#134e4a",
+                        "on-tertiary-fixed": "#121e1c",
+                        "secondary-fixed-dim": "#3cddc7",
+                        "expense-rose": "#E11D48",
+                        "surface-bright": "#f7f9fb",
+                        "inverse-primary": "#9ad1cb",
+                        "on-surface": "#191c1e",
+                        "on-primary-fixed": "#00201e",
+                        "surface-container-high": "#e6e8ea",
+                        "error": "#ba1a1a",
+                        "inverse-surface": "#2d3133",
+                        "success-emerald": "#10B981",
+                        "on-tertiary-fixed-variant": "#3d4947",
+                        "on-primary-container": "#87beb8",
+                        "surface-dim": "#d8dadc",
+                        "tertiary-container": "#3c4846",
+                        "on-secondary-container": "#007165",
+                        "secondary": "#006b5f",
+                        "outline": "#707977"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xl": "40px",
+                        "lg": "24px",
+                        "sm": "12px",
+                        "xs": "8px",
+                        "gutter": "16px",
+                        "md": "16px",
+                        "container-max": "1200px",
+                        "base": "4px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Inter"],
+                        "label-md": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "headline-xl": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "500"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "600"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "headline-xl": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body-md overflow-x-hidden gradient-bg min-h-screen">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full bg-surface/80 dark:bg-surface-dim/80 backdrop-blur-md shadow-sm z-50">
+<div class="flex justify-between items-center w-full px-md md:px-lg max-w-container-max mx-auto h-16">
+<div class="flex items-center gap-sm">
+<button class="material-symbols-outlined text-primary p-2 hover:bg-surface-container-high/50 rounded-full transition-all">menu</button>
+<h1 class="font-headline-md text-headline-md font-bold text-primary">TADOR</h1>
+</div>
+<div class="hidden md:flex gap-lg">
+<a class="text-primary border-b-2 border-primary pb-1 font-label-md" href="#">Apuntes</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-label-md" href="#">Reportes</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-label-md" href="#">Ahorros</a>
+</div>
+<button class="bg-primary text-on-primary px-lg py-2 rounded-full font-label-md squishy-button transition-all shadow-sm">Ingresar</button>
+</div>
+</header>
+<main class="pt-24 pb-xl px-md md:px-lg max-w-[800px] mx-auto">
+<!-- Header Section -->
+<section class="mb-lg">
+<h2 class="font-headline-xl text-headline-xl text-primary mb-xs">Nuevo Apunte</h2>
+<p class="text-body-lg text-on-surface-variant">Registra tus movimientos diarios de forma rápida y sencilla.</p>
+</section>
+<!-- Entry Form Card -->
+<div class="bg-surface-container-lowest rounded-xl custom-shadow p-lg md:p-xl border border-outline-variant/30">
+<form class="space-y-lg" id="expenseForm">
+<!-- Toggle Ingreso/Gasto -->
+<div class="flex bg-surface-container p-1 rounded-full w-full max-w-sm mx-auto">
+<button class="flex-1 py-2 rounded-full text-label-md font-bold transition-all bg-surface-container-lowest shadow-sm text-expense-rose" id="toggleGasto" type="button">Gasto</button>
+<button class="flex-1 py-2 rounded-full text-label-md font-bold transition-all text-on-surface-variant" id="toggleIngreso" type="button">Ingreso</button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-lg">
+<!-- Monto -->
+<div class="flex flex-col gap-xs">
+<label class="font-label-md text-on-surface-variant px-1">Monto</label>
+<div class="relative group">
+<span class="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant font-bold">$</span>
+<input class="w-full pl-8 pr-4 py-3 rounded-lg border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary bg-surface-bright outline-none transition-all text-headline-md font-bold text-primary" placeholder="0.00" required="" step="0.01" type="number"/>
+</div>
+</div>
+<!-- Fecha -->
+<div class="flex flex-col gap-xs">
+<label class="font-label-md text-on-surface-variant px-1">Fecha</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant">calendar_today</span>
+<input class="w-full px-4 py-3 rounded-lg border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary bg-surface-bright outline-none transition-all" type="date" value="2024-05-20"/>
+</div>
+</div>
+</div>
+<!-- Categoría Selection -->
+<div class="flex flex-col gap-sm">
+<label class="font-label-md text-on-surface-variant px-1">Categoría</label>
+<div class="grid grid-cols-3 md:grid-cols-6 gap-sm">
+<button class="category-card flex flex-col items-center gap-xs p-3 rounded-xl border border-outline-variant hover:border-primary transition-all active:scale-95 group" onclick="selectCategory(this)" type="button">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary">shopping_cart</span>
+<span class="text-label-sm text-on-surface-variant">Compras</span>
+</button>
+<button class="category-card flex flex-col items-center gap-xs p-3 rounded-xl border border-outline-variant hover:border-primary transition-all active:scale-95 group" onclick="selectCategory(this)" type="button">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary">restaurant</span>
+<span class="text-label-sm text-on-surface-variant">Comida</span>
+</button>
+<button class="category-card flex flex-col items-center gap-xs p-3 rounded-xl border border-outline-variant hover:border-primary transition-all active:scale-95 group active" onclick="selectCategory(this)" type="button">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary">home</span>
+<span class="text-label-sm text-on-surface-variant">Hogar</span>
+</button>
+<button class="category-card flex flex-col items-center gap-xs p-3 rounded-xl border border-outline-variant hover:border-primary transition-all active:scale-95 group" onclick="selectCategory(this)" type="button">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary">directions_car</span>
+<span class="text-label-sm text-on-surface-variant">Transporte</span>
+</button>
+<button class="category-card flex flex-col items-center gap-xs p-3 rounded-xl border border-outline-variant hover:border-primary transition-all active:scale-95 group" onclick="selectCategory(this)" type="button">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary">medication</span>
+<span class="text-label-sm text-on-surface-variant">Salud</span>
+</button>
+<button class="category-card flex flex-col items-center gap-xs p-3 rounded-xl border border-outline-variant hover:border-primary transition-all active:scale-95 group" onclick="selectCategory(this)" type="button">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary">more_horiz</span>
+<span class="text-label-sm text-on-surface-variant">Otros</span>
+</button>
+</div>
+</div>
+<!-- Descripción -->
+<div class="flex flex-col gap-xs">
+<label class="font-label-md text-on-surface-variant px-1">Descripción breve</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-4 text-on-surface-variant">edit_note</span>
+<textarea class="w-full pl-12 pr-4 py-3 rounded-lg border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary bg-surface-bright outline-none transition-all resize-none" placeholder="Ej. Pago de alquiler de Mayo" rows="2"></textarea>
+</div>
+</div>
+<!-- Action Button -->
+<button class="w-full bg-primary text-on-primary py-4 rounded-xl font-headline-md squishy-button shadow-lg flex items-center justify-center gap-sm mt-lg transition-transform" type="submit">
+<span class="material-symbols-outlined">check_circle</span>
+                    Guardar Apunte
+                </button>
+</form>
+</div>
+<!-- Recent Activity Mini List -->
+<section class="mt-xl">
+<div class="flex justify-between items-center mb-md">
+<h3 class="font-headline-md text-primary">Apuntes recientes</h3>
+<a class="text-primary font-label-md hover:underline" href="#">Ver todos</a>
+</div>
+<div class="space-y-sm">
+<!-- Item 1 -->
+<div class="bg-surface-container-lowest/60 backdrop-blur-sm p-md rounded-xl flex justify-between items-center border border-outline-variant/20 hover:border-primary-fixed transition-colors">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-full bg-primary-fixed flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-weight="fill">shopping_cart</span>
+</div>
+<div>
+<p class="font-label-md text-on-surface">Supermercado Central</p>
+<p class="text-label-sm text-on-surface-variant">Hoy, 10:30 AM</p>
+</div>
+</div>
+<span class="font-bold text-expense-rose">-$45.20</span>
+</div>
+<!-- Item 2 -->
+<div class="bg-surface-container-lowest/60 backdrop-blur-sm p-md rounded-xl flex justify-between items-center border border-outline-variant/20 hover:border-primary-fixed transition-colors">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-full bg-secondary-fixed flex items-center justify-center">
+<span class="material-symbols-outlined text-on-secondary-container" data-weight="fill">payments</span>
+</div>
+<div>
+<p class="font-label-md text-on-surface">Sueldo Quincena</p>
+<p class="text-label-sm text-on-surface-variant">Ayer, 06:00 PM</p>
+</div>
+</div>
+<span class="font-bold text-success-emerald">+$1,200.00</span>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-low dark:bg-tertiary-container w-full border-t border-outline-variant/10">
+<div class="w-full px-md md:px-lg py-xl max-w-container-max mx-auto flex flex-col md:flex-row justify-between items-center gap-md">
+<h1 class="font-headline-md text-headline-md font-bold text-primary">TADOR</h1>
+<div class="flex gap-lg">
+<a class="text-on-surface-variant hover:text-primary transition-opacity font-label-sm" href="#">Privacidad</a>
+<a class="text-on-surface-variant hover:text-primary transition-opacity font-label-sm" href="#">Términos</a>
+<a class="text-on-surface-variant hover:text-primary transition-opacity font-label-sm" href="#">Soporte</a>
+</div>
+<p class="text-on-surface-variant font-label-sm">© 2026 TADOR</p>
+</div>
+</footer>
+<script>
+        // Category selection logic
+        function selectCategory(el) {
+            document.querySelectorAll('.category-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            el.classList.add('active');
+        }
+
+        // Toggle Gasto/Ingreso logic
+        const toggleGasto = document.getElementById('toggleGasto');
+        const toggleIngreso = document.getElementById('toggleIngreso');
+
+        toggleGasto.addEventListener('click', () => {
+            toggleGasto.className = 'flex-1 py-2 rounded-full text-label-md font-bold transition-all bg-surface-container-lowest shadow-sm text-expense-rose';
+            toggleIngreso.className = 'flex-1 py-2 rounded-full text-label-md font-bold transition-all text-on-surface-variant';
+        });
+
+        toggleIngreso.addEventListener('click', () => {
+            toggleIngreso.className = 'flex-1 py-2 rounded-full text-label-md font-bold transition-all bg-surface-container-lowest shadow-sm text-success-emerald';
+            toggleGasto.className = 'flex-1 py-2 rounded-full text-label-md font-bold transition-all text-on-surface-variant';
+        });
+
+        // Form submission animation
+        document.getElementById('expenseForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button[type="submit"]');
+            const originalContent = btn.innerHTML;
+            btn.innerHTML = '<span class="material-symbols-outlined animate-spin">sync</span> Guardando...';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                btn.innerHTML = '<span class="material-symbols-outlined">done_all</span> ¡Guardado!';
+                btn.classList.replace('bg-primary', 'bg-success-emerald');
+                
+                setTimeout(() => {
+                    btn.innerHTML = originalContent;
+                    btn.classList.replace('bg-success-emerald', 'bg-primary');
+                    btn.disabled = false;
+                    e.target.reset();
+                }, 2000);
+            }, 1500);
+        });
+    </script>
+</body></html>

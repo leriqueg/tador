@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+
+<html lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-surface-variant": "#534341",
+                    "warning-amber": "#F59E0B",
+                    "background": "#fdf8f5",
+                    "secondary-container": "#ffdad9",
+                    "on-primary-fixed-variant": "#005050",
+                    "tertiary-container": "#9ad1cb",
+                    "on-tertiary": "#ffffff",
+                    "secondary-fixed": "#ffdad9",
+                    "surface-tint": "#006a6a",
+                    "expense-rose": "#E11D48",
+                    "text-muted": "#857371",
+                    "primary-fixed": "#b5ede7",
+                    "on-tertiary-fixed": "#002020",
+                    "primary-fixed-dim": "#9ad1cb",
+                    "surface-bright": "#fdf8f5",
+                    "success-emerald": "#10B981",
+                    "error-container": "#ffdad6",
+                    "surface-container-low": "#f8f3f0",
+                    "on-background": "#201a19",
+                    "inverse-on-surface": "#fbeee0",
+                    "tertiary-fixed": "#b5ede7",
+                    "outline-variant": "#d8c2bf",
+                    "on-secondary-fixed": "#2c1514",
+                    "on-tertiary-fixed-variant": "#005050",
+                    "surface-variant": "#f4dedb",
+                    "surface-dim": "#ded9d6",
+                    "tertiary": "#006a6a",
+                    "tertiary-fixed-dim": "#9ad1cb",
+                    "on-error": "#ffffff",
+                    "secondary-fixed-dim": "#e7bdbb",
+                    "primary": "#006a6a",
+                    "secondary": "#775654",
+                    "surface-container-high": "#f2edeb",
+                    "on-primary": "#ffffff",
+                    "inverse-surface": "#362f2d",
+                    "on-tertiary-container": "#002020",
+                    "outline": "#857371",
+                    "inverse-primary": "#9ad1cb",
+                    "surface-container-lowest": "#ffffff",
+                    "text-main": "#201a19",
+                    "on-primary-container": "#002020",
+                    "surface": "#fdf8f5",
+                    "on-error-container": "#410002",
+                    "error": "#ba1a1a",
+                    "on-secondary": "#ffffff",
+                    "surface-container": "#ece7e4",
+                    "surface-container-highest": "#e6e1df",
+                    "on-secondary-fixed-variant": "#5d3f3d",
+                    "primary-container": "#82fdf0",
+                    "on-primary-fixed": "#002020",
+                    "on-secondary-container": "#2c1514",
+                    "on-surface": "#201a19"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.5rem",
+                    "lg": "0.5rem",
+                    "xl": "1rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "gutter": "16px",
+                    "lg": "24px",
+                    "container-max": "1200px",
+                    "xl": "40px",
+                    "md": "16px",
+                    "sm": "12px",
+                    "xs": "8px",
+                    "base": "4px"
+            },
+            "fontFamily": {
+                    "body-lg": ["Manrope"],
+                    "label-sm": ["Manrope"],
+                    "headline-xl": ["Manrope"],
+                    "body-md": ["Manrope"],
+                    "headline-lg-mobile": ["Manrope"],
+                    "headline-lg": ["Manrope"],
+                    "label-md": ["Manrope"],
+                    "headline-md": ["Manrope"]
+            },
+            "fontSize": {
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "600"}],
+                    "headline-xl": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "800"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: #fdf8f5;
+            font-family: 'Manrope', sans-serif;
+            scroll-behavior: smooth;
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, padding 0.3s ease;
+        }
+        .accordion-item.active .accordion-content {
+            max-height: 500px;
+            padding-bottom: 24px;
+        }
+        .accordion-item.active .chevron-icon {
+            transform: rotate(180deg);
+        }
+        .squishy-active:active {
+            transform: scale(0.96);
+        }
+        .glass-header {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+    </style>
+</head>
+<body class="text-on-surface">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 glass-header bg-surface/85 shadow-sm border-b border-surface-variant/30">
+<div class="flex justify-between items-center w-full px-md md:px-lg max-w-container-max mx-auto h-20">
+<div class="flex items-center gap-md">
+<button class="material-symbols-outlined text-primary p-2 rounded-full hover:bg-surface-variant active:scale-95 transition-all md:hidden">menu</button>
+<h1 class="font-headline-md text-headline-md font-extrabold text-primary tracking-tight">TADOR</h1>
+</div>
+<nav class="hidden md:flex items-center gap-xl">
+<a class="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md" href="#">Inicio</a>
+<a class="text-primary border-b-2 border-primary pb-1 font-label-md text-label-md" href="#">Ayuda</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md" href="#">Contacto</a>
+</nav>
+<button class="bg-primary text-on-primary px-lg py-2.5 rounded-full font-label-md text-label-md hover:opacity-90 active:scale-95 transition-all shadow-md">Ingresar</button>
+</div>
+</header>
+<main class="pt-32 pb-xl px-gutter max-w-[840px] mx-auto min-h-screen">
+<!-- Hero Section -->
+<section class="mb-xl text-center">
+<h2 class="font-headline-xl text-headline-xl text-primary mb-sm">Preguntas frecuentes</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl mx-auto">
+            Resuelve todas tus dudas sobre cómo TADOR puede ayudarte a organizar tu economía personal con la precisión de un contador profesional.
+        </p>
+</section>
+<!-- Categories and Accordions -->
+<div class="flex flex-col gap-xl">
+<!-- Category: General -->
+<div>
+<h3 class="font-headline-md text-headline-md text-secondary mb-md flex items-center gap-xs">
+<span class="material-symbols-outlined text-primary">auto_awesome</span>
+                General
+            </h3>
+<div class="space-y-md">
+<!-- FAQ Item 1 -->
+<div class="accordion-item bg-surface-container-low rounded-xl shadow-sm border border-transparent hover:border-primary/20 transition-all cursor-pointer group" onclick="toggleAccordion(this)">
+<div class="p-lg flex justify-between items-center">
+<span class="font-label-md text-label-md font-bold text-on-surface">¿Qué es TADOR?</span>
+<div class="bg-surface-container-high p-1 rounded-full group-hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined chevron-icon transition-transform duration-300 text-primary">expand_more</span>
+</div>
+</div>
+<div class="accordion-content px-lg">
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+                            TADOR es una plataforma de gestión financiera diseñada para personas que quieren tener el control total de su economía sin complicaciones. Combinamos la rigurosidad del sistema contable profesional con una interfaz intuitiva y amigable, permitiéndote registrar "apuntes" de tus gastos e ingresos de forma natural.
+                        </p>
+</div>
+</div>
+<!-- FAQ Item 2 -->
+<div class="accordion-item bg-surface-container-low rounded-xl shadow-sm border border-transparent hover:border-primary/20 transition-all cursor-pointer group" onclick="toggleAccordion(this)">
+<div class="p-lg flex justify-between items-center">
+<span class="font-label-md text-label-md font-bold text-on-surface">¿Es gratis?</span>
+<div class="bg-surface-container-high p-1 rounded-full group-hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined chevron-icon transition-transform duration-300 text-primary">expand_more</span>
+</div>
+</div>
+<div class="accordion-content px-lg">
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+                            Contamos con una versión gratuita que incluye todas las funciones esenciales para organizar tu hogar. Para usuarios con necesidades más complejas o múltiples cuentas, ofrecemos planes premium con herramientas avanzadas de análisis y reportes detallados.
+                        </p>
+</div>
+</div>
+</div>
+</div>
+<!-- Category: Técnico -->
+<div>
+<h3 class="font-headline-md text-headline-md text-secondary mb-md flex items-center gap-xs">
+<span class="material-symbols-outlined text-primary">security</span>
+                Técnico
+            </h3>
+<div class="space-y-md">
+<!-- FAQ Item 3 -->
+<div class="accordion-item bg-surface-container-low rounded-xl shadow-sm border border-transparent hover:border-primary/20 transition-all cursor-pointer group" onclick="toggleAccordion(this)">
+<div class="p-lg flex justify-between items-center">
+<span class="font-label-md text-label-md font-bold text-on-surface">¿Mis datos están seguros?</span>
+<div class="bg-surface-container-high p-1 rounded-full group-hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined chevron-icon transition-transform duration-300 text-primary">expand_more</span>
+</div>
+</div>
+<div class="accordion-content px-lg">
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+                            Tu seguridad es nuestra prioridad. Utilizamos encriptación de grado bancario (AES-256) para proteger toda tu información financiera. Tus datos son privados y solo tú tienes acceso a ellos; nunca compartimos ni vendemos tu información personal a terceros.
+                        </p>
+</div>
+</div>
+</div>
+</div>
+<!-- Category: Contable -->
+<div>
+<h3 class="font-headline-md text-headline-md text-secondary mb-md flex items-center gap-xs">
+<span class="material-symbols-outlined text-primary">account_balance_wallet</span>
+                Contable
+            </h3>
+<div class="space-y-md">
+<!-- FAQ Item 4 -->
+<div class="accordion-item bg-surface-container-low rounded-xl shadow-sm border border-transparent hover:border-primary/20 transition-all cursor-pointer group" onclick="toggleAccordion(this)">
+<div class="p-lg flex justify-between items-center">
+<span class="font-label-md text-label-md font-bold text-on-surface">¿Necesito saber contabilidad?</span>
+<div class="bg-surface-container-high p-1 rounded-full group-hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined chevron-icon transition-transform duration-300 text-primary">expand_more</span>
+</div>
+</div>
+<div class="accordion-content px-lg">
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+                            Para nada. TADOR está diseñado específicamente para que cualquier persona pueda usarlo. Nosotros nos encargamos de la "magia" contable detrás de escena para que tú solo veas información clara y accionable sobre tu dinero, usando lenguaje cotidiano y visualizaciones simples.
+                        </p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Call to Action -->
+<section class="mt-xl p-xl bg-primary rounded-2xl text-center shadow-xl shadow-primary/10">
+<h4 class="font-headline-md text-headline-md text-on-primary mb-xs">¿Todavía tienes dudas?</h4>
+<p class="font-body-md text-body-md text-on-primary/90 mb-md">Escríbenos y te ayudamos a configurar tu cuenta en minutos.</p>
+<button class="bg-surface text-primary px-xl py-4 rounded-full font-label-md text-label-md squishy-active hover:bg-surface-bright transition-all shadow-lg font-bold">Contactar Soporte</button>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-low border-t border-surface-variant/30 w-full mt-xl">
+<div class="w-full px-md md:px-lg py-xl max-w-container-max mx-auto flex flex-col md:flex-row justify-between items-center gap-lg">
+<div class="flex flex-col items-center md:items-start gap-xs">
+<span class="font-headline-md text-headline-md font-extrabold text-primary">TADOR</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">© 2026 TADOR Finanzas</span>
+</div>
+<nav class="flex gap-lg">
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary hover:underline underline-offset-4 transition-all" href="#">Privacidad</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary hover:underline underline-offset-4 transition-all" href="#">Términos</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary hover:underline underline-offset-4 transition-all" href="#">Soporte</a>
+</nav>
+</div>
+</footer>
+<script>
+    function toggleAccordion(element) {
+        const allItems = document.querySelectorAll('.accordion-item');
+        allItems.forEach(item => {
+            if (item !== element && item.classList.contains('active')) {
+                item.classList.remove('active');
+            }
+        });
+        element.classList.toggle('active');
+    }
+</script>
+</body></html>

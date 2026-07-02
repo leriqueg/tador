@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "background": "#f7f9fb",
+                    "primary-fixed-dim": "#9ad1cb",
+                    "error-container": "#ffdad6",
+                    "on-primary-fixed-variant": "#144f4b",
+                    "on-error": "#ffffff",
+                    "secondary-fixed": "#62fae3",
+                    "surface-tint": "#316763",
+                    "on-surface-variant": "#404847",
+                    "on-secondary": "#ffffff",
+                    "on-background": "#191c1e",
+                    "surface-container": "#eceef0",
+                    "surface-variant": "#e0e3e5",
+                    "on-tertiary-container": "#a9b6b4",
+                    "text-muted": "#64748B",
+                    "tertiary": "#263230",
+                    "secondary-container": "#62fae3",
+                    "outline-variant": "#bfc8c6",
+                    "surface-container-highest": "#e0e3e5",
+                    "primary-fixed": "#b5ede7",
+                    "on-secondary-fixed-variant": "#005047",
+                    "text-main": "#1E293B",
+                    "inverse-on-surface": "#eff1f3",
+                    "surface-container-low": "#f2f4f6",
+                    "on-primary": "#ffffff",
+                    "on-secondary-fixed": "#00201c",
+                    "tertiary-fixed-dim": "#bcc9c6",
+                    "on-error-container": "#93000a",
+                    "tertiary-fixed": "#d8e5e2",
+                    "surface-container-lowest": "#ffffff",
+                    "surface": "#f7f9fb",
+                    "on-tertiary": "#ffffff",
+                    "warning-amber": "#F59E0B",
+                    "primary": "#003633",
+                    "primary-container": "#134e4a",
+                    "on-tertiary-fixed": "#121e1c",
+                    "secondary-fixed-dim": "#3cddc7",
+                    "expense-rose": "#E11D48",
+                    "surface-bright": "#f7f9fb",
+                    "inverse-primary": "#9ad1cb",
+                    "on-surface": "#191c1e",
+                    "on-primary-fixed": "#00201e",
+                    "surface-container-high": "#e6e8ea",
+                    "error": "#ba1a1a",
+                    "inverse-surface": "#2d3133",
+                    "success-emerald": "#10B981",
+                    "on-tertiary-fixed-variant": "#3d4947",
+                    "on-primary-container": "#87beb8",
+                    "surface-dim": "#d8dadc",
+                    "tertiary-container": "#3c4846",
+                    "on-secondary-container": "#007165",
+                    "secondary": "#006b5f",
+                    "outline": "#707977"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "xl": "40px",
+                    "lg": "24px",
+                    "sm": "12px",
+                    "xs": "8px",
+                    "gutter": "16px",
+                    "md": "16px",
+                    "container-max": "1200px",
+                    "base": "4px"
+            },
+            "fontFamily": {
+                    "body-md": ["Inter"],
+                    "label-md": ["Inter"],
+                    "label-sm": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "headline-xl": ["Inter"],
+                    "headline-md": ["Inter"],
+                    "headline-lg-mobile": ["Inter"],
+                    "body-lg": ["Inter"]
+            },
+            "fontSize": {
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "500"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-xl": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .bg-gradient-soft {
+        background: linear-gradient(135deg, #f0fdf4 0%, #fefce8 100%);
+      }
+      .squishy-interaction:active {
+        transform: scale(0.98);
+        transition: transform 0.1s ease;
+      }
+      .glass-card {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+      }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md min-h-screen">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full bg-surface/80 dark:bg-surface-dim/80 backdrop-blur-md shadow-sm z-50">
+<div class="flex justify-between items-center w-full px-md md:px-lg max-w-container-max mx-auto h-16">
+<div class="flex items-center gap-sm">
+<button class="material-symbols-outlined text-primary p-2 squishy-interaction">menu</button>
+<span class="font-headline-md text-headline-md font-bold text-primary">TADOR</span>
+</div>
+<nav class="hidden md:flex gap-lg">
+<a class="font-label-md text-label-md text-primary border-b-2 border-primary pb-1" href="#">Landing</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="#">Q&amp;A</a>
+<a class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors" href="#">Contacto</a>
+</nav>
+<button class="bg-primary text-on-primary px-lg py-sm rounded-full font-label-md text-label-md squishy-interaction">Ingresar</button>
+</div>
+</header>
+<main class="pt-24 pb-12 px-gutter md:px-lg max-w-container-max mx-auto bg-gradient-soft min-h-screen">
+<!-- Header Section -->
+<section class="mb-xl">
+<h1 class="font-headline-xl text-headline-xl text-primary mb-xs">Mis Cuentas</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">Gestiona tus activos de forma centralizada. Visualiza el estado actual de tu patrimonio distribuido en diferentes entidades.</p>
+</section>
+<!-- Bento Grid for Accounts -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-md">
+<!-- Total Balance Card (Hero) -->
+<div class="md:col-span-12 lg:col-span-4 bg-primary text-on-primary p-lg rounded-xl shadow-lg flex flex-col justify-between min-h-[220px]">
+<div>
+<div class="flex justify-between items-start mb-sm">
+<span class="font-label-md text-label-md opacity-80 uppercase tracking-wider">Saldo Total Consolidado</span>
+<span class="material-symbols-outlined">account_balance_wallet</span>
+</div>
+<div class="font-headline-xl text-headline-xl mb-xs">$ 1.450.230,00</div>
+<div class="flex items-center gap-xs text-secondary-fixed">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+<span class="font-label-sm text-label-sm">+12.4% este mes</span>
+</div>
+</div>
+<button class="mt-lg w-full py-sm bg-primary-fixed text-on-primary-fixed rounded-lg font-label-md squishy-interaction flex items-center justify-center gap-xs">
+<span class="material-symbols-outlined text-md">add_circle</span>
+                    Nueva Cuenta
+                </button>
+</div>
+<!-- Cash Accounts Group -->
+<div class="md:col-span-6 lg:col-span-4 glass-card p-lg rounded-xl shadow-sm border-t-2 border-primary">
+<div class="flex items-center gap-sm mb-lg">
+<div class="bg-primary-fixed-dim/20 p-2 rounded-lg">
+<span class="material-symbols-outlined text-primary">payments</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-primary">Efectivo</h3>
+</div>
+<div class="space-y-md">
+<div class="flex justify-between items-center p-md bg-surface-container-lowest rounded-lg hover:shadow-md transition-shadow cursor-pointer squishy-interaction">
+<div>
+<p class="font-label-md text-label-md text-on-surface">Caja Fuerte (ARS)</p>
+<p class="font-label-sm text-label-sm text-text-muted">Actualizado hace 2h</p>
+</div>
+<p class="font-headline-md text-headline-md text-primary">$ 45.000</p>
+</div>
+<div class="flex justify-between items-center p-md bg-surface-container-lowest rounded-lg hover:shadow-md transition-shadow cursor-pointer squishy-interaction">
+<div>
+<p class="font-label-md text-label-md text-on-surface">Billetera Personal</p>
+<p class="font-label-sm text-label-sm text-text-muted">Fondo para gastos diarios</p>
+</div>
+<p class="font-headline-md text-headline-md text-primary">$ 12.300</p>
+</div>
+</div>
+</div>
+<!-- Bank Accounts Group -->
+<div class="md:col-span-6 lg:col-span-4 glass-card p-lg rounded-xl shadow-sm border-t-2 border-primary">
+<div class="flex items-center gap-sm mb-lg">
+<div class="bg-primary-fixed-dim/20 p-2 rounded-lg">
+<span class="material-symbols-outlined text-primary">account_balance</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-primary">Bancos</h3>
+</div>
+<div class="space-y-md">
+<div class="flex justify-between items-center p-md bg-surface-container-lowest rounded-lg hover:shadow-md transition-shadow cursor-pointer squishy-interaction">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 bg-surface-variant rounded-full flex items-center justify-center font-bold text-xs text-primary">BBVA</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface">Cuenta Sueldo</p>
+<p class="font-label-sm text-label-sm text-text-muted">Caja de Ahorro</p>
+</div>
+</div>
+<p class="font-headline-md text-headline-md text-primary">$ 840.500</p>
+</div>
+<div class="flex justify-between items-center p-md bg-surface-container-lowest rounded-lg hover:shadow-md transition-shadow cursor-pointer squishy-interaction">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 bg-surface-variant rounded-full flex items-center justify-center font-bold text-xs text-primary">SNT</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface">Cuenta Inversión</p>
+<p class="font-label-sm text-label-sm text-text-muted">Santander Río</p>
+</div>
+</div>
+<p class="font-headline-md text-headline-md text-primary">$ 112.430</p>
+</div>
+</div>
+</div>
+<!-- Virtual Wallets Group (Asymmetric height for bento feel) -->
+<div class="md:col-span-12 lg:col-span-8 glass-card p-lg rounded-xl shadow-sm border-t-2 border-primary">
+<div class="flex justify-between items-center mb-lg">
+<div class="flex items-center gap-sm">
+<div class="bg-primary-fixed-dim/20 p-2 rounded-lg">
+<span class="material-symbols-outlined text-primary">credit_card</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-primary">Billeteras Virtuales</h3>
+</div>
+<span class="font-label-sm text-primary bg-primary-fixed/30 px-sm py-1 rounded-full">3 Activas</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+<!-- Wallet 1 -->
+<div class="flex justify-between items-center p-md bg-surface-container-lowest rounded-lg border border-outline-variant hover:border-primary transition-colors cursor-pointer squishy-interaction">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 bg-[#009EE3]/10 rounded-xl flex items-center justify-center">
+<span class="material-symbols-outlined text-[#009EE3]" style="font-variation-settings: 'FILL' 1;">universal_currency</span>
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface">Mercado Pago</p>
+<div class="flex items-center gap-xs">
+<span class="w-2 h-2 rounded-full bg-success-emerald"></span>
+<p class="font-label-sm text-label-sm text-text-muted">Invertido al 92%</p>
+</div>
+</div>
+</div>
+<div class="text-right">
+<p class="font-headline-md text-headline-md text-primary">$ 320.000</p>
+<p class="font-label-sm text-success-emerald">+$ 1.200 hoy</p>
+</div>
+</div>
+<!-- Wallet 2 -->
+<div class="flex justify-between items-center p-md bg-surface-container-lowest rounded-lg border border-outline-variant hover:border-primary transition-colors cursor-pointer squishy-interaction">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">wallet</span>
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface">Ualá</p>
+<p class="font-label-sm text-label-sm text-text-muted">Gastos Recreativos</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-headline-md text-headline-md text-primary">$ 85.000</p>
+<p class="font-label-sm text-text-muted">Sin cambios</p>
+</div>
+</div>
+<!-- Wallet 3 -->
+<div class="flex justify-between items-center p-md bg-surface-container-lowest rounded-lg border border-outline-variant hover:border-primary transition-colors cursor-pointer squishy-interaction">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 bg-expense-rose/10 rounded-xl flex items-center justify-center">
+<span class="material-symbols-outlined text-expense-rose" style="font-variation-settings: 'FILL' 1;">token</span>
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface">Binance (USDT)</p>
+<p class="font-label-sm text-label-sm text-text-muted">Activos Digitales</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-headline-md text-headline-md text-primary">$ 35.000</p>
+<p class="font-label-sm text-expense-rose">-$ 450 hoy</p>
+</div>
+</div>
+<!-- Add Wallet Placeholder -->
+<div class="flex items-center justify-center p-md border-2 border-dashed border-outline-variant rounded-lg hover:bg-surface-container-high transition-colors cursor-pointer squishy-interaction group">
+<div class="flex flex-col items-center">
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors">add</span>
+<span class="font-label-md text-label-md text-outline group-hover:text-primary transition-colors">Vincular nueva billetera</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Insights / Quick Stats -->
+<div class="md:col-span-12 lg:col-span-4 flex flex-col gap-md">
+<div class="bg-white/80 p-lg rounded-xl shadow-sm flex-1">
+<h4 class="font-label-sm text-label-sm text-text-muted uppercase mb-md">Distribución de Activos</h4>
+<div class="space-y-sm">
+<div class="flex items-center gap-md">
+<span class="w-3 h-3 rounded-full bg-primary"></span>
+<span class="flex-1 font-label-md">Bancos</span>
+<span class="font-label-md font-bold">66%</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-2 overflow-hidden">
+<div class="bg-primary h-full" style="width: 66%"></div>
+</div>
+<div class="flex items-center gap-md mt-md">
+<span class="w-3 h-3 rounded-full bg-primary-fixed-dim"></span>
+<span class="flex-1 font-label-md">Billeteras</span>
+<span class="font-label-md font-bold">30%</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-2 overflow-hidden">
+<div class="bg-primary-fixed-dim h-full" style="width: 30%"></div>
+</div>
+<div class="flex items-center gap-md mt-md">
+<span class="w-3 h-3 rounded-full bg-secondary-fixed"></span>
+<span class="flex-1 font-label-md">Efectivo</span>
+<span class="font-label-md font-bold">4%</span>
+</div>
+<div class="w-full bg-surface-container rounded-full h-2 overflow-hidden">
+<div class="bg-secondary-fixed h-full" style="width: 4%"></div>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-lg rounded-xl shadow-sm border-l-4 border-warning-amber">
+<div class="flex gap-sm">
+<span class="material-symbols-outlined text-warning-amber">warning</span>
+<div>
+<p class="font-label-md text-label-md text-on-surface font-bold">Recordatorio de Conciliación</p>
+<p class="font-label-sm text-label-sm text-text-muted mt-base">Tu cuenta de Efectivo no ha sido actualizada en 3 días.</p>
+<button class="mt-sm text-primary font-label-sm hover:underline">Actualizar ahora</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="w-full bg-surface-container-low dark:bg-tertiary-container mt-auto">
+<div class="w-full px-md md:px-lg py-xl max-w-container-max mx-auto flex flex-col md:flex-row justify-between items-center gap-md">
+<span class="font-headline-md text-headline-md font-bold text-primary">TADOR</span>
+<div class="flex gap-lg">
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Privacidad</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Términos</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Soporte</a>
+</div>
+<p class="font-label-sm text-label-sm text-on-surface-variant opacity-80">© 2026 TADOR</p>
+</div>
+</footer>
+<!-- Floating Action Button for Mobile -->
+<div class="fixed bottom-lg right-lg md:hidden">
+<button class="w-14 h-14 rounded-full bg-primary text-on-primary shadow-lg flex items-center justify-center squishy-interaction">
+<span class="material-symbols-outlined text-3xl">add</span>
+</button>
+</div>
+<script>
+        // Simple micro-interaction for active nav
+        document.querySelectorAll('nav a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                document.querySelectorAll('nav a').forEach(l => {
+                    l.classList.remove('text-primary', 'border-b-2', 'border-primary', 'pb-1');
+                    l.classList.add('text-on-surface-variant');
+                });
+                this.classList.add('text-primary', 'border-b-2', 'border-primary', 'pb-1');
+                this.classList.remove('text-on-surface-variant');
+            });
+        });
+    </script>
+</body></html>

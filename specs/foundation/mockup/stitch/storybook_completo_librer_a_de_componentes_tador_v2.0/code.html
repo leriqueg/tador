@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Storybook - TADOR Component Library</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "secondary-fixed-dim": "#3cddc7",
+                      "on-primary-container": "#87beb8",
+                      "primary-fixed-dim": "#9ad1cb",
+                      "on-tertiary-fixed": "#121e1c",
+                      "on-surface-variant": "#404847",
+                      "on-surface": "#191c1e",
+                      "surface-container-lowest": "#ffffff",
+                      "surface-bright": "#f7f9fb",
+                      "secondary-container": "#62fae3",
+                      "primary-container": "#134e4a",
+                      "on-error": "#ffffff",
+                      "on-error-container": "#93000a",
+                      "on-primary-fixed": "#00201e",
+                      "primary-fixed": "#b5ede7",
+                      "on-tertiary-fixed-variant": "#3d4947",
+                      "surface-variant": "#e0e3e5",
+                      "tertiary-fixed-dim": "#bcc9c6",
+                      "surface-container-highest": "#e0e3e5",
+                      "on-secondary-fixed": "#00201c",
+                      "surface": "#f7f9fb",
+                      "secondary-fixed": "#62fae3",
+                      "surface-tint": "#316763",
+                      "on-primary-fixed-variant": "#144f4b",
+                      "text-muted": "#64748B",
+                      "tertiary-fixed": "#d8e5e2",
+                      "on-secondary-fixed-variant": "#005047",
+                      "inverse-surface": "#2d3133",
+                      "on-tertiary": "#ffffff",
+                      "warning-amber": "#F59E0B",
+                      "on-secondary": "#ffffff",
+                      "surface-dim": "#d8dadc",
+                      "surface-container-low": "#f2f4f6",
+                      "on-tertiary-container": "#a9b6b4",
+                      "success-emerald": "#10B981",
+                      "on-secondary-container": "#007165",
+                      "outline": "#707977",
+                      "primary": "#003633",
+                      "error": "#ba1a1a",
+                      "text-main": "#1E293B",
+                      "secondary": "#006b5f",
+                      "on-primary": "#ffffff",
+                      "tertiary": "#263230",
+                      "surface-container": "#eceef0",
+                      "inverse-on-surface": "#eff1f3",
+                      "outline-variant": "#bfc8c6",
+                      "inverse-primary": "#9ad1cb",
+                      "surface-container-high": "#e6e8ea",
+                      "on-background": "#191c1e",
+                      "background": "#f7f9fb",
+                      "tertiary-container": "#3c4846",
+                      "error-container": "#ffdad6",
+                      "expense-rose": "#E11D48"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "xs": "8px",
+                      "xl": "40px",
+                      "container-max": "1200px",
+                      "base": "4px",
+                      "md": "16px",
+                      "gutter": "16px",
+                      "sm": "12px",
+                      "lg": "24px"
+              },
+              "fontFamily": {
+                      "headline-xl": ["Inter"],
+                      "headline-md": ["Inter"],
+                      "body-lg": ["Inter"],
+                      "body-md": ["Inter"],
+                      "label-sm": ["Inter"],
+                      "label-md": ["Inter"],
+                      "headline-lg-mobile": ["Inter"],
+                      "headline-lg": ["Inter"]
+              },
+              "fontSize": {
+                      "headline-xl": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "600"}],
+                      "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "500"}],
+                      "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                      "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #fdf8f5 0%, #f8f3f0 100%); }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .component-section { margin-bottom: 80px; }
+        .component-demo { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 12px; padding: 32px; box-shadow: 0 4px 12px rgba(19, 78, 74, 0.05); }
+        .component-label { margin-bottom: 16px; border-left: 4px solid #003633; padding-left: 12px; }
+        .token-card { height: 100px; border-radius: 8px; display: flex; align-items: flex-end; padding: 12px; font-size: 12px; font-weight: bold; }
+        .glass-header { backdrop-filter: blur(8px); background: rgba(247, 249, 251, 0.8); }
+        .wave-container { mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent); }
+    </style>
+</head>
+<body class="text-on-surface">
+<!-- Sidebar Navigation for Storybook -->
+<aside class="hidden lg:flex fixed left-0 top-0 h-full w-64 bg-surface-container-low border-r border-outline-variant flex-col p-lg z-[60]">
+<h1 class="font-headline-md text-headline-md text-primary font-bold mb-xl">TADOR<span class="text-secondary">UI</span></h1>
+<nav class="space-y-sm flex-1 overflow-y-auto">
+<a class="flex items-center gap-sm p-sm rounded-lg hover:bg-primary-container/10 text-on-surface-variant transition-colors" href="#foundations">
+<span class="material-symbols-outlined">palette</span> Foundations
+        </a>
+<a class="flex items-center gap-sm p-sm rounded-lg hover:bg-primary-container/10 text-on-surface-variant transition-colors" href="#navigation">
+<span class="material-symbols-outlined">menu</span> Navigation Shells
+        </a>
+<a class="flex items-center gap-sm p-sm rounded-lg hover:bg-primary-container/10 text-on-surface-variant transition-colors" href="#mascot">
+<span class="material-symbols-outlined">smart_toy</span> Mascot (Pacho)
+        </a>
+<a class="flex items-center gap-sm p-sm rounded-lg hover:bg-primary-container/10 text-on-surface-variant transition-colors" href="#dashboard">
+<span class="material-symbols-outlined">dashboard</span> Dashboard Widgets
+        </a>
+<a class="flex items-center gap-sm p-sm rounded-lg hover:bg-primary-container/10 text-on-surface-variant transition-colors" href="#financial">
+<span class="material-symbols-outlined">payments</span> Account &amp; Banking
+        </a>
+<a class="flex items-center gap-sm p-sm rounded-lg hover:bg-primary-container/10 text-on-surface-variant transition-colors" href="#dataviz">
+<span class="material-symbols-outlined">analytics</span> Advanced Viz
+        </a>
+<a class="flex items-center gap-sm p-sm rounded-lg hover:bg-primary-container/10 text-on-surface-variant transition-colors" href="#inputs">
+<span class="material-symbols-outlined">edit_square</span> Inputs &amp; Wizards
+        </a>
+</nav>
+</aside>
+<main class="lg:ml-64 p-gutter max-w-container-max mx-auto pt-24">
+<!-- Page Header -->
+<header class="mb-xl">
+<h2 class="font-headline-xl text-headline-xl text-primary">Storybook - TADOR Component Library</h2>
+<p class="text-body-lg text-text-muted max-w-2xl">Librería completa de patrones UI desarrollados para las experiencias Hogar y PRO. Un sistema "simpático pero sobrio" enfocado en la confianza financiera.</p>
+</header>
+<!-- 1. Foundations -->
+<section class="component-section" id="foundations">
+<div class="component-label">
+<h3 class="font-headline-md text-headline-md text-primary">Branding &amp; Foundations</h3>
+<p class="text-label-sm text-text-muted">Configuración de marca global.</p>
+</div>
+<div class="component-demo grid grid-cols-1 md:grid-cols-2 gap-lg">
+<div>
+<h4 class="font-label-md text-label-md mb-md">Color Palette (Primary Teal focus)</h4>
+<div class="grid grid-cols-2 gap-sm">
+<div class="token-card bg-primary text-white">Primary<br/>#003633</div>
+<div class="token-card bg-secondary text-white">Secondary<br/>#006B5F</div>
+<div class="token-card bg-secondary-container text-on-secondary-container">Sec. Container<br/>#62FAE3</div>
+<div class="token-card bg-expense-rose text-white">Expense Rose<br/>#E11D48</div>
+<div class="token-card bg-success-emerald text-white">Success<br/>#10B981</div>
+<div class="token-card bg-surface-container-low text-on-surface border border-outline-variant">Surface Low</div>
+</div>
+</div>
+<div>
+<h4 class="font-label-md text-label-md mb-md">Typography Scale (Inter)</h4>
+<div class="space-y-sm">
+<p class="font-headline-xl text-headline-xl text-primary">Headline XL</p>
+<p class="font-headline-lg text-headline-lg text-on-surface">Headline Large</p>
+<p class="font-headline-md text-headline-md text-on-surface">Headline Medium</p>
+<p class="font-body-lg text-body-lg text-on-surface">Body Large - Contexto</p>
+<p class="font-label-md text-label-md text-text-muted">Label Medium - Metadatos</p>
+</div>
+</div>
+</div>
+</section>
+<!-- 2. Navigation Shells -->
+<section class="component-section" id="navigation">
+<div class="component-label">
+<h3 class="font-headline-md text-headline-md text-primary">Navigation Shells</h3>
+<p class="text-label-sm text-text-muted">Puntos de entrada y estructuras de navegación global.</p>
+</div>
+<div class="grid grid-cols-1 gap-lg">
+<!-- Desktop Sidebar Mockup -->
+<div class="component-demo">
+<p class="text-label-sm font-bold mb-md">Desktop Sidebar (PRO)</p>
+<div class="flex h-64 border border-outline-variant rounded-xl overflow-hidden">
+<div class="w-48 bg-surface border-r border-outline-variant p-md flex flex-col gap-sm">
+<div class="font-bold text-primary mb-md">TADOR</div>
+<div class="bg-primary text-white p-2 rounded text-xs flex items-center gap-xs"><span class="material-symbols-outlined text-sm">home</span> Dashboard</div>
+<div class="text-on-surface-variant p-2 rounded text-xs flex items-center gap-xs"><span class="material-symbols-outlined text-sm">bar_chart</span> Informes</div>
+<div class="text-on-surface-variant p-2 rounded text-xs flex items-center gap-xs mt-auto"><span class="material-symbols-outlined text-sm">settings</span> Ajustes</div>
+</div>
+<div class="flex-1 bg-surface-container-low p-md">
+<div class="h-8 bg-white border border-outline-variant rounded-full w-2/3 px-sm flex items-center gap-xs text-[10px] text-outline">
+<span class="material-symbols-outlined text-xs">search</span> Buscar movimientos...
+                        </div>
+</div>
+</div>
+</div>
+<!-- Mobile Bottom Bar -->
+<div class="component-demo">
+<p class="text-label-sm font-bold mb-md">Mobile Bottom Bar (PRO vs Hogar)</p>
+<nav class="max-w-md mx-auto flex justify-around items-center py-sm bg-white shadow-lg rounded-t-xl border border-outline-variant">
+<div class="flex flex-col items-center bg-secondary-container text-on-secondary-container rounded-full px-4 py-1">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="text-[10px] font-bold">Resumen</span>
+</div>
+<div class="flex flex-col items-center text-on-surface-variant">
+<span class="material-symbols-outlined">edit_note</span>
+<span class="text-[10px]">Apuntes</span>
+</div>
+<div class="flex flex-col items-center text-on-surface-variant">
+<span class="material-symbols-outlined">analytics</span>
+<span class="text-[10px]">Informes</span>
+</div>
+<div class="flex flex-col items-center text-on-surface-variant">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-[10px]">Ajustes</span>
+</div>
+</nav>
+</div>
+</div>
+</section>
+<!-- 3. Mascot (Pacho) Variants -->
+<section class="component-section" id="mascot">
+<div class="component-label">
+<h3 class="font-headline-md text-headline-md text-primary">Mascota (Pacho) Contexts</h3>
+<p class="text-label-sm text-text-muted">Variaciones de Pacho según el flujo y contexto.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-lg">
+<!-- Mentor Card -->
+<div class="component-demo flex gap-md relative group border-l-4 border-primary">
+<button class="absolute top-2 right-2 p-1 text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-sm">close</span>
+</button>
+<div class="shrink-0 w-16 h-16 rounded-full bg-secondary-fixed border-2 border-white shadow-sm overflow-hidden relative">
+<img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida/AP1WRLvGreLZfwupXh98lF2PDaAcHLXoP2fU3dLW_qC9aSfCkiduczS6YgGRWrKlkv2XB9F3wYkju2LU_LxYTYpF5nSdC0ct9onSsaWTy_FT6TSLbuZnykRPyOeG2baYTewXg5qK6fClOWekNdfXDYrQKL8toHrqebLmklEzqpPud9_0-g2bXxJXBBCuGPodowClsofSg-rEVbvfM5MCoKKVvsQ7cpOHonFml43V1S3tcI0SGz4SVnWKQ6k"/>
+<div class="absolute bottom-0 right-0 bg-success-emerald w-4 h-4 rounded-full border-2 border-white flex items-center justify-center">
+<span class="material-symbols-outlined text-[8px] text-white font-bold">check</span>
+</div>
+</div>
+<div>
+<h4 class="font-label-md font-bold text-primary mb-1">Pacho Mentor</h4>
+<p class="text-body-md text-on-surface-variant italic">"Tu liquidez ha mejorado un 5% este trimestre. Es un buen momento para revisar inversiones."</p>
+</div>
+</div>
+<!-- Pacho with Bowtie Greeting -->
+<div class="component-demo flex items-center gap-md">
+<div class="w-14 h-14 rounded-full overflow-hidden bg-primary-fixed border-2 border-primary/10">
+<img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuABkI2eI3IQGuOTEqptnmZvBLYotwv_333n1ASwsbrIRBl3ccQTm8_8BVMnHu_Jl1LZSRyHbvVuB_pB546U02RJPXp7ayyxeh0rRVuiXUke0QGGEXwEndbEBJQIezyFkVhqQzw8akHENT2TTkS-0ZPl4Q-f8gtoa7CguODOG4UxHWRxZpwzyyicM3SwZcHNtOnVRtLirIVDBQKYi8x3BBXk21oo6fItw1DBUER-A7lhUH67MyQduPcWL8YAFM_e5yQch1WHtZgL"/>
+</div>
+<div>
+<p class="text-label-sm text-text-muted">Modo PRO Activo</p>
+<h4 class="font-headline-md text-primary">¡Hola, Alex! Pacho está listo.</h4>
+</div>
+</div>
+<!-- AI Assistant Variant -->
+<div class="component-demo bg-primary p-lg rounded-2xl flex flex-col gap-lg col-span-1 md:col-span-2">
+<div class="flex items-center gap-sm">
+<div class="w-10 h-10 bg-secondary-container rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">face</span>
+</div>
+<span class="text-white font-bold">Asistente Pacho</span>
+</div>
+<div class="bg-white/10 border border-white/20 rounded-xl p-md">
+<p class="text-white text-body-md italic mb-4">"Contame qué pasó, yo me encargo del resto..."</p>
+<div class="flex items-center gap-md bg-white/10 rounded-lg p-sm border border-white/10">
+<input class="bg-transparent border-none text-white focus:ring-0 placeholder:text-white/40 flex-1 px-sm" placeholder="Ayer pagué 5000 de luz..."/>
+<div class="flex gap-xs text-white/60">
+<span class="material-symbols-outlined">mic</span>
+<span class="material-symbols-outlined">attach_file</span>
+</div>
+</div>
+<button class="w-full mt-4 py-3 bg-secondary-container text-primary rounded-xl font-bold flex items-center justify-center gap-sm">
+<span class="material-symbols-outlined">auto_awesome</span> Procesar intención
+                    </button>
+</div>
+</div>
+</div>
+</section>
+<!-- 4. Dashboard Widgets (Hogar vs PRO) -->
+<section class="component-section" id="dashboard">
+<div class="component-label">
+<h3 class="font-headline-md text-headline-md text-primary">Dashboard Widgets</h3>
+<p class="text-label-sm text-text-muted">Diferenciación entre visión simplificada y detallada.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-lg">
+<!-- Resultado Neto (Hogar) -->
+<div class="component-demo bg-white p-lg flex flex-col justify-between h-56">
+<p class="text-label-sm text-text-muted uppercase tracking-wider mb-2">Resultado Neto (Hogar)</p>
+<h4 class="font-headline-xl text-primary">$ 45.230,00</h4>
+<div class="mt-4">
+<div class="flex justify-between items-center mb-xs">
+<span class="text-label-sm text-text-muted">Presupuesto mensual</span>
+<span class="text-label-sm text-success-emerald">+12% vs anterior</span>
+</div>
+<div class="h-12 w-full bg-primary-fixed/20 rounded-lg overflow-hidden relative wave-container">
+<div class="absolute bottom-0 left-0 w-[65%] h-full bg-primary/60 rounded-r-lg"></div>
+</div>
+</div>
+</div>
+<!-- Ingresos Totales (PRO) -->
+<div class="component-demo bg-white p-lg flex flex-col justify-between h-56">
+<div class="flex justify-between items-start">
+<div>
+<p class="text-label-sm text-text-muted uppercase tracking-wide">Ingresos Totales (PRO)</p>
+<h4 class="font-headline-lg text-primary mt-1">$ 12.450,00</h4>
+</div>
+<span class="text-success-emerald text-label-sm font-bold flex items-center">
+<span class="material-symbols-outlined text-sm">trending_up</span> +8.2%
+                    </span>
+</div>
+<div class="h-10 w-full bg-success-emerald/10 rounded-full flex items-end px-1 gap-1">
+<div class="bg-success-emerald h-1/2 flex-1 rounded-t-sm"></div>
+<div class="bg-success-emerald h-3/4 flex-1 rounded-t-sm"></div>
+<div class="bg-success-emerald h-2/3 flex-1 rounded-t-sm"></div>
+<div class="bg-success-emerald h-full flex-1 rounded-t-sm"></div>
+<div class="bg-success-emerald h-5/6 flex-1 rounded-t-sm"></div>
+</div>
+</div>
+<!-- Gastos Operativos (PRO) -->
+<div class="component-demo bg-white p-lg flex flex-col justify-between h-56">
+<div class="flex justify-between items-start">
+<div>
+<p class="text-label-sm text-text-muted uppercase tracking-wide">Gastos Operativos (PRO)</p>
+<h4 class="font-headline-lg text-expense-rose mt-1">$ 8.320,50</h4>
+</div>
+<span class="text-expense-rose text-label-sm font-bold flex items-center">
+<span class="material-symbols-outlined text-sm">trending_down</span> -2.4%
+                    </span>
+</div>
+<div class="h-10 w-full bg-expense-rose/10 rounded-full flex items-end px-1 gap-1">
+<div class="bg-expense-rose h-5/6 flex-1 rounded-t-sm"></div>
+<div class="bg-expense-rose h-4/6 flex-1 rounded-t-sm"></div>
+<div class="bg-expense-rose h-3/4 flex-1 rounded-t-sm"></div>
+<div class="bg-expense-rose h-1/2 flex-1 rounded-t-sm"></div>
+<div class="bg-expense-rose h-2/3 flex-1 rounded-t-sm"></div>
+</div>
+</div>
+<!-- Net Profit (Dark PRO) -->
+<div class="component-demo bg-primary text-white p-lg flex flex-col justify-between h-56 relative overflow-hidden shadow-xl">
+<div class="relative z-10">
+<p class="text-on-primary/70 text-label-sm uppercase tracking-wide">Resultado Neto (PyG)</p>
+<h4 class="text-headline-lg font-bold mt-2">$4.129,50</h4>
+<p class="text-on-primary/50 text-label-sm mt-1">Margen operativo del 33.1%</p>
+</div>
+<span class="material-symbols-outlined absolute -bottom-6 -right-6 text-9xl text-white/5 font-light">account_balance_wallet</span>
+</div>
+</div>
+</section>
+<!-- 5. Financial Cards (Expanded) -->
+<section class="component-section" id="financial">
+<div class="component-label">
+<h3 class="font-headline-md text-headline-md text-primary">Account &amp; Banking Patterns</h3>
+<p class="text-label-sm text-text-muted">Control de conciliación y estados bancarios.</p>
+</div>
+<div class="space-y-sm">
+<!-- Row 1: Santander -->
+<div class="component-demo p-md flex items-center justify-between">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 bg-surface-container rounded-lg flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-2xl">account_balance</span>
+</div>
+<div>
+<h4 class="font-label-md text-on-surface font-bold">Banco Santander Central</h4>
+<p class="text-label-sm text-text-muted">Actualizado: Hoy, 08:45 AM</p>
+</div>
+</div>
+<div class="flex items-center gap-lg">
+<div class="text-right">
+<p class="font-headline-md text-primary">$45.200,00</p>
+<p class="text-label-sm text-success-emerald font-medium">Conciliado</p>
+</div>
+<button class="bg-primary text-white px-6 py-2 rounded-xl font-bold active:scale-95 transition-transform">Conciliar</button>
+</div>
+</div>
+<!-- Row 2: Visa Infinite -->
+<div class="component-demo p-md flex items-center justify-between border-l-4 border-warning-amber">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 bg-surface-container rounded-lg flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-2xl">credit_card</span>
+</div>
+<div>
+<h4 class="font-label-md text-on-surface font-bold">Visa Infinite Platinum</h4>
+<p class="text-label-sm text-text-muted">5 movimientos pendientes</p>
+</div>
+</div>
+<div class="flex items-center gap-lg">
+<div class="text-right">
+<p class="font-headline-md text-expense-rose">$2.150,30</p>
+<p class="text-label-sm text-warning-amber font-medium">Revisión necesaria</p>
+</div>
+<button class="bg-secondary-fixed text-on-secondary-fixed px-6 py-2 rounded-xl font-bold active:scale-95 transition-transform">Revisar</button>
+</div>
+</div>
+<!-- Row 3: Caja Menor -->
+<div class="component-demo p-md flex items-center justify-between">
+<div class="flex items-center gap-md">
+<div class="w-12 h-12 bg-surface-container rounded-lg flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-2xl">payments</span>
+</div>
+<div>
+<h4 class="font-label-md text-on-surface font-bold">Caja Menor (Efectivo)</h4>
+<p class="text-label-sm text-text-muted">Arqueo hace 2 días</p>
+</div>
+</div>
+<div class="flex items-center gap-lg">
+<div class="text-right">
+<p class="font-headline-md text-primary">$1.250,00</p>
+<p class="text-label-sm text-success-emerald font-medium">Conciliado</p>
+</div>
+<button class="bg-primary text-white px-6 py-2 rounded-xl font-bold active:scale-95 transition-transform">Conciliar</button>
+</div>
+</div>
+</div>
+</section>
+<!-- 6. Advanced Data Viz -->
+<section class="component-section" id="dataviz">
+<div class="component-label">
+<h3 class="font-headline-md text-headline-md text-primary">Advanced Data Visualization</h3>
+<p class="text-label-sm text-text-muted">Análisis profundo de flujos y distribución.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-lg">
+<!-- Monthly Evolution (Bar) -->
+<div class="component-demo flex flex-col">
+<div class="flex justify-between items-center mb-lg">
+<h4 class="font-label-md font-bold text-primary">Evolución Mensual</h4>
+<div class="flex bg-surface-container rounded-lg p-1">
+<button class="px-3 py-1 bg-white shadow-sm rounded-md text-[10px] font-bold text-primary">Ingresos</button>
+<button class="px-3 py-1 text-[10px] font-medium text-text-muted">Gastos</button>
+</div>
+</div>
+<div class="h-48 flex items-end justify-around gap-2 px-2 relative">
+<div class="absolute inset-x-0 top-0 h-[1px] bg-outline-variant/20"></div>
+<div class="absolute inset-x-0 top-1/2 h-[1px] bg-outline-variant/20"></div>
+<div class="flex flex-col items-center flex-1">
+<div class="w-full bg-primary/20 rounded-t-md h-24"></div>
+<span class="text-[10px] text-text-muted mt-2">Ene</span>
+</div>
+<div class="flex flex-col items-center flex-1">
+<div class="w-full bg-primary/20 rounded-t-md h-32"></div>
+<span class="text-[10px] text-text-muted mt-2">Feb</span>
+</div>
+<div class="flex flex-col items-center flex-1">
+<div class="w-full bg-primary rounded-t-md h-44 relative">
+<div class="absolute -top-6 left-1/2 -translate-x-1/2 bg-primary text-white text-[9px] px-1.5 py-0.5 rounded">$12k</div>
+</div>
+<span class="text-[10px] font-bold text-primary mt-2">Mar</span>
+</div>
+</div>
+</div>
+<!-- Breakdown (Donut) -->
+<div class="component-demo flex flex-col">
+<div class="flex justify-between items-center mb-lg">
+<h4 class="font-label-md font-bold text-primary">Desglose del Periodo</h4>
+<div class="flex bg-surface-container rounded-lg p-1">
+<button class="px-3 py-1 text-[10px] font-medium text-text-muted">Ingresos</button>
+<button class="px-3 py-1 bg-white shadow-sm rounded-md text-[10px] font-bold text-primary">Gastos</button>
+</div>
+</div>
+<div class="flex flex-col items-center">
+<div class="relative w-32 h-32 flex items-center justify-center">
+<svg class="w-full h-full -rotate-90" viewbox="0 0 36 36">
+<circle cx="18" cy="18" fill="transparent" r="15.9" stroke="#003633" stroke-dasharray="45 100" stroke-width="4"></circle>
+<circle cx="18" cy="18" fill="transparent" r="15.9" stroke="#006b5f" stroke-dasharray="25 100" stroke-dashoffset="-45" stroke-width="4"></circle>
+<circle cx="18" cy="18" fill="transparent" r="15.9" stroke="#3cddc7" stroke-dasharray="20 100" stroke-dashoffset="-70" stroke-width="4"></circle>
+<circle cx="18" cy="18" fill="transparent" r="15.9" stroke="#bfc8c6" stroke-dasharray="10 100" stroke-dashoffset="-90" stroke-width="4"></circle>
+</svg>
+<div class="absolute flex flex-col items-center">
+<span class="text-[9px] text-text-muted uppercase">Total</span>
+<span class="font-bold text-primary">$8.3k</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-x-6 gap-y-1 mt-6 w-full">
+<div class="flex items-center gap-1.5 text-[10px]">
+<div class="w-2 h-2 rounded-full bg-primary"></div>
+<span class="flex-1">Vivienda</span>
+<span class="font-bold">45%</span>
+</div>
+<div class="flex items-center gap-1.5 text-[10px]">
+<div class="w-2 h-2 rounded-full bg-secondary"></div>
+<span class="flex-1">Comida</span>
+<span class="font-bold">25%</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- 7. Inputs & Wizards -->
+<section class="component-section" id="inputs">
+<div class="component-label">
+<h3 class="font-headline-md text-headline-md text-primary">Input Patterns &amp; Wizards</h3>
+<p class="text-label-sm text-text-muted">Flujos conversacionales y registro paso a paso.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-lg">
+<!-- Sequential Note Wizard -->
+<div class="component-demo space-y-md">
+<p class="text-label-sm font-bold text-text-muted">Registro Conversacional (Step-by-Step)</p>
+<div class="space-y-xl">
+<!-- Step: Account -->
+<div>
+<div class="flex items-center gap-xs mb-2">
+<div class="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
+<h2 class="text-primary font-bold">de mi cuenta...</h2>
+</div>
+<div class="bg-surface-container-lowest p-md rounded-xl border-2 border-primary flex items-center justify-between shadow-sm">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 bg-expense-rose/10 text-expense-rose rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined">account_balance</span>
+</div>
+<div>
+<p class="text-xs font-bold">Banco Santander</p>
+<p class="text-[10px] text-text-muted">**** 4920</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</div>
+<!-- Step: Amount -->
+<div>
+<h2 class="text-text-muted font-label-md mb-2">por un monto de...</h2>
+<div class="relative">
+<span class="absolute left-md top-1/2 -translate-y-1/2 text-headline-md font-bold text-primary">$</span>
+<input class="w-full bg-surface-container-low border-none rounded-xl py-lg pl-xl text-headline-md font-bold text-primary focus:ring-2 focus:ring-primary/10" placeholder="0.00" type="number"/>
+</div>
+</div>
+<button class="w-full bg-primary text-white py-4 rounded-xl font-bold shadow-lg flex items-center justify-center gap-sm">
+                        Continuar <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- AI Template Result -->
+<div class="component-demo space-y-md">
+<p class="text-label-sm font-bold text-text-muted">Resultado de Procesamiento IA</p>
+<div class="flex items-center gap-xs mb-sm">
+<span class="material-symbols-outlined text-success-emerald" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<p class="text-label-md">Plantilla: <span class="font-bold text-primary">Pago de Servicios</span></p>
+</div>
+<div class="bg-surface-container-lowest rounded-xl p-md border-l-4 border-success-emerald shadow-sm space-y-md">
+<div class="grid grid-cols-2 gap-md">
+<div class="space-y-1">
+<p class="text-[9px] text-text-muted uppercase font-bold">Monto</p>
+<p class="text-headline-md font-bold text-primary">$5.000,00</p>
+</div>
+<div class="space-y-1">
+<p class="text-[9px] text-text-muted uppercase font-bold">Categoría</p>
+<p class="font-medium">Hogar</p>
+</div>
+</div>
+<div class="pt-sm border-t border-surface-container">
+<button class="w-full py-2 bg-primary-container text-white rounded-lg text-xs font-bold">Confirmar y Guardar</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Navigation Drawer Component Mockup (Removable FAB) -->
+<button class="fixed bottom-gutter right-gutter w-14 h-14 bg-primary text-secondary-container rounded-full shadow-2xl flex items-center justify-center z-50 active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-3xl">add</span>
+</button>
+<script>
+    // Component interactions scripts (simple mockup behavior)
+    document.querySelectorAll('.active-scale').forEach(btn => {
+        btn.addEventListener('mousedown', () => btn.classList.add('scale-95'));
+        btn.addEventListener('mouseup', () => btn.classList.remove('scale-95'));
+    });
+</script>
+</body></html>

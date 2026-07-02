@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>TADOR - Configuración</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "background": "#f7f9fb",
+                    "primary-fixed-dim": "#9ad1cb",
+                    "error-container": "#ffdad6",
+                    "on-primary-fixed-variant": "#144f4b",
+                    "on-error": "#ffffff",
+                    "secondary-fixed": "#62fae3",
+                    "surface-tint": "#316763",
+                    "on-surface-variant": "#404847",
+                    "on-secondary": "#ffffff",
+                    "on-background": "#191c1e",
+                    "surface-container": "#eceef0",
+                    "surface-variant": "#e0e3e5",
+                    "on-tertiary-container": "#a9b6b4",
+                    "text-muted": "#64748B",
+                    "tertiary": "#263230",
+                    "secondary-container": "#62fae3",
+                    "outline-variant": "#bfc8c6",
+                    "surface-container-highest": "#e0e3e5",
+                    "primary-fixed": "#b5ede7",
+                    "on-secondary-fixed-variant": "#005047",
+                    "text-main": "#1E293B",
+                    "inverse-on-surface": "#eff1f3",
+                    "surface-container-low": "#f2f4f6",
+                    "on-primary": "#ffffff",
+                    "on-secondary-fixed": "#00201c",
+                    "tertiary-fixed-dim": "#bcc9c6",
+                    "on-error-container": "#93000a",
+                    "tertiary-fixed": "#d8e5e2",
+                    "surface-container-lowest": "#ffffff",
+                    "surface": "#f7f9fb",
+                    "on-tertiary": "#ffffff",
+                    "warning-amber": "#F59E0B",
+                    "primary": "#003633",
+                    "primary-container": "#134e4a",
+                    "on-tertiary-fixed": "#121e1c",
+                    "secondary-fixed-dim": "#3cddc7",
+                    "expense-rose": "#E11D48",
+                    "surface-bright": "#f7f9fb",
+                    "inverse-primary": "#9ad1cb",
+                    "on-surface": "#191c1e",
+                    "on-primary-fixed": "#00201e",
+                    "surface-container-high": "#e6e8ea",
+                    "error": "#ba1a1a",
+                    "inverse-surface": "#2d3133",
+                    "success-emerald": "#10B981",
+                    "on-tertiary-fixed-variant": "#3d4947",
+                    "on-primary-container": "#87beb8",
+                    "surface-dim": "#d8dadc",
+                    "tertiary-container": "#3c4846",
+                    "on-secondary-container": "#007165",
+                    "secondary": "#006b5f",
+                    "outline": "#707977"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "xl": "40px",
+                    "lg": "24px",
+                    "sm": "12px",
+                    "xs": "8px",
+                    "gutter": "16px",
+                    "md": "16px",
+                    "container-max": "1200px",
+                    "base": "4px"
+            },
+            "fontFamily": {
+                    "body-md": ["Inter"],
+                    "label-md": ["Inter"],
+                    "label-sm": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "headline-xl": ["Inter"],
+                    "headline-md": ["Inter"],
+                    "headline-lg-mobile": ["Inter"],
+                    "body-lg": ["Inter"]
+            },
+            "fontSize": {
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "500"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-xl": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f0fdf4 0%, #fefce8 100%);
+            min-height: 100vh;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .squishy-button {
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .squishy-button:active {
+            transform: scale(0.96);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 4px 12px rgba(19, 78, 74, 0.05);
+        }
+
+        /* Custom toggle animation */
+        .toggle-dot {
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        input:checked ~ .toggle-dot {
+            transform: translateX(100%);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 shadow-sm dark:shadow-none bg-surface/80 dark:bg-surface-dim/80 backdrop-blur-md">
+<div class="flex justify-between items-center w-full px-md md:px-lg max-w-container-max mx-auto h-16">
+<div class="flex items-center gap-xs">
+<button class="material-symbols-outlined text-primary p-xs hover:bg-surface-container-high/50 rounded-full transition-colors" data-icon="menu">menu</button>
+<h1 class="font-headline-md text-headline-md font-bold text-primary">TADOR</h1>
+</div>
+<div class="hidden md:flex items-center gap-lg">
+<a class="font-label-md text-label-md text-on-surface-variant dark:text-on-tertiary-container hover:text-primary transition-colors" href="#">Landing</a>
+<a class="font-label-md text-label-md text-on-surface-variant dark:text-on-tertiary-container hover:text-primary transition-colors" href="#">Q&amp;A</a>
+<a class="font-label-md text-label-md text-primary border-b-2 border-primary pb-1" href="#">Configuración</a>
+</div>
+<button class="squishy-button px-md py-xs rounded-full bg-primary text-white font-label-md text-label-md hover:bg-primary-container transition-all">Ingresar</button>
+</div>
+</header>
+<main class="pt-24 pb-xl px-gutter max-w-container-max mx-auto">
+<!-- Header Section -->
+<div class="mb-xl">
+<h2 class="font-headline-xl text-headline-xl text-primary mb-xs">Ajustes</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Personaliza tu experiencia contable con simplicidad.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-12 gap-lg">
+<!-- Settings Panel -->
+<div class="md:col-span-8 flex flex-col gap-lg">
+<!-- General Section -->
+<section class="glass-card rounded-xl p-lg">
+<div class="flex items-center gap-sm mb-lg">
+<span class="material-symbols-outlined text-primary" data-icon="settings">settings</span>
+<h3 class="font-headline-md text-headline-md text-on-surface">General</h3>
+</div>
+<div class="flex flex-col gap-xl">
+<!-- Currency Selection -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-md border-b border-outline-variant/30 pb-lg">
+<div class="flex flex-col">
+<label class="font-label-md text-label-md text-on-surface mb-1" for="currency">Moneda Principal</label>
+<p class="text-label-sm font-label-sm text-on-surface-variant">Define el símbolo monetario de tus reportes.</p>
+</div>
+<div class="relative min-w-[200px]">
+<select class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-md py-sm font-body-md text-body-md text-on-surface appearance-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" id="currency">
+<option value="EUR">Euro (€)</option>
+<option value="USD">Dólar ($)</option>
+<option value="MXN">Peso (MXN)</option>
+<option value="ARS">Peso (ARS)</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant" data-icon="expand_more">expand_more</span>
+</div>
+</div>
+<!-- Date Format Selection -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-md border-b border-outline-variant/30 pb-lg">
+<div class="flex flex-col">
+<label class="font-label-md text-label-md text-on-surface mb-1" for="date-format">Formato de Fecha</label>
+<p class="text-label-sm font-label-sm text-on-surface-variant">Cómo visualizas el tiempo en tus registros.</p>
+</div>
+<div class="relative min-w-[200px]">
+<select class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-md py-sm font-body-md text-body-md text-on-surface appearance-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" id="date-format">
+<option value="DD/MM/YYYY">DD/MM/AAAA</option>
+<option value="MM/DD/YYYY">MM/DD/AAAA</option>
+<option value="YYYY-MM-DD">AAAA-MM-DD</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant" data-icon="expand_more">expand_more</span>
+</div>
+</div>
+<!-- Mode Toggle (Hogar vs PRO) -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-md">
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface mb-1">Modo de Visualización</span>
+<p class="text-label-sm font-label-sm text-on-surface-variant">Alterna entre simplicidad diaria o precisión profesional.</p>
+</div>
+<div class="flex items-center gap-md bg-surface-container rounded-full p-1 w-fit">
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" id="mode-toggle" type="checkbox"/>
+<div class="w-48 h-10 bg-surface-container border border-outline-variant/30 rounded-full peer peer-checked:bg-secondary-container transition-all flex items-center relative overflow-hidden">
+<!-- Text Layer -->
+<div class="absolute inset-0 flex justify-between items-center px-4 z-10 pointer-events-none">
+<span class="text-label-sm font-label-sm text-primary transition-opacity peer-checked:opacity-40">Modo Hogar</span>
+<span class="text-label-sm font-label-sm text-on-secondary-container transition-opacity opacity-40 peer-checked:opacity-100">Modo PRO</span>
+</div>
+<!-- Animated Slider -->
+<div class="absolute top-1 left-1 w-[92px] h-8 bg-white dark:bg-surface-container-lowest rounded-full shadow-sm toggle-dot z-0 border border-outline-variant/10"></div>
+</div>
+</label>
+</div>
+</div>
+</div>
+</section>
+<!-- Footer-like actions -->
+<div class="flex justify-end gap-md">
+<button class="squishy-button px-lg py-sm rounded-full border border-primary text-primary font-label-md text-label-md hover:bg-primary-fixed-dim/20 transition-all">Restaurar Valores</button>
+<button class="squishy-button px-lg py-sm rounded-full bg-primary text-white font-label-md text-label-md shadow-sm hover:bg-primary-container transition-all">Guardar Cambios</button>
+</div>
+</div>
+<!-- Contextual Sidebar / Profile -->
+<div class="md:col-span-4 flex flex-col gap-lg">
+<div class="glass-card rounded-xl p-lg flex flex-col items-center text-center">
+<div class="w-24 h-24 rounded-full overflow-hidden mb-md border-4 border-white shadow-sm">
+<img class="w-full h-full object-cover" data-alt="A professional headshot of a friendly user in their 30s, smiling warmly. The lighting is bright and natural, reflecting a clean office environment. The style is modern corporate lifestyle photography with a soft depth of field and a minimalist background that complements the teal and yellow brand colors." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAts4q25TObngLlAMUMUJqEva9xB6KzlH1p68otfEGz4ZERd0v3D1RRfBGBONEHuifcovoDh2bTnIgjd2i7ZKL63u8wyU5hdvCe9gJHfU25Xd_zDGhDuQlOqw0u5DrbaDYzEi5bn0qrbYk7_P-4gTv46PiQpHv02dvh1kQ_mxlqIg8dEt1zybsduRmG7YYFv-Ayc5pDlW7rfcPFk9m21eLYW5g3yr800JM1-VjAEQhDF3mVVGK5Wo7OMFLnmqwAPlznuJgxcWWs"/>
+</div>
+<h4 class="font-headline-md text-headline-md text-on-surface">Alex Rivera</h4>
+<p class="text-label-sm font-label-sm text-primary mb-lg">Plan Premium</p>
+<div class="w-full h-1.5 bg-surface-container rounded-full overflow-hidden mb-xs">
+<div class="w-3/4 h-full bg-primary rounded-full"></div>
+</div>
+<p class="text-label-sm font-label-sm text-on-surface-variant">75% de almacenamiento utilizado</p>
+</div>
+<div class="glass-card rounded-xl p-lg">
+<h5 class="font-label-md text-label-md text-on-surface mb-md">Próximos Pasos</h5>
+<ul class="flex flex-col gap-sm">
+<li class="flex items-start gap-sm">
+<span class="material-symbols-outlined text-success-emerald text-[20px]" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="text-label-sm font-label-sm text-on-surface-variant">Vincular cuenta bancaria</span>
+</li>
+<li class="flex items-start gap-sm">
+<span class="material-symbols-outlined text-outline text-[20px]" data-icon="radio_button_unchecked">radio_button_unchecked</span>
+<span class="text-label-sm font-label-sm text-on-surface-variant">Configurar categorías personalizadas</span>
+</li>
+<li class="flex items-start gap-sm">
+<span class="material-symbols-outlined text-outline text-[20px]" data-icon="radio_button_unchecked">radio_button_unchecked</span>
+<span class="text-label-sm font-label-sm text-on-surface-variant">Exportar primer reporte mensual</span>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="w-full bg-surface-container-low dark:bg-tertiary-container mt-xl">
+<div class="w-full px-md md:px-lg py-xl max-w-container-max mx-auto flex flex-col md:flex-row justify-between items-center gap-md">
+<div class="flex items-center gap-xs">
+<span class="font-headline-md text-headline-md font-bold text-primary">TADOR</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant opacity-80">© 2026 TADOR</span>
+</div>
+<div class="flex gap-lg">
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary hover:underline underline-offset-4 transition-opacity" href="#">Privacidad</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary hover:underline underline-offset-4 transition-opacity" href="#">Términos</a>
+<a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary hover:underline underline-offset-4 transition-opacity" href="#">Soporte</a>
+</div>
+</div>
+</footer>
+<!-- Interactive script for toggle and selects -->
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggle = document.getElementById('mode-toggle');
+            const toggleText = document.querySelector('.toggle-dot');
+            
+            toggle.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    // Logic for PRO mode
+                    console.log('Modo PRO activado');
+                } else {
+                    // Logic for Hogar mode
+                    console.log('Modo Hogar activado');
+                }
+            });
+
+            // Micro-interactions for select inputs
+            const selects = document.querySelectorAll('select');
+            selects.forEach(select => {
+                select.addEventListener('focus', () => {
+                    select.parentElement.querySelector('.material-symbols-outlined').style.transform = 'translateY(-50%) rotate(180deg)';
+                });
+                select.addEventListener('blur', () => {
+                    select.parentElement.querySelector('.material-symbols-outlined').style.transform = 'translateY(-50%) rotate(0deg)';
+                });
+            });
+        });
+    </script>
+</body></html>

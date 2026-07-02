@@ -1,0 +1,317 @@
+<!DOCTYPE html><html class="light" lang="es" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>TADOR - Dashboard Principal</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "background": "#f7f9fb",
+                    "primary-fixed-dim": "#9ad1cb",
+                    "error-container": "#ffdad6",
+                    "on-primary-fixed-variant": "#144f4b",
+                    "on-error": "#ffffff",
+                    "secondary-fixed": "#62fae3",
+                    "surface-tint": "#316763",
+                    "on-surface-variant": "#404847",
+                    "on-secondary": "#ffffff",
+                    "on-background": "#191c1e",
+                    "surface-container": "#eceef0",
+                    "surface-variant": "#e0e3e5",
+                    "on-tertiary-container": "#a9b6b4",
+                    "text-muted": "#64748B",
+                    "tertiary": "#263230",
+                    "secondary-container": "#62fae3",
+                    "outline-variant": "#bfc8c6",
+                    "surface-container-highest": "#e0e3e5",
+                    "primary-fixed": "#b5ede7",
+                    "on-secondary-fixed-variant": "#005047",
+                    "text-main": "#1E293B",
+                    "inverse-on-surface": "#eff1f3",
+                    "surface-container-low": "#f2f4f6",
+                    "on-primary": "#ffffff",
+                    "on-secondary-fixed": "#00201c",
+                    "tertiary-fixed-dim": "#bcc9c6",
+                    "on-error-container": "#93000a",
+                    "tertiary-fixed": "#d8e5e2",
+                    "surface-container-lowest": "#ffffff",
+                    "surface": "#f7f9fb",
+                    "on-tertiary": "#ffffff",
+                    "warning-amber": "#F59E0B",
+                    "primary": "#003633",
+                    "primary-container": "#134e4a",
+                    "on-tertiary-fixed": "#121e1c",
+                    "secondary-fixed-dim": "#3cddc7",
+                    "expense-rose": "#E11D48",
+                    "surface-bright": "#f7f9fb",
+                    "inverse-primary": "#9ad1cb",
+                    "on-surface": "#191c1e",
+                    "on-primary-fixed": "#00201e",
+                    "surface-container-high": "#e6e8ea",
+                    "error": "#ba1a1a",
+                    "inverse-surface": "#2d3133",
+                    "success-emerald": "#10B981",
+                    "on-tertiary-fixed-variant": "#3d4947",
+                    "on-primary-container": "#87beb8",
+                    "surface-dim": "#d8dadc",
+                    "tertiary-container": "#3c4846",
+                    "on-secondary-container": "#007165",
+                    "secondary": "#006b5f",
+                    "outline": "#707977"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "xl": "40px",
+                    "lg": "24px",
+                    "sm": "12px",
+                    "xs": "8px",
+                    "gutter": "16px",
+                    "md": "16px",
+                    "container-max": "1200px",
+                    "base": "4px"
+            },
+            "fontFamily": {
+                    "body-md": ["Inter"],
+                    "label-md": ["Inter"],
+                    "label-sm": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "headline-xl": ["Inter"],
+                    "headline-md": ["Inter"],
+                    "headline-lg-mobile": ["Inter"],
+                    "body-lg": ["Inter"]
+            },
+            "fontSize": {
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "500"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-xl": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .soft-gradient-bg {
+            background: radial-gradient(circle at top left, #f0f9f1 0%, #ffffff 40%, #fefce8 100%);
+        }
+        .squishy-interaction:active {
+            transform: scale(0.96);
+            transition: transform 0.1s ease-out;
+        }
+        .card-elevation-low {
+            box-shadow: 0 4px 12px rgba(19, 78, 74, 0.05);
+        }
+        .backdrop-blur-nav {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface font-body-md soft-gradient-bg min-h-screen pb-24">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-surface/80 dark:bg-surface-dim/80 backdrop-blur-md shadow-sm">
+<div class="flex justify-between items-center w-full px-md md:px-lg max-w-container-max mx-auto h-16">
+<div class="flex items-center gap-md">
+<button class="p-2 squishy-interaction rounded-full hover:bg-surface-container-high/50">
+<span class="material-symbols-outlined text-primary">menu</span>
+</button>
+<h1 class="font-headline-md text-headline-md font-bold text-primary">TADOR</h1>
+</div>
+<nav class="hidden md:flex items-center gap-lg">
+<a class="text-primary border-b-2 border-primary pb-1 font-label-md" href="#">Dashboard</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-label-md" href="#">Actividad</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-label-md" href="#">Cuentas</a>
+</nav>
+<div class="flex items-center gap-sm">
+<button class="hidden md:block px-md py-xs text-primary font-label-md hover:bg-surface-container-high/50 rounded-full transition-all">Ingresar</button>
+<div class="w-10 h-10 rounded-full border-2 border-primary-fixed-dim overflow-hidden shadow-sm">
+<img class="w-full h-full object-cover" data-alt="A professional portrait of a friendly office manager in their 30s, smiling warmly at the camera. The setting is a bright, modern corporate environment with soft, natural morning light filtering through large windows. The visual style is clean and airy, utilizing a palette of soft teals, whites, and warm wooden accents to evoke trust and approachability." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCEGZ6GAOUImNUafvLG-m2xPEjlAZaN_4DuHMQpiWwzPR88mawCiBC9yQOjU_NxfFKzcsl-TstrNZosotUl9HT360slSF-flz7ccziZPbMMmoXqb-9FzKWJYMBjfnT8K6ALxESM_IL_TX5ouZ8mpWrHQ5k6sRsltQQ8mk9gXO6UT95DnompYl4ZSu0EEJIgni-tx3La4HKpl5vdBoYvEhLk1EMJ1Y5KlZ3C9FT4xbEMbgJ0AYhOMc6QcEfTxUttnbF2cOkh1Bp9">
+</div>
+</div>
+</div>
+</header>
+<main class="pt-24 px-md md:px-lg max-w-container-max mx-auto">
+<!-- Welcome Header -->
+<section class="mb-lg">
+
+
+</section>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-gutter">
+<!-- PYG Summary Card -->
+<div class="md:col-span-8 bg-white rounded-xl card-elevation-low p-md md:p-lg border-t-2 border-primary/10">
+<div class="flex justify-between items-center mb-md">
+<h3 class="font-headline-md text-primary">Resumen Mensual (PYG)</h3>
+<div class="flex gap-xs">
+<span class="text-label-sm text-on-surface-variant bg-surface-container px-2 py-1 rounded">Octubre 2024</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-md mb-lg">
+<div class="p-md bg-primary-fixed/20 rounded-lg">
+<p class="text-label-sm text-on-primary-fixed-variant uppercase tracking-wider mb-1">Ingresos</p>
+<p class="font-headline-md text-secondary">+ $4.250,00</p>
+<div class="mt-2 h-1 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-[85%] rounded-full"></div>
+</div>
+</div>
+<div class="p-md bg-error-container/20 rounded-lg">
+<p class="text-label-sm text-on-error-container uppercase tracking-wider mb-1">Gastos</p>
+<p class="font-headline-md text-expense-rose">- $2.120,50</p>
+<div class="mt-2 h-1 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-expense-rose w-[45%] rounded-full"></div>
+</div>
+</div>
+</div>
+<!-- Simple Visualization Placeholder -->
+<div class="h-48 w-full bg-surface-container-low rounded-lg relative overflow-hidden flex items-end px-md gap-2">
+<div class="flex-1 bg-primary-fixed-dim rounded-t-lg h-[60%] squishy-interaction cursor-pointer"></div>
+<div class="flex-1 bg-secondary-fixed-dim rounded-t-lg h-[45%] squishy-interaction cursor-pointer"></div>
+<div class="flex-1 bg-primary-fixed-dim rounded-t-lg h-[75%] squishy-interaction cursor-pointer"></div>
+<div class="flex-1 bg-secondary-fixed-dim rounded-t-lg h-[40%] squishy-interaction cursor-pointer"></div>
+<div class="flex-1 bg-primary-fixed-dim rounded-t-lg h-[90%] squishy-interaction cursor-pointer"></div>
+<div class="flex-1 bg-secondary-fixed-dim rounded-t-lg h-[30%] squishy-interaction cursor-pointer"></div>
+<div class="flex-1 bg-primary-fixed-dim rounded-t-lg h-[65%] squishy-interaction cursor-pointer"></div>
+<div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-40">
+<span class="text-label-sm text-on-surface-variant font-medium">Balance Neto: + $2.129,50</span>
+</div>
+</div>
+</div>
+<!-- Main Accounts Card -->
+<div class="md:col-span-4 space-y-gutter">
+<div class="bg-white rounded-xl card-elevation-low p-md border-t-2 border-secondary/10">
+<h3 class="font-headline-md text-primary mb-md">Mis haberes</h3>
+<div class="space-y-sm">
+<!-- Account Item -->
+<div class="flex items-center justify-between p-sm hover:bg-surface-container-low rounded-lg transition-colors cursor-pointer group">
+<div class="flex items-center gap-sm">
+<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">account_balance</span>
+</div>
+<div>
+<p class="font-label-md text-on-surface">Inversiones</p>
+<p class="text-label-sm text-on-surface-variant">BBVA Principal</p>
+</div>
+</div>
+<p class="font-label-md text-primary">$12.450,20</p>
+</div>
+<!-- Account Item -->
+<div class="flex items-center justify-between p-sm hover:bg-surface-container-low rounded-lg transition-colors cursor-pointer group">
+<div class="flex items-center gap-sm">
+<div class="w-10 h-10 rounded-full bg-secondary-container/20 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined">savings</span>
+</div>
+<div>
+<p class="font-label-md text-on-surface">Bancos</p>
+<p class="text-label-sm text-on-surface-variant">Metas 2024</p>
+</div>
+</div>
+<p class="font-label-md text-primary">$5.800,00</p>
+</div>
+<!-- Account Item -->
+<div class="flex items-center justify-between p-sm hover:bg-surface-container-low rounded-lg transition-colors cursor-pointer group">
+<div class="flex items-center gap-sm">
+<div class="w-10 h-10 rounded-full bg-warning-amber/10 flex items-center justify-center text-warning-amber">
+<span class="material-symbols-outlined">payments</span>
+</div>
+<div>
+<p class="font-label-md text-on-surface">Efectivo</p>
+<p class="text-label-sm text-on-surface-variant">Billetera</p>
+</div>
+</div>
+<p class="font-label-md text-primary">$420,00</p>
+</div>
+</div>
+
+</div>
+<!-- Quick Tip Card -->
+
+</div>
+<!-- Recent Activity Table (Wide) -->
+<div class="md:col-span-12 bg-white rounded-xl card-elevation-low overflow-hidden border-t-2 border-primary/5">
+
+<div class="overflow-x-auto">
+
+</div>
+</div>
+</div>
+</main>
+<!-- FAB: Floating Action Button -->
+
+<!-- Bottom Navigation for Mobile -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full bg-surface/90 backdrop-blur-nav border-t border-surface-container flex justify-around py-sm z-50">
+<a class="flex flex-col items-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="text-[10px] font-medium">Dashboard</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-on-surface-variant" href="#">
+<span class="material-symbols-outlined">receipt_long</span>
+<span class="text-[10px] font-medium">Apuntes</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-on-surface-variant" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="text-[10px] font-medium">Informes</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-on-surface-variant" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-[10px] font-medium">Ajustes</span>
+</a>
+</nav>
+<!-- Simple Footer -->
+<footer class="w-full px-md md:px-lg py-xl max-w-container-max mx-auto flex flex-col md:flex-row justify-between items-center gap-md border-t border-surface-container mt-xl">
+<p class="font-label-sm text-on-surface-variant">© 2026 TADOR - Finanzas Humanas</p>
+<div class="flex gap-lg">
+<a class="text-on-surface-variant hover:text-primary transition-colors font-label-sm hover:underline underline-offset-4" href="#">Privacidad</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-label-sm hover:underline underline-offset-4" href="#">Términos</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-label-sm hover:underline underline-offset-4" href="#">Soporte</a>
+</div>
+</footer>
+<script>
+        // Micro-interaction for cards
+        document.querySelectorAll('.squishy-interaction').forEach(element => {
+            element.addEventListener('click', () => {
+                element.classList.add('scale-95');
+                setTimeout(() => {
+                    element.classList.remove('scale-95');
+                }, 100);
+            });
+        });
+
+        // Simple scroll effect for header
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('header');
+            if (window.scrollY > 20) {
+                header.classList.add('shadow-md');
+                header.classList.remove('shadow-sm');
+            } else {
+                header.classList.add('shadow-sm');
+                header.classList.remove('shadow-md');
+            }
+        });
+    </script>
+
+
+</body></html>

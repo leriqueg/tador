@@ -1,0 +1,236 @@
+<!DOCTYPE html><html lang="es" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>TADOR - Dashboard Hogar</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-fixed-dim": "#9ad1cb",
+                    "background": "#f7f9fb",
+                    "error-container": "#ffdad6",
+                    "surface-tint": "#316763",
+                    "secondary-fixed": "#62fae3",
+                    "on-primary-fixed-variant": "#144f4b",
+                    "on-error": "#ffffff",
+                    "surface-container": "#eceef0",
+                    "on-secondary": "#ffffff",
+                    "on-background": "#191c1e",
+                    "on-surface-variant": "#404847",
+                    "surface-variant": "#e0e3e5",
+                    "on-tertiary-container": "#a9b6b4",
+                    "secondary-container": "#62fae3",
+                    "outline-variant": "#bfc8c6",
+                    "tertiary": "#263230",
+                    "text-muted": "#64748B",
+                    "inverse-on-surface": "#eff1f3",
+                    "text-main": "#1E293B",
+                    "surface-container-highest": "#e0e3e5",
+                    "primary-fixed": "#b5ede7",
+                    "on-secondary-fixed-variant": "#005047",
+                    "on-primary": "#ffffff",
+                    "surface-container-low": "#f2f4f6",
+                    "tertiary-fixed": "#d8e5e2",
+                    "tertiary-fixed-dim": "#bcc9c6",
+                    "on-error-container": "#93000a",
+                    "on-secondary-fixed": "#00201c",
+                    "primary-container": "#134e4a",
+                    "primary": "#003633",
+                    "warning-amber": "#F59E0B",
+                    "surface-container-lowest": "#ffffff",
+                    "surface": "#f7f9fb",
+                    "on-tertiary": "#ffffff",
+                    "inverse-primary": "#9ad1cb",
+                    "surface-bright": "#f7f9fb",
+                    "secondary-fixed-dim": "#3cddc7",
+                    "expense-rose": "#E11D48",
+                    "on-tertiary-fixed": "#121e1c",
+                    "surface-container-high": "#e6e8ea",
+                    "on-primary-fixed": "#00201e",
+                    "on-surface": "#191c1e",
+                    "success-emerald": "#10B981",
+                    "inverse-surface": "#2d3133",
+                    "error": "#ba1a1a",
+                    "tertiary-container": "#3c4846",
+                    "surface-dim": "#d8dadc",
+                    "on-primary-container": "#87beb8",
+                    "on-tertiary-fixed-variant": "#3d4947",
+                    "secondary": "#006b5f",
+                    "on-secondary-container": "#007165",
+                    "outline": "#707977"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "xl": "40px",
+                    "lg": "24px",
+                    "sm": "12px",
+                    "container-max": "1200px",
+                    "base": "4px",
+                    "xs": "8px",
+                    "gutter": "16px",
+                    "md": "16px"
+            },
+            "fontFamily": {
+                    "body-md": ["Inter"],
+                    "headline-xl": ["Inter"],
+                    "headline-md": ["Inter"],
+                    "headline-lg-mobile": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "label-md": ["Inter"],
+                    "label-sm": ["Inter"],
+                    "headline-lg": ["Inter"]
+            },
+            "fontSize": {
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-xl": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "500"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f9fb;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .shadow-soft {
+            box-shadow: 0 4px 12px rgba(19, 78, 74, 0.05);
+        }
+        .active-scale:active {
+            transform: scale(0.95);
+        }
+        .wave-container {
+            mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+        }
+    </style>
+</head>
+<body class="text-on-background pb-32">
+<!-- TopAppBar -->
+<header class="w-full top-0 sticky z-40 bg-background dark:bg-background flex justify-between items-center px-md py-xs">
+<div class="flex items-center gap-xs">
+<div class="w-10 h-10 rounded-full overflow-hidden bg-primary-fixed ring-2 ring-primary/10">
+<img alt="Pacho mascot" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida/AP1WRLvGreLZfwupXh98lF2PDaAcHLXoP2fU3dLW_qC9aSfCkiduczS6YgGRWrKlkv2XB9F3wYkju2LU_LxYTYpF5nSdC0ct9onSsaWTy_FT6TSLbuZnykRPyOeG2baYTewXg5qK6fClOWekNdfXDYrQKL8toHrqebLmklEzqpPud9_0-g2bXxJXBBCuGPodowClsofSg-rEVbvfM5MCoKKVvsQ7cpOHonFml43V1S3tcI0SGz4SVnWKQ6k">
+</div>
+<span class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim">TADOR</span>
+</div>
+<button class="material-symbols-outlined text-on-surface-variant hover:opacity-80 transition-opacity p-2 rounded-full">notifications</button>
+</header>
+<main class="max-w-container-max mx-auto px-gutter pt-xs">
+<!-- Welcome Message -->
+<section class="mb-lg">
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-primary mb-1">¡Hola, Diego!</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Tu economía está bajo control.</p>
+</section>
+<!-- Bento Layout for Desktop / Single Column for Mobile -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-lg">
+<!-- Summary Card (Primary) -->
+<div class="md:col-span-8 bg-surface-container-lowest rounded-xl shadow-soft p-lg relative overflow-hidden">
+<div class="relative z-10">
+<p class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider mb-2">Resultado Neto</p>
+<div class="flex items-baseline gap-xs mb-lg">
+<span class="font-headline-xl text-headline-xl text-primary">$ 45.230,00</span>
+</div>
+<!-- Progress Wave -->
+<div class="mt-xl">
+<div class="flex justify-between items-center mb-xs">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Ingresos vs Gastos del mes</span>
+<span class="font-label-sm text-label-sm text-success-emerald">+12% vs anterior</span>
+</div>
+<div class="h-16 w-full bg-primary-fixed/20 rounded-lg relative overflow-hidden wave-container">
+<!-- Simple Bar Mockup -->
+<div class="absolute bottom-0 left-0 w-[65%] h-full bg-primary/60 rounded-r-lg"></div>
+<div class="absolute bottom-0 left-0 w-[40%] h-3/4 bg-primary rounded-r-lg"></div>
+</div>
+</div>
+</div>
+<!-- Background Decoration -->
+<div class="absolute top-[-20%] right-[-10%] w-48 h-48 bg-secondary-container/20 rounded-full blur-3xl"></div>
+</div>
+<!-- Consejo de Pacho -->
+
+<!-- Quick Actions -->
+<div class="md:col-span-12 grid grid-cols-2 gap-md">
+
+
+</div>
+<!-- Recent Movements -->
+<div class="md:col-span-12">
+<div class="flex justify-between items-center mb-md">
+
+
+</div>
+<div class="space-y-sm">
+<!-- Tx 1 -->
+
+<!-- Tx 2 -->
+
+<!-- Tx 3 -->
+
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 bg-surface-container-lowest dark:bg-inverse-surface shadow-lg rounded-t-xl pb-safe pt-2 px-xs flex justify-around items-center">
+<!-- Resumen (Active) -->
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-4 py-1 active:scale-90 transition-all duration-150" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="font-label-sm text-label-sm">Resumen</span>
+</a>
+<!-- Apuntes -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant py-1 hover:text-primary transition-opacity active:scale-90" href="#">
+<span class="material-symbols-outlined">edit_note</span>
+<span class="font-label-sm text-label-sm">Apuntes</span>
+</a>
+<!-- Cuentas -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant py-1 hover:text-primary transition-opacity active:scale-90" href="#">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+<span class="font-label-sm text-label-sm">Cuentas</span>
+</a>
+<!-- Entidades -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant py-1 hover:text-primary transition-opacity active:scale-90" href="#">
+<span class="material-symbols-outlined">account_balance</span>
+<span class="font-label-sm text-label-sm">Entidades</span>
+</a>
+<!-- Ajustes -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant py-1 hover:text-primary transition-opacity active:scale-90" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-sm text-label-sm">Ajustes</span>
+</a>
+</nav>
+<script>
+        // Micro-interaction for cards
+        document.querySelectorAll('.active-scale').forEach(button => {
+            button.addEventListener('mousedown', () => button.classList.add('scale-95'));
+            button.addEventListener('mouseup', () => button.classList.remove('scale-95'));
+            button.addEventListener</script>
+
+
+
+</body></html>

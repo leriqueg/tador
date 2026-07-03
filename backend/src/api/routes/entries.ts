@@ -93,7 +93,7 @@ export function registerEntryRoutes(
         return reply.status(201).send(result);
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to create entry';
-        if (message.startsWith('Invalid line') || message.startsWith('Balance')) {
+        if (message.startsWith('Invalid line') || message.includes('balanced') || message.includes('at least two')) {
           return reply.status(400).send({ error: message });
         }
         if (message.includes('closed')) {
@@ -207,7 +207,7 @@ export function registerEntryRoutes(
         if (message.includes('voided')) {
           return reply.status(400).send({ error: message });
         }
-        if (message.startsWith('Invalid line') || message.startsWith('Balance')) {
+        if (message.startsWith('Invalid line') || message.includes('balanced') || message.includes('at least two')) {
           return reply.status(400).send({ error: message });
         }
         if (message.includes('not found')) {

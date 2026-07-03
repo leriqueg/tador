@@ -761,9 +761,9 @@ export function createAccountingService(): AccountingService {
             COALESCE(SUM(l.debito), 0) AS "totalDebito",
             COALESCE(SUM(l.credito), 0) AS "totalCredito"
           FROM lineas_asiento l
-          INNER JOIN asientos a ON a.id = l.asiento_id
-          WHERE l.cuenta_id = ${cuentaId}
-            AND a.book_id = ${bookId}
+          INNER JOIN asientos a ON a.id = l."asientoId"
+          WHERE l."cuentaId" = ${cuentaId}
+            AND a."bookId" = ${bookId}
             AND a.anulado = false
             AND EXTRACT(YEAR FROM a.fecha) = ${año}::int
           GROUP BY EXTRACT(MONTH FROM a.fecha)

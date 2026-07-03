@@ -12,6 +12,8 @@ enum TipoCuenta {
   card
   wallet
   bridge
+  incomeCategory
+  expenseCategory
 
   @@map("tipo_cuenta")
 }
@@ -23,6 +25,13 @@ enum TipoEntidad {
   issuer
 
   @@map("tipo_entidad")
+}
+
+enum AsientoTipo {
+  manual
+  reversa
+
+  @@map("asiento_tipo")
 }
 
 model User {
@@ -49,10 +58,10 @@ model Book {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user    User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  config  BookConfig?
-  asientos Asiento[]
-  periodos PeriodoAnual[]
+  user      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  config    BookConfig?
+  asientos  Asiento[]
+  periodos  PeriodoContable[]
 
   @@map("books")
 }
@@ -100,6 +109,7 @@ model CuentaGlobal {
   children        CuentaGlobal[]            @relation("GlobalAccountHierarchy")
   cuentasUsuario  CuentaUsuario[]
   activaciones    ActivacionCuentaGlobal[]
+  lineas          LineaAsiento[]
 
   @@map("cuentas_globales")
 }
@@ -107,6 +117,7 @@ model CuentaGlobal {
 model CuentaUsuario {
   id                 String     @id @default(cuid())
   userId             String
+  codigo             String?
   globalId           String?
   entidadId          String?
   tipoCuenta         TipoCuenta
@@ -116,11 +127,12 @@ model CuentaUsuario {
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt
 
-  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  global       CuentaGlobal? @relation(fields: [globalId], references: [id])
-  entidad      Entidad?      @relation(fields: [entidadId], references: [id])
-  lineasAsiento LineaAsiento[]
+  user    User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  global  CuentaGlobal?   @relation(fields: [globalId], references: [id])
+  entidad Entidad?        @relation(fields: [entidadId], references: [id])
+  lineas  LineaAsiento[]
 
+  @@unique([userId, codigo])
   @@map("cuentas_usuario")
 }
 
@@ -168,43 +180,67 @@ model ActivacionCuentaGlobal {
 }
 
 model Asiento {
-  id          String   @id @default(cuid())
-  bookId      String
-  fecha       DateTime
-  descripcion String
-  editHistory Json     @default("[]")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                String     @id @default(cuid())
+  bookId            String
+  fecha             DateTime
+  concepto          String
+  tipo              AsientoTipo
+  asientoOriginalId String?
+  idempotencyKey    String?    @unique
+  anulado           Boolean    @default(false)
+  anuladoAt         DateTime?
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
 
-  book   Book           @relation(fields: [bookId], references: [id], onDelete: Cascade)
-  lineas LineaAsiento[]
+  book            Book            @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  asientoOriginal Asiento?        @relation("Reversa", fields: [asientoOriginalId], references: [id])
+  reversos        Asiento[]       @relation("Reversa")
+  lineas          LineaAsiento[]
+  versiones       AsientoVersion[]
 
   @@map("asientos")
 }
 
 model LineaAsiento {
-  id              String   @id @default(cuid())
-  asientoId       String
-  cuentaUsuarioId String
-  debe            Decimal  @default(0)
-  haber           Decimal  @default(0)
+  id             String         @id @default(cuid())
+  asientoId      String
+  cuentaId       String?
+  cuentaGlobalId String?
+  debito         Decimal        @default(0)
+  credito        Decimal        @default(0)
+  createdAt      DateTime       @default(now())
 
-  asiento       Asiento       @relation(fields: [asientoId], references: [id], onDelete: Cascade)
-  cuentaUsuario CuentaUsuario @relation(fields: [cuentaUsuarioId], references: [id])
+  asiento      Asiento        @relation(fields: [asientoId], references: [id], onDelete: Cascade)
+  cuenta       CuentaUsuario? @relation(fields: [cuentaId], references: [id])
+  cuentaGlobal CuentaGlobal?  @relation(fields: [cuentaGlobalId], references: [id])
 
   @@map("lineas_asiento")
 }
 
-model PeriodoAnual {
+model AsientoVersion {
+  id         String   @id @default(cuid())
+  asientoId  String
+  version    Int
+  snapshot   Json
+  modifiedBy String
+  createdAt  DateTime @default(now())
+
+  asiento Asiento @relation(fields: [asientoId], references: [id], onDelete: Cascade)
+
+  @@map("asiento_versions")
+}
+
+model PeriodoContable {
   id          String    @id @default(cuid())
   bookId      String
   año         Int
-  cerrado     Boolean   @default(false)
-  cerradoEn   DateTime?
-  reabiertoEn DateTime?
+  abierto     Boolean   @default(true)
+  cerradoAt   DateTime?
+  reabiertoAt DateTime?
+  createdAt   DateTime  @default(now())
 
   book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
 
   @@unique([bookId, año])
-  @@map("periodos_anuales")
+  @@map("periodos_contables")
 }

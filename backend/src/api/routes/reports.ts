@@ -1,5 +1,5 @@
 /**
- * Balance routes: account balance queries.
+ * Report routes: PyG and balance sheet reports.
  */
 
 import type { FastifyInstance } from 'fastify';
@@ -8,7 +8,7 @@ import type { AccountingService } from '../../application/accounting-service.js'
 import { createAuthMiddleware } from '../middleware/auth.js';
 import { prisma } from '../../infrastructure/database.js';
 
-export function registerBalanceRoutes(
+export function registerReportRoutes(
   app: FastifyInstance,
   authService: AuthApplicationService,
   accountingService: AccountingService,
@@ -24,19 +24,16 @@ export function registerBalanceRoutes(
   }
 
   // ---------------------------------------------------------------------------
-  // GET /api/balances/:cuentaId — current balance
-  // Query params:
-  //   tipo=usuario (default) | global — account type
+  // GET /api/reports/pyg — PyG report
   // ---------------------------------------------------------------------------
 
   app.get(
-    '/api/balances/:cuentaId',
+    '/api/reports/pyg',
     { preHandler: requireAuth },
     async (request, reply) => {
       const userId = request.userId!;
-      const { cuentaId } = request.params as { cuentaId: string };
-      const query = request.query as { tipo?: string };
-      const tipo = query.tipo === 'global' ? 'global' as const : 'usuario' as const;
+      const query = request.query as { año?: string };
+      const año = query.año ? parseInt(query.año, 10) : new Date().getFullYear();
 
       try {
         const bookId = await getBookId(userId);
@@ -44,32 +41,27 @@ export function registerBalanceRoutes(
           return reply.status(404).send({ error: 'Book not found' });
         }
 
-        const saldo = await accountingService.getBalance(cuentaId, bookId, tipo);
+        const report = await accountingService.getPyG(bookId, año);
 
-        return reply.status(200).send({ cuentaId, saldo });
+        return reply.status(200).send(report);
       } catch (err) {
-        request.log.error(err, 'Failed to get balance');
-        return reply.status(500).send({ error: 'Failed to get balance' });
+        request.log.error(err, 'Failed to get PyG report');
+        return reply.status(500).send({ error: 'Failed to get PyG report' });
       }
     },
   );
 
   // ---------------------------------------------------------------------------
-  // GET /api/balances/:cuentaId/monthly — monthly balances
-  // Query params:
-  //   año — fiscal year (default: current year)
-  //   tipo=usuario (default) | global — account type
+  // GET /api/reports/balance — balance sheet
   // ---------------------------------------------------------------------------
 
   app.get(
-    '/api/balances/:cuentaId/monthly',
+    '/api/reports/balance',
     { preHandler: requireAuth },
     async (request, reply) => {
       const userId = request.userId!;
-      const { cuentaId } = request.params as { cuentaId: string };
-      const query = request.query as { año?: string; tipo?: string };
+      const query = request.query as { año?: string };
       const año = query.año ? parseInt(query.año, 10) : new Date().getFullYear();
-      const tipo = query.tipo === 'global' ? 'global' as const : 'usuario' as const;
 
       try {
         const bookId = await getBookId(userId);
@@ -77,17 +69,12 @@ export function registerBalanceRoutes(
           return reply.status(404).send({ error: 'Book not found' });
         }
 
-        const mensual = await accountingService.getMonthlyBalances(
-          cuentaId,
-          bookId,
-          año,
-          tipo,
-        );
+        const report = await accountingService.getBalanceSheet(bookId, año);
 
-        return reply.status(200).send({ cuentaId, año, mensual });
+        return reply.status(200).send(report);
       } catch (err) {
-        request.log.error(err, 'Failed to get monthly balances');
-        return reply.status(500).send({ error: 'Failed to get monthly balances' });
+        request.log.error(err, 'Failed to get balance sheet report');
+        return reply.status(500).send({ error: 'Failed to get balance sheet report' });
       }
     },
   );

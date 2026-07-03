@@ -1,89 +1,108 @@
 /**
- * Entries routes: journal entry CRUD.
- *
- * POST /api/entries      — create a balanced entry (FR-001/002)
- * GET  /api/entries      — list entries with optional date range
- * GET  /api/entries/:id  — get entry by id with lines
- * PUT  /api/entries/:id  — update entry in open period (FR-009/010)
+ * Entry routes: journal entry (asiento) CRUD.
  */
 
 import type { FastifyInstance } from 'fastify';
 import type { AuthApplicationService } from '../../application/auth-service.js';
-import type { AsientoApplicationService } from '../../application/asiento-service.js';
-import type { BookRepository } from '../../infrastructure/repositories/book-repo.js';
+import type { AccountingService } from '../../application/accounting-service.js';
 import { createAuthMiddleware } from '../middleware/auth.js';
+import { prisma } from '../../infrastructure/database.js';
+
+interface CreateEntryLineBody {
+  cuentaId?: string;
+  cuentaGlobalId?: string;
+  debito?: number;
+  credito?: number;
+}
 
 interface CreateEntryBody {
   fecha: string;
-  descripcion: string;
-  lineas: Array<{
-    cuentaUsuarioId: string;
-    debe: number;
-    haber: number;
-  }>;
+  concepto: string;
+  lineas: CreateEntryLineBody[];
+  idempotencyKey?: string;
 }
 
 interface UpdateEntryBody {
-  descripcion: string;
-  lineas: Array<{
-    cuentaUsuarioId: string;
-    debe: number;
-    haber: number;
-  }>;
-}
-
-interface ListEntriesQuery {
-  desde?: string;
-  hasta?: string;
+  fecha?: string;
+  concepto?: string;
+  lineas?: CreateEntryLineBody[];
 }
 
 export function registerEntryRoutes(
   app: FastifyInstance,
   authService: AuthApplicationService,
-  asientoService: AsientoApplicationService,
-  bookRepo: BookRepository,
+  accountingService: AccountingService,
 ): void {
   const requireAuth = createAuthMiddleware(authService);
 
-  /** Helper to resolve bookId from the authenticated user's session userId. */
-  async function resolveBookId(userId: string): Promise<string> {
-    const book = await bookRepo.findByUserId(userId);
-    if (!book) {
-      throw new Error('Book not found for this user');
-    }
-    return book.id;
+  // ---------------------------------------------------------------------------
+  // Helpers
+  // ---------------------------------------------------------------------------
+
+  async function getBookId(userId: string): Promise<string | null> {
+    const book = await prisma.book.findFirst({
+      where: { userId },
+      select: { id: true },
+    });
+    return book?.id ?? null;
   }
 
-  // POST /api/entries — create a balanced entry
+  function normalizeLines(
+    lineas: CreateEntryLineBody[],
+  ): Array<{ cuentaId?: string; cuentaGlobalId?: string; debito: number; credito: number }> {
+    return lineas.map((l) => ({
+      cuentaId: l.cuentaId,
+      cuentaGlobalId: l.cuentaGlobalId,
+      debito: l.debito ?? 0,
+      credito: l.credito ?? 0,
+    }));
+  }
+
+  // ---------------------------------------------------------------------------
+  // POST /api/entries — create entry
+  // ---------------------------------------------------------------------------
+
   app.post(
     '/api/entries',
     { preHandler: requireAuth },
     async (request, reply) => {
       const userId = request.userId!;
-      const { fecha, descripcion, lineas } = request.body as CreateEntryBody;
+      const body = request.body as CreateEntryBody;
+      const idempotencyKey =
+        body.idempotencyKey ??
+        (request.headers['idempotency-key'] as string | undefined);
 
-      if (!fecha || !descripcion || !lineas || lineas.length === 0) {
-        return reply.status(400).send({ error: 'fecha, descripcion, and lineas are required' });
+      if (!body.fecha || !body.concepto || !body.lineas?.length) {
+        return reply
+          .status(400)
+          .send({ error: 'fecha, concepto, and lineas are required' });
       }
 
       try {
-        const bookId = await resolveBookId(userId);
-        const asiento = await asientoService.crearAsiento(bookId, userId, {
-          fecha,
-          descripcion,
-          lineas,
+        const bookId = await getBookId(userId);
+        if (!bookId) {
+          return reply.status(404).send({ error: 'Book not found' });
+        }
+
+        const result = await accountingService.createEntry({
+          bookId,
+          fecha: new Date(body.fecha),
+          concepto: body.concepto,
+          lineas: normalizeLines(body.lineas),
+          idempotencyKey,
         });
 
-        return reply.status(201).send({ asiento });
+        return reply.status(201).send(result);
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to create entry';
-        if (
-          message.startsWith('Unbalanced entry') ||
-          message.startsWith('Account') ||
-          message.startsWith('Fiscal year') ||
-          message.startsWith('Entry must have')
-        ) {
+        if (message.startsWith('Invalid line') || message.includes('balanced') || message.includes('at least two')) {
           return reply.status(400).send({ error: message });
+        }
+        if (message.includes('closed')) {
+          return reply.status(400).send({ error: message });
+        }
+        if (message.includes('not found')) {
+          return reply.status(404).send({ error: message });
         }
         request.log.error(err, 'Failed to create entry');
         return reply.status(500).send({ error: 'Failed to create entry' });
@@ -91,17 +110,26 @@ export function registerEntryRoutes(
     },
   );
 
-  // GET /api/entries — list entries with optional date range
+  // ---------------------------------------------------------------------------
+  // GET /api/entries — list entries
+  // ---------------------------------------------------------------------------
+
   app.get(
     '/api/entries',
     { preHandler: requireAuth },
     async (request, reply) => {
       const userId = request.userId!;
-      const { desde, hasta } = request.query as ListEntriesQuery;
+      const query = request.query as { año?: string; mes?: string };
+      const año = query.año ? parseInt(query.año, 10) : undefined;
+      const mes = query.mes ? parseInt(query.mes, 10) : undefined;
 
       try {
-        const bookId = await resolveBookId(userId);
-        const entries = await asientoService.listarAsientos(bookId, userId, desde, hasta);
+        const bookId = await getBookId(userId);
+        if (!bookId) {
+          return reply.status(404).send({ error: 'Book not found' });
+        }
+
+        const entries = await accountingService.listEntries(bookId, año, mes);
 
         return reply.status(200).send({ entries });
       } catch (err) {
@@ -111,7 +139,10 @@ export function registerEntryRoutes(
     },
   );
 
-  // GET /api/entries/:id — get entry by id
+  // ---------------------------------------------------------------------------
+  // GET /api/entries/:id — get entry with lines
+  // ---------------------------------------------------------------------------
+
   app.get(
     '/api/entries/:id',
     { preHandler: requireAuth },
@@ -120,54 +151,109 @@ export function registerEntryRoutes(
       const { id } = request.params as { id: string };
 
       try {
-        const bookId = await resolveBookId(userId);
-        const asiento = await asientoService.obtenerAsiento(id, userId, bookId);
-        return reply.status(200).send({ asiento });
-      } catch (err) {
-        const message = err instanceof Error ? err.message : 'Failed to get entry';
-        if (message === 'Entry not found') {
-          return reply.status(404).send({ error: message });
+        const bookId = await getBookId(userId);
+        if (!bookId) {
+          return reply.status(404).send({ error: 'Book not found' });
         }
+
+        const result = await accountingService.getEntry(id, bookId);
+        if (!result) {
+          return reply.status(404).send({ error: 'Entry not found' });
+        }
+
+        return reply.status(200).send(result);
+      } catch (err) {
         request.log.error(err, 'Failed to get entry');
         return reply.status(500).send({ error: 'Failed to get entry' });
       }
     },
   );
 
-  // PUT /api/entries/:id — update entry (FR-009/010)
+  // ---------------------------------------------------------------------------
+  // PUT /api/entries/:id — update entry
+  // ---------------------------------------------------------------------------
+
   app.put(
     '/api/entries/:id',
     { preHandler: requireAuth },
     async (request, reply) => {
       const userId = request.userId!;
       const { id } = request.params as { id: string };
-      const { descripcion, lineas } = request.body as UpdateEntryBody;
-
-      if (!descripcion || !lineas || lineas.length === 0) {
-        return reply.status(400).send({ error: 'descripcion and lineas are required' });
-      }
+      const body = request.body as UpdateEntryBody;
 
       try {
-        const asiento = await asientoService.editarAsiento(id, userId, {
-          descripcion,
-          lineas,
-        });
+        const bookId = await getBookId(userId);
+        if (!bookId) {
+          return reply.status(404).send({ error: 'Book not found' });
+        }
 
-        return reply.status(200).send({ asiento });
+        const result = await accountingService.updateEntry(
+          id,
+          bookId,
+          {
+            ...(body.fecha !== undefined && { fecha: new Date(body.fecha) }),
+            ...(body.concepto !== undefined && { concepto: body.concepto }),
+            ...(body.lineas !== undefined && {
+              lineas: normalizeLines(body.lineas),
+            }),
+          },
+          userId,
+        );
+
+        return reply.status(200).send(result);
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to update entry';
-        if (message === 'Entry not found') {
-          return reply.status(404).send({ error: message });
-        }
-        if (
-          message.startsWith('Cannot modify entry') ||
-          message.startsWith('Unbalanced entry') ||
-          message.startsWith('Account')
-        ) {
+        if (message.includes('closed')) {
           return reply.status(400).send({ error: message });
+        }
+        if (message.includes('voided')) {
+          return reply.status(400).send({ error: message });
+        }
+        if (message.startsWith('Invalid line') || message.includes('balanced') || message.includes('at least two')) {
+          return reply.status(400).send({ error: message });
+        }
+        if (message.includes('not found')) {
+          return reply.status(404).send({ error: message });
         }
         request.log.error(err, 'Failed to update entry');
         return reply.status(500).send({ error: 'Failed to update entry' });
+      }
+    },
+  );
+
+  // ---------------------------------------------------------------------------
+  // POST /api/entries/:id/void — void entry
+  // ---------------------------------------------------------------------------
+
+  app.post(
+    '/api/entries/:id/void',
+    { preHandler: requireAuth },
+    async (request, reply) => {
+      const userId = request.userId!;
+      const { id } = request.params as { id: string };
+
+      try {
+        const bookId = await getBookId(userId);
+        if (!bookId) {
+          return reply.status(404).send({ error: 'Book not found' });
+        }
+
+        const result = await accountingService.voidEntry(id, bookId);
+
+        return reply.status(200).send(result);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to void entry';
+        if (message.includes('already voided')) {
+          return reply.status(400).send({ error: message });
+        }
+        if (message.includes('closed')) {
+          return reply.status(400).send({ error: message });
+        }
+        if (message.includes('not found')) {
+          return reply.status(404).send({ error: message });
+        }
+        request.log.error(err, 'Failed to void entry');
+        return reply.status(500).send({ error: 'Failed to void entry' });
       }
     },
   );

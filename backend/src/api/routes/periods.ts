@@ -1,77 +1,100 @@
 /**
- * Periods routes: annual period close/reopen.
- *
- * POST /api/periods/:year/close   — close fiscal year (FR-005)
- * POST /api/periods/:year/reopen  — reopen fiscal year (FR-007)
+ * Period routes: fiscal period management.
  */
 
 import type { FastifyInstance } from 'fastify';
 import type { AuthApplicationService } from '../../application/auth-service.js';
-import type { PeriodoApplicationService } from '../../application/periodo-service.js';
-import type { BookRepository } from '../../infrastructure/repositories/book-repo.js';
+import type { AccountingService } from '../../application/accounting-service.js';
 import { createAuthMiddleware } from '../middleware/auth.js';
+import { prisma } from '../../infrastructure/database.js';
 
 export function registerPeriodRoutes(
   app: FastifyInstance,
   authService: AuthApplicationService,
-  periodoService: PeriodoApplicationService,
-  bookRepo: BookRepository,
+  accountingService: AccountingService,
 ): void {
   const requireAuth = createAuthMiddleware(authService);
 
-  /** Helper to resolve bookId from the authenticated user's session userId. */
-  async function resolveBookId(userId: string): Promise<string> {
-    const book = await bookRepo.findByUserId(userId);
-    if (!book) {
-      throw new Error('Book not found for this user');
-    }
-    return book.id;
+  async function getBookId(userId: string): Promise<string | null> {
+    const book = await prisma.book.findFirst({
+      where: { userId },
+      select: { id: true },
+    });
+    return book?.id ?? null;
   }
 
-  // POST /api/periods/:year/close — close a fiscal year
+  // ---------------------------------------------------------------------------
+  // POST /api/periods/:año/close — close period
+  // ---------------------------------------------------------------------------
+
   app.post(
-    '/api/periods/:year/close',
+    '/api/periods/:año/close',
     { preHandler: requireAuth },
     async (request, reply) => {
       const userId = request.userId!;
-      const { year } = request.params as { year: string };
-      const año = parseInt(year, 10);
+      const { año } = request.params as { año: string };
+      const anioNum = parseInt(año, 10);
 
-      if (isNaN(año) || año < 1900 || año > 2100) {
-        return reply.status(400).send({ error: 'Invalid year' });
+      if (isNaN(anioNum)) {
+        return reply.status(400).send({ error: 'Invalid year parameter' });
       }
 
       try {
-        const bookId = await resolveBookId(userId);
-        const periodo = await periodoService.cerrarPeriodo(bookId, año, userId);
+        const bookId = await getBookId(userId);
+        if (!bookId) {
+          return reply.status(404).send({ error: 'Book not found' });
+        }
 
-        return reply.status(200).send({ periodo });
+        const period = await accountingService.closePeriod(bookId, anioNum);
+
+        return reply.status(200).send({ period });
       } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to close period';
+        if (message.includes('already closed')) {
+          return reply.status(400).send({ error: message });
+        }
+        if (message.includes('does not exist')) {
+          return reply.status(404).send({ error: message });
+        }
         request.log.error(err, 'Failed to close period');
         return reply.status(500).send({ error: 'Failed to close period' });
       }
     },
   );
 
-  // POST /api/periods/:year/reopen — reopen a fiscal year
+  // ---------------------------------------------------------------------------
+  // POST /api/periods/:año/reopen — reopen period
+  // ---------------------------------------------------------------------------
+
   app.post(
-    '/api/periods/:year/reopen',
+    '/api/periods/:año/reopen',
     { preHandler: requireAuth },
     async (request, reply) => {
       const userId = request.userId!;
-      const { year } = request.params as { year: string };
-      const año = parseInt(year, 10);
+      const { año } = request.params as { año: string };
+      const anioNum = parseInt(año, 10);
 
-      if (isNaN(año) || año < 1900 || año > 2100) {
-        return reply.status(400).send({ error: 'Invalid year' });
+      if (isNaN(anioNum)) {
+        return reply.status(400).send({ error: 'Invalid year parameter' });
       }
 
       try {
-        const bookId = await resolveBookId(userId);
-        const periodo = await periodoService.reabrirPeriodo(bookId, año, userId);
+        const bookId = await getBookId(userId);
+        if (!bookId) {
+          return reply.status(404).send({ error: 'Book not found' });
+        }
 
-        return reply.status(200).send({ periodo });
+        const period = await accountingService.reopenPeriod(bookId, anioNum);
+
+        return reply.status(200).send({ period });
       } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to reopen period';
+        if (message.includes('already open')) {
+          return reply.status(400).send({ error: message });
+        }
+        if (message.includes('does not exist')) {
+          return reply.status(404).send({ error: message });
+        }
         request.log.error(err, 'Failed to reopen period');
         return reply.status(500).send({ error: 'Failed to reopen period' });
       }

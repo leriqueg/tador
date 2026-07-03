@@ -4,11 +4,12 @@
  * digital wallets, or bridge/transfer accounts.
  */
 
-export type TipoCuenta = 'bank' | 'card' | 'wallet' | 'bridge';
+export type TipoCuenta = 'bank' | 'card' | 'wallet' | 'bridge' | 'incomeCategory' | 'expenseCategory';
 
 export interface CuentaUsuario {
   id: string;
   userId: string;
+  codigo: string | null;
   globalId: string | null;
   entidadId: string | null;
   tipoCuenta: TipoCuenta;

@@ -11,6 +11,7 @@ import { createEmailService } from './infrastructure/services/email-service.js';
 import { createSessionService } from './infrastructure/services/session-service.js';
 import { createAuthApplicationService } from './application/auth-service.js';
 import { createBookApplicationService } from './application/book-service.js';
+import { createAccountingService } from './application/accounting-service.js';
 import { registerAuthRoutes } from './api/routes/auth.js';
 import { registerVerificationRoutes } from './api/routes/verification.js';
 import { registerRecoveryRoutes } from './api/routes/recovery.js';
@@ -19,6 +20,10 @@ import { registerChartRoutes } from './api/routes/chart.js';
 import { registerAccountRoutes } from './api/routes/accounts.js';
 import { registerEntityRoutes } from './api/routes/entities.js';
 import { registerTagRoutes } from './api/routes/tags.js';
+import { registerEntryRoutes } from './api/routes/entries.js';
+import { registerBalanceRoutes } from './api/routes/balances.js';
+import { registerReportRoutes } from './api/routes/reports.js';
+import { registerPeriodRoutes } from './api/routes/periods.js';
 
 const PORT = parseInt(process.env.PORT || '3000', 10);
 const HOST = process.env.HOST || '0.0.0.0';
@@ -69,6 +74,8 @@ export async function buildApp(opts?: { logger?: boolean | object }) {
     return user !== null && user !== undefined && user.verifiedAt !== null;
   });
 
+  const accountingService = createAccountingService();
+
   // Routes
   registerAuthRoutes(app, authService);
   registerVerificationRoutes(app, authService);
@@ -78,6 +85,10 @@ export async function buildApp(opts?: { logger?: boolean | object }) {
   registerAccountRoutes(app, authService);
   registerEntityRoutes(app, authService);
   registerTagRoutes(app, authService);
+  registerEntryRoutes(app, authService, accountingService);
+  registerBalanceRoutes(app, authService, accountingService);
+  registerReportRoutes(app, authService, accountingService);
+  registerPeriodRoutes(app, authService, accountingService);
 
   return app;
 }

@@ -48,7 +48,7 @@ describe('5.1 — Chart activation (FR-009/010)', () => {
     const app = await createTestApp();
     const cookies = await registerAndVerify(app, 'chart-51@test.com');
 
-    // GET /api/chart — expect all 27 seeded accounts, no activations
+    // GET /api/chart — expect all 40 seeded groups + 64 postable = 104 accounts, no activations
     const chartRes = await app.inject({
       method: 'GET',
       url: '/api/chart',
@@ -56,7 +56,7 @@ describe('5.1 — Chart activation (FR-009/010)', () => {
     });
     expect(chartRes.statusCode).toBe(200);
     const chartBody = chartRes.json();
-    expect(chartBody.chart).toHaveLength(100);
+    expect(chartBody.chart).toHaveLength(104);
     expect(chartBody.activations).toHaveLength(0);
 
     // Get a postable account (esPostable: true) to activate — not a group
@@ -75,7 +75,7 @@ describe('5.1 — Chart activation (FR-009/010)', () => {
     expect(activation.activa).toBe(true);
     expect(activation.userId).toBeDefined();
 
-    // GET /api/chart again — activation now appears, chart still has 100 entries
+    // GET /api/chart again — activation now appears, chart still has 104 entries
     const chartRes2 = await app.inject({
       method: 'GET',
       url: '/api/chart',
@@ -83,7 +83,7 @@ describe('5.1 — Chart activation (FR-009/010)', () => {
     });
     expect(chartRes2.statusCode).toBe(200);
     const chartBody2 = chartRes2.json();
-    expect(chartBody2.chart).toHaveLength(100);
+    expect(chartBody2.chart).toHaveLength(104);
     expect(chartBody2.activations).toHaveLength(1);
     expect(chartBody2.activations[0].globalId).toBe(firstChartId);
 

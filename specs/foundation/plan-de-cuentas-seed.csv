@@ -1,0 +1,136 @@
+# Plan de Cuentas Global — TADOR
+# ==============================
+# Edita este archivo para modificar el catálogo de cuentas que se siembra en la DB.
+# El seed script (backend/prisma/seed/catalogos.ts) lee este archivo.
+#
+# Columnas:
+#   codigo       — Código contable único. Primer dígito = clasificación:
+#                  1 = Activo, 2 = Pasivo, 4 = Ingreso, 6 = Gasto
+#   nombre       — Nombre visible de la cuenta
+#   esPostable   — true = puede usarse en líneas de asiento, false = solo agrupadora
+#   codigoPadre  — Código del grupo al que pertenece (vacío si es raíz)
+#   descripcion  — Texto explicativo opcional
+#   naturaleza   — Clasificación fina (group, income_category, expense_category, etc.)
+#   clasificacion— asset, liability, income, expense
+#   legacyId     — ID del CSV legacy original (solo referencia, no se usa en seed)
+#
+# Reglas:
+#   - Las cuentas con esPostable=false son agrupadoras (no reciben asientos directos)
+#   - Las cuentas con esPostable=true son las que se usan en los asientos
+#   - Una cuenta postable DEBE tener codigoPadre apuntando a un grupo existente
+#   - No borres filas sin antes verificar que ningún código padre las referencia
+#   - Puedes agregar, renombrar, re-clasificar o eliminar filas libremente
+#   - El seed es idempotente: correlo cuantas veces quieras
+
+codigo,nombre,esPostable,codigoPadre,naturaleza,clasificacion,legacyId
+# ── ACTIVOS (1) ─────────────────────────────────────────────────────────────
+11110000,Honorarios por Cobrar,false,,group,asset,3
+11120000,Ahorros Bancos y Cooperativas,false,,group,asset,6
+11130000,Efectivo Corriente,false,,group,asset,12
+11220000,Inversiones,false,,group,asset,16
+11320000,Cuentas Personales por Cobrar,false,,group,asset,18
+
+# ── PASIVOS (2) ─────────────────────────────────────────────────────────────
+21200000,Honorarios por Pagar,false,,group,liability,32
+21300000,Obligaciones Adquiridas,false,,group,liability,35
+21310000,Creditos de Consumo,false,,group,liability,173
+21400000,Consumos por Pagar,false,,group,liability,42
+21600000,Impuestos por Pagar,false,,group,liability,51
+22130000,Prestamos,false,,group,liability,53
+
+# ── INGRESOS (4) ────────────────────────────────────────────────────────────
+41000000,Ingresos Activos,false,,group,income,55
+41000001,Nómina, Sueldo, Salario,true,41000000,income_category,income,56
+41000002,Prestación social,true,41000000,income_category,income,57
+41000003,Trabajos Ocasionales,true,41000000,income_category,income,58
+41000004,Proveedores,true,41000000,income_category,income,59
+41100000,Ingresos Pasivos,false,,group,income,61
+41100002,Rentas de Alquileres,true,41100000,income_category,income,62
+41100004,Rentas de Alquileres,true,41100000,income_category,income,64
+41100005,Pensión Alimenticia,true,41100000,income_category,income,65
+41200000,Otros Ingresos,false,,group,income,66
+41200001,Trabajos Ocasionales,true,41200000,income_category,income,67
+41200002,Otros Ingresos,true,41200000,income_category,income,68
+41200003,Devolución de Impuestos,true,41200000,income_category,income,69
+41200004,Subvenciones,true,41200000,income_category,income,70
+41200005,Devolución de Impuestos,true,41200000,income_category,income,71
+41200006,Donativo o Regalo,true,41200000,income_category,income,72
+
+# ── GASTOS (6) ──────────────────────────────────────────────────────────────
+61115000,Vivienda,false,,group,expense,73
+61115001,Alquiler Vivienda,true,61115000,expense_category,expense,74
+61116000,Servicios del Hogar,false,,group,expense,999
+61116002,Servicio doméstico,true,61116000,expense_category,expense,75
+61116003,Lavandería,true,61116000,expense_category,expense,76
+61150000,Salud y Estilo de Vida,false,,group,expense,77
+61150001,Farmacia,true,61150000,expense_category,expense,78
+61150003,Dentista,true,61150000,expense_category,expense,79
+61150004,Veterinario Mascotas,true,61150000,expense_category,expense,80
+61150005,Belleza, peluquería, spa,true,61150000,expense_category,expense,81
+61150006,Clubs o Gimnasios,true,61150000,expense_category,expense,82
+61150007,Médicos, Clínicas,true,61150000,expense_category,expense,83
+61150008,Otros Gastos en Salud,true,61150000,expense_category,expense,84
+61150009,Óptica,true,61150000,expense_category,expense,85
+61160000,Cursos y Capacitaciones,false,,group,expense,86
+61160001,Educación,true,61160000,expense_category,expense,87
+61160002,Material Escolar,true,61160000,expense_category,expense,88
+61160003,Libros, Revistas y Prensa,true,61160000,expense_category,expense,89
+61160004,Clases de Violín,true,61160000,expense_category,expense,90
+61211000,Servicios Básicos,false,,group,expense,91
+61211001,Agua,true,61211000,expense_category,expense,92
+61211002,Energía,true,61211000,expense_category,expense,93
+61213000,Donaciones y Regalos,false,,group,expense,999
+61213001,Donativos,true,61213000,expense_category,expense,94
+61213002,Regalos,true,61213000,expense_category,expense,95
+61240000,Alimentación,false,,group,expense,96
+61240001,Supermercado, Alimentación,true,61240000,expense_category,expense,97
+61240002,Restaurantes y Bares,true,61240000,expense_category,expense,98
+61240004,Almuerzos, Desayunos Diarios,true,61240000,expense_category,expense,99
+61260000,Transporte y Vehículos,false,,group,expense,100
+61260001,Transporte,true,61260000,expense_category,expense,101
+61260002,Taxis,true,61260000,expense_category,expense,102
+61270000,Vehículos,false,,group,expense,999
+61270003,Combustible,true,61270000,expense_category,expense,103
+61280000,Gastos del Hogar,false,,group,expense,104
+61280001,Electrodomésticos, Electrónica e Informática,true,61280000,expense_category,expense,105
+61280002,Reformas y Reparaciones,true,61280000,expense_category,expense,106
+61280003,Menaje y Ferretería,true,61280000,expense_category,expense,107
+61280004,Mantenimiento y Reparaciones,true,61280000,expense_category,expense,108
+61280005,Electrodomésticos, Electrónica e Informática,true,61280000,expense_category,expense,109
+61280006,Ropa y complementos,true,61280000,expense_category,expense,110
+62100000,Gastos Financieros,false,,group,expense,111
+62130000,Servicios Financieros,false,,group,expense,999
+62130001,Comisiones Bancarias,true,62130000,expense_category,expense,112
+62130002,Intereses por Financiamiento,true,62130000,expense_category,expense,113
+62130003,Multas,true,62130000,expense_category,expense,114
+63000000,Impuestos y Aranceles,false,,group,expense,115
+63000001,Impuestos,true,63000000,expense_category,expense,116
+63000002,Trámites Públicos,true,63000000,expense_category,expense,117
+63000003,Pensión Alimenticia,true,63000000,expense_category,expense,118
+63000004,IESS Aportaciones,true,63000000,expense_category,expense,171
+63000005,Impuestos Consumo Exterior,true,63000000,expense_category,expense,180
+63400000,Otros Gastos,false,,group,expense,119
+63400001,Donativos,true,63400000,expense_category,expense,120
+63400002,No sé o no quiero saber,true,63400000,expense_category,expense,121
+63400003,Gastos Anteriores,true,63400000,expense_category,expense,144
+63400004,Primas de Seguros,true,63400000,expense_category,expense,190
+64000000,Diversiones y pasatiempos,false,,group,expense,122
+64000002,Loterías y Apuestas,true,64000000,expense_category,expense,124
+64000003,Alojamiento en Hoteles,true,64000000,expense_category,expense,125
+64000004,Espectáculos, Cine, Teatro,true,64000000,expense_category,expense,126
+64000005,Diversiones Alcohólicas,true,64000000,expense_category,expense,127
+64000006,Tabaco,true,64000000,expense_category,expense,128
+64000007,Paseos,true,64000000,expense_category,expense,129
+64000008,Fiestas y Eventos,true,64000000,expense_category,expense,142
+64000009,Juegos y Apps de Ocio,true,64000000,expense_category,expense,175
+64000010,Membresías Online para Ocio y Diversión,true,64000000,expense_category,expense,176
+64100000,Servicios Hogar,false,,group,expense,130
+64100001,Teléfono e Internet,true,64100000,expense_category,expense,131
+64100002,Música y Apps,true,64100000,expense_category,expense,132
+64100003,Servicios online,true,64100000,expense_category,expense,133
+64200000,Servicios Profesionales,false,,group,expense,134
+64200001,Asesores,true,64200000,expense_category,expense,135
+64200003,Deudas Anteriores,true,64200000,expense_category,expense,137
+64200004,No sé o no quiero saber,true,64200000,expense_category,expense,138
+64200006,Proveedores,true,64200000,expense_category,expense,140
+64200007,Herramientas de Trabajo,true,64200000,expense_category,expense,174

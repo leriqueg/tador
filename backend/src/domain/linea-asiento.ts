@@ -87,3 +87,53 @@ export function buildReversalLines(
     credito: l.debito,
   }));
 }
+
+/**
+ * Resolve account display info from a LineaAsiento Prisma row.
+ * Handles both CuentaGlobal (direct) and CuentaUsuario (via cuenta.global) paths.
+ *
+ * Usage:
+ * ```typescript
+ * const { nombreCuenta, codigoCuenta, tipoCuenta } = resolveCuenta(linea);
+ * ```
+ */
+export interface CuentaResolved {
+  nombreCuenta: string;
+  codigoCuenta: string;
+  tipoCuenta: 'global' | 'usuario';
+}
+
+export function resolveCuenta(linea: {
+  cuentaId?: string | null;
+  cuentaGlobalId?: string | null;
+  cuenta?: { nombre: string; codigo?: string | null; global?: { codigo: string; nombre: string } | null } | null;
+  cuentaGlobal?: { codigo: string; nombre: string } | null;
+}): CuentaResolved {
+  // Path 1: Direct CuentaGlobal reference (N3=0 accounts like "Supermercado")
+  if (linea.cuentaGlobalId && linea.cuentaGlobal) {
+    return {
+      nombreCuenta: linea.cuentaGlobal.nombre,
+      codigoCuenta: linea.cuentaGlobal.codigo,
+      tipoCuenta: 'global',
+    };
+  }
+
+  // Path 2: CuentaUsuario with a link to CuentaGlobal (financial account with bank/card group)
+  if (linea.cuentaId && linea.cuenta) {
+    if (linea.cuenta.global) {
+      return {
+        nombreCuenta: linea.cuenta.nombre,
+        codigoCuenta: linea.cuenta.global.codigo,
+        tipoCuenta: 'usuario',
+      };
+    }
+    // Path 3: CuentaUsuario without global link (bridge accounts)
+    return {
+      nombreCuenta: linea.cuenta.nombre,
+      codigoCuenta: linea.cuenta.codigo ?? '',
+      tipoCuenta: 'usuario',
+    };
+  }
+
+  return { nombreCuenta: '', codigoCuenta: '', tipoCuenta: 'usuario' };
+}

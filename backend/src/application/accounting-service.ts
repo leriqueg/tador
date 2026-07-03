@@ -12,6 +12,7 @@ import {
   validateLinea,
   validateBalance,
   buildReversalLines,
+  resolveCuenta,
 } from '../domain/linea-asiento.js';
 import type { AsientoVersion } from '../domain/asiento-version.js';
 import type { PeriodoContable } from '../domain/periodo-contable.js';
@@ -928,27 +929,13 @@ export function createAccountingService(): AccountingService {
 
       for (const asiento of asientos) {
         for (const linea of asiento.lineas) {
-          // Determine the CuentaGlobal codigo from either path
-          let codigo = '';
-          let globalId = '';
-          let nombre = '';
-
-          if (linea.cuentaGlobalId && linea.cuentaGlobal) {
-            // Direct CuentaGlobal reference
-            codigo = linea.cuentaGlobal.codigo;
-            globalId = linea.cuentaGlobal.id;
-            nombre = linea.cuentaGlobal.nombre;
-          } else if (linea.cuentaId && linea.cuenta?.global) {
-            // Via CuentaUsuario → CuentaGlobal
-            codigo = linea.cuenta.global.codigo;
-            globalId = linea.cuenta.global.id;
-            nombre = linea.cuenta.global.nombre;
-          } else if (linea.cuentaId && linea.cuenta) {
-            // CuentaUsuario without global link — use user account name
-            codigo = '';
-            globalId = linea.cuenta.id;
-            nombre = linea.cuenta.nombre;
-          }
+          const { nombreCuenta, codigoCuenta } = resolveCuenta(linea);
+          const codigo = codigoCuenta;
+          const nombre = nombreCuenta;
+          // globalId for grouping — prefer CuentaGlobal id
+          const globalId = linea.cuentaGlobalId
+            ? (linea.cuentaGlobal?.id ?? linea.cuenta?.global?.id ?? '')
+            : (linea.cuenta?.id ?? '');
 
           const tipo = classifyAccount(codigo);
           if (tipo === 'unknown' && !codigo) continue; // skip uncategorised
@@ -1035,24 +1022,13 @@ export function createAccountingService(): AccountingService {
 
       for (const asiento of asientos) {
         for (const linea of asiento.lineas) {
-          // Determine the CuentaGlobal codigo from either path
-          let codigo = '';
-          let globalId = '';
-          let nombre = '';
-
-          if (linea.cuentaGlobalId && linea.cuentaGlobal) {
-            codigo = linea.cuentaGlobal.codigo;
-            globalId = linea.cuentaGlobal.id;
-            nombre = linea.cuentaGlobal.nombre;
-          } else if (linea.cuentaId && linea.cuenta?.global) {
-            codigo = linea.cuenta.global.codigo;
-            globalId = linea.cuenta.global.id;
-            nombre = linea.cuenta.global.nombre;
-          } else if (linea.cuentaId && linea.cuenta) {
-            codigo = '';
-            globalId = linea.cuenta.id;
-            nombre = linea.cuenta.nombre;
-          }
+          const { nombreCuenta, codigoCuenta } = resolveCuenta(linea);
+          const codigo = codigoCuenta;
+          const nombre = nombreCuenta;
+          // globalId for grouping — prefer CuentaGlobal id
+          const globalId = linea.cuentaGlobalId
+            ? (linea.cuentaGlobal?.id ?? linea.cuenta?.global?.id ?? '')
+            : (linea.cuenta?.id ?? '');
 
           const tipo = classifyAccount(codigo);
           if (tipo === 'unknown' && !codigo) continue;

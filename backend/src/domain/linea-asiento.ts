@@ -6,20 +6,36 @@
 export interface LineaAsiento {
   id: string;
   asientoId: string;
-  cuentaId: string;
+  cuentaId: string | null;       // CuentaUsuario reference (financial accounts)
+  cuentaGlobalId: string | null; // CuentaGlobal reference (shared categories)
   debito: number; // > 0 for debit
   credito: number; // > 0 for credit
   createdAt: Date;
 }
 
 /**
- * Validate a single line: exactly one of debito or credito must be > 0.
+ * Validate a single line:
+ * - Exactly one of cuentaId or cuentaGlobalId must be set (never both, never neither).
+ * - Exactly one of debito or credito must be > 0.
  * Returns an error message string, or null if valid.
  */
 export function validateLinea(linea: {
+  cuentaId?: string | null;
+  cuentaGlobalId?: string | null;
   debito: number;
   credito: number;
 }): string | null {
+  // Account reference validation
+  const hasCuenta = Boolean(linea.cuentaId);
+  const hasGlobal = Boolean(linea.cuentaGlobalId);
+  if (hasCuenta && hasGlobal) {
+    return 'Line cannot have both cuentaId and cuentaGlobalId';
+  }
+  if (!hasCuenta && !hasGlobal) {
+    return 'Line must have either cuentaId or cuentaGlobalId';
+  }
+
+  // Amount validation
   if (linea.debito > 0 && linea.credito > 0) {
     return 'Line cannot have both debito and credito';
   }
@@ -52,12 +68,21 @@ export function validateBalance(
 
 /**
  * Build reversal lines by swapping debito/credito on each original line.
+ * Preserves both cuentaId and cuentaGlobalId references.
  */
+export interface ReversalLine {
+  cuentaId: string | null;
+  cuentaGlobalId: string | null;
+  debito: number;
+  credito: number;
+}
+
 export function buildReversalLines(
   lineas: LineaAsiento[],
-): Array<{ cuentaId: string; debito: number; credito: number }> {
+): ReversalLine[] {
   return lineas.map((l) => ({
     cuentaId: l.cuentaId,
+    cuentaGlobalId: l.cuentaGlobalId,
     debito: l.credito,
     credito: l.debito,
   }));

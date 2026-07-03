@@ -107,6 +107,7 @@ model CuentaGlobal {
   children        CuentaGlobal[]            @relation("GlobalAccountHierarchy")
   cuentasUsuario  CuentaUsuario[]
   activaciones    ActivacionCuentaGlobal[]
+  lineas          LineaAsiento[]
 
   @@map("cuentas_globales")
 }
@@ -197,15 +198,17 @@ model Asiento {
 }
 
 model LineaAsiento {
-  id        String   @id @default(cuid())
-  asientoId String
-  cuentaId  String
-  debito    Decimal  @default(0)
-  credito   Decimal  @default(0)
-  createdAt DateTime @default(now())
+  id             String         @id @default(cuid())
+  asientoId      String
+  cuentaId       String?
+  cuentaGlobalId String?
+  debito         Decimal        @default(0)
+  credito        Decimal        @default(0)
+  createdAt      DateTime       @default(now())
 
-  asiento Asiento         @relation(fields: [asientoId], references: [id], onDelete: Cascade)
-  cuenta  CuentaUsuario   @relation(fields: [cuentaId], references: [id])
+  asiento      Asiento        @relation(fields: [asientoId], references: [id], onDelete: Cascade)
+  cuenta       CuentaUsuario? @relation(fields: [cuentaId], references: [id])
+  cuentaGlobal CuentaGlobal?  @relation(fields: [cuentaGlobalId], references: [id])
 
   @@map("lineas_asiento")
 }

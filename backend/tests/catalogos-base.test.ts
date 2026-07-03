@@ -56,11 +56,13 @@ describe('5.1 — Chart activation (FR-009/010)', () => {
     });
     expect(chartRes.statusCode).toBe(200);
     const chartBody = chartRes.json();
-    expect(chartBody.chart).toHaveLength(27);
+    expect(chartBody.chart).toHaveLength(100);
     expect(chartBody.activations).toHaveLength(0);
 
-    // Activate the first global account
-    const firstChartId = chartBody.chart[0].id;
+    // Get a postable account (esPostable: true) to activate — not a group
+    const postable = chartBody.chart.find((c: any) => c.esPostable === true);
+    expect(postable).toBeDefined();
+    const firstChartId = postable.id;
     const activateRes = await app.inject({
       method: 'POST',
       url: `/api/chart/${firstChartId}/activate`,
@@ -73,7 +75,7 @@ describe('5.1 — Chart activation (FR-009/010)', () => {
     expect(activation.activa).toBe(true);
     expect(activation.userId).toBeDefined();
 
-    // GET /api/chart again — activation now appears, chart still has 27 entries
+    // GET /api/chart again — activation now appears, chart still has 100 entries
     const chartRes2 = await app.inject({
       method: 'GET',
       url: '/api/chart',
@@ -81,7 +83,7 @@ describe('5.1 — Chart activation (FR-009/010)', () => {
     });
     expect(chartRes2.statusCode).toBe(200);
     const chartBody2 = chartRes2.json();
-    expect(chartBody2.chart).toHaveLength(27);
+    expect(chartBody2.chart).toHaveLength(100);
     expect(chartBody2.activations).toHaveLength(1);
     expect(chartBody2.activations[0].globalId).toBe(firstChartId);
 

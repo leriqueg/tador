@@ -9,7 +9,8 @@ import { createAuthMiddleware } from '../middleware/auth.js';
 import { prisma } from '../../infrastructure/database.js';
 
 interface CreateEntryLineBody {
-  cuentaId: string;
+  cuentaId?: string;
+  cuentaGlobalId?: string;
   debito?: number;
   credito?: number;
 }
@@ -48,9 +49,10 @@ export function registerEntryRoutes(
 
   function normalizeLines(
     lineas: CreateEntryLineBody[],
-  ): Array<{ cuentaId: string; debito: number; credito: number }> {
+  ): Array<{ cuentaId?: string; cuentaGlobalId?: string; debito: number; credito: number }> {
     return lineas.map((l) => ({
       cuentaId: l.cuentaId,
+      cuentaGlobalId: l.cuentaGlobalId,
       debito: l.debito ?? 0,
       credito: l.credito ?? 0,
     }));

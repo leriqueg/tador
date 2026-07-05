@@ -48,6 +48,7 @@ model User {
   entidades        Entidad[]
   tags             Tag[]
   activaciones     ActivacionCuentaGlobal[]
+  apuntes          Apunte[]
 
   @@map("users")
 }
@@ -197,6 +198,7 @@ model Asiento {
   reversos        Asiento[]       @relation("Reversa")
   lineas          LineaAsiento[]
   versiones       AsientoVersion[]
+  apuntes         Apunte[]
 
   @@map("asientos")
 }
@@ -228,6 +230,21 @@ model AsientoVersion {
   asiento Asiento @relation(fields: [asientoId], references: [id], onDelete: Cascade)
 
   @@map("asiento_versions")
+}
+
+model Apunte {
+  id           String   @id @default(cuid())
+  templateCode String?
+  date         DateTime
+  concept      String
+  amount       Decimal
+  asientoId    String   @unique
+  asiento      Asiento  @relation(fields: [asientoId], references: [id])
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  createdAt    DateTime @default(now())
+
+  @@map("apuntes")
 }
 
 model PeriodoContable {

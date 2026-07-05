@@ -50,7 +50,7 @@ El backend se desarrollará primero, con TDD. En una segunda iteración se traba
 
 - TADOR debe servir a usuarios de hogar que solo quieren controlar su dinero sin aprender contabilidad.
 - TADOR debe permitir crecer hacia un uso profesional independiente sin migrar a otro producto.
-- Modo Hogar y Modo PRO no son, por ahora, conceptos económicos o de pricing: son modos de uso y complejidad.
+- Modo Hogar y Modo PRO no son, por ahora, conceptos económicos o de pricing: son niveles de expectativa del usuario y de complejidad de la UI. En el futuro el modo podría convertirse en factor de valor por suscripción, sin cambiar el modelo de datos.
 - Los mismos datos deben poder sobrevivir al cambio de modo. La diferencia está en opciones visibles, densidad de campos, informes y plantillas disponibles.
 - La contabilidad correcta debe estar en el motor; la experiencia simple debe estar en la UI.
 - No se quiere inventar una contabilidad nueva: se quieren plantillas y métodos de captura sencillos que produzcan registros contables apropiados.
@@ -135,7 +135,7 @@ La transición Hogar -> PRO debe permitir que una persona que empieza un negocio
 - Tags o etiquetas simples para contexto no estructurado.
 - Cuentas puente/bypass para acumular y controlar gastos, proyectos o contextos.
 - Saldos actuales por cuenta en Modo Hogar y Modo PRO.
-- Dashboard PYG sencillo por ejercicio como único reporte obligatorio del MVP.
+- Dashboard con panel PYG por ejercicio y panel de posición (disponible, por cobrar, por pagar) como reporte obligatorio del MVP.
 - Cierre anual con opción de reapertura para modificaciones.
 - UI mobile-first, pero compatible con desktop para el MVP.
 - Asistente IA v0 en Modo Hogar, después de backend y frontend, para interpretar frases simples y sugerir plantillas.
@@ -144,8 +144,8 @@ La transición Hogar -> PRO debe permitir que una persona que empieza un negocio
 
 - Registros periódicos.
 - Facturas.
-- Cuentas por cobrar formales.
-- Cuentas por pagar formales.
+- Cuentas por cobrar formales (módulo documental).
+- Cuentas por pagar formales (módulo documental).
 - Índices financieros.
 - Compras diferidas en tarjetas de crédito.
 - Conciliación bancaria o de tarjetas.
@@ -304,7 +304,7 @@ Ejemplos de uso:
 - Ingreso por cumpleaños, clasificado como otros ingresos, depositado en banco, entidad/tag `Mariuxi`.
 - Consulta posterior de cuánto ingreso o gasto se relacionó con `Mariuxi` en el año.
 
-Para casos estructurados como "María me debe dinero", en el futuro el modelo correcto será CxC/CxP apuntando a una Entidad. En el MVP se deja espacio para hacerlo con cuentas contables normales y Entidades, sin módulo formal de documentos.
+Para casos estructurados como "María me debe dinero", en el MVP se registra con cuentas de balance por cobrar vinculadas a la Entidad persona. En el futuro, el módulo documental formal de CxC/CxP apuntará a la misma Entidad.
 
 ## Ingresos, descuentos y valores negativos
 
@@ -364,7 +364,7 @@ Queda pendiente definir exactamente qué bloquea el cierre anual:
 
 ## Reporte PYG MVP
 
-El MVP tendrá un único reporte obligatorio: un dashboard sencillo de PYG por ejercicio. Este reporte es indispensable porque ya existe conceptualmente en el proyecto legacy y TADOR no debería perder esa lectura mínima.
+El MVP tendrá un dashboard obligatorio con dos lecturas separadas: panel PYG por ejercicio y panel de posición a la fecha de consulta. El panel PYG es indispensable porque ya existe conceptualmente en el proyecto legacy y TADOR no debería perder esa lectura mínima.
 
 Ejemplo:
 

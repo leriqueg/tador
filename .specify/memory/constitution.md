@@ -1,14 +1,18 @@
 <!--
 Sync Impact Report
-- Version change: 1.1.0 → 1.2.0
-- Modified principles: VIII (stable dependency and reputable OSS requirements)
+- Version change: 1.2.0 → 1.3.0
+- Modified principles: V (MVP receivable/payable support), VI (dashboard position panel)
 - Added sections: none
 - Removed sections: none
 - Templates requiring updates:
-  ✅ .specify/templates/plan-template.md
-  ✅ .specify/templates/spec-template.md
-  ✅ .specify/templates/tasks-template.md
-  ✅ README.md (reviewed; no update required)
+  ✅ README.md (vision and two-question framing)
+  ✅ specs/foundation/mvp-scope.md
+  ✅ specs/foundation/reporte-pyg-mvp.md
+  ✅ specs/foundation/modelo-conceptual.md
+  ✅ specs/005-dashboard-pyg/spec.md
+  ✅ .specify/templates/plan-template.md (reviewed; no update required)
+  ✅ .specify/templates/spec-template.md (reviewed; no update required)
+  ✅ .specify/templates/tasks-template.md (reviewed; no update required)
   ✅ .cursor/rules/specify-rules.mdc (reviewed; no update required)
 - Follow-up TODOs: none
 -->
@@ -70,18 +74,27 @@ The global plan gives NIIF-inspired classification and allowed locations; user
 accounts represent concrete banks, cards, wallets, bridges, projects, and personal
 tracking needs. Entidad MUST represent named objects such as banks, card issuers,
 people, family members, clients, suppliers, institutions, or platforms. Entidad does
-not imply CxC/CxP by itself; future CxC/CxP modules MUST reference Entidades.
+not imply formal CxC/CxP documents by itself; future CxC/CxP modules MUST reference
+Entidades. The MVP MUST support registering receivable and payable debts as balance
+accounts linked to Entidades (banks, card issuers, people, clients, suppliers).
+Formal CxC/CxP documents, due dates, and third-party account statements are post-MVP,
+but the account-plus-Entidad engine that supports them MUST exist from the MVP so
+that switching between Modo Hogar and Modo PRO never requires a data model change.
 
 Rationale: This avoids mixing catalog defaults with one user's history while keeping
-a migration path from the legacy plan and future professional modules.
+a migration path from the legacy plan and future professional modules, and ensures
+mode switching stays a UI concern rather than a data migration.
 
 ### VI. PYG y Balance son preguntas distintas
 
 Reports and calculations MUST distinguish between PYG and Balance. PYG answers what
 income or expense occurred by income/expense accounts. Balance answers where money,
 debt, assets, liabilities, or bridge balances are. Bridge/bypass accounts MAY net to
-zero without erasing the PYG impact. The MVP PYG dashboard MUST aggregate from income
-and expense accounts, not from bridge balances or payment-method accounts.
+zero without erasing the PYG impact. The MVP dashboard MUST include a PYG panel that
+aggregates from income and expense accounts only, not from bridge balances or
+payment-method accounts, and a separate balance-position panel (available cash,
+receivables, payables) derived from balance account saldos. The two panels MUST NOT
+mix data sources.
 
 Rationale: The canonical card, child/dependent, third-party funds, and bridge-account
 cases depend on not confusing payment media with real income or expense.
@@ -123,15 +136,18 @@ corruption, supply-chain, and long-term maintenance risk.
 - MVP scope is defined in `specs/foundation/mvp-scope.md`.
 - The implementation sequence MUST follow `specs/foundation/estrategia-incremental-sprints.md`
   unless a spec explicitly amends that order.
-- The only mandatory MVP report is the annual PYG dashboard described in
-  `specs/foundation/reporte-pyg-mvp.md`.
+- The mandatory MVP dashboard is described in `specs/foundation/reporte-pyg-mvp.md`
+  and spec `005-dashboard-pyg`: annual PYG panel plus a separate balance-position
+  panel (available cash, receivables, payables).
 - Plantilla design MUST start from `specs/foundation/plantillas-mvp-v0.md`.
 - Canonical behavior MUST be checked against `specs/foundation/casos-canonicos-demo.md`.
 - The legacy chart review in `specs/foundation/reglas-plan-cuentas.md` is migration
   input, not the final global plan.
-- The MVP explicitly excludes formal invoices, formal CxC/CxP, periodic entries,
-  deferred credit-card purchases, reconciliation, inventory, kardex, advanced
-  reports, and autonomous AI execution.
+- The MVP explicitly excludes formal invoices, formal CxC/CxP documents and
+  third-party account statements, periodic entries, deferred credit-card purchases,
+  reconciliation, inventory, kardex, advanced reports, and autonomous AI execution.
+  Exclusion of formal CxC/CxP does NOT exclude registering receivable/payable debts
+  as balance accounts linked to Entidades; that capability is MVP core.
 
 ## Technical Direction
 
@@ -183,4 +199,4 @@ Each new Spec Kit plan MUST pass the Constitution Check before Phase 0 research 
 again after Phase 1 design. Violations MUST be listed in Complexity Tracking with the
 simpler alternative that was rejected.
 
-**Version**: 1.2.0 | **Ratified**: 2026-06-20 | **Last Amended**: 2026-06-22
+**Version**: 1.3.0 | **Ratified**: 2026-06-20 | **Last Amended**: 2026-07-04

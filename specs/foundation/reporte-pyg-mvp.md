@@ -1,10 +1,12 @@
-# Reporte PYG MVP
+# Dashboard MVP
 
-El MVP de TADOR debe incluir un único reporte obligatorio: un dashboard sencillo de PYG por ejercicio. Este reporte ya existe conceptualmente en el proyecto legacy y se considera indispensable para que el MVP sea útil.
+El MVP de TADOR debe incluir un dashboard obligatorio con dos lecturas separadas: un panel PYG por ejercicio y un panel de posición financiera a la fecha de consulta. El panel PYG ya existe conceptualmente en el proyecto legacy y se considera indispensable; el panel de posición expone la capacidad MVP de registrar deudas por cobrar/pagar como cuentas de balance vinculadas a Entidades.
 
 ## Objetivo
 
-Mostrar una lectura rápida del resultado anual:
+Mostrar una lectura rápida del resultado anual y, por separado, de la posición financiera actual.
+
+**Panel PYG (por ejercicio):**
 
 ```text
 Ejercicio: 2026
@@ -13,9 +15,17 @@ Total gastos: $101,500
 Neto: $500
 ```
 
+**Panel de posición (a la fecha de consulta):**
+
+```text
+Disponible: $3,200
+Por cobrar: $500
+Por pagar: $1,800
+```
+
 ## Alcance
 
-Incluido:
+Incluido — panel PYG:
 
 - Selector de ejercicio anual.
 - Total acumulado de ingresos del ejercicio.
@@ -25,6 +35,12 @@ Incluido:
 - Top 10 de ingresos acumulados por cuenta.
 - Top 10 de egresos acumulados por cuenta.
 
+Incluido — panel de posición:
+
+- Total disponible (suma de saldos de cuentas de activo líquido: efectivo, bancos, billeteras).
+- Total por cobrar (suma de saldos de cuentas de activo por cobrar).
+- Total por pagar (suma de saldos de cuentas de pasivo: tarjetas, préstamos, cuentas por pagar).
+
 Fuera del MVP:
 
 - PYG comparativo entre ejercicios.
@@ -33,8 +49,10 @@ Fuera del MVP:
 - Reportes por centro o cuenta puente.
 - Ratios o índices financieros.
 - Exportación formal.
+- Estados de cuenta por cliente o proveedor.
+- Desglose de posición por Entidad (filtros por tercero quedan post-MVP).
 
-## Gráfico mensual
+## Gráfico mensual (panel PYG)
 
 El dashboard debe mostrar un gráfico con:
 
@@ -77,7 +95,7 @@ Reglas:
 
 ## Datos conceptuales requeridos
 
-El reporte necesita que el motor pueda entregar, por usuario y ejercicio:
+El panel PYG necesita que el motor pueda entregar, por usuario y ejercicio:
 
 - ingresos acumulados,
 - egresos acumulados,
@@ -88,20 +106,37 @@ El reporte necesita que el motor pueda entregar, por usuario y ejercicio:
 - top cuentas de ingreso,
 - top cuentas de egreso.
 
+- top cuentas de egreso.
+
+El panel de posición necesita que el motor pueda entregar, por usuario a la fecha de consulta:
+
+- saldo agregado de activos líquidos,
+- saldo agregado de activos por cobrar,
+- saldo agregado de pasivos (por pagar).
+
 ## Regla de lectura contable
 
-El dashboard PYG debe responder:
+El panel PYG debe responder:
 
 ```text
 ¿Cuánto ingresé, cuánto gasté y cuál fue mi resultado en el ejercicio?
 ```
 
-No debe responder:
+El panel de posición debe responder:
 
 ```text
-¿Dónde está el dinero?
+¿Cuánto tengo disponible?
+¿Cuánto me deben?
 ¿Cuánto debo?
-¿Qué saldo tiene una cuenta puente?
 ```
 
-Esas preguntas pertenecen a balance, saldos o extractos, no al PYG MVP.
+El cálculo PYG no debe mezclarse con el cálculo de posición. El panel PYG no debe usar saldos de balance ni cuentas puente. El panel de posición no debe usar cuentas de ingreso/egreso.
+
+Preguntas que siguen fuera del dashboard MVP:
+
+```text
+¿Qué saldo tiene una cuenta puente?
+¿Cuánto debo a un proveedor específico? (estado de cuenta por Entidad)
+```
+
+Esas lecturas pertenecen a saldos por cuenta, extractos o módulos formales de CxC/CxP post-MVP.

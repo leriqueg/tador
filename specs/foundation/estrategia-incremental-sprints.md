@@ -131,13 +131,15 @@ Plantillas prioritarias:
 
 Los casos canónicos demostrativos principales pueden reproducirse mediante plantillas o asiento manual PRO.
 
-## Sprint 05 - Dashboard PYG
+## Sprint 05 - Dashboard PYG y Posición
 
 ### Objetivo
 
-Entregar el único reporte obligatorio del MVP.
+Entregar el dashboard obligatorio del MVP con panel PYG y panel de posición separados.
 
 ### Incluye
+
+**Panel PYG:**
 
 - Selector de ejercicio.
 - Total ingresos.
@@ -147,9 +149,15 @@ Entregar el único reporte obligatorio del MVP.
 - Top 10 ingresos.
 - Top 10 egresos.
 
+**Panel de posición:**
+
+- Total disponible (activo líquido).
+- Total por cobrar.
+- Total por pagar.
+
 ### Criterio de cierre
 
-El dashboard PYG anual se calcula desde asientos reales y no desde saldos de cuentas puente.
+El panel PYG se calcula desde asientos reales de cuentas de ingreso/egreso y no desde saldos de cuentas puente. El panel de posición se calcula desde saldos de cuentas de balance y no altera ni mezcla totales PYG.
 
 ## Sprint 06 - Frontend Hogar
 
@@ -166,7 +174,7 @@ Construir una experiencia usable para registro cotidiano.
 - Crear entidades básicas.
 - Registrar apuntes principales.
 - Ver saldos actuales.
-- Ver dashboard PYG.
+- Ver dashboard con panel PYG y panel de posición.
 
 ### Criterio de cierre
 

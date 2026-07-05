@@ -1,5 +1,40 @@
 # Reglas iniciales del plan de cuentas
 
+## Segmentación del código contable
+
+Los códigos de cuenta en TADOR siguen la convención `[A][BBB][C][DDD]` (8 dígitos):
+
+```
+[A][BBB][C][DDD]
+1    111   0   001
+
+A   = 1 dígito — Clase contable
+      1 = Activo, 2 = Pasivo, 4 = Ingreso, 6 = Gasto
+BBB = 3 dígitos — Grupo contable (Cuenta Madre)
+      Identifica la familia de cuentas (ej: 111 = Vivienda, 124 = Alimentación)
+C   = 1 dígito — Scope
+      0 = Global (CuentaGlobal — pre-seed del catálogo)
+      1 = Usuario (CuentaUsuario — creada por el usuario)
+DDD = 3 dígitos — Secuencia
+      000 = la cuenta grupo (nunca es postable)
+      001-999 = cuentas postables del grupo
+
+Ejemplos:
+  61240001 → Gasto(6) | Alimentación(124) | Global(0) | postable #1 = "Supermercado"
+  11121001 → Activo(1) | Bancos(112) | Usuario(1) | cuenta #1 = "Banco Pichincha"
+  41000000 → Ingreso(4) | Ingresos Activos(100) | Global(0) | grupo
+
+Uso en plantillas:
+  - Códigos con N3=0: el template referencia CuentaGlobal directamente
+  - Códigos con N3=1: el template usa máscara (XXX), el frontend reemplaza con las
+    cuentas del usuario que cuelgan de ese grupo
+
+Nota: 9 cuentas del legacy no siguen esta convención (N3 != 0). Se mapean con el
+campo `alcance` en CuentaGlobal. La recodificación se hará cuando toque migrar
+datos legacy.
+
+---
+
 Este documento convierte el plan de cuentas legacy en una tabla revisable. No es el plan definitivo de TADOR; sirve para separar qué parece catálogo global y qué parece cuenta propia del usuario, preservando ID y código legacy para una migración futura.
 
 ## Reglas propuestas

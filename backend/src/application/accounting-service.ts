@@ -12,6 +12,7 @@ import {
   validateLinea,
   validateBalance,
   buildReversalLines,
+  resolveCuenta,
 } from '../domain/linea-asiento.js';
 import type { AsientoVersion } from '../domain/asiento-version.js';
 import type { PeriodoContable } from '../domain/periodo-contable.js';
@@ -21,7 +22,8 @@ import type { PeriodoContable } from '../domain/periodo-contable.js';
 // ---------------------------------------------------------------------------
 
 export interface CreateEntryLineInput {
-  cuentaId: string;
+  cuentaId?: string;       // CuentaUsuario reference (financial accounts)
+  cuentaGlobalId?: string; // CuentaGlobal reference (shared categories)
   debito: number;
   credito: number;
 }
@@ -111,11 +113,16 @@ export interface AccountingService {
   ): Promise<PeriodoContable | null>;
 
   // Balances
-  getBalance(cuentaId: string, bookId: string): Promise<number>;
+  getBalance(
+    cuentaId: string,
+    bookId: string,
+    tipo?: 'usuario' | 'global',
+  ): Promise<number>;
   getMonthlyBalances(
     cuentaId: string,
     bookId: string,
     año: number,
+    tipo?: 'usuario' | 'global',
   ): Promise<Array<{ mes: number; saldo: number }>>;
 
   // Reports
@@ -131,7 +138,7 @@ export interface AccountingService {
 // ---------------------------------------------------------------------------
 
 /** Account type classification from CuentaGlobal codigo first digit. */
-type AccountClass = 'asset' | 'liability' | 'income' | 'expense' | 'unknown';
+type AccountClass = 'asset' | 'liability' | 'income' | 'expense' | 'equity' | 'unknown';
 
 function classifyAccount(codigo: string): AccountClass {
   const first = codigo.charAt(0);
@@ -140,6 +147,8 @@ function classifyAccount(codigo: string): AccountClass {
       return 'asset';
     case '2':
       return 'liability';
+    case '3':
+      return 'equity';
     case '4':
       return 'income';
     case '6':
@@ -189,7 +198,8 @@ function mapAsiento(record: {
 function mapLinea(record: {
   id: string;
   asientoId: string;
-  cuentaId: string;
+  cuentaId: string | null;
+  cuentaGlobalId: string | null;
   debito: { toNumber: () => number } | number;
   credito: { toNumber: () => number } | number;
   createdAt: Date;
@@ -198,6 +208,7 @@ function mapLinea(record: {
     id: record.id,
     asientoId: record.asientoId,
     cuentaId: record.cuentaId,
+    cuentaGlobalId: record.cuentaGlobalId,
     debito: toNumber(record.debito),
     credito: toNumber(record.credito),
     createdAt: record.createdAt,
@@ -286,6 +297,107 @@ async function ensurePeriodExists(
 }
 
 // ---------------------------------------------------------------------------
+// Account validation helper
+// ---------------------------------------------------------------------------
+
+/**
+ * Normalize a line input: extract the referenced account ID for query purposes.
+ * Returns { cuentaId, cuentaGlobalId } with exactly one non-null.
+ * Throws if both or neither are present.
+ */
+function normalizeLineAccount(
+  line: CreateEntryLineInput,
+): { cuentaId: string | null; cuentaGlobalId: string | null } {
+  const hasCuenta = Boolean(line.cuentaId);
+  const hasGlobal = Boolean(line.cuentaGlobalId);
+  if (hasCuenta && hasGlobal) {
+    throw new Error('Line cannot have both cuentaId and cuentaGlobalId');
+  }
+  if (!hasCuenta && !hasGlobal) {
+    throw new Error('Line must have either cuentaId or cuentaGlobalId');
+  }
+  return {
+    cuentaId: line.cuentaId ?? null,
+    cuentaGlobalId: line.cuentaGlobalId ?? null,
+  };
+}
+
+/**
+ * Validate that all account references in the lines are valid.
+ * For cuentaId → verifies the CuentaUsuario exists, is active, belongs to the
+ *   book's user, and its linked CuentaGlobal is postable.
+ * For cuentaGlobalId → verifies the CuentaGlobal exists and is postable.
+ *
+ * @throws Error with a descriptive message if any account is invalid.
+ */
+async function validateEntryAccounts(
+  bookId: string,
+  lineas: CreateEntryLineInput[],
+): Promise<void> {
+  // Get book's userId for tenant isolation
+  const book = await prisma.book.findUnique({
+    where: { id: bookId },
+    select: { userId: true },
+  });
+  if (!book) {
+    throw new Error(`Book not found: ${bookId}`);
+  }
+
+  // Collect distinct account IDs by type
+  const cuentaIds: string[] = [];
+  const cuentaGlobalIds: string[] = [];
+
+  for (const l of lineas) {
+    if (l.cuentaId) cuentaIds.push(l.cuentaId);
+    if (l.cuentaGlobalId) cuentaGlobalIds.push(l.cuentaGlobalId);
+  }
+
+  // Validate CuentaUsuario references
+  if (cuentaIds.length > 0) {
+    const uniqueCuentaIds = [...new Set(cuentaIds)];
+    const cuentas = await prisma.cuentaUsuario.findMany({
+      where: {
+        id: { in: uniqueCuentaIds },
+        userId: book.userId,
+        activa: true,
+        global: { esPostable: true },
+      },
+      select: { id: true },
+    });
+
+    const foundIds = new Set(cuentas.map((c) => c.id));
+    for (const cid of uniqueCuentaIds) {
+      if (!foundIds.has(cid)) {
+        throw new Error(
+          `Account ${cid} not found, not active, not postable, or does not belong to this book`,
+        );
+      }
+    }
+  }
+
+  // Validate CuentaGlobal references
+  if (cuentaGlobalIds.length > 0) {
+    const uniqueGlobalIds = [...new Set(cuentaGlobalIds)];
+    const globales = await prisma.cuentaGlobal.findMany({
+      where: {
+        id: { in: uniqueGlobalIds },
+        esPostable: true,
+      },
+      select: { id: true },
+    });
+
+    const foundIds = new Set(globales.map((c) => c.id));
+    for (const cid of uniqueGlobalIds) {
+      if (!foundIds.has(cid)) {
+        throw new Error(
+          `Global account ${cid} not found or is not postable`,
+        );
+      }
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Factory
 // ---------------------------------------------------------------------------
 
@@ -322,35 +434,8 @@ export function createAccountingService(): AccountingService {
         }
       }
 
-      // 5. Validate all cuentaIds exist, are active, postable, and
-      //    belong to the book's user (tenant isolation).
-      const book = await prisma.book.findUnique({
-        where: { id: params.bookId },
-        select: { userId: true },
-      });
-      if (!book) {
-        throw new Error(`Book not found: ${params.bookId}`);
-      }
-
-      const cuentaIds = [...new Set(params.lineas.map((l) => l.cuentaId))];
-      const cuentas = await prisma.cuentaUsuario.findMany({
-        where: {
-          id: { in: cuentaIds },
-          userId: book.userId,
-          activa: true,
-          global: { esPostable: true },
-        },
-        select: { id: true },
-      });
-
-      const foundIds = new Set(cuentas.map((c) => c.id));
-      for (const cid of cuentaIds) {
-        if (!foundIds.has(cid)) {
-          throw new Error(
-            `Account ${cid} not found, not active, not postable, or does not belong to this book`,
-          );
-        }
-      }
+      // 5. Validate all accounts
+      await validateEntryAccounts(params.bookId, params.lineas);
 
       // 6. Ensure period exists and is open
       await ensurePeriodExists(params.bookId, año);
@@ -371,16 +456,18 @@ export function createAccountingService(): AccountingService {
         });
 
         const lineas = await Promise.all(
-          params.lineas.map((l) =>
-            tx.lineaAsiento.create({
+          params.lineas.map((l) => {
+            const { cuentaId, cuentaGlobalId } = normalizeLineAccount(l);
+            return tx.lineaAsiento.create({
               data: {
                 asientoId: entry.id,
-                cuentaId: l.cuentaId,
+                cuentaId,
+                cuentaGlobalId,
                 debito: l.debito,
                 credito: l.credito,
               },
-            }),
-          ),
+            });
+          }),
         );
 
         return { entry, lineas };
@@ -461,8 +548,9 @@ export function createAccountingService(): AccountingService {
       }
 
       // 3. Determine resulting lines (merged with original if not provided)
-      const newLineas = params.lineas ?? existing.lineas.map((l) => ({
-        cuentaId: l.cuentaId,
+      const newLineas: CreateEntryLineInput[] = params.lineas ?? existing.lineas.map((l) => ({
+        cuentaId: l.cuentaId ?? undefined,
+        cuentaGlobalId: l.cuentaGlobalId ?? undefined,
         debito: toNumber(l.debito),
         credito: toNumber(l.credito),
       }));
@@ -478,31 +566,7 @@ export function createAccountingService(): AccountingService {
       if (balanceErr) throw new Error(balanceErr);
 
       // 6. Validate accounts (same as createEntry)
-      const book = await prisma.book.findUnique({
-        where: { id: bookId },
-        select: { userId: true },
-      });
-      if (!book) throw new Error(`Book not found: ${bookId}`);
-
-      const cuentaIds = [...new Set(newLineas.map((l) => l.cuentaId))];
-      const cuentas = await prisma.cuentaUsuario.findMany({
-        where: {
-          id: { in: cuentaIds },
-          userId: book.userId,
-          activa: true,
-          global: { esPostable: true },
-        },
-        select: { id: true },
-      });
-
-      const foundIds = new Set(cuentas.map((c) => c.id));
-      for (const cid of cuentaIds) {
-        if (!foundIds.has(cid)) {
-          throw new Error(
-            `Account ${cid} not found, not active, not postable, or does not belong to this book`,
-          );
-        }
-      }
+      await validateEntryAccounts(bookId, newLineas);
 
       // 7. Check period is open (from the entry's fecha)
       const año = existing.fecha.getFullYear();
@@ -539,6 +603,7 @@ export function createAccountingService(): AccountingService {
               lineas: existing.lineas.map((l) => ({
                 id: l.id,
                 cuentaId: l.cuentaId,
+                cuentaGlobalId: l.cuentaGlobalId,
                 debito: toNumber(l.debito),
                 credito: toNumber(l.credito),
               })),
@@ -554,16 +619,18 @@ export function createAccountingService(): AccountingService {
 
         // Create new lines
         const createdLines = await Promise.all(
-          newLineas.map((l) =>
-            tx.lineaAsiento.create({
+          newLineas.map((l) => {
+            const { cuentaId, cuentaGlobalId } = normalizeLineAccount(l);
+            return tx.lineaAsiento.create({
               data: {
                 asientoId: id,
-                cuentaId: l.cuentaId,
+                cuentaId,
+                cuentaGlobalId,
                 debito: l.debito,
                 credito: l.credito,
               },
-            }),
-          ),
+            });
+          }),
         );
 
         // Update asiento header
@@ -631,6 +698,7 @@ export function createAccountingService(): AccountingService {
               data: {
                 asientoId: reversa.id,
                 cuentaId: l.cuentaId,
+                cuentaGlobalId: l.cuentaGlobalId,
                 debito: l.debito,
                 credito: l.credito,
               },
@@ -729,7 +797,28 @@ export function createAccountingService(): AccountingService {
     // -----------------------------------------------------------------------
     // getBalance
     // -----------------------------------------------------------------------
-    async getBalance(cuentaId, bookId) {
+    async getBalance(cuentaId, bookId, tipo = 'usuario') {
+      if (tipo === 'global') {
+        const result = await prisma.lineaAsiento.aggregate({
+          where: {
+            cuentaGlobalId: cuentaId,
+            asiento: {
+              bookId,
+              anulado: false,
+            },
+          },
+          _sum: {
+            debito: true,
+            credito: true,
+          },
+        });
+
+        const totalDebito = toNumber(result._sum.debito ?? 0);
+        const totalCredito = toNumber(result._sum.credito ?? 0);
+        return totalDebito - totalCredito;
+      }
+
+      // Default: CuentaUsuario balance
       const result = await prisma.lineaAsiento.aggregate({
         where: {
           cuentaId,
@@ -752,8 +841,31 @@ export function createAccountingService(): AccountingService {
     // -----------------------------------------------------------------------
     // getMonthlyBalances
     // -----------------------------------------------------------------------
-    async getMonthlyBalances(cuentaId, bookId, año) {
-      // Raw query because Prisma's groupBy doesn't support date extraction
+    async getMonthlyBalances(cuentaId, bookId, año, tipo = 'usuario') {
+      if (tipo === 'global') {
+        const rows: Array<{ mes: number; totalDebito: number; totalCredito: number }> =
+          await prisma.$queryRaw`
+            SELECT
+              EXTRACT(MONTH FROM a.fecha)::int AS mes,
+              COALESCE(SUM(l.debito), 0) AS "totalDebito",
+              COALESCE(SUM(l.credito), 0) AS "totalCredito"
+            FROM lineas_asiento l
+            INNER JOIN asientos a ON a.id = l."asientoId"
+            WHERE l."cuentaGlobalId" = ${cuentaId}
+              AND a."bookId" = ${bookId}
+              AND a.anulado = false
+              AND EXTRACT(YEAR FROM a.fecha) = ${año}::int
+            GROUP BY EXTRACT(MONTH FROM a.fecha)
+            ORDER BY mes
+          `;
+
+        return rows.map((r) => ({
+          mes: r.mes,
+          saldo: Number(r.totalDebito) - Number(r.totalCredito),
+        }));
+      }
+
+      // Default: CuentaUsuario monthly balances
       const rows: Array<{ mes: number; totalDebito: number; totalCredito: number }> =
         await prisma.$queryRaw`
           SELECT
@@ -798,6 +910,7 @@ export function createAccountingService(): AccountingService {
                   global: true,
                 },
               },
+              cuentaGlobal: true,
             },
           },
         },
@@ -816,14 +929,17 @@ export function createAccountingService(): AccountingService {
 
       for (const asiento of asientos) {
         for (const linea of asiento.lineas) {
-          const codigo = linea.cuenta.global?.codigo ?? '';
+          const { nombreCuenta, codigoCuenta } = resolveCuenta(linea);
+          const codigo = codigoCuenta;
+          const nombre = nombreCuenta;
+          // globalId for grouping — prefer CuentaGlobal id
+          const globalId = linea.cuentaGlobalId
+            ? (linea.cuentaGlobal?.id ?? linea.cuenta?.global?.id ?? '')
+            : (linea.cuenta?.id ?? '');
+
           const tipo = classifyAccount(codigo);
+          if (tipo === 'unknown' && !codigo) continue; // skip uncategorised
 
-          if (tipo === 'unknown') continue; // skip uncategorised accounts
-
-          const globalId = linea.cuenta.global?.id ?? linea.cuentaId;
-          const nombre =
-            linea.cuenta.global?.nombre ?? linea.cuenta.nombre;
           const debito = toNumber(linea.debito);
           const credito = toNumber(linea.credito);
 
@@ -887,6 +1003,7 @@ export function createAccountingService(): AccountingService {
                   global: true,
                 },
               },
+              cuentaGlobal: true,
             },
           },
         },
@@ -905,14 +1022,17 @@ export function createAccountingService(): AccountingService {
 
       for (const asiento of asientos) {
         for (const linea of asiento.lineas) {
-          const codigo = linea.cuenta.global?.codigo ?? '';
+          const { nombreCuenta, codigoCuenta } = resolveCuenta(linea);
+          const codigo = codigoCuenta;
+          const nombre = nombreCuenta;
+          // globalId for grouping — prefer CuentaGlobal id
+          const globalId = linea.cuentaGlobalId
+            ? (linea.cuentaGlobal?.id ?? linea.cuenta?.global?.id ?? '')
+            : (linea.cuenta?.id ?? '');
+
           const tipo = classifyAccount(codigo);
+          if (tipo === 'unknown' && !codigo) continue;
 
-          if (tipo === 'unknown') continue;
-
-          const globalId = linea.cuenta.global?.id ?? linea.cuentaId;
-          const nombre =
-            linea.cuenta.global?.nombre ?? linea.cuenta.nombre;
           const debito = toNumber(linea.debito);
           const credito = toNumber(linea.credito);
 

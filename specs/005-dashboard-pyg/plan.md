@@ -1,12 +1,12 @@
-# Implementation Plan: Sprint 05 - Dashboard PYG
+# Implementation Plan: Sprint 05 - Dashboard PYG y Posición
 
-**Branch**: `sdd/definiciones` | **Date**: 2026-06-22 | **Spec**: [spec.md](./spec.md)
+**Branch**: `sdd/definiciones` | **Date**: 2026-07-04 | **Spec**: [spec.md](./spec.md)
 
 **Input**: Feature specification from `/specs/005-dashboard-pyg/spec.md`
 
 ## Summary
 
-Deliver the mandatory MVP annual PYG dashboard with totals, monthly series and Top 10 income/expense breakdowns.
+Deliver the mandatory MVP dashboard with two separate panels: annual PYG (totals, monthly series, Top 10) and balance position (available cash, receivables, payables) derived from current account saldos.
 
 ## Technical Context
 
@@ -38,7 +38,7 @@ Deliver the mandatory MVP annual PYG dashboard with totals, monthly series and T
 - **Accounting Integrity**: PASS — any financial behavior routes through balanced Asientos or declares no accounting impact.
 - **Plantilla Discipline**: PASS — common operations are modeled through versioned Plantillas when applicable.
 - **Plan de Cuentas & Entidades**: PASS — global chart, user accounts and Entidades remain separate concepts.
-- **PYG vs Balance**: PASS — PYG reporting is separated from balance, bridge and payment accounts.
+- **PYG vs Balance**: PASS — PYG panel and balance-position panel use separate data sources and are never mixed.
 - **TDD & Tests**: PASS — each sprint defines test obligations; Sprint 01 establishes runnable tooling.
 - **AI Safety**: PASS — IA v0 only suggests templates and never persists accounting directly.
 - **Concurrency & Idempotency**: PASS — mutating backend behavior must define duplicate-request and concurrent update handling before implementation.
@@ -103,7 +103,7 @@ See [data-model.md](./data-model.md), [quickstart.md](./quickstart.md), and cont
 
 ## Post-Design Constitution Check
 
-- **MVP Scope & Sprint Fit**: PASS — design artifacts remain scoped to `Sprint 05 - Dashboard PYG`.
+- **MVP Scope & Sprint Fit**: PASS — design artifacts remain scoped to `Sprint 05 - Dashboard PYG y Posición`.
 - **Tenant & Privacy**: PASS — privacy/tenant impact is documented for this sprint.
 - **Accounting Integrity**: PASS — accounting impact is either absent or routed through balanced Asientos.
 - **TDD & Tests**: PASS — test expectations are documented for planning and task generation.

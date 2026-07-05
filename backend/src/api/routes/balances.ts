@@ -25,6 +25,8 @@ export function registerBalanceRoutes(
 
   // ---------------------------------------------------------------------------
   // GET /api/balances/:cuentaId — current balance
+  // Query params:
+  //   tipo=usuario (default) | global — account type
   // ---------------------------------------------------------------------------
 
   app.get(
@@ -33,6 +35,8 @@ export function registerBalanceRoutes(
     async (request, reply) => {
       const userId = request.userId!;
       const { cuentaId } = request.params as { cuentaId: string };
+      const query = request.query as { tipo?: string };
+      const tipo = query.tipo === 'global' ? 'global' as const : 'usuario' as const;
 
       try {
         const bookId = await getBookId(userId);
@@ -40,7 +44,7 @@ export function registerBalanceRoutes(
           return reply.status(404).send({ error: 'Book not found' });
         }
 
-        const saldo = await accountingService.getBalance(cuentaId, bookId);
+        const saldo = await accountingService.getBalance(cuentaId, bookId, tipo);
 
         return reply.status(200).send({ cuentaId, saldo });
       } catch (err) {
@@ -52,6 +56,9 @@ export function registerBalanceRoutes(
 
   // ---------------------------------------------------------------------------
   // GET /api/balances/:cuentaId/monthly — monthly balances
+  // Query params:
+  //   año — fiscal year (default: current year)
+  //   tipo=usuario (default) | global — account type
   // ---------------------------------------------------------------------------
 
   app.get(
@@ -60,8 +67,9 @@ export function registerBalanceRoutes(
     async (request, reply) => {
       const userId = request.userId!;
       const { cuentaId } = request.params as { cuentaId: string };
-      const query = request.query as { año?: string };
+      const query = request.query as { año?: string; tipo?: string };
       const año = query.año ? parseInt(query.año, 10) : new Date().getFullYear();
+      const tipo = query.tipo === 'global' ? 'global' as const : 'usuario' as const;
 
       try {
         const bookId = await getBookId(userId);
@@ -73,6 +81,7 @@ export function registerBalanceRoutes(
           cuentaId,
           bookId,
           año,
+          tipo,
         );
 
         return reply.status(200).send({ cuentaId, año, mensual });

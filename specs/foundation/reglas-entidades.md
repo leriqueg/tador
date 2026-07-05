@@ -51,8 +51,8 @@ Una Entidad puede tener un tipo principal y varias capacidades. Esto evita multi
 - Una Entidad puede estar relacionada con cuentas del usuario.
 - Una Entidad puede usarse como tag/afectación en apuntes.
 - Una cuenta bancaria o tarjeta puede apuntar a una Entidad financiera o emisora.
-- Una persona puede usarse como referencia de regalos, préstamos informales o ingresos.
-- No se implementan facturas, CxC formal ni CxP formal en el MVP.
+- Una persona puede usarse como referencia de regalos, préstamos informales, ingresos o deudas por cobrar/pagar vinculadas a cuentas de balance.
+- No se implementan facturas ni módulo documental formal de CxC/CxP en el MVP; sí se registran deudas por cobrar/pagar como cuentas de balance vinculadas a Entidades (tarjetas, préstamos, personas, clientes, proveedores).
 
 ## Reglas para módulos futuros
 

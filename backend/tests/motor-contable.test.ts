@@ -2,12 +2,12 @@
  * Integration tests: Sprint 03 — Motor contable.
  *
  * Covers the accounting engine: journal entries, idempotency, voiding,
- * period lifecycle, balances, and reports.
+ * period lifecycle, balances, reports, and direct CuentaGlobal line support.
  *
- * NOTE: The seed only creates 27 group-level CuentaGlobal records (all
- * esPostable=false). Each test creates its own postable CuentaGlobal records
- * via prisma directly, then creates CuentaUsuario records linked to them
- * via the /api/accounts endpoint.
+ * NOTE: The seed creates 100 CuentaGlobal records (27 groups + 73 postable).
+ * Each test creates additional postable CuentaGlobal records via prisma
+ * directly, then creates CuentaUsuario records linked to them via the
+ * /api/accounts endpoint.
  */
 
 import { describe, it, expect, afterAll } from 'vitest';
@@ -993,6 +993,174 @@ describe('Edge cases', () => {
     expect(getBody.versiones[0].version).toBe(1);
     expect(getBody.versiones[0].snapshot).toBeDefined();
     expect(getBody.versiones[0].snapshot.asiento.concepto).toBe('Original concepto');
+
+    await app.close();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// US6 — Direct CuentaGlobal in entry lines
+// ---------------------------------------------------------------------------
+
+describe('US6 — Direct CuentaGlobal in entry lines', () => {
+  it('should create an entry using cuentaGlobalId directly (no CuentaUsuario wrapper)', async () => {
+    const app = await createTestApp();
+    const cookies = await registerAndVerify(app, 'us6-global@test.com');
+
+    // Create test accounts: one CuentaUsuario (asset) and one CuentaGlobal (expense)
+    const accounts = await setupTestAccounts(app, cookies);
+
+    // Create a postable global expense account (used directly)
+    const globalExpense = await prisma.cuentaGlobal.create({
+      data: {
+        codigo: nextCodigo('6199'),
+        nombre: 'Global Expense Direct',
+        esPostable: true,
+      },
+    });
+    createdGlobalIds.push(globalExpense.id);
+
+    // Entry: CuentaUsuario asset debit 200, CuentaGlobal expense credit 200
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/entries',
+      headers: { cookie: cookies.join('; ') },
+      payload: {
+        fecha: '2026-06-01T00:00:00.000Z',
+        concepto: 'Global direct entry',
+        lineas: [
+          { cuentaId: accounts.assetAccountId, debito: 200, credito: 0 },
+          { cuentaGlobalId: globalExpense.id, debito: 0, credito: 200 },
+        ],
+      },
+    });
+
+    expect(res.statusCode).toBe(201);
+    const body = res.json();
+    expect(body.entry).toBeDefined();
+    expect(body.lineas).toHaveLength(2);
+
+    // Verify the lines have the correct account references
+    const assetLine = body.lineas.find(
+      (l: { cuentaId: string | null }) => l.cuentaId === accounts.assetAccountId,
+    );
+    const globalLine = body.lineas.find(
+      (l: { cuentaGlobalId: string | null }) => l.cuentaGlobalId === globalExpense.id,
+    );
+    expect(assetLine).toBeDefined();
+    expect(assetLine.debito).toBe(200);
+    expect(globalLine).toBeDefined();
+    expect(globalLine.credito).toBe(200);
+
+    await app.close();
+  });
+
+  it('should reject lines with both cuentaId and cuentaGlobalId → 400', async () => {
+    const app = await createTestApp();
+    const cookies = await registerAndVerify(app, 'us6-both@test.com');
+    const accounts = await setupTestAccounts(app, cookies);
+    const globalAcc = await prisma.cuentaGlobal.create({
+      data: {
+        codigo: nextCodigo('6299'),
+        nombre: 'Test Both',
+        esPostable: true,
+      },
+    });
+    createdGlobalIds.push(globalAcc.id);
+
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/entries',
+      headers: { cookie: cookies.join('; ') },
+      payload: {
+        fecha: '2026-06-01T00:00:00.000Z',
+        concepto: 'Both IDs',
+        lineas: [
+          {
+            cuentaId: accounts.expenseAccountId,
+            cuentaGlobalId: globalAcc.id,
+            debito: 100,
+            credito: 0,
+          },
+          { cuentaId: accounts.incomeAccountId, debito: 0, credito: 100 },
+        ],
+      },
+    });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.json().error).toContain('both');
+    await app.close();
+  });
+
+  it('should reject lines with neither cuentaId nor cuentaGlobalId → 400', async () => {
+    const app = await createTestApp();
+    const cookies = await registerAndVerify(app, 'us6-neither@test.com');
+    const accounts = await setupTestAccounts(app, cookies);
+
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/entries',
+      headers: { cookie: cookies.join('; ') },
+      payload: {
+        fecha: '2026-06-01T00:00:00.000Z',
+        concepto: 'Neither ID',
+        lineas: [
+          { debito: 100, credito: 0 } as any,
+          { cuentaId: accounts.incomeAccountId, debito: 0, credito: 100 },
+        ],
+      },
+    });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.json().error).toContain('cuentaId');
+    await app.close();
+  });
+
+  it('should include global-account lines in PyG reports', async () => {
+    const app = await createTestApp();
+    const cookies = await registerAndVerify(app, 'us6-pyg-global@test.com');
+    const accounts = await setupTestAccounts(app, cookies);
+
+    // Create a postable global income account
+    const globalIncome = await prisma.cuentaGlobal.create({
+      data: {
+        codigo: nextCodigo('4299'),
+        nombre: 'Global Income Direct',
+        esPostable: true,
+      },
+    });
+    createdGlobalIds.push(globalIncome.id);
+
+    // Entry: income via CuentaGlobal, expense via CuentaUsuario
+    await app.inject({
+      method: 'POST',
+      url: '/api/entries',
+      headers: { cookie: cookies.join('; ') },
+      payload: {
+        fecha: '2026-06-01T00:00:00.000Z',
+        concepto: 'Mixed entry',
+        lineas: [
+          { cuentaId: accounts.expenseAccountId, debito: 300, credito: 0 },
+          { cuentaGlobalId: globalIncome.id, debito: 0, credito: 300 },
+        ],
+      },
+    });
+
+    const pygRes = await app.inject({
+      method: 'GET',
+      url: '/api/reports/pyg?año=2026',
+      headers: { cookie: cookies.join('; ') },
+    });
+    expect(pygRes.statusCode).toBe(200);
+    const report = pygRes.json();
+
+    expect(Number(report.totalExpense)).toBe(300);
+    expect(Number(report.totalIncome)).toBe(300);
+    expect(Number(report.neto)).toBe(0);
+
+    // Should have expense from CuentaUsuario and income from CuentaGlobal
+    expect(report.expenseBreakdown.length).toBeGreaterThanOrEqual(1);
+    expect(report.incomeBreakdown.length).toBeGreaterThanOrEqual(1);
 
     await app.close();
   });

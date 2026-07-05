@@ -12,6 +12,8 @@ enum TipoCuenta {
   card
   wallet
   bridge
+  incomeCategory
+  expenseCategory
 
   @@map("tipo_cuenta")
 }
@@ -107,6 +109,7 @@ model CuentaGlobal {
   children        CuentaGlobal[]            @relation("GlobalAccountHierarchy")
   cuentasUsuario  CuentaUsuario[]
   activaciones    ActivacionCuentaGlobal[]
+  lineas          LineaAsiento[]
 
   @@map("cuentas_globales")
 }
@@ -114,6 +117,7 @@ model CuentaGlobal {
 model CuentaUsuario {
   id                 String     @id @default(cuid())
   userId             String
+  codigo             String?
   globalId           String?
   entidadId          String?
   tipoCuenta         TipoCuenta
@@ -128,6 +132,7 @@ model CuentaUsuario {
   entidad Entidad?        @relation(fields: [entidadId], references: [id])
   lineas  LineaAsiento[]
 
+  @@unique([userId, codigo])
   @@map("cuentas_usuario")
 }
 
@@ -197,15 +202,17 @@ model Asiento {
 }
 
 model LineaAsiento {
-  id        String   @id @default(cuid())
-  asientoId String
-  cuentaId  String
-  debito    Decimal  @default(0)
-  credito   Decimal  @default(0)
-  createdAt DateTime @default(now())
+  id             String         @id @default(cuid())
+  asientoId      String
+  cuentaId       String?
+  cuentaGlobalId String?
+  debito         Decimal        @default(0)
+  credito        Decimal        @default(0)
+  createdAt      DateTime       @default(now())
 
-  asiento Asiento         @relation(fields: [asientoId], references: [id], onDelete: Cascade)
-  cuenta  CuentaUsuario   @relation(fields: [cuentaId], references: [id])
+  asiento      Asiento        @relation(fields: [asientoId], references: [id], onDelete: Cascade)
+  cuenta       CuentaUsuario? @relation(fields: [cuentaId], references: [id])
+  cuentaGlobal CuentaGlobal?  @relation(fields: [cuentaGlobalId], references: [id])
 
   @@map("lineas_asiento")
 }

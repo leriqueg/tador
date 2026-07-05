@@ -3,8 +3,8 @@
 | Campo | Valor |
 |-------|-------|
 | **Documento** | Constitución del proyecto TADOR |
-| **Versión** | 1.0.0 |
-| **Última actualización** | 2026-06-24 |
+| **Versión** | 1.1.0 |
+| **Última actualización** | 2026-07-04 |
 | **Estado** | Aprobado — Documento fundacional |
 | **Fuentes** | 15 documentos fundacionales en `specs/foundation/` |
 
@@ -14,7 +14,7 @@
 
 TADOR es una aplicación web para registrar y controlar la economía del hogar con base contable correcta. Su nombre proviene de la frase «con TADOR, puedes facilitar tu economía del hogar». Nace de la experiencia con Conta Hogar (aplicación legacy Symfony/MySQL): se conserva la velocidad y sencillez de captura, pero se reemplaza el motor contable interno por partida doble real, asientos balanceados, plan de cuentas configurable y un modelo extensible mediante plantillas.
 
-TADOR no es un ERP. Su objetivo es que una persona use la aplicación en su vida diaria sin sentir que está usando un sistema contable profesional, pero sin sacrificar la integridad contable interna. El mismo sistema debe permitir crecer hacia un uso profesional ligero sin migrar a otro producto. Modo Hogar y Modo PRO son modos de uso, no modelos de pricing: los mismos datos sobreviven al cambio de modo.
+TADOR no es un ERP. Su objetivo es que una persona use la aplicación en su vida diaria sin sentir que está usando un sistema contable profesional, pero sin sacrificar la integridad contable interna. El mismo sistema debe permitir crecer hacia un uso profesional ligero sin migrar a otro producto. Modo Hogar y Modo PRO son niveles de expectativa del usuario, no modelos de pricing: los mismos datos sobreviven al cambio de modo; solo cambian densidad de UI y plantillas visibles.
 
 Esta constitución es el documento de referencia definitivo del proyecto. Todo sprint, spec, decisión arquitectónica o controversia se resuelve contra este documento.
 
@@ -24,7 +24,7 @@ Esta constitución es el documento de referencia definitivo del proyecto. Todo s
 
 ### 1. Alcance MVP
 
-**Regla.** El MVP debe entregar una aplicación web multiusuario operativa que cubra registro de economía del hogar con base contable correcta, plan de cuentas configurable, apuntes guiados, saldos básicos y un dashboard PYG anual.
+**Regla.** El MVP debe entregar una aplicación web multiusuario operativa que cubra registro de economía del hogar con base contable correcta, plan de cuentas configurable, apuntes guiados, saldos básicos (incluyendo deudas por cobrar/pagar vinculadas a Entidades) y un dashboard con panel PYG y panel de posición financiera.
 
 **Qué incluye.**
 - Multiusuario con autoregistro, login y recuperación de contraseña.
@@ -33,21 +33,21 @@ Esta constitución es el documento de referencia definitivo del proyecto. Todo s
 - Plan de cuentas global mantenido por TADOR como semilla base.
 - Plan de cuentas personalizado por usuario sobre la estructura global.
 - Cuentas madre (agrupadoras, no postables) y cuentas postables.
-- Módulo de Entidades como catálogo de objetos con nombre propio (personas, bancos, tarjetas, plataformas, etc.), sin CxC/CxP formal.
+- Módulo de Entidades como catálogo de objetos con nombre propio (personas, bancos, tarjetas, plataformas, etc.), vinculable a cuentas de balance por cobrar/pagar; sin módulo documental formal de CxC/CxP.
 - Tags como marcado de contexto; si representan nombre propio deben apoyarse en una Entidad.
 - Asientos contables internos, atómicos, balanceados y auditables.
 - Apuntes como plantillas guiadas que generan asientos válidos.
 - Traspasos/transferencias entre cuentas sin impacto PYG directo.
 - Cuentas puente/bypass para tarjetas, proyectos, años o dependientes.
-- Saldos actuales por cuenta.
-- Dashboard PYG anual como único reporte obligatorio.
+- Saldos actuales por cuenta, incluyendo activos líquidos, cuentas por cobrar y pasivos (tarjetas, préstamos, cuentas por pagar).
+- Dashboard con panel PYG anual y panel de posición (disponible, por cobrar, por pagar) como reporte obligatorio del MVP.
 - Cierre anual con reapertura.
 - UI mobile-first con soporte desktop.
 - Asistente IA v0 local (último componente del MVP) para interpretar frases simples y sugerir plantillas en Modo Hogar.
 
-**Qué queda fuera del MVP.** Registros periódicos, facturas, CxC formal, CxP formal, compras diferidas con tarjeta, conciliación bancaria, inventario, kardex, índices financieros, reportes avanzados, IA autónoma, personalidad completa de Pacho.
+**Qué queda fuera del MVP.** Registros periódicos, facturas, módulo documental formal de CxC/CxP (facturas, vencimientos, estados de cuenta por tercero), compras diferidas con tarjeta, conciliación bancaria, inventario, kardex, índices financieros, reportes avanzados, IA autónoma, personalidad completa de Pacho. Quedan fuera los documentos formales, no el registro de deudas por cobrar/pagar como cuentas de balance + Entidad.
 
-**Criterio de cierre del MVP.** El MVP está completo cuando un usuario puede: (1) registrarse, (2) configurar moneda, (3) tener plan de cuentas inicial, (4) crear cuentas propias guiadas, (5) crear entidades básicas, (6) registrar apuntes principales, (7) registrar traspasos, (8) usar cuentas puente, (9) ver saldos actuales, (10) ver dashboard PYG anual, (11) cerrar y reabrir un ejercicio, (12) usar IA v0 para sugerir plantillas simples en Modo Hogar.
+**Criterio de cierre del MVP.** El MVP está completo cuando un usuario puede: (1) registrarse, (2) configurar moneda, (3) tener plan de cuentas inicial, (4) crear cuentas propias guiadas, (5) crear entidades básicas, (6) registrar apuntes principales, (7) registrar traspasos, (8) usar cuentas puente, (9) ver saldos actuales, (10) ver dashboard con panel PYG y panel de posición, (11) cerrar y reabrir un ejercicio, (12) usar IA v0 para sugerir plantillas simples en Modo Hogar.
 
 **Implementación.** Cada sprint implementa una capacidad vertical verificable. No se construyen capas aisladas. El orden de valor es: auth segura → cuentas configurables → asiento válido → apunte real → dashboard útil → UI usable → IA asistente.
 
@@ -108,7 +108,7 @@ Esta constitución es el documento de referencia definitivo del proyecto. Todo s
 
 ### 5. Entidades
 
-**Regla.** Una Entidad es un objeto con nombre propio: persona, institución financiera, emisor de tarjeta, cliente, proveedor, plataforma, etc. No implica por sí sola cuentas por cobrar, cuentas por pagar, facturas ni documentos.
+**Regla.** Una Entidad es un objeto con nombre propio: persona, institución financiera, emisor de tarjeta, cliente, proveedor, plataforma, etc. No implica por sí sola facturas ni módulo documental de CxC/CxP. En el MVP, las Entidades pueden vincular cuentas de balance por cobrar o por pagar (tarjetas, préstamos, deudas con personas, clientes, proveedores).
 
 **Por qué existe.** En lugar de crear tablas separadas para bancos, personas, clientes y proveedores, una sola abstracción de Entidad con tipos y capacidades permite crecer por módulos sin cambiar el modelo de datos. CxC y CxP son capacidades futuras que apuntarán a Entidades existentes.
 
@@ -119,7 +119,7 @@ Esta constitución es el documento de referencia definitivo del proyecto. Todo s
 - Una Entidad puede tener capacidades/roles adicionales (`can_have_bank_accounts`, `can_issue_credit_cards`, `can_be_tagged`, `can_be_customer`, `can_be_supplier`, `can_have_receivables`, `can_have_payables`, `can_be_report_dimension`).
 - Una cuenta bancaria o tarjeta debe poder apuntar a una Entidad financiera/emisora.
 - Una Entidad puede usarse como tag/afectación en apuntes.
-- No se implementan facturas, CxC formal ni CxP formal en el MVP, pero el diseño debe permitir que módulos futuros apunten a Entidades existentes.
+- No se implementan facturas ni módulo documental formal de CxC/CxP en el MVP, pero el registro de deudas por cobrar/pagar vía cuentas de balance + Entidad sí es núcleo del MVP. Los módulos futuros deben apuntar a Entidades existentes.
 
 ---
 
@@ -144,11 +144,14 @@ Esta constitución es el documento de referencia definitivo del proyecto. Todo s
 
 **Regla.** TADOR separa dos preguntas contables fundamentales: «¿qué ingreso o gasto ocurrió?» (PYG) y «¿dónde está el dinero o la deuda?» (Balance). Nunca deben confundirse.
 
-**Por qué existe.** La confusión entre PYG y balance es el error más común en contabilidad doméstica. Una cuenta puente en cero no significa que no haya existido un gasto. El dashboard PYG debe responder ingresos y gastos del ejercicio; el balance responde saldos de activos, pasivos y patrimonio.
+**Por qué existe.** La confusión entre PYG y balance es el error más común en contabilidad doméstica. Una cuenta puente en cero no significa que no haya existido un gasto. El panel PYG responde ingresos y gastos del ejercicio; el panel de posición responde saldos de activos líquidos, cuentas por cobrar y pasivos.
 
 **Qué implica para implementación.**
-- El dashboard PYG MVP se calcula desde cuentas clasificadas como ingresos y gastos, no desde cuentas puente ni saldos de balance.
-- El reporte PYG incluye: selector de ejercicio, total ingresos, total gastos, neto, gráfico mensual (ingresos verdes, egresos rojos, saldo línea negra), Top 10 ingresos y Top 10 egresos.
+- El panel PYG del dashboard MVP se calcula desde cuentas clasificadas como ingresos y gastos, no desde cuentas puente ni saldos de balance.
+- El panel de posición se calcula desde saldos de cuentas de balance (activo líquido, por cobrar, pasivo) a la fecha de consulta; no usa cuentas de ingreso/egreso.
+- Los dos paneles se presentan juntos pero nunca mezclan fuentes de cálculo.
+- El panel PYG incluye: selector de ejercicio, total ingresos, total gastos, neto, gráfico mensual (ingresos verdes, egresos rojos, saldo línea negra), Top 10 ingresos y Top 10 egresos.
+- El panel de posición incluye: total disponible, total por cobrar, total por pagar.
 - Los egresos se muestran como valores positivos en el gráfico (para lectura visual).
 - El formato monetario debe respetar la moneda del usuario.
 - Quedan fuera del MVP: PYG comparativo, drill-down por asiento, filtros por entidad/tag, reportes por centro de costo, ratios, exportación formal.
@@ -305,7 +308,7 @@ Cada sprint debe cerrar con:
 | **Asiento manual** | Registro PRO abierto con validación de balance explícita. |
 | **Traspaso** | Plantilla que mueve valor entre cuentas sin generar PYG directo. |
 | **Plantilla** | Receta que toma parámetros y genera un asiento válido. |
-| **Entidad** | Objeto con nombre propio (banco, persona, plataforma, etc.). No implica CxC/CxP. |
+| **Entidad** | Objeto con nombre propio (banco, persona, plataforma, etc.). No implica módulo documental CxC/CxP; puede vincular cuentas de balance por cobrar/pagar. |
 | **Tag** | Marca de contexto para filtrar o agrupar. Si es nombre propio reutilizable, debe ser Entidad. |
 | **Cuenta puente** | Cuenta para acumular o netear valores de paso sin confundir PYG con saldos. |
 | **PYG** | Vista de ingresos y gastos. Responde «cuánto gané o gasté por categoría». |

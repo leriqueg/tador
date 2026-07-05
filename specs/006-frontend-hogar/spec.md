@@ -41,7 +41,7 @@ Como usuario Hogar, quiero registrar ingresos, gastos, compras con tarjeta y tra
 
 ### User Story 3 - Revisar estado del hogar (Priority: P2)
 
-Como usuario Hogar, quiero ver saldos actuales y dashboard PYG para entender mi situación.
+Como usuario Hogar, quiero ver saldos actuales y el dashboard (resultado del ejercicio y posición financiera) para entender mi situación.
 
 **Why this priority**: La captura no tiene valor sin retroalimentación simple.
 
@@ -50,7 +50,7 @@ Como usuario Hogar, quiero ver saldos actuales y dashboard PYG para entender mi 
 **Acceptance Scenarios**:
 
 1. **Given** apuntes registrados, **When** abro saldos, **Then** veo cuentas con importes actuales.
-2. **Given** apuntes con PYG, **When** abro dashboard, **Then** veo resumen anual.
+2. **Given** apuntes con PYG y saldos de balance, **When** abro dashboard, **Then** veo resumen anual PYG y totales de posición (disponible, por cobrar, por pagar).
 
 ### Edge Cases
 
@@ -69,7 +69,7 @@ Como usuario Hogar, quiero ver saldos actuales y dashboard PYG para entender mi 
 - **FR-004**: La UI MUST permitir creación básica de Entidades.
 - **FR-005**: La UI MUST permitir registrar apuntes principales.
 - **FR-006**: La UI MUST mostrar saldos actuales.
-- **FR-007**: La UI MUST mostrar dashboard PYG anual.
+- **FR-007**: La UI MUST mostrar dashboard con panel PYG anual y panel de posición (disponible, por cobrar, por pagar).
 - **FR-008**: La UI MUST presentar errores de validación en lenguaje cotidiano.
 
 ### Constitution Alignment *(mandatory for TADOR)*
@@ -84,7 +84,7 @@ Como usuario Hogar, quiero ver saldos actuales y dashboard PYG para entender mi 
 - **Pantalla Hogar**: Interfaz simplificada.
 - **Formulario de apunte**: Captura de intención cotidiana.
 - **Saldos visibles**: Resumen de cuentas del usuario.
-- **Dashboard PYG**: Reporte anual presentado al usuario.
+- **Dashboard MVP**: Reporte con panel PYG y panel de posición presentado al usuario.
 
 ## Success Criteria *(mandatory)*
 

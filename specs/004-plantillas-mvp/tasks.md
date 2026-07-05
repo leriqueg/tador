@@ -1,6 +1,6 @@
 # Tasks: Sprint 04 — Plantillas MVP
 
-## T1: Plantillas JSON (10 archivos)
+- [x] ## T1: Plantillas JSON (10 archivos)
 
 Crear `backend/src/plantillas/` con los 10 JSON de plantillas HOME.
 
@@ -15,7 +15,7 @@ Crear `backend/src/plantillas/` con los 10 JSON de plantillas HOME.
 
 ---
 
-## T2: Plantilla loader (`index.ts`)
+- [x] ## T2: Plantilla loader (`index.ts`)
 
 **File**: `backend/src/plantillas/index.ts`
 
@@ -32,7 +32,7 @@ Carga los 10 JSON desde el filesystem, valida schema mínimo y los exporta como 
 
 ---
 
-## T3: Plugin Fastify — registro de plantillas
+- [x] ## T3: Plugin Fastify — registro de plantillas
 
 **File**: `backend/src/api/plugins/plantillas.ts` o integrado en server.ts
 
@@ -44,7 +44,7 @@ Registra las plantillas en el servidor y agrega decorator `app.plantillaLoader`.
 
 ---
 
-## T4: GET /api/plantillas
+- [x] ## T4: GET /api/plantillas
 
 **Files**: `backend/src/api/routes/plantillas.ts`, registro en server.ts
 
@@ -64,7 +64,7 @@ Endpoint listar y obtener plantillas individuales.
 
 ---
 
-## T5: Modelo Apunte + migración Prisma
+- [x] ## T5: Modelo Apunte + migración Prisma
 
 **File**: `backend/prisma/schema.prisma`, nueva migración
 
@@ -91,7 +91,7 @@ model Apunte {
 
 ---
 
-## T6: POST /api/apuntes — core logic
+- [x] ## T6: POST /api/apuntes — core logic
 
 **File**: `backend/src/api/routes/apuntes.ts`
 
@@ -123,7 +123,7 @@ Crea un apunte y su asiento en una transacción.
 
 ---
 
-## T7: Tests
+- [x] ## T7: Tests
 
 **File**: `backend/tests/plantillas.test.ts`
 
@@ -172,7 +172,7 @@ Crea un apunte y su asiento en una transacción.
 
 ---
 
-## T8: Validator de jerarquía
+- [x] ## T8: Validator de jerarquía
 
 **File**: `backend/src/application/plantilla-validator.ts` o similar
 

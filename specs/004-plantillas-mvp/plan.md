@@ -1,111 +1,71 @@
-# Implementation Plan: Sprint 04 - Plantillas MVP
+# Implementation Plan: Sprint 04 — Plantillas MVP
 
-**Branch**: `sdd/definiciones` | **Date**: 2026-06-22 | **Spec**: [spec.md](./spec.md)
-
-**Input**: Feature specification from `/specs/004-plantillas-mvp/spec.md`
+**Branch**: `sprint/004-plantillas`  
+**Spec**: [spec.md](./spec.md)
 
 ## Summary
 
-Define and execute prioritized templates that convert Hogar/PRO intent into validated balanced journal entries.
+Implement motor de plantillas que permite registrar apuntes contables desde plantillas JSON predefinidas (HOME) o desde wizard libre (PRO). Backend-only: JSONs, endpoints, validación, generación de asientos y tabla Apunte.
 
-## Technical Context
+## Architectural Context
 
-**Language/Version**: TypeScript on Node.js (exact versions to be pinned during Sprint 01 setup)
+- Backend: Fastify + TypeScript ESM + Prisma + PostgreSQL
+- Ya existe: motor contable (asientos, líneas, periodos, CuentaGlobal, CuentaUsuario)
+- Se agrega: carga de plantillas JSON, endpoint GET /api/plantillas, POST /api/apuntes, validación de slots, tabla Apunte
 
-**Primary Dependencies**: Fastify, Prisma, PostgreSQL for backend; React, Vite, Mantine, Zustand and React Query for frontend when frontend sprints begin
+## Design Decisions
 
-**Storage**: PostgreSQL via Prisma for product data; JSON files in repo for MVP template definitions until a later persistence decision
+1. **Plantillas como JSON** — en `backend/src/plantillas/*.json`. Se cargan en memoria al startup. Sin tabla en DB.
+2. **Mismo endpoint para HOME y PRO** — `POST /api/apuntes` acepta con o sin `templateCode`. Con template: valida contra plantilla. Sin template: solo valida balance + cuentas.
+3. **Estrategias de línea** — `from_group` (una cuenta hija de un grupo), `from_groups` (de varios grupos), `fixed` (cuenta fija).
+4. **amountMode** — `single` (mismo monto en todas las líneas) o `per_line` (futuro).
+5. **Validación de jerarquía** — Para `from_group`/`from_groups`, se verifica que la cuenta seleccionada (CuentaGlobal o CuentaUsuario) cuelgue del grupo declarado.
 
-**Testing**: Test runner to be established in Sprint 01; backend behavior requires TDD once tooling exists
+## Implementation Phases
 
-**Target Platform**: Linux-hosted web application, local Docker development, browser clients mobile-first plus desktop support
+### Phase 1: Plantillas JSON + loader
 
-**Project Type**: Web application with backend API and frontend client
+- Crear `backend/src/plantillas/` con 10 archivos JSON
+- `index.ts` que carga todos los JSON, los valida contra un schema mínimo y los exporta
+- Registrar en el servidor (plugin Fastify)
 
-**Performance Goals**: MVP user flows should feel interactive for a personal finance book; dashboard and balances should load within normal web-app expectations for pilot data
+### Phase 2: GET /api/plantillas endpoint
 
-**Constraints**: Tenant isolation, privacy-safe logs, stable per-book currency, balanced accounting entries, no autonomous AI execution
+- Listar plantillas (opcional: filtrar por modo)
+- Resolver cuentas disponibles por línea según estrategia
+- GET /api/plantillas/:code con una plantilla específica
 
-**Scale/Scope**: MVP/pilot scale for personal and light professional use; one sprint per spec
+### Phase 3: Tabla Apunte + Prisma migration
 
+- Modelo `Apunte` en schema.prisma
+- Migración
 
-## Constitution Check
+### Phase 4: POST /api/apuntes (con plantilla)
 
-*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
+- Validar templateCode, líneas, cuentas
+- Validar jerarquía grupo → cuenta
+- Aplicar amountMode single
+- Generar asiento via accounting-service
+- Guardar Apunte + Asiento en transacción
 
-- **MVP Scope & Sprint Fit**: PASS — this plan covers one sprint/capability only and keeps out-of-scope work explicit.
-- **Tenant & Privacy**: PASS — user-owned data is scoped by authenticated user whenever the sprint touches runtime data.
-- **Accounting Integrity**: PASS — any financial behavior routes through balanced Asientos or declares no accounting impact.
-- **Plantilla Discipline**: PASS — common operations are modeled through versioned Plantillas when applicable.
-- **Plan de Cuentas & Entidades**: PASS — global chart, user accounts and Entidades remain separate concepts.
-- **PYG vs Balance**: PASS — PYG reporting is separated from balance, bridge and payment accounts.
-- **TDD & Tests**: PASS — each sprint defines test obligations; Sprint 01 establishes runnable tooling.
-- **AI Safety**: PASS — IA v0 only suggests templates and never persists accounting directly.
-- **Concurrency & Idempotency**: PASS — mutating backend behavior must define duplicate-request and concurrent update handling before implementation.
-- **Secure Design & Architecture**: PASS — plans must preserve Clean Architecture boundaries, authorization, validation, privacy-safe logs, and fail-closed tenant access.
-- **Maintainability Standards**: PASS — implementation must follow SOLID/DRY with judgment, English code/endpoint naming, and rare English comments for complex procedures only.
-- **Dependency Hygiene**: PASS — package additions must use stable releases, lock exact resolved versions, avoid prerelease/untested packages, and prefer reputable OSS/framework features.
+### Phase 5: POST /api/apuntes (sin plantilla / PRO)
 
+- Validar líneas con side + amount
+- Validar balance
+- Generar asiento sin vincular plantilla
 
-## Project Structure
+### Phase 6: Tests
 
-### Documentation (this feature)
+- Unit: parsing de template JSON, validación de líneas
+- Integration: GET /api/plantillas devuelve 10
+- Integration: POST /api/apuntes con cada template → asiento balanceado
+- Integration: POST /api/apuntes PRO wizard → asiento balanceado
+- Integration: errores V1-V9
 
-```text
-specs/004-plantillas-mvp/
-├── spec.md
-├── plan.md
-├── research.md
-├── data-model.md
-├── quickstart.md
-└── contracts/
-    └── behavior.md
-```
+## Risks
 
-### Source Code (repository root)
-
-```text
-backend/
-├── src/
-│   ├── domain/
-│   ├── application/
-│   ├── infrastructure/
-│   └── api/
-└── tests/
-
-frontend/
-├── src/
-│   ├── components/
-│   ├── pages/
-│   ├── services/
-│   └── state/
-└── tests/
-
-specs/
-└── foundation/
-```
-
-**Structure Decision**: Use a web application layout with separate `backend/` and `frontend/` roots when implementation begins. Foundation and sprint specs remain under `specs/`.
-
-
-## Complexity Tracking
-
-No constitution violations are currently planned. Any future violation must document why it is required and what simpler alternative was rejected.
-
-
-## Phase 0 Research
-
-See [research.md](./research.md). All planning clarifications are resolved for this draft plan.
-
-## Phase 1 Design
-
-See [data-model.md](./data-model.md), [quickstart.md](./quickstart.md), and contracts under [contracts/](./contracts/) when applicable.
-
-## Post-Design Constitution Check
-
-- **MVP Scope & Sprint Fit**: PASS — design artifacts remain scoped to `Sprint 04 - Plantillas MVP`.
-- **Tenant & Privacy**: PASS — privacy/tenant impact is documented for this sprint.
-- **Accounting Integrity**: PASS — accounting impact is either absent or routed through balanced Asientos.
-- **TDD & Tests**: PASS — test expectations are documented for planning and task generation.
-- **Concurrency & Idempotency**: PASS — implementation tasks must cover duplicate submissions and concurrent writes when mutating state.
-- **Secure Design & Architecture**: PASS — design must maintain secure boundaries and Clean Architecture separation.
+| Risk | Mitigation |
+|---|---|
+| Validar jerarquía CuentaGlobal requiere consultas recursivas | Limitar a 3 niveles, usar Prisma relations |
+| Plantillas cambian en el futuro | JSON versionado, carga al startup |
+| amountMode per_line en PRO sin template duplica lógica | Usar mismo validador de balance existente |

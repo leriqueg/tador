@@ -1,7 +1,7 @@
 /**
  * Seed script for CuentaGlobal (global chart of accounts).
  *
- * Reads the CSV from specs/foundation/plan-de-cuentas-seed.csv
+ * Reads the chart from specs/foundation/plan-de-cuentas/plan-de-cuentas-final-seed.json
  * and upserts ALL accounts using a two-pass approach:
  *
  * Pass 1: Upsert group-level accounts (esPostable === false).
@@ -22,86 +22,28 @@ import { fileURLToPath } from 'node:url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const prisma = new PrismaClient();
 
-interface CsvAccountEntry {
+interface SeedAccountEntry {
   codigo: string;
   nombre: string;
   esPostable: boolean;
   codigoPadre: string | null;
-  naturaleza: string;
-  clasificacion: string;
   legacyId: number | null;
+  legacyCodigo: string | null;
 }
 
-function parseCsvLine(line: string): string[] {
-  const result: string[] = [];
-  let current = '';
-  let inQuotes = false;
-
-  for (const char of line) {
-    if (char === '"') {
-      inQuotes = !inQuotes;
-    } else if (char === ',' && !inQuotes) {
-      result.push(current.trim());
-      current = '';
-    } else {
-      current += char;
-    }
-  }
-  result.push(current.trim());
-  return result;
-}
-
-function parseCsvAccounts(csvContent: string): CsvAccountEntry[] {
-  const lines = csvContent.split('\n');
-  const accounts: CsvAccountEntry[] = [];
-  let headerFound = false;
-
-  for (const line of lines) {
-    const trimmed = line.trim();
-
-    // Skip empty lines and comments
-    if (!trimmed || trimmed.startsWith('#')) continue;
-
-    // Find header row
-    if (!headerFound) {
-      if (trimmed.startsWith('codigo,')) {
-        headerFound = true;
-      }
-      continue;
-    }
-
-    const cols = parseCsvLine(trimmed);
-    if (cols.length < 5) continue;
-
-    const codigo = cols[0];
-    const nombre = cols[1];
-    const esPostable = cols[2].toLowerCase() === 'true';
-    const codigoPadre = cols[3] || null;
-    const naturaleza = cols[4] || '';
-    const clasificacion = cols[5] || '';
-    const legacyId = cols[6] ? parseInt(cols[6], 10) : null;
-
-    accounts.push({
-      codigo,
-      nombre,
-      esPostable,
-      codigoPadre,
-      naturaleza,
-      clasificacion,
-      legacyId,
-    });
-  }
-
-  return accounts;
+interface SeedFile {
+  schemaVersion: string;
+  accounts: SeedAccountEntry[];
 }
 
 export async function main(): Promise<void> {
   const dataPath = resolve(
     __dirname,
-    '../../../specs/foundation/plan-de-cuentas-seed.csv',
+    '../../../specs/foundation/plan-de-cuentas/plan-de-cuentas-final-seed.json',
   );
   const raw = readFileSync(dataPath, 'utf-8');
-  const accounts = parseCsvAccounts(raw);
+  const seed: SeedFile = JSON.parse(raw);
+  const accounts = seed.accounts;
 
   // -------------------------------------------------------------------------
   // Pass 1: Upsert group-level accounts

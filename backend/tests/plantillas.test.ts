@@ -12,7 +12,7 @@
 import { describe, it, expect, afterAll, beforeEach } from 'vitest';
 import { buildApp } from '../src/server.js';
 import { prisma } from '../src/infrastructure/database.js';
-import { resetPlantillaCache, loadPlantillas } from '../src/plantillas/index.js';
+import { resetPlantillaCache, loadPlantillas, getPlantilla } from '../src/plantillas/index.js';
 import type { FastifyInstance } from 'fastify';
 
 // ---------------------------------------------------------------------------
@@ -232,13 +232,14 @@ describe('Plantilla loader', () => {
 
   it('getPlantilla for unknown code should return undefined', () => {
     resetPlantillaCache();
-    const { getPlantilla } = require('../src/plantillas/index.js');
+    loadPlantillas();
     const result = getPlantilla('nonexistent');
     expect(result).toBeUndefined();
   });
 
   it('should have pagar_servicios with correct structure', () => {
-    const { getPlantilla } = require('../src/plantillas/index.js');
+    resetPlantillaCache();
+    loadPlantillas();
     const p = getPlantilla('pagar_servicios');
     expect(p).toBeDefined();
     expect(p!.lines[0].strategy).toBe('from_group');

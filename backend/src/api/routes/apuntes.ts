@@ -227,14 +227,16 @@ export function registerApunteRoutes(
         const bookId = await getBookId(userId);
 
         // ---------------------------------------------------------------
-        // V6: Validate period is open
+        // V6: Validate period is open (create if not exists)
         // ---------------------------------------------------------------
         const fecha = new Date(body.date);
         const año = fecha.getFullYear();
-        const period = await prisma.periodoContable.findUnique({
+        const period = await prisma.periodoContable.upsert({
           where: { bookId_año: { bookId, año } },
+          update: {},
+          create: { bookId, año, abierto: true },
         });
-        if (period && !period.abierto) {
+        if (!period.abierto) {
           return reply
             .status(400)
             .send({ error: `Period ${año} is closed (V6)` });

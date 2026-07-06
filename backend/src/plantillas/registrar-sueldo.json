@@ -1,0 +1,16 @@
+{
+  "code": "registrar_sueldo",
+  "version": 1,
+  "name": "Registrar sueldo del mes",
+  "modes": ["hogar"],
+  "amount": { "type": "money", "required": true, "label": "Monto" },
+  "concept": { "type": "text", "required": true, "label": "Concepto" },
+  "date": { "type": "date", "default": "today", "required": true, "label": "Fecha" },
+  "entity": { "type": "entity", "required": false, "label": "Relacionado con" },
+  "amountMode": "single",
+  "descriptionTemplate": "Sueldo: {concept}",
+  "lines": [
+    { "id": 1, "side": "debit",  "label": "¿Dónde recibiste?", "strategy": "from_groups", "groupCodes": ["11110000","11120000"] },
+    { "id": 2, "side": "credit", "label": "Tipo de ingreso",    "strategy": "from_group", "groupCode": "41010000", "suggestedChild": null }
+  ]
+}

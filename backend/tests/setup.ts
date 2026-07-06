@@ -27,6 +27,7 @@ afterAll(async () => {
 
 afterEach(async () => {
   // Clean up all data after each test
+  await prisma.apunte.deleteMany();
   await prisma.session.deleteMany();
   await prisma.bookConfig.deleteMany();
   await prisma.book.deleteMany();

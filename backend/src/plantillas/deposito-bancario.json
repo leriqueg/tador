@@ -1,0 +1,16 @@
+{
+  "code": "deposito_bancario",
+  "version": 1,
+  "name": "Depositar en banco",
+  "modes": ["hogar"],
+  "amount": { "type": "money", "required": true, "label": "Monto" },
+  "concept": { "type": "text", "required": true, "label": "Concepto" },
+  "date": { "type": "date", "default": "today", "required": true, "label": "Fecha" },
+  "entity": { "type": "entity", "required": false, "label": "Relacionado con" },
+  "amountMode": "single",
+  "descriptionTemplate": "Depósito: {concept}",
+  "lines": [
+    { "id": 1, "side": "debit",  "label": "Banco destino",   "strategy": "from_group",   "groupCode": "11120000" },
+    { "id": 2, "side": "credit", "label": "Desde (origen)",   "strategy": "from_groups", "groupCodes": ["11110000","11120000"] }
+  ]
+}

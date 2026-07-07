@@ -1,8 +1,8 @@
 <!--
 Sync Impact Report
-- Version change: 1.2.0 → 1.3.0
-- Modified principles: V (MVP receivable/payable support), VI (dashboard position panel)
-- Added sections: none
+- Version change: 1.4.0 → 1.5.0
+- Modified principles: I (richer mode definition), V (CxC/CxP clarification)
+- Added sections: Product Vision (preamble), reference to modos-hogar-pro.md
 - Removed sections: none
 - Templates requiring updates:
   ✅ README.md (vision and two-question framing)
@@ -19,18 +19,41 @@ Sync Impact Report
 
 # TADOR Constitution
 
+## Product Vision: Two modes, one engine
+
+TADOR serves two distinct needs through the same accounting engine:
+
+**HOGAR** gives peace of mind. It answers: *"Am I doing well with my money?"*
+Simple, quick indicators — income, expenses, available balance, debts, net savings.
+Clarity over technical detail. Designed so a person or family can understand their
+financial health without thinking like an accountant.
+
+**PRO** gives economic control. It answers: *"How is my economic activity performing
+and what commitments do I have?"* Richer context — receivables, payables, assets,
+liabilities, cash flow, real vs capital expense. Designed for independent
+professionals and small businesses who need to distinguish profitability from
+liquidity and expense from investment.
+
+Both modes operate on the same data model and the same backend. They differ only in
+UI density, level of detail, and which indicators are emphasized. Switching modes
+never requires migration. The full definition lives in `specs/foundation/modos-hogar-pro.md`.
+
 ## Core Principles
 
 ### I. Simplicidad Hogar con motor contable real
 
 TADOR MUST let a household user register everyday financial events through simple
-language, short forms, and guided Apuntes. The UI MAY hide accounting codes, account
-parents, debits, and credits in Modo Hogar, but the backend MUST preserve a correct
-accounting model. Product work MUST NOT make casual users learn ERP-style workflows
-just to record common income, expense, transfer, or card operations.
+language, short forms, and guided Apuntes in Modo Hogar, while exposing richer
+operational detail in Modo PRO — all backed by the same correct accounting engine.
+The UI MAY hide accounting codes, account parents, debits, and credits in Modo Hogar,
+but the backend MUST preserve a correct accounting model that works for both modes.
+Product work MUST NOT make casual users learn ERP-style workflows just to record
+common income, expense, transfer, or card operations.
 
 Rationale: TADOR is inspired by Conta Hogar's speed and clarity, but exists to avoid
 the accounting limits that appeared as the user's needs became more professional.
+The two-mode design ensures the app grows with the user without requiring data
+migration or a product switch.
 
 ### II. Asiento atómico y partida doble
 
@@ -77,9 +100,16 @@ people, family members, clients, suppliers, institutions, or platforms. Entidad 
 not imply formal CxC/CxP documents by itself; future CxC/CxP modules MUST reference
 Entidades. The MVP MUST support registering receivable and payable debts as balance
 accounts linked to Entidades (banks, card issuers, people, clients, suppliers).
-Formal CxC/CxP documents, due dates, and third-party account statements are post-MVP,
-but the account-plus-Entidad engine that supports them MUST exist from the MVP so
-that switching between Modo Hogar and Modo PRO never requires a data model change.
+Formal CxC/CxP documents (invoices, due-date tracking, aging, third-party account
+statements) are post-MVP, but the account-plus-Entidad engine that supports them
+MUST exist from the MVP so that switching between Modo Hogar and Modo PRO never
+requires a data model change.
+
+CLARIFICATION: "Cuenta por cobrar" and "cuenta por pagar" are balance accounts with
+an Entidad reference. Registering a debt via an accounting entry IS core MVP.
+Aging reports, invoice attachments, and formal CxC/CxP modules are separate
+post-MVP capabilities. The account layer and the formal document layer are distinct;
+the MVP implements the first and leaves the second for later sprints.
 
 Rationale: This avoids mixing catalog defaults with one user's history while keeping
 a migration path from the legacy plan and future professional modules, and ensures
@@ -134,6 +164,8 @@ corruption, supply-chain, and long-term maintenance risk.
 ## Product & Domain Constraints
 
 - MVP scope is defined in `specs/foundation/mvp-scope.md`.
+- Mode definitions (Hogar vs PRO) are defined in `specs/foundation/modos-hogar-pro.md`.
+- All specs and sprints MUST respect the Hogar/PRO distinction described in that document.
 - The implementation sequence MUST follow `specs/foundation/estrategia-incremental-sprints.md`
   unless a spec explicitly amends that order.
 - The mandatory MVP dashboard is described in `specs/foundation/reporte-pyg-mvp.md`
@@ -148,6 +180,19 @@ corruption, supply-chain, and long-term maintenance risk.
   reconciliation, inventory, kardex, advanced reports, and autonomous AI execution.
   Exclusion of formal CxC/CxP does NOT exclude registering receivable/payable debts
   as balance accounts linked to Entidades; that capability is MVP core.
+- MVP closure criteria: the product is complete when a user can:
+  (1) register and authenticate,
+  (2) configure their currency on first login,
+  (3) receive the initial chart of accounts,
+  (4) create guided personal accounts,
+  (5) create basic entities,
+  (6) record everyday journal entries via templates,
+  (7) record transfers between accounts,
+  (8) use bridge/bypass accounts,
+  (9) view current account balances,
+  (10) view the dashboard with PYG and position panels,
+  (11) close and re-open a fiscal year,
+  (12) use the local AI v0 to suggest simple templates in Modo Hogar.
 
 ## Technical Direction
 
@@ -199,4 +244,34 @@ Each new Spec Kit plan MUST pass the Constitution Check before Phase 0 research 
 again after Phase 1 design. Violations MUST be listed in Complexity Tracking with the
 simpler alternative that was rejected.
 
-**Version**: 1.3.0 | **Ratified**: 2026-06-20 | **Last Amended**: 2026-07-04
+---
+## Appendix A: Glossary
+
+| Term | Definition |
+|------|------------|
+| **TADOR** | Web application to facilitate household economy with correct accounting foundations, designed to grow towards light professional use. |
+| **Hogar** | Simple, guided mode using everyday language. Hides account codes, parent accounts, debits/credits, and accounting complexity. |
+| **PRO** | Explicit mode that exposes accounting details without becoming an ERP. |
+| **Book (Libro)** | A user's complete financial dataset: accounts, entities, journal entries, templates, periods, settings. |
+| **Account (Cuenta)** | Chart-of-accounts element that classifies balances, income, expenses, liabilities, equity, or bridge/bypass values. |
+| **Parent account (Cuenta madre)** | Grouping account (GRP), non-postable. Organizes the chart of accounts. |
+| **Postable account (Cuenta postable)** | Leaf account (MOV) that receives journal entry lines. |
+| **Global chart of accounts (Plan de cuentas global)** | NIIF-inspired base catalog maintained by TADOR. |
+| **User chart of accounts (Plan de cuentas del usuario)** | Personalization on top of the global plan with user-owned accounts. |
+| **Asiento** | Atomic, balanced, auditable journal entry. Contains a header and lines. |
+| **Journal entry line (Línea de asiento)** | Individual account movement within an Asiento. |
+| **Apunte** | Guided template that converts an everyday intention into one or more valid Asientos. |
+| **Manual entry (Asiento manual)** | PRO-mode open entry with explicit balance validation. |
+| **Transfer (Traspaso)** | Template that moves value between accounts without direct PYG impact. |
+| **Template (Plantilla)** | Recipe that takes user parameters and generates a valid Asiento. |
+| **Entidad** | Named-object abstraction: bank, person, platform, card issuer, client, supplier, etc. Does not imply formal CxC/CxP documents; can link balance accounts for receivables/payables. |
+| **Tag** | Context marker for filtering or grouping. If representing a reusable named entity, MUST be an Entidad instead. |
+| **Bridge account (Cuenta puente)** | Account that accumulates or nets passing values without confusing PYG with balance. |
+| **PYG** | Income/expense view. Answers "how much did I earn or spend by category?" |
+| **Balance** | Asset, liability, and equity view. Answers "where is the money and what do I owe?" |
+| **Annual close (Cierre anual)** | Lock modification on a fiscal year, with optional re-opening. |
+| **Re-opening (Reapertura)** | Action to re-enable modification of a previously closed fiscal year. |
+| **Double-entry (Partida doble)** | Accounting principle: every journal entry has debits and credits that MUST sum to equal amounts. |
+| **Idempotency (Idempotencia)** | Property by which the same request can be sent multiple times without creating duplicates. |
+
+**Version**: 1.5.0 | **Ratified**: 2026-06-20 | **Last Amended**: 2026-07-07

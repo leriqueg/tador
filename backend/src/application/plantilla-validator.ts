@@ -33,10 +33,11 @@ async function collectAncestorCodes(
     if (visited.has(currentId)) break;
     visited.add(currentId);
 
-    const record = await prisma.cuentaGlobal.findUnique({
-      where: { id: currentId },
-      select: { codigo: true, parentId: true },
-    });
+    const record: { codigo: string; parentId: string | null } | null =
+      await prisma.cuentaGlobal.findUnique({
+        where: { id: currentId! },
+        select: { codigo: true, parentId: true },
+      });
     if (!record) break;
 
     codes.push(record.codigo);

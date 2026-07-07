@@ -1,5 +1,13 @@
 # TADOR
 
+![GitHub last commit](https://img.shields.io/github/last-commit/leriqueg/tador)
+![GitHub repo size](https://img.shields.io/github/repo-size/leriqueg/tador)
+![GitHub](https://img.shields.io/github/license/leriqueg/tador)
+![Prisma](https://img.shields.io/badge/Prisma-2D3748?logo=prisma)
+![Fastify](https://img.shields.io/badge/Fastify-000000?logo=fastify)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?logo=postgresql&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
+
 TADOR es una aplicación web en etapa de diseño para facilitar la economía del hogar y permitir que una persona crezca hacia un control financiero profesional ligero, sin tener que cambiar de herramienta.
 
 ## Origen
@@ -12,55 +20,103 @@ Con el tiempo aparecieron necesidades que Conta Hogar no cubría bien: tarjetas 
 
 TADOR busca conservar la sencillez de los apuntes rápidos, pero con un motor interno basado en asientos contables balanceados. El usuario Hogar debería poder registrar cosas como “gasté dinero”, “recibí dinero” o “compré con tarjeta” sin pensar en contabilidad; el usuario PRO podrá ver y controlar más detalle cuando lo necesite.
 
-TADOR responde dos preguntas distintas con una sola base contable:
+---
 
-1. **¿Cómo va mi dinero?** — ingresos, gastos y resultado del ejercicio (PYG).
-2. **¿Qué tengo y qué debo?** — efectivo, bancos, deudas por cobrar y deudas por pagar (Balance).
+## Modos de uso — Hogar y PRO
 
-Desde el MVP, el motor soporta registrar deudas por cobrar y por pagar como cuentas de balance vinculadas a Entidades: una tarjeta de crédito es una deuda con su emisor, un préstamo a una persona es una cuenta por cobrar. El análisis documental formal (facturas, vencimientos, estados de cuenta por cliente o proveedor) llegará después, pero sobre este mismo motor, sin migraciones de concepto.
+TADOR ofrece dos modos sobre un mismo motor contable. Ambos operan con los mismos datos; solo cambia la densidad de la UI y los indicadores que se muestran.
 
-Los modos Hogar y PRO son niveles de expectativa del usuario, no niveles de precio: cambian la densidad de la UI y las plantillas visibles, nunca el modelo de datos. El cambio de modo debe ser inmediato y sin pérdida de historial. En el futuro, el modo podría convertirse en un factor de valor por suscripción, pero esa decisión no debe afectar el diseño del motor.
+### HOGAR — Paz mental
 
-La meta es construir una herramienta:
+Pensado para una persona o familia que quiere entender si vive bien financieramente, sin pensar como contador.
 
-- simple para el hogar,
-- extensible para uso profesional,
-- segura para datos financieros personales,
-- preparada para multiusuario,
-- basada en un plan de cuentas claro,
-- capaz de crecer mediante plantillas y entidades,
-- con un dashboard que combine resultado del ejercicio (PYG) y posición financiera (qué tengo / qué debo).
+**Preguntas que responde:**
+- ¿Cuánto gano y cuánto gasto?
+- ¿En qué se va la plata?
+- ¿Cuánto tengo disponible y cuánto debo?
+- ¿Al final del mes estoy mejor o peor?
 
-## Stack previsto
+**Indicadores:** ingresos, gastos, saldo disponible, deudas, ahorro neto, tendencia mensual, alertas de exceso de gasto.
 
-Frontend:
+### PRO — Control económico
 
-- React
-- TypeScript
-- Vite
-- Mantine
-- Zustand
-- React Query
+Pensado para profesionales independientes, pequeños negocios o quienes necesitan ordenar finanzas operativas con más precisión.
 
-Backend:
+**Preguntas que responde:**
+- ¿Cuánto cobré, cuánto me deben y cuánto debo?
+- ¿Qué tengo en activos y qué debo en pasivos?
+- ¿Qué fue gasto real y qué fue inversión?
+- ¿Cómo está mi rentabilidad y liquidez?
 
-- Node.js
-- Fastify
-- PostgreSQL
-- Prisma
+**Indicadores:** ingresos cobrados y por cobrar, gastos pagados y por pagar, activos, pasivos, flujo de caja, resultado del ejercicio, desglose por cuenta.
 
-Infraestructura:
+> **Hogar da paz mental; PRO da control económico.**
+>
+> La diferencia no es incompleto vs completo. Cada modo resuelve una necesidad distinta sobre los mismos datos.
 
-- Docker
+---
 
-IA local:
+## Estado actual — Sprint 05 completado ✅
 
-- modelo local pequeño
-- uso inicial como interpretador de lenguaje natural
-- sugerencia de plantillas en Modo Hogar
+| Sprint | Nombre | Estado |
+|--------|--------|--------|
+| 00 | Foundation Spec Kit | ✅ Completado |
+| 01 | Plataforma base | ✅ Completado |
+| 02 | Catálogos base | ✅ Completado |
+| 03 | Motor contable | ✅ Completado |
+| 04 | Plantillas MVP | 🔄 Pendiente |
+| **05** | **Dashboard PYG** | **✅ Completado** |
+| 06 | Frontend Hogar | ⏳ Pendiente |
+| 07 | Frontend PRO ligero | ⏳ Pendiente |
+| 08 | IA v0 | ⏳ Pendiente |
 
-## Estado actual
+El **Sprint 05** entrega el dashboard obligatorio del MVP con dos paneles:
 
-El proyecto está en fase foundation. Todavía no hay implementación de producto; los documentos iniciales viven en `specs/foundation/` y sirven como insumo para que Spec Kit ayude a definir constitución, specs y fases del MVP.
+- **Panel PYG**: ingresos, gastos, resultado neto, evolución mensual (12 meses con gráfico), Top 10 de ingresos y egresos.
+- **Panel de posición**: disponible (efectivo, bancos), por cobrar, por pagar, posición neta y desglose por cuenta individual.
 
-La primera etapa técnica se enfocará en backend con TDD. Luego vendrá el frontend base y, al cierre del MVP, una capa de IA local para interpretar frases simples y sugerir apuntes/plantillas sin ejecutar contabilidad de forma autónoma.
+Ambos paneles se sirven desde una API común (`GET /api/reports/pyg`, `GET /api/reports/position`) que alimenta tanto la vista Hogar como la vista PRO. Las diferencias de presentación entre modos se resuelven en el frontend.
+
+---
+
+## Stack
+
+| Capa | Tecnología |
+|------|------------|
+| Backend | Node.js + TypeScript + Fastify + Prisma + PostgreSQL |
+| Frontend | React + TypeScript + Vite + Mantine + Zustand + React Query |
+| Infraestructura | Docker |
+| IA local | Modelo local pequeño (sugerencia de plantillas en Modo Hogar) |
+| Cálculos financieros | decimal.js |
+
+---
+
+## Arquitectura
+
+Clean Architecture con dependencias dirigidas hacia el dominio:
+
+```
+api/ → application/ → domain/
+ ↑          ↑
+infrastructure/
+```
+
+Las reglas contables (balance de asientos, tenant isolation, idempotencia) viven en `domain/`. Los casos de uso viven en `application/`. La infraestructura (Prisma, Fastify) implementa interfaces definidas en dominio/aplicación.
+
+---
+
+## Documentación
+
+| Documento | Ubicación |
+|-----------|-----------|
+| Constitución del proyecto | `.specify/memory/constitution.md` |
+| Definición de modos Hogar y PRO | `specs/foundation/modos-hogar-pro.md` |
+| Alcance MVP | `specs/foundation/mvp-scope.md` |
+| Specs por sprint | `specs/{sprint}-*/spec.md` |
+| Diseño y tareas | `openspec/changes/{sprint}-*/` |
+
+---
+
+## Licencia
+
+[MIT](LICENSE)

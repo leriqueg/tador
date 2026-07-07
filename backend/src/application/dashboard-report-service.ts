@@ -123,12 +123,21 @@ function classifyPositionAccount(
     return 'excluded';
   }
 
-  // Bank and wallet are always liquid assets
+  const prefix = globalCodigo ? globalCodigo.charAt(0) : '';
+
+  // Entity-linked accounts: entidadId takes precedence for proper
+  // classification of loans/credit extended to third parties.
+  if (entidadId && prefix === '1') {
+    return 'receivable';
+  }
+  if (entidadId && prefix === '2') {
+    return 'payable';
+  }
+
+  // Bank and wallet are liquid assets
   if (tipoCuenta === 'bank' || tipoCuenta === 'wallet') {
     return 'available';
   }
-
-  const prefix = globalCodigo ? globalCodigo.charAt(0) : '';
 
   // Cards: codigo determines classification
   if (tipoCuenta === 'card') {
@@ -137,12 +146,7 @@ function classifyPositionAccount(
     return 'excluded'; // Unknown card type
   }
 
-  // Accounts linked to an entity + asset codigo → receivable
-  if (entidadId && prefix === '1') {
-    return 'receivable';
-  }
-
-  // Asset codigo (not entity-linked) → available
+  // Asset codigo → available
   if (prefix === '1') {
     return 'available';
   }

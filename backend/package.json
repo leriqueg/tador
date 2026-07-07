@@ -21,6 +21,7 @@
     "@fastify/cookie": "^11.0.0",
     "@prisma/client": "^6.0.0",
     "argon2": "^0.41.0",
+    "decimal.js": "^10.4.3",
     "fastify": "^5.0.0",
     "nanoid": "^5.0.0",
     "pino": "^9.0.0",

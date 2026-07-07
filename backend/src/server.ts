@@ -12,6 +12,7 @@ import { createSessionService } from './infrastructure/services/session-service.
 import { createAuthApplicationService } from './application/auth-service.js';
 import { createBookApplicationService } from './application/book-service.js';
 import { createAccountingService } from './application/accounting-service.js';
+import { createDashboardReportService } from './application/dashboard-report-service.js';
 import { registerAuthRoutes } from './api/routes/auth.js';
 import { registerVerificationRoutes } from './api/routes/verification.js';
 import { registerRecoveryRoutes } from './api/routes/recovery.js';
@@ -78,6 +79,7 @@ export async function buildApp(opts?: { logger?: boolean | object }) {
   });
 
   const accountingService = createAccountingService();
+  const dashboardReportService = createDashboardReportService();
 
   // Routes
   registerAuthRoutes(app, authService);
@@ -90,7 +92,7 @@ export async function buildApp(opts?: { logger?: boolean | object }) {
   registerTagRoutes(app, authService);
   registerEntryRoutes(app, authService, accountingService);
   registerBalanceRoutes(app, authService, accountingService);
-  registerReportRoutes(app, authService, accountingService);
+  registerReportRoutes(app, authService, accountingService, dashboardReportService);
   registerPeriodRoutes(app, authService, accountingService);
   registerPlantillaRoutes(app, authService);
   registerApunteRoutes(app, authService);

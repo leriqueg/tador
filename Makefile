@@ -37,14 +37,26 @@ db-reset:                 ## Resetea DB: borra esquema, migra y seedea
 db-studio:                ## Abre Prisma Studio
 	cd $(BACKEND) && npx prisma studio
 
-# ─── Servidor ──────────────────────────────────────────
+# ─── Servidores ────────────────────────────────────────
 
-.PHONY: dev
-dev:                      ## Arranca backend en modo watch
+.PHONY: up
+up:                       ## Levanta todos los servicios (Docker)
+	$(COMPOSE) up -d
+
+.PHONY: down
+down:                     ## Detiene todos los servicios
+	$(COMPOSE) down
+
+.PHONY: dev-backend
+dev-backend:              ## Arranca backend en modo watch (local)
 	cd $(BACKEND) && npx tsx watch src/server.ts
 
+.PHONY: dev-frontend
+dev-frontend:             ## Arranca frontend en modo watch (local)
+	cd frontend && npm run dev
+
 .PHONY: build
-build:                    ## Compila TypeScript
+build:                    ## Compila TypeScript (backend)
 	cd $(BACKEND) && npx tsc
 
 # ─── Tests ─────────────────────────────────────────────
@@ -73,8 +85,16 @@ ps:                       ## Muestra contenedores activos
 	$(COMPOSE) ps
 
 .PHONY: logs
-logs:                     ## Logs del backend
+logs:                     ## Logs de todos los servicios
+	$(COMPOSE) logs -f
+
+.PHONY: logs-backend
+logs-backend:             ## Logs del backend
 	$(COMPOSE) logs -f backend
+
+.PHONY: logs-frontend
+logs-frontend:            ## Logs del frontend
+	$(COMPOSE) logs -f frontend
 
 .PHONY: clean
 clean:                    ## Limpia artefactos de build

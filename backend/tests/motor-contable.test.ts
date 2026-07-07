@@ -892,13 +892,13 @@ describe('US5 — Reports', () => {
     expect(pygRes.statusCode).toBe(200);
     const report = pygRes.json();
 
-    expect(report.año).toBe(2026);
+    expect(report.year).toBe(2026);
     expect(Number(report.totalIncome)).toBe(500);
-    expect(Number(report.totalExpense)).toBe(300);
-    expect(Number(report.neto)).toBe(200);
+    expect(Number(report.totalExpenses)).toBe(300);
+    expect(Number(report.netResult)).toBe(200);
 
-    expect(report.incomeBreakdown).toHaveLength(1);
-    expect(report.expenseBreakdown).toHaveLength(1);
+    expect(report.topIncome).toHaveLength(1);
+    expect(report.topExpenses).toHaveLength(1);
 
     await app.close();
   });
@@ -1154,13 +1154,13 @@ describe('US6 — Direct CuentaGlobal in entry lines', () => {
     expect(pygRes.statusCode).toBe(200);
     const report = pygRes.json();
 
-    expect(Number(report.totalExpense)).toBe(300);
+    expect(Number(report.totalExpenses)).toBe(300);
     expect(Number(report.totalIncome)).toBe(300);
-    expect(Number(report.neto)).toBe(0);
+    expect(Number(report.netResult)).toBe(0);
 
     // Should have expense from CuentaUsuario and income from CuentaGlobal
-    expect(report.expenseBreakdown.length).toBeGreaterThanOrEqual(1);
-    expect(report.incomeBreakdown.length).toBeGreaterThanOrEqual(1);
+    expect(report.topExpenses.length).toBeGreaterThanOrEqual(1);
+    expect(report.topIncome.length).toBeGreaterThanOrEqual(1);
 
     await app.close();
   });

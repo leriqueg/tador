@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>TADOR - Onboarding</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-low": "#f2f4f6",
+                        "on-surface-variant": "#404847",
+                        "error-container": "#ffdad6",
+                        "error": "#ba1a1a",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-highest": "#e0e3e5",
+                        "on-primary": "#ffffff",
+                        "on-primary-container": "#87beb8",
+                        "secondary-container": "#62fae3",
+                        "on-surface": "#191c1e",
+                        "surface-variant": "#e0e3e5",
+                        "text-muted": "#64748B",
+                        "on-primary-fixed-variant": "#144f4b",
+                        "surface-dim": "#d8dadc",
+                        "on-tertiary-fixed-variant": "#3d4947",
+                        "surface-container-high": "#e6e8ea",
+                        "on-primary-fixed": "#00201e",
+                        "warning-amber": "#F59E0B",
+                        "surface-container": "#eceef0",
+                        "tertiary": "#263230",
+                        "outline-variant": "#bfc8c6",
+                        "on-secondary-fixed": "#00201c",
+                        "on-secondary": "#ffffff",
+                        "surface-bright": "#f7f9fb",
+                        "tertiary-container": "#3c4846",
+                        "primary": "#003633",
+                        "on-error-container": "#93000a",
+                        "inverse-surface": "#2d3133",
+                        "secondary-fixed": "#62fae3",
+                        "surface-tint": "#316763",
+                        "surface": "#f7f9fb",
+                        "outline": "#707977",
+                        "on-error": "#ffffff",
+                        "tertiary-fixed-dim": "#bcc9c6",
+                        "success-emerald": "#10B981",
+                        "surface-container-lowest": "#ffffff",
+                        "background": "#f7f9fb",
+                        "on-tertiary-fixed": "#121e1c",
+                        "primary-fixed": "#b5ede7",
+                        "text-main": "#1E293B",
+                        "on-secondary-container": "#007165",
+                        "tertiary-fixed": "#d8e5e2",
+                        "inverse-primary": "#9ad1cb",
+                        "on-tertiary-container": "#a9b6b4",
+                        "inverse-on-surface": "#eff1f3",
+                        "expense-rose": "#E11D48",
+                        "secondary-fixed-dim": "#3cddc7",
+                        "primary-fixed-dim": "#9ad1cb",
+                        "on-background": "#191c1e",
+                        "primary-container": "#134e4a",
+                        "secondary": "#006b5f",
+                        "on-secondary-fixed-variant": "#005047"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "sm": "12px",
+                        "base": "4px",
+                        "xs": "8px",
+                        "xl": "40px",
+                        "container-max": "1200px",
+                        "gutter": "16px",
+                        "md": "16px",
+                        "lg": "24px"
+                    },
+                    "fontFamily": {
+                        "label-sm": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-xl": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "label-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "600"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-xl": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "500"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .squishy-btn:active {
+            transform: scale(0.98);
+            transition: transform 0.1s ease;
+        }
+        .tonal-shadow {
+            box-shadow: 0 4px 12px rgba(19, 78, 74, 0.05);
+        }
+        .high-elevation {
+            box-shadow: 0 12px 32px rgba(19, 78, 74, 0.12);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface selection:bg-primary-fixed-dim selection:text-primary">
+<!-- Header / Navigation Shell Suppression (Transactional Context) -->
+<header class="fixed top-0 w-full bg-surface/80 backdrop-blur-md z-50 h-16 flex items-center shadow-sm">
+<div class="max-w-container-max mx-auto w-full px-lg flex justify-between items-center">
+<div class="flex items-center gap-xs">
+<span class="font-headline-md text-headline-md font-bold text-primary tracking-tight">TADOR</span>
+</div>
+<div class="flex items-center gap-md">
+<div class="flex items-center gap-xs text-on-surface-variant font-label-md text-label-md">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">help_outline</span>
+<span>¿Necesitas ayuda?</span>
+</div>
+</div>
+</div>
+</header>
+<main class="min-h-screen pt-16 flex flex-col items-center justify-center">
+<div class="w-full max-w-container-max mx-auto px-lg py-xl">
+<!-- Stepper Component -->
+<nav class="flex justify-center mb-xl">
+<div class="flex items-center gap-lg w-full max-w-md">
+<div class="flex flex-col items-center gap-xs flex-1">
+<div class="w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center font-bold">1</div>
+<span class="font-label-sm text-label-sm text-primary uppercase">Elección</span>
+</div>
+<div class="h-px bg-outline-variant flex-grow -mt-6"></div>
+<div class="flex flex-col items-center gap-xs flex-1 opacity-40">
+<div class="w-10 h-10 rounded-full bg-surface-container-high text-on-surface flex items-center justify-center font-bold">2</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Moneda</span>
+</div>
+<div class="h-px bg-outline-variant flex-grow -mt-6"></div>
+<div class="flex flex-col items-center gap-xs flex-1 opacity-40">
+<div class="w-10 h-10 rounded-full bg-surface-container-high text-on-surface flex items-center justify-center font-bold">3</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Registro</span>
+</div>
+</div>
+</nav>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-xl items-center">
+<!-- Left Section: Welcome Message & Pacho -->
+<div class="lg:col-span-5 flex flex-col items-start gap-md animate-in fade-in slide-in-from-left duration-700">
+<div class="relative w-full aspect-square max-w-[400px] rounded-xl overflow-hidden bg-surface-container-low border border-outline-variant/30 tonal-shadow">
+<img alt="Pacho Mentor Mascot" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida/AP1WRLuUwZfrW4rl9mxUWY36pjoFluBSiGrYv3fQI56YI79cU-jYAUa-kqIPwdJ8k8qK7-uX_zoYiYBxkbnVf3WDYoPZ-tZyP560n7eIycaNkpntNMNHmfs1Rb7Z-T4mc2tf1ZZHxgReAm36OYZjUuycHdWMNPTVG4UWjmlRbc-bXGbZe8W9AVLcnHzriafDb-FXT5cPD03uMH4bstlAuiitqEx2K56Knd1XPfHDjiCHHhQSTC53f-T2nZM"/>
+<div class="absolute bottom-4 left-4 right-4 bg-surface/90 backdrop-blur-sm p-md rounded-lg border border-outline-variant/20">
+<p class="font-body-md text-body-md text-on-surface italic">"¡Hola! Soy Pacho, tu mentor personal. Juntos pondremos en orden tus finanzas con la precisión de un contador y la calma de un hogar feliz."</p>
+</div>
+</div>
+<div class="mt-md">
+<h1 class="font-headline-xl text-headline-xl text-primary mb-sm leading-tight">Bienvenido a TADOR</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-md">Para empezar este viaje hacia tu calma financiera, necesitamos definir cómo te gustaría interactuar con tus números.</p>
+</div>
+</div>
+<!-- Right Section: Choice Cards -->
+<div class="lg:col-span-7 flex flex-col gap-lg">
+<div class="flex flex-col gap-xs mb-md">
+<h2 class="font-headline-md text-headline-md text-on-surface">Configura tu experiencia</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Elige el modo que mejor se adapte a tus necesidades actuales. Puedes cambiar esto más adelante.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-lg">
+<!-- Card 1: Modo Hogar -->
+<div class="group relative bg-surface-container-lowest border-2 border-outline-variant p-lg rounded-xl transition-all duration-300 hover:border-primary-fixed hover:bg-surface-bright tonal-shadow cursor-pointer flex flex-col">
+<div class="mb-md flex items-center justify-between">
+<div class="p-xs bg-secondary-container/30 text-secondary rounded-lg">
+<span class="material-symbols-outlined text-[32px]" style="font-variation-settings: 'FILL' 1;">home</span>
+</div>
+<span class="material-symbols-outlined text-outline group-hover:text-primary opacity-0 group-hover:opacity-100 transition-opacity">check_circle</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-primary mb-xs">Modo Hogar</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-md flex-grow">Ideal para quienes buscan simplificar sus gastos personales sin complicaciones técnicas.</p>
+<ul class="space-y-sm mb-lg">
+<li class="flex items-start gap-xs text-label-md font-label-md text-on-surface">
+<span class="material-symbols-outlined text-success-emerald text-[18px]">done</span>
+                                    Lenguaje cotidiano (Apuntes)
+                                </li>
+<li class="flex items-start gap-xs text-label-md font-label-md text-on-surface">
+<span class="material-symbols-outlined text-success-emerald text-[18px]">done</span>
+                                    Categorías inteligentes
+                                </li>
+<li class="flex items-start gap-xs text-label-md font-label-md text-on-surface">
+<span class="material-symbols-outlined text-success-emerald text-[18px]">done</span>
+                                    Presupuesto familiar simple
+                                </li>
+</ul>
+<button class="squishy-btn w-full py-md rounded-full bg-surface-container-high text-primary font-bold transition-colors group-hover:bg-primary group-hover:text-on-primary">
+                                Seleccionar Hogar
+                            </button>
+</div>
+<!-- Card 2: Modo PRO -->
+<div class="group relative bg-surface-container-lowest border-2 border-outline-variant p-lg rounded-xl transition-all duration-300 hover:border-primary-fixed hover:bg-surface-bright tonal-shadow cursor-pointer flex flex-col">
+<div class="mb-md flex items-center justify-between">
+<div class="p-xs bg-primary-container/20 text-primary rounded-lg">
+<span class="material-symbols-outlined text-[32px]" style="font-variation-settings: 'FILL' 1;">account_balance</span>
+</div>
+<div class="bg-primary-fixed px-xs py-1 rounded text-[10px] font-bold text-primary uppercase tracking-wider">Premium</div>
+</div>
+<h3 class="font-headline-md text-headline-md text-primary mb-xs">Modo PRO</h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-md flex-grow">Diseñado para profesionales independientes o pequeños negocios con rigor contable.</p>
+<ul class="space-y-sm mb-lg">
+<li class="flex items-start gap-xs text-label-md font-label-md text-on-surface">
+<span class="material-symbols-outlined text-success-emerald text-[18px]">done</span>
+                                    Partida doble automática
+                                </li>
+<li class="flex items-start gap-xs text-label-md font-label-md text-on-surface">
+<span class="material-symbols-outlined text-success-emerald text-[18px]">done</span>
+                                    Reportes de flujo de caja
+                                </li>
+<li class="flex items-start gap-xs text-label-md font-label-md text-on-surface">
+<span class="material-symbols-outlined text-success-emerald text-[18px]">done</span>
+                                    Gestión multi-moneda
+                                </li>
+</ul>
+<button class="squishy-btn w-full py-md rounded-full bg-surface-container-high text-primary font-bold transition-colors group-hover:bg-primary group-hover:text-on-primary">
+                                Seleccionar PRO
+                            </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Actions -->
+<div class="mt-xl flex flex-col md:flex-row justify-between items-center pt-lg border-t border-outline-variant gap-md">
+<button class="flex items-center gap-xs text-on-surface-variant font-label-md text-label-md hover:text-primary transition-colors squishy-btn">
+<span class="material-symbols-outlined">arrow_back</span>
+                    Volver al inicio
+                </button>
+<div class="flex items-center gap-md">
+<p class="hidden md:block font-label-sm text-label-sm text-on-surface-variant italic">¿No estás seguro? Empezar con el Modo Hogar es lo más común.</p>
+<button class="squishy-btn px-lg py-md bg-primary-fixed-dim text-on-primary-fixed-variant rounded-full font-bold flex items-center gap-xs hover:bg-primary-fixed transition-colors">
+                        Siguiente paso
+                        <span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer Script for subtle interactions -->
+<script>
+        document.querySelectorAll('.group.cursor-pointer').forEach(card => {
+            card.addEventListener('click', () => {
+                // Remove active state from all
+                document.querySelectorAll('.group.cursor-pointer').forEach(c => {
+                    c.classList.remove('border-primary', 'bg-surface-bright');
+                    c.classList.add('border-outline-variant', 'bg-surface-container-lowest');
+                    const btn = c.querySelector('button');
+                    btn.classList.replace('bg-primary', 'bg-surface-container-high');
+                    btn.classList.replace('text-on-primary', 'text-primary');
+                });
+                
+                // Add active state to selected
+                card.classList.replace('border-outline-variant', 'border-primary');
+                card.classList.replace('bg-surface-container-lowest', 'bg-surface-bright');
+                const activeBtn = card.querySelector('button');
+                activeBtn.classList.replace('bg-surface-container-high', 'bg-primary');
+                activeBtn.classList.replace('text-primary', 'text-on-primary');
+                
+                // Trigger a small pulse effect
+                card.style.transform = 'scale(0.99)';
+                setTimeout(() => card.style.transform = '', 100);
+            });
+        });
+    </script>
+</body></html>

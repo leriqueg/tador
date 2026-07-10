@@ -191,3 +191,13 @@ Función que verifica si una cuenta (CuentaGlobal o CuentaUsuario) cuelga de un 
 - Retorna boolean
 - Usa Prisma relations (carga la chain completa en una query)
 - Limita a 10 niveles de profundidad (previene loops)
+
+---
+
+## Follow-up (deuda para Sprint 06)
+
+Historial de apuntes requerido por UI Hogar (`/entries`, dashboard recientes). Contrato: `GET /api/apuntes` en spec §5.4.
+
+- [ ] F1 Escribir test: `GET /api/apuntes` → 200 lista del usuario A; usuario B no ve apuntes de A (SC-008)
+- [ ] F2 Escribir test: orden por `date` desc; `limit`/`offset` respetados; respuesta sin líneas de asiento
+- [ ] F3 Implementar `GET /api/apuntes` en `backend/src/api/routes/apuntes.ts` según §5.4

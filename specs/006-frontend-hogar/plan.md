@@ -101,6 +101,10 @@ See [research.md](./research.md). All planning clarifications are resolved for t
 
 See [data-model.md](./data-model.md), [quickstart.md](./quickstart.md), and contracts under [contracts/](./contracts/) when applicable.
 
+**Pre-implementation inventory** (routes ↔ mockups ↔ APIs): [inventory-vistas-endpoints.md](./inventory-vistas-endpoints.md).  
+**Component inventory** (Storybook definitions): [`frontend/docs/component-inventory.md`](../../frontend/docs/component-inventory.md).  
+**Tasks**: [tasks.md](./tasks.md).
+
 ## Post-Design Constitution Check
 
 - **MVP Scope & Sprint Fit**: PASS — design artifacts remain scoped to `Sprint 06 - Frontend Hogar`.

@@ -395,7 +395,43 @@ Crea un apunte a partir de una plantilla (o sin plantilla, modo PRO).
 }
 ```
 
-### 5.4 Modo PRO sin plantilla
+### 5.4 `GET /api/apuntes`
+
+Lista los apuntes del usuario autenticado (historial Hogar / reciente). No expone líneas contables.
+
+**Query (opcionales):**
+
+| Param | Tipo | Default | Descripción |
+|-------|------|---------|-------------|
+| `limit` | number | 20 | Máximo de ítems (cap 100) |
+| `offset` | number | 0 | Paginación |
+
+**Response 200:**
+
+```jsonc
+{
+  "apuntes": [
+    {
+      "id": "apunte-xxx",
+      "templateCode": "pagar_servicios",  // null si PRO wizard
+      "date": "2026-07-05",
+      "concept": "Luz julio",
+      "amount": 85.50,
+      "asientoId": "asiento-abc-123",
+      "createdAt": "2026-07-05T14:22:00.000Z"
+    }
+  ],
+  "total": 42
+}
+```
+
+**Reglas:**
+- Solo apuntes del `userId` autenticado (tenant isolation).
+- Orden: `date` desc, luego `createdAt` desc.
+- Proyección Hogar: sin `lines` del asiento; el frontend no muestra códigos contables.
+- 401 si no hay sesión.
+
+### 5.5 Modo PRO sin plantilla
 
 El endpoint `POST /api/apuntes` también acepta apuntes sin `templateCode`. En ese caso:
 
@@ -464,6 +500,7 @@ Este sprint no implementa frontend. Pero el spec define cómo el frontend DEBE c
 3. Usuario selecciona una → GET /api/plantillas/:code → obtiene la plantilla con cuentas disponibles resueltas
 4. UI renderiza los campos (`amount`, `concept`, `date`, `entity`) y los slots de cuenta con selectores filtrados
 5. Usuario llena → POST /api/apuntes
+6. Lista reciente / historial → GET /api/apuntes (proyección sin líneas contables)
 
 ### 8.2 Modo PRO (wizard)
 
@@ -502,6 +539,7 @@ Cada plantilla referencia grupos del plan de cuentas. Tabla de referencia:
 - **SC-005**: Validaciones V1-V9 rechazan apuntes inválidos con mensajes claros.
 - **SC-006**: Apunte queda registrado y vinculado al Asiento generado.
 - **SC-007**: POST /api/apuntes con `amountMode: "single"` replica el monto en todas las líneas.
+- **SC-008**: GET /api/apuntes devuelve solo apuntes del usuario autenticado, ordenados por fecha desc, sin líneas contables.
 
 ## 11. Fuera de scope (sprint actual)
 
@@ -512,5 +550,4 @@ Cada plantilla referencia grupos del plan de cuentas. Tabla de referencia:
 - Cuenta puente
 - Plantillas PRO (ingreso_tercero, gasto_proyecto_puente, asiento_manual)
 - Motor de plantillas en DB
-- Historial de apuntes
 - Edición de apuntes

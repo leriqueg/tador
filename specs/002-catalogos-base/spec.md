@@ -88,6 +88,7 @@ Como usuario, quiero registrar nombres propios y etiquetas para relacionarlos co
 - **FR-011**: El sistema MUST permitir overrides por usuario sin modificar la definición global.
 - **FR-012**: El sistema MUST mantener Entidades y tags como catálogos separados en el MVP.
 - **FR-013**: El sistema MUST permitir nombres duplicados entre Entidades y tags, distinguiendo explícitamente el tipo de filtro o referencia.
+- **FR-014**: El sistema MUST exponer `GET /api/accounts` que liste las cuentas del usuario autenticado (propias y provisionadas por entidad), sin filtrar por códigos contables en la proyección Hogar.
 
 ### Constitution Alignment *(mandatory for TADOR)*
 
@@ -114,6 +115,7 @@ Como usuario, quiero registrar nombres propios y etiquetas para relacionarlos co
 - **SC-004**: Dos usuarios pueden tener Entidades con el mismo nombre sin compartir datos.
 - **SC-005**: Un usuario puede usar una cuenta global común sin que se copie todo el catálogo a su libro.
 - **SC-006**: Una búsqueda o reporte puede diferenciar entre una Entidad y un tag aunque compartan nombre.
+- **SC-007**: `GET /api/accounts` devuelve solo las cuentas del usuario autenticado e incluye al menos id, nombre, tipoCuenta y flags de activación/provisión.
 
 ## Assumptions
 

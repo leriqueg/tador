@@ -12,6 +12,8 @@ The UI follows the TADOR Finanzas design system:
 | **TypeScript tokens** | [`src/design/tokens.ts`](src/design/tokens.ts) |
 | **CSS theme** (Tailwind `@theme`) | [`src/globals.css`](src/globals.css) |
 | **Component library** | Storybook (`npm run storybook`) |
+| **Component inventory** (definitions, status, Storybook map) | [`docs/component-inventory.md`](docs/component-inventory.md) |
+| **Sprint 06 route ↔ API map** | [`specs/006-frontend-hogar/inventory-vistas-endpoints.md`](../specs/006-frontend-hogar/inventory-vistas-endpoints.md) |
 
 ### Typography
 

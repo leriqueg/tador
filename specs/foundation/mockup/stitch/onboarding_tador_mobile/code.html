@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>TADOR - Onboarding</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts: Inter -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-container-low": "#f2f4f6",
+                      "on-surface-variant": "#404847",
+                      "error-container": "#ffdad6",
+                      "error": "#ba1a1a",
+                      "on-tertiary": "#ffffff",
+                      "surface-container-highest": "#e0e3e5",
+                      "on-primary": "#ffffff",
+                      "on-primary-container": "#87beb8",
+                      "secondary-container": "#62fae3",
+                      "on-surface": "#191c1e",
+                      "surface-variant": "#e0e3e5",
+                      "text-muted": "#64748B",
+                      "on-primary-fixed-variant": "#144f4b",
+                      "surface-dim": "#d8dadc",
+                      "on-tertiary-fixed-variant": "#3d4947",
+                      "surface-container-high": "#e6e8ea",
+                      "on-primary-fixed": "#00201e",
+                      "warning-amber": "#F59E0B",
+                      "surface-container": "#eceef0",
+                      "tertiary": "#263230",
+                      "outline-variant": "#bfc8c6",
+                      "on-secondary-fixed": "#00201c",
+                      "on-secondary": "#ffffff",
+                      "surface-bright": "#f7f9fb",
+                      "tertiary-container": "#3c4846",
+                      "primary": "#003633",
+                      "on-error-container": "#93000a",
+                      "inverse-surface": "#2d3133",
+                      "secondary-fixed": "#62fae3",
+                      "surface-tint": "#316763",
+                      "surface": "#f7f9fb",
+                      "outline": "#707977",
+                      "on-error": "#ffffff",
+                      "tertiary-fixed-dim": "#bcc9c6",
+                      "success-emerald": "#10B981",
+                      "surface-container-lowest": "#ffffff",
+                      "background": "#f7f9fb",
+                      "on-tertiary-fixed": "#121e1c",
+                      "primary-fixed": "#b5ede7",
+                      "text-main": "#1E293B",
+                      "on-secondary-container": "#007165",
+                      "tertiary-fixed": "#d8e5e2",
+                      "inverse-primary": "#9ad1cb",
+                      "on-tertiary-container": "#a9b6b4",
+                      "inverse-on-surface": "#eff1f3",
+                      "expense-rose": "#E11D48",
+                      "secondary-fixed-dim": "#3cddc7",
+                      "primary-fixed-dim": "#9ad1cb",
+                      "on-background": "#191c1e",
+                      "primary-container": "#134e4a",
+                      "secondary": "#006b5f",
+                      "on-secondary-fixed-variant": "#005047"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "sm": "12px",
+                      "base": "4px",
+                      "xs": "8px",
+                      "xl": "40px",
+                      "container-max": "1200px",
+                      "gutter": "16px",
+                      "md": "16px",
+                      "lg": "24px"
+              },
+              "fontFamily": {
+                      "label-sm": ["Inter"],
+                      "headline-lg": ["Inter"],
+                      "body-lg": ["Inter"],
+                      "body-md": ["Inter"],
+                      "headline-xl": ["Inter"],
+                      "headline-md": ["Inter"],
+                      "headline-lg-mobile": ["Inter"],
+                      "label-md": ["Inter"]
+              },
+              "fontSize": {
+                      "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "600"}],
+                      "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "headline-xl": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                      "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                      "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "500"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .squishy-active:active {
+            transform: scale(0.96);
+        }
+        .custom-glass {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+        .selected-ring {
+            box-shadow: 0 0 0 3px #134e4a;
+        }
+        /* Warm Gradient Background from SCREEN_15 logic */
+        .onboarding-bg {
+            background: linear-gradient(135deg, #f7f9fb 0%, #e0e3e5 100%);
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col font-body-md overflow-x-hidden">
+<!-- Background Layer -->
+<div class="onboarding-bg"></div>
+<!-- Main Container -->
+<main class="flex-1 flex flex-col max-w-lg mx-auto w-full px-md pb-xl pt-lg relative z-10">
+<!-- Step Indicator -->
+<div class="w-full flex gap-xs mb-xl justify-center items-center">
+<div class="h-1.5 flex-1 bg-primary rounded-full"></div>
+<div class="h-1.5 flex-1 bg-surface-container-highest rounded-full"></div>
+<div class="h-1.5 flex-1 bg-surface-container-highest rounded-full"></div>
+</div>
+<!-- Pacho Mentor Card -->
+<section class="mb-xl animate-fade-in">
+<div class="bg-surface-container-lowest rounded-xl p-md shadow-[0_4px_12px_rgba(19,78,74,0.05)] flex items-start gap-md border border-surface-container-low">
+<div class="shrink-0 w-20 h-20 rounded-full overflow-hidden bg-primary-fixed">
+<img alt="Pacho the Poodle Mascot" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida/AP1WRLuUwZfrW4rl9mxUWY36pjoFluBSiGrYv3fQI56YI79cU-jYAUa-kqIPwdJ8k8qK7-uX_zoYiYBxkbnVf3WDYoPZ-tZyP560n7eIycaNkpntNMNHmfs1Rb7Z-T4mc2tf1ZZHxgReAm36OYZjUuycHdWMNPTVG4UWjmlRbc-bXGbZe8W9AVLcnHzriafDb-FXT5cPD03uMH4bstlAuiitqEx2K56Knd1XPfHDjiCHHhQSTC53f-T2nZM"/>
+</div>
+<div class="flex-1">
+<h2 class="font-headline-md text-headline-md text-primary mb-xs">¡Hola!</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">
+                        Soy <span class="font-bold text-primary">Pacho</span>, tu guía financiero. Vamos a preparar tu cuenta juntos.
+                    </p>
+</div>
+</div>
+</section>
+<!-- Step Title -->
+<section class="mb-lg">
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface mb-xs">Elige tu estilo</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">¿Cómo planeas usar TADOR? Puedes cambiar esto más tarde.</p>
+</section>
+<!-- Selection Cards (Bento-ish) -->
+<section class="grid grid-cols-1 gap-md mb-xl">
+<!-- Mode Home -->
+<button class="group text-left p-md bg-surface-container-lowest rounded-xl border-2 border-transparent transition-all duration-300 shadow-[0_4px_12px_rgba(19,78,74,0.05)] squishy-active hover:shadow-md" id="mode-hogar" onclick="selectMode('hogar')">
+<div class="flex justify-between items-start mb-sm">
+<div class="w-12 h-12 bg-secondary-container text-on-secondary-container rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-2xl">home_app_logo</span>
+</div>
+<div class="radio-indicator w-6 h-6 rounded-full border-2 border-outline-variant flex items-center justify-center transition-colors">
+<div class="inner-dot w-3 h-3 bg-primary rounded-full scale-0 transition-transform"></div>
+</div>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-base">Modo Hogar</h3>
+<p class="font-label-md text-label-md text-on-surface-variant">
+                    Simple, limpio y diseñado para el uso diario. Ideal para gestionar gastos familiares sin complicaciones.
+                </p>
+</button>
+<!-- Mode PRO -->
+<button class="group text-left p-md bg-surface-container-lowest rounded-xl border-2 border-transparent transition-all duration-300 shadow-[0_4px_12px_rgba(19,78,74,0.05)] squishy-active hover:shadow-md" id="mode-pro" onclick="selectMode('pro')">
+<div class="flex justify-between items-start mb-sm">
+<div class="w-12 h-12 bg-primary-fixed text-primary rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-2xl">monitoring</span>
+</div>
+<div class="radio-indicator w-6 h-6 rounded-full border-2 border-outline-variant flex items-center justify-center transition-colors">
+<div class="inner-dot w-3 h-3 bg-primary rounded-full scale-0 transition-transform"></div>
+</div>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-base">Modo PRO</h3>
+<p class="font-label-md text-label-md text-on-surface-variant">
+                    Reportes avanzados, control técnico y conciliación bancaria. Para quienes aman el detalle contable.
+                </p>
+</button>
+</section>
+<!-- Spacer for push-bottom -->
+<div class="flex-1"></div>
+<!-- Footer Action -->
+<footer class="sticky bottom-0 py-md bg-transparent">
+<button class="w-full py-4 bg-primary text-on-primary rounded-xl font-headline-md text-headline-md shadow-lg opacity-50 cursor-not-allowed transition-all duration-300 squishy-active disabled:scale-100 flex items-center justify-center gap-xs" disabled="" id="continue-btn">
+                Continuar
+                <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+<p class="text-center mt-sm font-label-sm text-label-sm text-outline">
+                Paso 1 de 3
+            </p>
+</footer>
+</main>
+<script>
+        let selectedMode = null;
+
+        function selectMode(mode) {
+            selectedMode = mode;
+            
+            // Reset cards
+            document.getElementById('mode-hogar').classList.remove('border-primary', 'shadow-lg');
+            document.getElementById('mode-pro').classList.remove('border-primary', 'shadow-lg');
+            
+            document.querySelectorAll('.radio-indicator').forEach(el => {
+                el.classList.remove('border-primary');
+                el.classList.add('border-outline-variant');
+            });
+            document.querySelectorAll('.inner-dot').forEach(el => {
+                el.classList.remove('scale-100');
+                el.classList.add('scale-0');
+            });
+
+            // Set active card
+            const activeCard = document.getElementById(`mode-${mode}`);
+            activeCard.classList.add('border-primary', 'shadow-lg');
+            
+            const indicator = activeCard.querySelector('.radio-indicator');
+            indicator.classList.remove('border-outline-variant');
+            indicator.classList.add('border-primary');
+            
+            const dot = activeCard.querySelector('.inner-dot');
+            dot.classList.remove('scale-0');
+            dot.classList.add('scale-100');
+
+            // Enable button
+            const btn = document.getElementById('continue-btn');
+            btn.disabled = false;
+            btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            btn.classList.add('hover:bg-primary-container', 'active:scale-95');
+        }
+
+        // Entrance animation
+        window.addEventListener('DOMContentLoaded', () => {
+            const elements = document.querySelectorAll('.animate-fade-in');
+            elements.forEach((el, index) => {
+                setTimeout(() => {
+                    el.style.opacity = '1';
+                    el.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+    </script>
+<style>
+        .animate-fade-in {
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+    </style>
+</body></html>

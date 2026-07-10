@@ -65,6 +65,37 @@ export function registerAccountRoutes(
 ): void {
   const requireAuth = createAuthMiddleware(authService);
 
+  // GET /api/accounts — list user-owned accounts (FR-014)
+  app.get(
+    '/api/accounts',
+    { preHandler: requireAuth },
+    async (request, reply) => {
+      const userId = request.userId!;
+
+      try {
+        const rows = await prisma.cuentaUsuario.findMany({
+          where: { userId },
+          orderBy: [{ tipoCuenta: 'asc' }, { nombre: 'asc' }],
+        });
+
+        const accounts = rows.map((row) => ({
+          id: row.id,
+          codigo: row.codigo,
+          nombre: row.nombre,
+          tipoCuenta: row.tipoCuenta,
+          entidadId: row.entidadId,
+          isEntityProvisioned: row.entidadId != null,
+          activa: row.activa,
+        }));
+
+        return reply.status(200).send({ accounts });
+      } catch (err) {
+        request.log.error(err, 'Failed to list accounts');
+        return reply.status(500).send({ error: 'Failed to list accounts' });
+      }
+    },
+  );
+
   // POST /api/accounts — create a user account
   app.post(
     '/api/accounts',

@@ -472,3 +472,79 @@ describe('5.5 — Edge cases', () => {
     await app.close();
   });
 });
+
+describe('FR-014 — GET /api/accounts (follow-up Sprint 06)', () => {
+  it('should list only the authenticated user accounts with Hogar projection', async () => {
+    const app = await createTestApp();
+    const cookiesA = await registerAndVerify(app, 'list-acc-a@test.com');
+    const cookiesB = await registerAndVerify(app, 'list-acc-b@test.com');
+
+    const entityRes = await app.inject({
+      method: 'POST',
+      url: '/api/entities',
+      headers: { cookie: cookiesA.join('; ') },
+      payload: { nombre: 'Banco A', tipo: 'bank' },
+    });
+    expect(entityRes.statusCode).toBe(201);
+    const { entity } = entityRes.json();
+
+    const createA = await app.inject({
+      method: 'POST',
+      url: '/api/accounts',
+      headers: { cookie: cookiesA.join('; ') },
+      payload: {
+        tipoCuenta: 'bank',
+        nombre: 'Cuenta A',
+        entidadId: entity.id,
+      },
+    });
+    expect(createA.statusCode).toBe(201);
+
+    const createB = await app.inject({
+      method: 'POST',
+      url: '/api/accounts',
+      headers: { cookie: cookiesB.join('; ') },
+      payload: { tipoCuenta: 'wallet', nombre: 'Billetera B' },
+    });
+    expect(createB.statusCode).toBe(201);
+
+    const listA = await app.inject({
+      method: 'GET',
+      url: '/api/accounts',
+      headers: { cookie: cookiesA.join('; ') },
+    });
+    expect(listA.statusCode).toBe(200);
+    const bodyA = listA.json();
+    expect(bodyA.accounts).toHaveLength(1);
+    expect(bodyA.accounts[0]).toMatchObject({
+      nombre: 'Cuenta A',
+      tipoCuenta: 'bank',
+      entidadId: entity.id,
+      isEntityProvisioned: true,
+      activa: true,
+    });
+    expect(bodyA.accounts[0].id).toBeDefined();
+    expect(bodyA.accounts[0]).not.toHaveProperty('userId');
+
+    const listB = await app.inject({
+      method: 'GET',
+      url: '/api/accounts',
+      headers: { cookie: cookiesB.join('; ') },
+    });
+    expect(listB.statusCode).toBe(200);
+    const bodyB = listB.json();
+    expect(bodyB.accounts).toHaveLength(1);
+    expect(bodyB.accounts[0].nombre).toBe('Billetera B');
+    expect(bodyB.accounts[0].isEntityProvisioned).toBe(false);
+    expect(bodyB.accounts[0].entidadId).toBeNull();
+
+    await app.close();
+  });
+
+  it('should return 401 without session', async () => {
+    const app = await createTestApp();
+    const res = await app.inject({ method: 'GET', url: '/api/accounts' });
+    expect(res.statusCode).toBe(401);
+    await app.close();
+  });
+});

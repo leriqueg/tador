@@ -35,6 +35,10 @@ El backend expone endpoints que devuelven datos estructurados. No incluyen forma
 
 Devuelve el resultado del ejercicio PYG.
 
+**Query canónica:** `year` (inglés, alineado a constitución / naming de endpoints).
+
+**Deuda de implementación (follow-up):** el runtime en `backend/src/api/routes/reports.ts` lee hoy `query.año`. Debe aceptar `year` como parámetro primario. Se puede mantener `año` como alias deprecado durante una transición corta; los clientes nuevos (Sprint 06) MUST usar `year`.
+
 ```typescript
 // Response
 {
@@ -261,7 +265,7 @@ Devuelve la posición financiera actual a la fecha de consulta.
 
 | ID | Requirement | Mode |
 |----|-------------|------|
-| FR-API-001 | El sistema MUST exponer `GET /api/reports/pyg?year={year}` que devuelva ingresos, gastos, neto y serie mensual. | Ambos |
+| FR-API-001 | El sistema MUST exponer `GET /api/reports/pyg?year={year}` que devuelva ingresos, gastos, neto y serie mensual. El query param canónico es `year` (no `año`). | Ambos |
 | FR-API-002 | La serie mensual MUST incluir 12 meses, incluso los que tengan saldo cero. | Ambos |
 | FR-API-003 | El endpoint PYG MUST devolver Top 10 ingresos y Top 10 egresos ordenados por acumulado descendente. | Ambos |
 | FR-API-004 | El endpoint PYG MUST excluir cuentas puente, medios de pago y cuentas de balance de sus totales. | Ambos |

@@ -42,8 +42,8 @@
 ### 2A — Backend follow-ups (other specs; track here as deps)
 
 - [x] T004 Complete 002 Follow-up F1–F3 (`GET /api/accounts`) per `specs/002-catalogos-base/tasks.md`
-- [ ] T005 Complete 004 Follow-up F1–F3 (`GET /api/apuntes`) per `specs/004-plantillas-mvp/tasks.md`
-- [ ] T006 Complete 005 Follow-up F1–F4 (`year` query) per `specs/005-dashboard-pyg/tasks.md`
+- [x] T005 Complete 004 Follow-up F1–F3 (`GET /api/apuntes`) per `specs/004-plantillas-mvp/tasks.md`
+- [x] T006 Complete 005 Follow-up F1–F4 (`year` query) per `specs/005-dashboard-pyg/tasks.md`
 
 ### 2B — Storybook P0 components (no product routes yet)
 

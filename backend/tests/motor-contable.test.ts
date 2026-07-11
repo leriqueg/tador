@@ -886,7 +886,7 @@ describe('US5 — Reports', () => {
     // Get PyG
     const pygRes = await app.inject({
       method: 'GET',
-      url: '/api/reports/pyg?año=2026',
+      url: '/api/reports/pyg?year=2026',
       headers: { cookie: cookies.join('; ') },
     });
     expect(pygRes.statusCode).toBe(200);
@@ -926,7 +926,7 @@ describe('US5 — Reports', () => {
     // Get balance sheet
     const bsRes = await app.inject({
       method: 'GET',
-      url: '/api/reports/balance?año=2026',
+      url: '/api/reports/balance?year=2026',
       headers: { cookie: cookies.join('; ') },
     });
     expect(bsRes.statusCode).toBe(200);
@@ -1148,7 +1148,7 @@ describe('US6 — Direct CuentaGlobal in entry lines', () => {
 
     const pygRes = await app.inject({
       method: 'GET',
-      url: '/api/reports/pyg?año=2026',
+      url: '/api/reports/pyg?year=2026',
       headers: { cookie: cookies.join('; ') },
     });
     expect(pygRes.statusCode).toBe(200);

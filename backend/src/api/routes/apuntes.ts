@@ -161,11 +161,60 @@ async function getBookId(userId: string): Promise<string> {
 // Route registration
 // ---------------------------------------------------------------------------
 
+function formatApunteDate(date: Date): string {
+  return date.toISOString().slice(0, 10);
+}
+
 export function registerApunteRoutes(
   app: FastifyInstance,
   authService: AuthApplicationService,
 ): void {
   const requireAuth = createAuthMiddleware(authService);
+
+  // GET /api/apuntes — recent/history list (no journal lines)
+  app.get(
+    '/api/apuntes',
+    { preHandler: requireAuth },
+    async (request, reply) => {
+      const userId = request.userId!;
+      const query = request.query as { limit?: string; offset?: string };
+
+      const limitRaw = query.limit ? parseInt(query.limit, 10) : 20;
+      const offsetRaw = query.offset ? parseInt(query.offset, 10) : 0;
+      const limit = Number.isFinite(limitRaw)
+        ? Math.min(Math.max(limitRaw, 1), 100)
+        : 20;
+      const offset = Number.isFinite(offsetRaw) ? Math.max(offsetRaw, 0) : 0;
+
+      try {
+        const [total, rows] = await Promise.all([
+          prisma.apunte.count({ where: { userId } }),
+          prisma.apunte.findMany({
+            where: { userId },
+            orderBy: [{ date: 'desc' }, { createdAt: 'desc' }],
+            take: limit,
+            skip: offset,
+          }),
+        ]);
+
+        return reply.status(200).send({
+          apuntes: rows.map((row) => ({
+            id: row.id,
+            templateCode: row.templateCode,
+            date: formatApunteDate(row.date),
+            concept: row.concept,
+            amount: Number(row.amount),
+            asientoId: row.asientoId,
+            createdAt: row.createdAt.toISOString(),
+          })),
+          total,
+        });
+      } catch (err) {
+        request.log.error(err, 'Failed to list apuntes');
+        return reply.status(500).send({ error: 'Failed to list apuntes' });
+      }
+    },
+  );
 
   app.post(
     '/api/apuntes',

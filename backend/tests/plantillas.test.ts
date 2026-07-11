@@ -972,3 +972,143 @@ describe('Direct CuentaGlobal in template apuntes', () => {
     await app.close();
   });
 });
+
+// ---------------------------------------------------------------------------
+// Follow-up Sprint 06 ? GET /api/apuntes (SC-008)
+// ---------------------------------------------------------------------------
+
+describe('SC-008 ? GET /api/apuntes', () => {
+  it('should list only the authenticated user apuntes without journal lines', async () => {
+    const app = await createTestApp();
+    const cookiesA = await registerAndVerify(app, 'list-apuntes-a@test.com');
+    const cookiesB = await registerAndVerify(app, 'list-apuntes-b@test.com');
+
+    const energia = await findGlobalByCodigo("61120002");
+    if (!energia) throw new Error("61120002 not seeded");
+
+    async function createGasto(
+      cookies: string[],
+      concept: string,
+      amount: number,
+      date: string,
+    ) {
+      const bancoPostable = await createPostableGlobal(
+        nextCodigo("111214"),
+        `Banco ${concept}`,
+        "11120000",
+      );
+      const bancoUser = await createUserAccount(
+        app,
+        cookies,
+        bancoPostable.codigo,
+        `Banco ${concept}`,
+      );
+      const res = await app.inject({
+        method: "POST",
+        url: "/api/apuntes",
+        headers: { cookie: cookies.join("; ") },
+        payload: {
+          templateCode: "pagar_servicios",
+          date,
+          concept,
+          amount,
+          lines: [
+            { id: 1, accountId: energia.id },
+            { id: 2, accountId: bancoUser.id },
+          ],
+        },
+      });
+      expect(res.statusCode).toBe(201);
+      return res.json().apunte;
+    }
+
+    await createGasto(cookiesA, "Luz junio", 80, "2026-06-01");
+    await createGasto(cookiesA, "Luz julio", 85.5, "2026-07-05");
+    await createGasto(cookiesB, "Luz otro", 10, "2026-07-05");
+
+    const listA = await app.inject({
+      method: "GET",
+      url: "/api/apuntes",
+      headers: { cookie: cookiesA.join("; ") },
+    });
+    expect(listA.statusCode).toBe(200);
+    const bodyA = listA.json();
+    expect(bodyA.total).toBe(2);
+    expect(bodyA.apuntes).toHaveLength(2);
+    expect(bodyA.apuntes[0].concept).toBe("Luz julio");
+    expect(bodyA.apuntes[1].concept).toBe("Luz junio");
+    expect(bodyA.apuntes[0]).toMatchObject({
+      templateCode: "pagar_servicios",
+      date: "2026-07-05",
+      amount: 85.5,
+    });
+    expect(bodyA.apuntes[0].asientoId).toBeDefined();
+    expect(bodyA.apuntes[0]).not.toHaveProperty("lines");
+    expect(bodyA.apuntes[0]).not.toHaveProperty("userId");
+
+    const listB = await app.inject({
+      method: "GET",
+      url: "/api/apuntes",
+      headers: { cookie: cookiesB.join("; ") },
+    });
+    expect(listB.statusCode).toBe(200);
+    expect(listB.json().total).toBe(1);
+    expect(listB.json().apuntes[0].concept).toBe("Luz otro");
+
+    const unauth = await app.inject({ method: "GET", url: "/api/apuntes" });
+    expect(unauth.statusCode).toBe(401);
+
+    await app.close();
+  });
+
+  it("should respect limit and offset pagination", async () => {
+    const app = await createTestApp();
+    const cookies = await registerAndVerify(app, "list-apuntes-page@test.com");
+
+    const energia = await findGlobalByCodigo("61120002");
+    if (!energia) throw new Error("61120002 not seeded");
+
+    for (let i = 1; i <= 3; i++) {
+      const bancoPostable = await createPostableGlobal(
+        nextCodigo("111214"),
+        `Banco page ${i}`,
+        "11120000",
+      );
+      const bancoUser = await createUserAccount(
+        app,
+        cookies,
+        bancoPostable.codigo,
+        `Banco page ${i}`,
+      );
+      const res = await app.inject({
+        method: "POST",
+        url: "/api/apuntes",
+        headers: { cookie: cookies.join("; ") },
+        payload: {
+          templateCode: "pagar_servicios",
+          date: `2026-07-0${i}`,
+          concept: `Apunte ${i}`,
+          amount: 10 * i,
+          lines: [
+            { id: 1, accountId: energia.id },
+            { id: 2, accountId: bancoUser.id },
+          ],
+        },
+      });
+      expect(res.statusCode).toBe(201);
+    }
+
+    const page = await app.inject({
+      method: "GET",
+      url: "/api/apuntes?limit=1&offset=1",
+      headers: { cookie: cookies.join("; ") },
+    });
+    expect(page.statusCode).toBe(200);
+    const body = page.json();
+    expect(body.total).toBe(3);
+    expect(body.apuntes).toHaveLength(1);
+    expect(body.apuntes[0].concept).toBe("Apunte 2");
+
+    await app.close();
+  });
+});

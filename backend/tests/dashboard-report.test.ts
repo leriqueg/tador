@@ -202,7 +202,7 @@ describe('PYG Report — GET /api/reports/pyg', () => {
 
     const pygRes = await app.inject({
       method: 'GET',
-      url: '/api/reports/pyg?año=2026',
+      url: '/api/reports/pyg?year=2026',
       headers: { cookie: cookies.join('; ') },
     });
     expect(pygRes.statusCode).toBe(200);
@@ -330,7 +330,7 @@ describe('PYG Report — GET /api/reports/pyg', () => {
 
     const pygRes = await app.inject({
       method: 'GET',
-      url: '/api/reports/pyg?año=2026',
+      url: '/api/reports/pyg?year=2026',
       headers: { cookie: cookies.join('; ') },
     });
     expect(pygRes.statusCode).toBe(200);
@@ -608,7 +608,7 @@ describe('Edge cases', () => {
 
     const pygRes = await app.inject({
       method: 'GET',
-      url: '/api/reports/pyg?año=2025',
+      url: '/api/reports/pyg?year=2025',
       headers: { cookie: cookies.join('; ') },
     });
     expect(pygRes.statusCode).toBe(200);
@@ -626,6 +626,14 @@ describe('Edge cases', () => {
     }
     expect(report.topIncome).toHaveLength(0);
     expect(report.topExpenses).toHaveLength(0);
+
+    const aliasRes = await app.inject({
+      method: 'GET',
+      url: '/api/reports/pyg?año=2025',
+      headers: { cookie: cookies.join('; ') },
+    });
+    expect(aliasRes.statusCode).toBe(200);
+    expect(aliasRes.json().year).toBe(2025);
 
     await app.close();
   });
@@ -683,7 +691,7 @@ describe('Edge cases', () => {
 
     const pygRes = await app.inject({
       method: 'GET',
-      url: '/api/reports/pyg?año=2026',
+      url: '/api/reports/pyg?year=2026',
       headers: { cookie: cookies.join('; ') },
     });
     expect(pygRes.statusCode).toBe(200);
@@ -827,7 +835,7 @@ describe('Edge cases', () => {
     // User B queries PYG for 2026 — should see zeros, not User A's data
     const pygRes = await app.inject({
       method: 'GET',
-      url: '/api/reports/pyg?año=2026',
+      url: '/api/reports/pyg?year=2026',
       headers: { cookie: cookiesB.join('; ') },
     });
     expect(pygRes.statusCode).toBe(200);

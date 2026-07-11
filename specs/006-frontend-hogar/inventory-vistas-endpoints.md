@@ -113,7 +113,7 @@ Componente objetivo: **AppShell** (ver inventario frontend). Sin avatar Pacho.
 | `GET /api/plantillas?mode=hogar` | Plantillas |
 | `GET /api/plantillas/:code` | Detalle |
 | `POST /api/apuntes` | Registrar |
-| `GET /api/apuntes` | Recientes / historial (follow-up 004 — **implementación pendiente**) |
+| `GET /api/apuntes` | Recientes / historial (004 FR §5.4 — implementado) |
 
 #### `/dashboard`
 
@@ -127,8 +127,8 @@ Componente objetivo: **AppShell** (ver inventario frontend). Sin avatar Pacho.
 | Gap | Spec | Estado |
 |-----|------|--------|
 | `GET /api/accounts` | 002 FR-014 + contrato | **Código listo** (F1–F3); tests integración requieren Postgres |
-| `GET /api/apuntes` | 004 §5.4 | Spec + follow-up; **código pendiente** |
-| Query PYG `year` | 005 FR-API-001 | Spec + follow-up; **runtime aún puede usar `año`** |
+| `GET /api/apuntes` | 004 §5.4 | **Código listo** (F1–F3) |
+| Query PYG `year` | 005 FR-API-001 | **Código listo** (`year` canónico; `año` alias) |
 
 ### 2.4 No usar en Hogar
 

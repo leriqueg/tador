@@ -1,7 +1,8 @@
 /**
  * Seed script for CuentaGlobal (global chart of accounts).
  *
- * Reads the chart from specs/foundation/plan-de-cuentas/plan-de-cuentas-final-seed.json
+ * Reads the chart from backend/data/plan-de-cuentas/plan-de-cuentas-final-seed.json
+ * (promoted copy of specs/foundation/plan-de-cuentas/plan-de-cuentas-final-seed.json)
  * and upserts ALL accounts using a two-pass approach:
  *
  * Pass 1: Upsert group-level accounts (esPostable === false).
@@ -12,6 +13,9 @@
  *
  * Each postable account is linked to its parent group via parentId.
  * The script is idempotent (upsert by codigo).
+ *
+ * Specs stay independent of the runtime codebase: when the source chart in
+ * specs changes, refresh the copy under backend/data/ before re-seeding.
  */
 
 import { PrismaClient } from '@prisma/client';
@@ -39,7 +43,7 @@ interface SeedFile {
 export async function main(): Promise<void> {
   const dataPath = resolve(
     __dirname,
-    '../../../specs/foundation/plan-de-cuentas/plan-de-cuentas-final-seed.json',
+    '../../data/plan-de-cuentas/plan-de-cuentas-final-seed.json',
   );
   const raw = readFileSync(dataPath, 'utf-8');
   const seed: SeedFile = JSON.parse(raw);

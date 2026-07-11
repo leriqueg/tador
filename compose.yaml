@@ -21,6 +21,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+      target: development
     container_name: tador-backend
     restart: unless-stopped
     ports:
@@ -30,6 +31,10 @@ services:
       SESSION_SECRET: ${SESSION_SECRET:-change-me-in-production}
       PORT: 3000
       HOST: 0.0.0.0
+      CHOKIDAR_USEPOLLING: "true"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
     depends_on:
       postgres:
         condition: service_healthy
@@ -44,6 +49,7 @@ services:
       - "${FRONTEND_PORT:-5173}:5173"
     environment:
       VITE_PROXY_TARGET: http://backend:3000
+      CHOKIDAR_USEPOLLING: "true"
     volumes:
       - ./frontend:/app
       - /app/node_modules

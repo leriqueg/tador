@@ -1,9 +1,11 @@
 # TADOR — Makefile
 # ────────────────────────────────────────────────────────
 # Comandos rápidos para desarrollo local.
+# Los comandos de app/DB se ejecutan dentro de contenedores.
 
-BACKEND = backend
 COMPOSE = docker compose
+RUN_BACKEND = $(COMPOSE) run --rm backend
+EXEC_BACKEND = $(COMPOSE) exec backend
 
 # ─── Base de datos ─────────────────────────────────────
 
@@ -19,23 +21,28 @@ db-up:                    ## Levanta PostgreSQL en Docker
 
 .PHONY: db-migrate
 db-migrate:               ## Ejecuta migraciones Prisma (dev)
-	cd $(BACKEND) && npx prisma migrate dev
+	$(RUN_BACKEND) npx prisma migrate dev
 
 .PHONY: db-seed
 db-seed:                  ## Siembra datos de catálogo global
-	cd $(BACKEND) && npx tsx prisma/seed/catalogos.ts
+	$(RUN_BACKEND) npx tsx prisma/seed/catalogos.ts
 
 .PHONY: db-setup
 db-setup: db-up db-migrate db-seed  ## Postgres + migraciones + seed
 
 .PHONY: db-reset
 db-reset:                 ## Resetea DB: borra esquema, migra y seedea
-	cd $(BACKEND) && npx prisma migrate reset --force
+	$(RUN_BACKEND) npx prisma migrate reset --force
 	$(MAKE) db-seed
+
+.PHONY: db-generate
+db-generate:              ## Regenera Prisma Client
+	$(RUN_BACKEND) npx prisma generate
 
 .PHONY: db-studio
 db-studio:                ## Abre Prisma Studio
-	cd $(BACKEND) && npx prisma studio
+	$(COMPOSE) run --rm -p 5555:5555 backend \
+		npx prisma studio --hostname 0.0.0.0 --port 5555
 
 # ─── Servidores ────────────────────────────────────────
 
@@ -47,33 +54,37 @@ up:                       ## Levanta todos los servicios (Docker)
 down:                     ## Detiene todos los servicios
 	$(COMPOSE) down
 
+.PHONY: rebuild
+rebuild:                  ## Reconstruye imágenes de desarrollo
+	$(COMPOSE) build
+
 .PHONY: dev-backend
-dev-backend:              ## Arranca backend en modo watch (local)
-	cd $(BACKEND) && npx tsx watch src/server.ts
+dev-backend:              ## Arranca backend en modo watch (contenedor)
+	$(COMPOSE) up backend
 
 .PHONY: dev-frontend
-dev-frontend:             ## Arranca frontend en modo watch (local)
-	cd frontend && npm run dev
+dev-frontend:             ## Arranca frontend en modo watch (contenedor)
+	$(COMPOSE) up frontend
 
 .PHONY: build
 build:                    ## Compila TypeScript (backend)
-	cd $(BACKEND) && npx tsc
+	$(RUN_BACKEND) npx tsc
 
 # ─── Tests ─────────────────────────────────────────────
 
 .PHONY: test
 test:                     ## Tests de integración (todos)
-	cd $(BACKEND) && npx vitest run --config vitest.integration.config.ts
+	$(RUN_BACKEND) npx vitest run --config vitest.integration.config.ts
 
 .PHONY: test-watch
 test-watch:               ## Tests en modo watch
-	cd $(BACKEND) && npx vitest --config vitest.integration.config.ts
+	$(RUN_BACKEND) npx vitest --config vitest.integration.config.ts
 
 # ─── Calidad ───────────────────────────────────────────
 
 .PHONY: typecheck
 typecheck:                ## Verifica TypeScript sin emitir
-	cd $(BACKEND) && npx tsc --noEmit
+	$(RUN_BACKEND) npx tsc --noEmit
 
 .PHONY: check
 check: typecheck test     ## Typecheck + tests
@@ -96,9 +107,13 @@ logs-backend:             ## Logs del backend
 logs-frontend:            ## Logs del frontend
 	$(COMPOSE) logs -f frontend
 
+.PHONY: shell-backend
+shell-backend:            ## Shell interactivo en el backend
+	$(EXEC_BACKEND) sh
+
 .PHONY: clean
 clean:                    ## Limpia artefactos de build
-	cd $(BACKEND) && rm -rf dist
+	$(RUN_BACKEND) rm -rf dist
 
 .PHONY: help
 help:                     ## Muestra esta ayuda

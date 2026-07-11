@@ -50,9 +50,6 @@ Pensado para profesionales independientes, pequeños negocios o quienes necesita
 
 **Indicadores:** ingresos cobrados y por cobrar, gastos pagados y por pagar, activos, pasivos, flujo de caja, resultado del ejercicio, desglose por cuenta.
 
-> **Hogar da paz mental; PRO da control económico.**
->
-> La diferencia no es incompleto vs completo. Cada modo resuelve una necesidad distinta sobre los mismos datos.
 
 ---
 
@@ -105,7 +102,7 @@ Las reglas contables (balance de asientos, tenant isolation, idempotencia) viven
 
 ---
 
-## Documentación
+## Documentación del MVP, concepto original.
 
 | Documento | Ubicación |
 |-----------|-----------|

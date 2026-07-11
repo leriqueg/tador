@@ -71,14 +71,20 @@ build:                    ## Compila TypeScript (backend)
 	$(RUN_BACKEND) npx tsc
 
 # ─── Tests ─────────────────────────────────────────────
+# DATABASE_URL is resolved inside the app/tests from POSTGRES_* pieces
+# (Docker host = postgres, host/CI = localhost). No Makefile URL required.
 
 .PHONY: test
-test:                     ## Tests de integración (todos)
-	$(RUN_BACKEND) npx vitest run --config vitest.integration.config.ts
+test: db-up               ## Tests de integración (Postgres + Fastify)
+	$(RUN_BACKEND) npm run test:integration
+
+.PHONY: test-unit
+test-unit:                ## Tests unitarios de dominio (sin DB)
+	$(RUN_BACKEND) npm run test:unit
 
 .PHONY: test-watch
-test-watch:               ## Tests en modo watch
-	$(RUN_BACKEND) npx vitest --config vitest.integration.config.ts
+test-watch: db-up         ## Tests de integración en modo watch
+	$(RUN_BACKEND) npm run test:integration -- --watch
 
 # ─── Calidad ───────────────────────────────────────────
 

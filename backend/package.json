@@ -11,10 +11,11 @@
     "test:watch": "vitest",
     "test:unit": "vitest run --config vitest.unit.config.ts",
     "test:integration": "vitest run --config vitest.integration.config.ts",
-    "db:migrate": "prisma migrate dev",
+    "db:migrate": "node scripts/run-with-db-url.mjs npx prisma migrate dev",
+    "db:migrate:deploy": "node scripts/run-with-db-url.mjs npx prisma migrate deploy",
     "db:generate": "prisma generate",
-    "db:studio": "prisma studio",
-    "seed:catalogos": "npx tsx prisma/seed/catalogos.ts",
+    "db:studio": "node scripts/run-with-db-url.mjs npx prisma studio",
+    "seed:catalogos": "node scripts/run-with-db-url.mjs npx tsx prisma/seed/catalogos.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

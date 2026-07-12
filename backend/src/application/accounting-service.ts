@@ -13,7 +13,13 @@ import {
   validateBalance,
   buildReversalLines,
   resolveCuenta,
+  quantizeEntryLines,
 } from '../domain/linea-asiento.js';
+import {
+  DEFAULT_CURRENCY,
+  moneyToNumber,
+  quantizeMoney,
+} from '../domain/money.js';
 import type { AsientoVersion } from '../domain/asiento-version.js';
 import type { PeriodoContable } from '../domain/periodo-contable.js';
 
@@ -158,9 +164,23 @@ function classifyAccount(codigo: string): AccountClass {
   }
 }
 
-/** Safely convert a Prisma Decimal (or number) to a JS number. */
-function toNumber(value: { toNumber: () => number } | number): number {
-  return typeof value === 'number' ? value : value.toNumber();
+/** Convert Prisma Decimal / number via domain money helpers (quantized USD by default). */
+function toNumber(
+  value: { toNumber: () => number; toString: () => string } | number | string,
+  currencyCode: string = DEFAULT_CURRENCY,
+): number {
+  if (typeof value === 'number') {
+    return moneyToNumber(value, currencyCode);
+  }
+  return moneyToNumber(value.toString(), currencyCode);
+}
+
+async function getBookCurrency(bookId: string): Promise<string> {
+  const config = await prisma.bookConfig.findUnique({
+    where: { bookId },
+    select: { currency: true },
+  });
+  return config?.currency ?? DEFAULT_CURRENCY;
 }
 
 // ---------------------------------------------------------------------------
@@ -413,8 +433,11 @@ export function createAccountingService(): AccountingService {
         if (err) throw new Error(`Invalid line: ${err}`);
       }
 
-      // 2. Validate balance
-      const balanceErr = validateBalance(params.lineas);
+      const currency = await getBookCurrency(params.bookId);
+      const quantizedLines = quantizeEntryLines(params.lineas, currency);
+
+      // 2. Validate balance (decimal.js at book currency scale)
+      const balanceErr = validateBalance(quantizedLines, currency);
       if (balanceErr) throw new Error(balanceErr);
 
       // 3. Extract año from fecha
@@ -435,7 +458,7 @@ export function createAccountingService(): AccountingService {
       }
 
       // 5. Validate all accounts
-      await validateEntryAccounts(params.bookId, params.lineas);
+      await validateEntryAccounts(params.bookId, quantizedLines);
 
       // 6. Ensure period exists and is open
       await ensurePeriodExists(params.bookId, año);
@@ -456,15 +479,15 @@ export function createAccountingService(): AccountingService {
         });
 
         const lineas = await Promise.all(
-          params.lineas.map((l) => {
+          quantizedLines.map((l) => {
             const { cuentaId, cuentaGlobalId } = normalizeLineAccount(l);
             return tx.lineaAsiento.create({
               data: {
                 asientoId: entry.id,
                 cuentaId,
                 cuentaGlobalId,
-                debito: l.debito,
-                credito: l.credito,
+                debito: quantizeMoney(l.debito, currency).toFixed(),
+                credito: quantizeMoney(l.credito, currency).toFixed(),
               },
             });
           }),
@@ -562,11 +585,13 @@ export function createAccountingService(): AccountingService {
       }
 
       // 5. Validate balance
-      const balanceErr = validateBalance(newLineas);
+      const currency = await getBookCurrency(bookId);
+      const quantizedLineas = quantizeEntryLines(newLineas, currency);
+      const balanceErr = validateBalance(quantizedLineas, currency);
       if (balanceErr) throw new Error(balanceErr);
 
       // 6. Validate accounts (same as createEntry)
-      await validateEntryAccounts(bookId, newLineas);
+      await validateEntryAccounts(bookId, quantizedLineas);
 
       // 7. Check period is open (from the entry's fecha)
       const año = existing.fecha.getFullYear();
@@ -619,15 +644,15 @@ export function createAccountingService(): AccountingService {
 
         // Create new lines
         const createdLines = await Promise.all(
-          newLineas.map((l) => {
+          quantizedLineas.map((l) => {
             const { cuentaId, cuentaGlobalId } = normalizeLineAccount(l);
             return tx.lineaAsiento.create({
               data: {
                 asientoId: id,
                 cuentaId,
                 cuentaGlobalId,
-                debito: l.debito,
-                credito: l.credito,
+                debito: quantizeMoney(l.debito, currency).toFixed(),
+                credito: quantizeMoney(l.credito, currency).toFixed(),
               },
             });
           }),

@@ -10,6 +10,10 @@
 
 import Decimal from 'decimal.js';
 import { prisma } from '../infrastructure/database.js';
+import {
+  moneyToNumber,
+  toDecimal as toMoneyDecimal,
+} from '../domain/money.js';
 
 // ---------------------------------------------------------------------------
 // DTOs — API response shapes
@@ -164,10 +168,10 @@ function classifyPositionAccount(
 // Decimal helpers
 // ---------------------------------------------------------------------------
 
-/** Safely convert a string or number to Decimal. */
+/** Safely convert a string or number to Decimal via domain money helpers. */
 function toDecimal(value: string | number | { toString: () => string }): Decimal {
-  if (typeof value === 'number') return new Decimal(value);
-  return new Decimal(value.toString());
+  if (typeof value === 'number') return toMoneyDecimal(value);
+  return toMoneyDecimal(value.toString());
 }
 
 // ---------------------------------------------------------------------------

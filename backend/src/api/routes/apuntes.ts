@@ -16,6 +16,14 @@ import {
   isCuentaGlobalUnderGroups,
   isCuentaUsuarioUnderGroups,
 } from '../../application/plantilla-validator.js';
+import {
+  DEFAULT_CURRENCY,
+  moneyEquals,
+  moneyToFixed,
+  moneyToNumber,
+  quantizeMoney,
+  sumMoney,
+} from '../../domain/money.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -203,7 +211,7 @@ export function registerApunteRoutes(
             templateCode: row.templateCode,
             date: formatApunteDate(row.date),
             concept: row.concept,
-            amount: Number(row.amount),
+            amount: moneyToNumber(row.amount.toString()),
             asientoId: row.asientoId,
             createdAt: row.createdAt.toISOString(),
           })),
@@ -234,10 +242,21 @@ export function registerApunteRoutes(
         }
 
         // ---------------------------------------------------------------
+        // Resolve book + currency scale
+        // ---------------------------------------------------------------
+        const bookId = await getBookId(userId);
+        const bookConfig = await prisma.bookConfig.findUnique({
+          where: { bookId },
+          select: { currency: true },
+        });
+        const currency = bookConfig?.currency ?? DEFAULT_CURRENCY;
+        const amountD = quantizeMoney(body.amount ?? 0, currency);
+
+        // ---------------------------------------------------------------
         // Template-based (HOME) or free-form (PRO)
         // ---------------------------------------------------------------
         let template: Plantilla | undefined;
-        let amount = body.amount ?? 0;
+        let amount = moneyToNumber(amountD, currency);
         const amountMode = body.amountMode ?? 'single';
 
         if (body.templateCode) {
@@ -266,14 +285,9 @@ export function registerApunteRoutes(
                 .status(400)
                 .send({ error: 'amount is required when template has amountMode single (V5)' });
             }
-            amount = body.amount;
+            amount = moneyToNumber(quantizeMoney(body.amount, currency), currency);
           }
         }
-
-        // ---------------------------------------------------------------
-        // Resolve book
-        // ---------------------------------------------------------------
-        const bookId = await getBookId(userId);
 
         // ---------------------------------------------------------------
         // V6: Validate period is open (create if not exists)
@@ -297,8 +311,8 @@ export function registerApunteRoutes(
         const entryLines: Array<{
           cuentaId?: string;
           cuentaGlobalId?: string;
-          debito: number;
-          credito: number;
+          debito: string;
+          credito: string;
         }> = [];
 
         for (const line of body.lines) {
@@ -313,12 +327,13 @@ export function registerApunteRoutes(
             await validateLineAgainstTemplate(line, templateLine, userId);
 
             const isDebit = templateLine.side === 'debit';
+            const lineAmount = quantizeMoney(amount, currency).toFixed();
             entryLines.push({
               ...(resolved.tipo === 'global'
                 ? { cuentaGlobalId: resolved.id }
                 : { cuentaId: resolved.id }),
-              debito: isDebit ? amount : 0,
-              credito: isDebit ? 0 : amount,
+              debito: isDebit ? lineAmount : moneyToFixed(0, currency),
+              credito: isDebit ? moneyToFixed(0, currency) : lineAmount,
             });
           } else {
             // PRO wizard: side and amount come from the request
@@ -329,28 +344,32 @@ export function registerApunteRoutes(
             }
 
             const isDebit = line.side === 'debit';
-            const lineAmount = line.amount;
+            const lineAmount = quantizeMoney(line.amount, currency).toFixed();
             entryLines.push({
               ...(resolved.tipo === 'global'
                 ? { cuentaGlobalId: resolved.id }
                 : { cuentaId: resolved.id }),
-              debito: isDebit ? lineAmount : 0,
-              credito: isDebit ? 0 : lineAmount,
+              debito: isDebit ? lineAmount : moneyToFixed(0, currency),
+              credito: isDebit ? moneyToFixed(0, currency) : lineAmount,
             });
           }
         }
 
         // ---------------------------------------------------------------
-        // V8: Validate balance
+        // V8: Validate balance (decimal.js)
         // ---------------------------------------------------------------
-        const totalDebito = entryLines.reduce((s, l) => s + l.debito, 0);
-        const totalCredito = entryLines.reduce((s, l) => s + l.credito, 0);
-        if (totalDebito !== totalCredito) {
-          return reply
-            .status(400)
-            .send({
-              error: `Entry not balanced: debito ${totalDebito} ≠ credito ${totalCredito} (V8)`,
-            });
+        const totalDebito = sumMoney(
+          entryLines.map((l) => l.debito),
+          currency,
+        );
+        const totalCredito = sumMoney(
+          entryLines.map((l) => l.credito),
+          currency,
+        );
+        if (!moneyEquals(totalDebito, totalCredito, currency)) {
+          return reply.status(400).send({
+            error: `Entry not balanced: debito ${moneyToFixed(totalDebito, currency)} ≠ credito ${moneyToFixed(totalCredito, currency)} (V8)`,
+          });
         }
         if (entryLines.length < 2) {
           return reply
@@ -393,7 +412,7 @@ export function registerApunteRoutes(
               templateCode: body.templateCode ?? null,
               date: fecha,
               concept: body.concept,
-              amount,
+              amount: quantizeMoney(amount, currency).toFixed(),
               asientoId: asiento.id,
               userId,
             },
@@ -408,7 +427,7 @@ export function registerApunteRoutes(
             templateCode: result.apunte.templateCode,
             date: result.apunte.date.toISOString(),
             concept: result.apunte.concept,
-            amount: Number(result.apunte.amount),
+            amount: moneyToNumber(result.apunte.amount.toString(), currency),
             asientoId: result.apunte.asientoId,
           },
           asiento: {
@@ -418,8 +437,8 @@ export function registerApunteRoutes(
             lines: result.lineas.map((l) => ({
               cuentaId: l.cuentaId,
               cuentaGlobalId: l.cuentaGlobalId,
-              debito: Number(l.debito),
-              credito: Number(l.credito),
+              debito: moneyToNumber(l.debito.toString(), currency),
+              credito: moneyToNumber(l.credito.toString(), currency),
             })),
           },
         });

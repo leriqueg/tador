@@ -1,15 +1,26 @@
 /**
  * LineaAsiento domain entity.
  * Represents a single line in a journal entry (debit or credit).
+ *
+ * Monetary comparisons use domain/money (decimal.js), never IEEE 754 sums.
  */
+
+import {
+  DEFAULT_CURRENCY,
+  moneyEquals,
+  moneyToFixed,
+  quantizeMoney,
+  sumMoney,
+  toDecimal,
+} from './money.js';
 
 export interface LineaAsiento {
   id: string;
   asientoId: string;
-  cuentaId: string | null;       // CuentaUsuario reference (financial accounts)
-  cuentaGlobalId: string | null; // CuentaGlobal reference (shared categories)
-  debito: number; // > 0 for debit
-  credito: number; // > 0 for credit
+  cuentaId: string | null;
+  cuentaGlobalId: string | null;
+  debito: number;
+  credito: number;
   createdAt: Date;
 }
 
@@ -25,7 +36,6 @@ export function validateLinea(linea: {
   debito: number;
   credito: number;
 }): string | null {
-  // Account reference validation
   const hasCuenta = Boolean(linea.cuentaId);
   const hasGlobal = Boolean(linea.cuentaGlobalId);
   if (hasCuenta && hasGlobal) {
@@ -35,14 +45,16 @@ export function validateLinea(linea: {
     return 'Line must have either cuentaId or cuentaGlobalId';
   }
 
-  // Amount validation
-  if (linea.debito > 0 && linea.credito > 0) {
+  const debito = toDecimal(linea.debito);
+  const credito = toDecimal(linea.credito);
+
+  if (debito.gt(0) && credito.gt(0)) {
     return 'Line cannot have both debito and credito';
   }
-  if (linea.debito === 0 && linea.credito === 0) {
+  if (debito.eq(0) && credito.eq(0)) {
     return 'Line must have either debito or credito';
   }
-  if (linea.debito < 0 || linea.credito < 0) {
+  if (debito.lt(0) || credito.lt(0)) {
     return 'Amounts cannot be negative';
   }
   return null;
@@ -50,20 +62,42 @@ export function validateLinea(linea: {
 
 /**
  * Validate that total debito equals total credito across all lines.
- * Returns an error message string, or null if balanced.
+ * Amounts are quantized to the book currency scale before comparison.
  */
 export function validateBalance(
   lineas: Array<{ debito: number; credito: number }>,
+  currencyCode: string = DEFAULT_CURRENCY,
 ): string | null {
   if (lineas.length < 2) {
     return 'Entry must have at least two lines';
   }
-  const totalDebito = lineas.reduce((s, l) => s + l.debito, 0);
-  const totalCredito = lineas.reduce((s, l) => s + l.credito, 0);
-  if (totalDebito !== totalCredito) {
-    return `Entry not balanced: debito ${totalDebito} ≠ credito ${totalCredito}`;
+
+  const totalDebito = sumMoney(
+    lineas.map((l) => l.debito),
+    currencyCode,
+  );
+  const totalCredito = sumMoney(
+    lineas.map((l) => l.credito),
+    currencyCode,
+  );
+
+  if (!moneyEquals(totalDebito, totalCredito, currencyCode)) {
+    return `Entry not balanced: debito ${moneyToFixed(totalDebito, currencyCode)} ≠ credito ${moneyToFixed(totalCredito, currencyCode)}`;
   }
   return null;
+}
+
+/**
+ * Quantize debit/credit on each line to the book currency before persistence.
+ */
+export function quantizeEntryLines<
+  T extends { debito: number; credito: number },
+>(lineas: T[], currencyCode: string = DEFAULT_CURRENCY): T[] {
+  return lineas.map((l) => ({
+    ...l,
+    debito: quantizeMoney(l.debito, currencyCode).toNumber(),
+    credito: quantizeMoney(l.credito, currencyCode).toNumber(),
+  }));
 }
 
 /**
@@ -78,7 +112,12 @@ export interface ReversalLine {
 }
 
 export function buildReversalLines(
-  lineas: LineaAsiento[],
+  lineas: Array<{
+    cuentaId: string | null;
+    cuentaGlobalId: string | null;
+    debito: number;
+    credito: number;
+  }>,
 ): ReversalLine[] {
   return lineas.map((l) => ({
     cuentaId: l.cuentaId,
@@ -91,11 +130,6 @@ export function buildReversalLines(
 /**
  * Resolve account display info from a LineaAsiento Prisma row.
  * Handles both CuentaGlobal (direct) and CuentaUsuario (via cuenta.global) paths.
- *
- * Usage:
- * ```typescript
- * const { nombreCuenta, codigoCuenta, tipoCuenta } = resolveCuenta(linea);
- * ```
  */
 export interface CuentaResolved {
   nombreCuenta: string;
@@ -106,10 +140,13 @@ export interface CuentaResolved {
 export function resolveCuenta(linea: {
   cuentaId?: string | null;
   cuentaGlobalId?: string | null;
-  cuenta?: { nombre: string; codigo?: string | null; global?: { codigo: string; nombre: string } | null } | null;
+  cuenta?: {
+    nombre: string;
+    codigo?: string | null;
+    global?: { codigo: string; nombre: string } | null;
+  } | null;
   cuentaGlobal?: { codigo: string; nombre: string } | null;
 }): CuentaResolved {
-  // Path 1: Direct CuentaGlobal reference (N3=0 accounts like "Supermercado")
   if (linea.cuentaGlobalId && linea.cuentaGlobal) {
     return {
       nombreCuenta: linea.cuentaGlobal.nombre,
@@ -118,7 +155,6 @@ export function resolveCuenta(linea: {
     };
   }
 
-  // Path 2: CuentaUsuario with a link to CuentaGlobal (financial account with bank/card group)
   if (linea.cuentaId && linea.cuenta) {
     if (linea.cuenta.global) {
       return {
@@ -127,7 +163,6 @@ export function resolveCuenta(linea: {
         tipoCuenta: 'usuario',
       };
     }
-    // Path 3: CuentaUsuario without global link (bridge accounts)
     return {
       nombreCuenta: linea.cuenta.nombre,
       codigoCuenta: linea.cuenta.codigo ?? '',

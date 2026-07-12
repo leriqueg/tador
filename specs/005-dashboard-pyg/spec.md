@@ -272,7 +272,7 @@ Devuelve la posición financiera actual a la fecha de consulta.
 | FR-API-005 | El sistema MUST exponer `GET /api/reports/position` que devuelva disponible, por cobrar, por pagar y desglose por cuenta. | Ambos |
 | FR-API-006 | El endpoint de posición MUST excluir cuentas de ingreso/egreso de sus totales. | Ambos |
 | FR-API-007 | Ambos endpoints MUST filtrar por usuario autenticado (tenant isolation). | Ambos |
-| FR-API-008 | Ambos endpoints MUST usar `decimal.js` (o equivalente) para cálculos, sin punto flotante JS. | Ambos |
+| FR-API-008 | Ambos endpoints MUST aplicar aritmética monetaria exacta (Constitution IX): `decimal.js` para cálculos y comparaciones; PostgreSQL `NUMERIC` en persistencia; cuantización a los minor units ISO 4217 de la moneda del libro (MVP: USD, 2 decimales). IEEE 754 `number` está prohibido en la aritmética intermedia. | Ambos |
 
 ### 5.2 Presentation requirements (Hogar)
 

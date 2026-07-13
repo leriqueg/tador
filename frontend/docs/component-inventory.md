@@ -116,9 +116,9 @@ Tokens in code: `src/design/tokens.ts` · CSS: `src/globals.css`
 - **Path:** `src/components/dashboard/PygPanelHogar.tsx`
 
 ### PositionPanel — exists (P0)
-- **Purpose:** Disponible + Deudas (Hogar hides “por cobrar” per FR-H-004)
+- **Purpose:** Disponible + Me deben (por cobrar) + Deudas (FR-H-004 / FR-007)
 - **Mockup:** `dashboard_hogar_tador` / position contract
-- **Props:** `disponible`, `deudas`, optional `currencyFormat`
+- **Props:** `disponible`, `porCobrar`, `deudas`, optional `currencyFormat`
 - **API:** `GET /api/reports/position`
 - **Story:** Hogar/P0 Foundations → DashboardPanels
 - **Path:** `src/components/dashboard/PositionPanel.tsx`

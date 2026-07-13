@@ -229,7 +229,7 @@ Devuelve la posición financiera actual a la fecha de consulta.
 
 **Acceptance**:
 1. **Given** cuentas de banco/efectivo, cuentas por cobrar y pasivos, **When** consulto el dashboard en modo PRO, **Then** veo disponible, por cobrar y por pagar como lecturas separadas con desglose por cuenta.
-2. **Given** que el modo cambia a Hogar, **Then** el panel de posición muestra solo disponible y deudas (sin por cobrar).
+2. **Given** que el modo cambia a Hogar, **Then** el panel de posición sigue mostrando disponible, por cobrar y por pagar (CxC/CxP informales), en lenguaje cotidiano.
 
 ---
 
@@ -255,7 +255,7 @@ Devuelve la posición financiera actual a la fecha de consulta.
 - Más de 10 cuentas con importes — solo se muestran las 10 más altas.
 - Usuario sin cuentas de pasivo o por cobrar — posición muestra ceros en esas categorías.
 - Movimientos que afectan balance y PYG en el mismo asiento — cada panel refleja solo su fuente.
-- Usuario en modo Hogar con cuentas por cobrar — el panel de posición no las muestra (solo disponible y deudas).
+- Usuario en modo Hogar con cuentas por cobrar — el panel de posición **sí** las muestra como “por cobrar” / “me deben” (sin aging ni facturas).
 
 ---
 
@@ -281,7 +281,7 @@ Devuelve la posición financiera actual a la fecha de consulta.
 | FR-H-001 | El panel PYG MUST mostrar: total ingresos, total gastos, resultado neto. |
 | FR-H-002 | El panel PYG MUST incluir un gráfico mensual con barras verdes (ingresos), barras rojas (egresos) y línea negra (saldo). |
 | FR-H-003 | El panel PYG MUST incluir Top 10 de egresos mostrando solo nombre de cuenta (sin código). |
-| FR-H-004 | El panel de posición MUST mostrar "Disponible" y "Deudas" como lecturas simples. NO debe mostrar "Por cobrar". |
+| FR-H-004 | El panel de posición MUST mostrar "Disponible", "Por cobrar" (me deben) y "Deudas / por pagar" como lecturas simples en lenguaje cotidiano. MUST NOT exigir módulo documental (facturas, aging). |
 | FR-H-005 | Los egresos MUST mostrarse como valores positivos en el gráfico. |
 | FR-H-006 | NO se deben mostrar códigos de cuenta en ningún lugar del dashboard Hogar. |
 | FR-H-007 | El formato monetario MUST respetar la moneda configurada por el usuario. |
@@ -329,8 +329,8 @@ Devuelve la posición financiera actual a la fecha de consulta.
 - **Tenant & Privacy**: Todos los endpoints filtran por usuario autenticado.
 - **Accounting Impact**: El dashboard solo lee datos existentes (asientos, saldos). No crea ni modifica asientos.
 - **MVP/Sprint Boundary**: Incluye panel PYG anual y panel de posición. Quedan fuera: PYG comparativo, drill-down por asiento, filtros por entidad/tag, reportes por centro de costo, ratios, exportación formal, estados de cuenta por Entidad.
-- **Hogar scope**: El panel de posición Hogar solo muestra disponible y deudas (oculta por cobrar). Esto es intencional — en Hogar la pregunta es "¿estoy bien?" no "¿qué me deben?".
-- **PRO scope**: El panel de posición PRO expone disponible, por cobrar y por pagar con desglose. Esto sienta las bases para los módulos formales de CxC/CxP post-MVP.
+- **Hogar scope**: El panel de posición Hogar muestra disponible, por cobrar y deudas (CxC/CxP **informales** vía cuentas de balance + Entidad). No incluye facturas, aging ni aplicación de pagos a documentos.
+- **PRO scope**: Además de los mismos saldos, PRO añade (post-MVP / Sprint 07+) el módulo documental: facturas, pagos parciales aplicados a documentos viejos, aging.
 - **Testing**: Los cálculos PYG y posición deben tener tests contables que verifiquen: totales correctos, exclusión de cuentas puente en PYG, exclusión de ingreso/egreso en posición, y separación de fuentes entre paneles.
 
 ---

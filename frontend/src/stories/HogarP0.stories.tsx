@@ -63,7 +63,7 @@ export const DashboardPanels: StoryObj = {
         netResult={4129.5}
         monthlySeries={SAMPLE_SERIES}
       />
-      <PositionPanel disponible={45200} deudas={2150.3} />
+      <PositionPanel disponible={45200} porCobrar={1200} deudas={2150.3} />
     </div>
   ),
 };

@@ -67,3 +67,13 @@ Chain strategy: pending
 - [x] 6.1 Completar `backend/Dockerfile` multistage (build + production)
 - [x] 6.2 compose.yaml con backend service + healthcheck en postgres
 - [x] 6.3 Suite completa pasa: `vitest run` — 10/10 tests pasan
+
+## Follow-up (post-MVP / delta email)
+
+Ver `specs/001-plataforma-base/spec.md` § Follow-up. Resumen:
+
+- [ ] D1 Variables de entorno de email + `.env.example`
+- [ ] D2 Adaptador real de `email-service` (reemplazar stub)
+- [ ] D3 Envío real en recovery + verification
+- [ ] D4 Reactivar gate FR-009 (`REQUIRE_EMAIL_VERIFICATION`)
+- [ ] D5 Página `/recovery` coordinada con Sprint 06

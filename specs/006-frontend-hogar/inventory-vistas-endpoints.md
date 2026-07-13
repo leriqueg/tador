@@ -29,20 +29,30 @@ Rutas en inglés (código). Copy de UI en español neutro.
 | 2 | `/login` | Login | `login_tador_neutro` | FR-002 | **Hecho** (auth real) |
 | 3 | `/register` | Registro | `registro_tador_neutro` | FR-002 | **Hecho** (auth real) |
 | 4 | `/faq` | Preguntas frecuentes | `preguntas_frecuentes_tador_neutro` | Marketing | **Hecho** |
-| 5 | `/contact` | Contacto | `contacto_tador_neutro` | Marketing | Pendiente |
-| 6 | `/onboarding` | Primer uso guiado | `onboarding_tador_mobile` + `onboarding_tador_desktop` | US1, FR-002, FR-003 | Pendiente |
-| 7 | `/dashboard` | Resumen Hogar (PYG + posición) | `dashboard_hogar_tador` (primario) | US3, FR-007 | Pendiente |
+| 5 | `/contact` | Contacto | `contacto_tador_neutro` | Marketing | Pendiente — **`mailto:`** (sin API) |
+| 6 | `/onboarding` | Primer uso guiado | `onboarding_tador_mobile` + `onboarding_tador_desktop` | US1, FR-009/010 | Pendiente — modo + moneda + timezone (UTC) |
+| 7 | `/dashboard` | Resumen Hogar (PYG + posición) | `dashboard_hogar_tador` (primario) | US3, FR-007 | Pendiente — post-login destino si libro OK |
 | 8 | `/entries` | Apuntes (nuevo + recientes) | `apuntes_tador` | US2, FR-005 | Pendiente |
 | 9 | `/accounts` | Cuentas + saldos | `cuentas_tador` | FR-003, FR-006 | Pendiente |
-| 10 | `/entities` | Entidades | `entidades_tador` | FR-004 | Pendiente |
+| 10 | `/entities` | Entidades | `entidades_tador` | FR-004 | Pendiente — CxC/CxP informales vía Entidad |
 | 11 | `/settings` | Ajustes (libro / moneda / formato) | `configuraci_n_tador` | FR-002 | Pendiente |
+| 12 | `/recovery` | Recuperar contraseña | (definir mockup / flujo) | FR-003 de 001 | Pendiente — depende email config (delta 001) |
 
 ### Onboarding (detalle)
 
-- Mobile: wizard multi-paso; paso 1 = elección de modo (Hogar / PRO).
-- Desktop: moneda + mensaje guía (mockup incluye Pacho — **omitir mascota** en implementación).
-- **MVP:** solo Modo Hogar usable; PRO como “próximamente” u omitido hasta Sprint 07.
+- Wizard multi-paso al **primer login** (libro no inicializado).
+- Captura: **modo (Hogar | PRO)**, **moneda**, **timezone** (default `UTC`).
+- Desktop: moneda + mensaje guía (mockup incluye Pacho — **omitir mascota**).
+- Post-MVP: al inicializar el libro MAY crearse vistas materializadas / índices para dashboard limpio (fuera de Sprint 06).
 - Guía: callout tipográfico / tip banner — no personaje.
+
+### Redirect post-auth
+
+| Condición | Destino |
+|-----------|---------|
+| Libro no inicializado (falta modo/moneda/timezone del wizard) | `/onboarding` |
+| Libro inicializado | `/dashboard` |
+| Registro exitoso | mismo criterio (suele ser `/onboarding`) |
 
 ### Shell autenticado
 
@@ -152,9 +162,10 @@ Ver **[`frontend/docs/component-inventory.md`](../../frontend/docs/component-inv
 ## 4. Criterio de avance
 
 - [x] Acordar rutas (§1) e inventario de componentes en frontend docs
-- [x] Gaps API documentados en specs 002 / 004 / 005
-- [ ] Implementar follow-ups backend (002 F*, 004 F*, 005 F*)
-- [ ] Storybook P0 del inventario
-- [ ] Cablear páginas autenticadas (US1 → US2 → US3)
+- [x] Gaps API documentados e implementados (002 / 004 / 005 follow-ups)
+- [x] Storybook P0 del inventario
+- [x] Clarificaciones producto 2026-07-12 (redirect, onboarding, email, mailto, CxC Hogar)
+- [ ] Extender `BookConfig` (mode, timeZone, onboardingCompletedAt) + cliente API T002
+- [ ] Cablear páginas autenticadas (US1 → US2 → US3) + `/recovery` (UI; email real = delta 001)
 
 Ver también [tasks.md](./tasks.md) (generado vía Spec Kit).

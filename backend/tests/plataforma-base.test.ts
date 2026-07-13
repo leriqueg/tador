@@ -19,7 +19,7 @@ async function createTestApp(): Promise<FastifyInstance> {
 }
 
 describe('US1 — Registration and first book', () => {
-  it('should register a user, create book, and deny book access before verification', async () => {
+  it('should register a user, create book, and allow book access without email verification (MVP)', async () => {
     const app = await createTestApp();
 
     // Register
@@ -36,14 +36,15 @@ describe('US1 — Registration and first book', () => {
 
     const cookies = res.cookies.map((c) => `${c.name}=${c.value}`);
 
-    // Try to access book before verification (FR-009)
+    // MVP: REQUIRE_EMAIL_VERIFICATION unset → book access allowed (FR-009 deferred)
     const bookRes = await app.inject({
       method: 'GET',
       url: '/book',
       headers: { cookie: cookies.join('; ') },
     });
 
-    expect(bookRes.statusCode).toBe(403);
+    expect(bookRes.statusCode).toBe(200);
+    expect(bookRes.json().book).toBeDefined();
 
     await app.close();
   });

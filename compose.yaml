@@ -27,6 +27,7 @@ services:
     restart: unless-stopped
     ports:
       - "${BACKEND_PORT:-3000}:3000"
+      - "5555:5555"
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-tador}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-tador_dev_password}

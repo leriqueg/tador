@@ -3,6 +3,8 @@
  * Represents a user's financial book with configurable settings.
  */
 
+export type BookMode = 'hogar' | 'pro';
+
 export interface Book {
   id: string;
   userId: string;
@@ -16,6 +18,9 @@ export interface BookConfig {
   locale: string;
   format: string;
   currencyLocked: boolean;
+  mode: BookMode;
+  timeZone: string;
+  onboardingCompletedAt: Date | null;
   createdAt: Date;
 }
 
@@ -27,11 +32,15 @@ export interface UpdateBookConfigInput {
   currency?: string;
   locale?: string;
   format?: string;
+  mode?: BookMode;
+  timeZone?: string;
+  /** When true, stamps onboardingCompletedAt if not already set */
+  completeOnboarding?: boolean;
 }
 
 export function createBook(input: CreateBookInput): Book {
   return {
-    id: '', // assigned by repository
+    id: '',
     userId: input.userId,
     createdAt: new Date(),
   };
@@ -39,12 +48,15 @@ export function createBook(input: CreateBookInput): Book {
 
 export function createDefaultBookConfig(): BookConfig {
   return {
-    id: '', // assigned by repository
-    bookId: '', // assigned by repository
+    id: '',
+    bookId: '',
     currency: 'USD',
     locale: 'en-US',
     format: 'symbol',
     currencyLocked: false,
+    mode: 'hogar',
+    timeZone: 'UTC',
+    onboardingCompletedAt: null,
     createdAt: new Date(),
   };
 }
@@ -58,14 +70,21 @@ export function defaultBookConfigCreateInput() {
     locale: 'en-US',
     format: 'symbol',
     currencyLocked: false,
+    mode: 'hogar',
+    timeZone: 'UTC',
+    onboardingCompletedAt: null as Date | null,
   };
+}
+
+export function isBookInitialized(config: BookConfig): boolean {
+  return config.onboardingCompletedAt !== null;
 }
 
 /**
  * Apply configuration updates with FR-006 rule:
  * currency cannot be changed if currencyLocked is true.
  *
- * @throws Error if attempting to change a locked currency.
+ * @throws Error if attempting to change a locked currency or invalid mode.
  */
 export function applyBookConfigUpdate(
   current: BookConfig,
@@ -86,6 +105,24 @@ export function applyBookConfigUpdate(
 
   if (input.format !== undefined) {
     current.format = input.format;
+  }
+
+  if (input.mode !== undefined) {
+    if (input.mode !== 'hogar' && input.mode !== 'pro') {
+      throw new Error('Invalid book mode');
+    }
+    current.mode = input.mode;
+  }
+
+  if (input.timeZone !== undefined) {
+    if (input.timeZone.trim() === '') {
+      throw new Error('Invalid time zone');
+    }
+    current.timeZone = input.timeZone;
+  }
+
+  if (input.completeOnboarding === true && current.onboardingCompletedAt === null) {
+    current.onboardingCompletedAt = new Date();
   }
 
   return { ...current };

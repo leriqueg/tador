@@ -21,28 +21,28 @@ db-up:                    ## Levanta PostgreSQL en Docker
 
 .PHONY: db-migrate
 db-migrate:               ## Ejecuta migraciones Prisma (dev)
-	$(RUN_BACKEND) npx prisma migrate dev
+	$(RUN_BACKEND) npm run db:migrate
 
 .PHONY: db-seed
 db-seed:                  ## Siembra datos de catálogo global
-	$(RUN_BACKEND) npx tsx prisma/seed/catalogos.ts
+	$(RUN_BACKEND) npm run seed:catalogos
 
 .PHONY: db-setup
 db-setup: db-up db-migrate db-seed  ## Postgres + migraciones + seed
 
 .PHONY: db-reset
 db-reset:                 ## Resetea DB: borra esquema, migra y seedea
-	$(RUN_BACKEND) npx prisma migrate reset --force
+	$(RUN_BACKEND) node scripts/run-with-db-url.mjs npx prisma migrate reset --force
 	$(MAKE) db-seed
 
 .PHONY: db-generate
 db-generate:              ## Regenera Prisma Client
-	$(RUN_BACKEND) npx prisma generate
+	$(RUN_BACKEND) npm run db:generate
 
 .PHONY: db-studio
 db-studio:                ## Abre Prisma Studio
 	$(COMPOSE) run --rm -p 5555:5555 backend \
-		npx prisma studio --hostname 0.0.0.0 --port 5555
+		npm run db:studio -- --hostname 0.0.0.0 --port 5555
 
 # ─── Servidores ────────────────────────────────────────
 

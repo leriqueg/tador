@@ -44,7 +44,12 @@ describe('US1 — Registration and first book', () => {
     });
 
     expect(bookRes.statusCode).toBe(200);
-    expect(bookRes.json().book).toBeDefined();
+    const bookBody = bookRes.json();
+    expect(bookBody.book).toBeDefined();
+    expect(bookBody.config.initialized).toBe(false);
+    expect(bookBody.config.mode).toBe('hogar');
+    expect(bookBody.config.timeZone).toBe('UTC');
+    expect(bookBody.config.onboardingCompletedAt).toBeNull();
 
     await app.close();
   });
@@ -58,6 +63,48 @@ describe('US1 — Registration and first book', () => {
       payload: { email: 'book-test@test.com', password: 'password123' },
     });
     expect(res.statusCode).toBe(201);
+
+    await app.close();
+  });
+
+  it('should complete onboarding via PATCH /book/config', async () => {
+    const app = await createTestApp();
+
+    const res = await app.inject({
+      method: 'POST',
+      url: '/auth/register',
+      payload: { email: 'onboard@test.com', password: 'password123' },
+    });
+    expect(res.statusCode).toBe(201);
+    const cookies = res.cookies.map((c) => `${c.name}=${c.value}`);
+
+    const patchRes = await app.inject({
+      method: 'PATCH',
+      url: '/book/config',
+      headers: { cookie: cookies.join('; ') },
+      payload: {
+        mode: 'hogar',
+        currency: 'COP',
+        timeZone: 'America/Bogota',
+        completeOnboarding: true,
+      },
+    });
+
+    expect(patchRes.statusCode).toBe(200);
+    const { config } = patchRes.json();
+    expect(config.mode).toBe('hogar');
+    expect(config.currency).toBe('COP');
+    expect(config.timeZone).toBe('America/Bogota');
+    expect(config.initialized).toBe(true);
+    expect(config.onboardingCompletedAt).toBeTruthy();
+
+    const getRes = await app.inject({
+      method: 'GET',
+      url: '/book',
+      headers: { cookie: cookies.join('; ') },
+    });
+    expect(getRes.statusCode).toBe(200);
+    expect(getRes.json().config.initialized).toBe(true);
 
     await app.close();
   });

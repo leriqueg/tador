@@ -18,6 +18,9 @@ export interface UpdateBookConfigInput {
   currency?: string;
   locale?: string;
   format?: string;
+  mode?: 'hogar' | 'pro';
+  timeZone?: string;
+  completeOnboarding?: boolean;
 }
 
 export interface BookApplicationService {

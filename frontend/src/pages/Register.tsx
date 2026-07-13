@@ -7,6 +7,7 @@ import Icon from '../components/ui/Icon.tsx';
 import PasswordRequirement from '../components/ui/PasswordRequirement.tsx';
 import TextInput from '../components/ui/TextInput.tsx';
 import { useAuth } from '../lib/auth.tsx';
+import { resolvePostAuthDestination } from '../lib/post-auth-redirect.ts';
 
 export default function Register() {
   const { register } = useAuth();
@@ -34,7 +35,8 @@ export default function Register() {
     setLoading(true);
     try {
       await register(email, password);
-      navigate('/');
+      const dest = await resolvePostAuthDestination();
+      navigate(dest, { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al registrarse');
     } finally {

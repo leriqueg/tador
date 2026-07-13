@@ -28,6 +28,7 @@ async function request<T>(
     method,
     headers: {
       'Content-Type': 'application/json',
+      Accept: 'application/json',
     },
     credentials: 'include',
     body: body ? JSON.stringify(body) : undefined,
@@ -98,5 +99,45 @@ export const auth = {
     return request<{ message: string }>('POST', '/auth/resend-verification', {
       email,
     });
+  },
+};
+
+// ─── Book ──────────────────────────────────────────────────────────
+
+export type BookMode = 'hogar' | 'pro';
+
+export interface BookConfig {
+  id: string;
+  currency: string;
+  locale: string;
+  format: string;
+  currencyLocked: boolean;
+  mode: BookMode;
+  timeZone: string;
+  onboardingCompletedAt: string | null;
+  initialized: boolean;
+}
+
+export interface BookResponse {
+  book: { id: string; createdAt: string };
+  config: BookConfig;
+}
+
+export interface UpdateBookConfigInput {
+  currency?: string;
+  locale?: string;
+  format?: string;
+  mode?: BookMode;
+  timeZone?: string;
+  completeOnboarding?: boolean;
+}
+
+export const book = {
+  get() {
+    return request<BookResponse>('GET', '/book');
+  },
+
+  updateConfig(input: UpdateBookConfigInput) {
+    return request<{ config: BookConfig }>('PATCH', '/book/config', input);
   },
 };

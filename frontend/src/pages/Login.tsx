@@ -6,6 +6,7 @@ import Button from '../components/ui/Button.tsx';
 import Icon from '../components/ui/Icon.tsx';
 import TextInput from '../components/ui/TextInput.tsx';
 import { useAuth } from '../lib/auth.tsx';
+import { resolvePostAuthDestination } from '../lib/post-auth-redirect.ts';
 
 export default function Login() {
   const { login } = useAuth();
@@ -23,7 +24,8 @@ export default function Login() {
     setLoading(true);
     try {
       await login(email, password);
-      navigate('/');
+      const dest = await resolvePostAuthDestination();
+      navigate(dest, { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al iniciar sesión');
     } finally {

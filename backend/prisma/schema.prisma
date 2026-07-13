@@ -68,14 +68,20 @@ model Book {
 }
 
 model BookConfig {
-  id             String   @id @default(cuid())
-  bookId         String   @unique
-  currency       String   @default("USD")
-  locale         String   @default("en-US")
-  format         String   @default("symbol")
-  currencyLocked Boolean  @default(false)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id                    String    @id @default(cuid())
+  bookId                String    @unique
+  currency              String    @default("USD")
+  locale                String    @default("en-US")
+  format                String    @default("symbol")
+  currencyLocked        Boolean   @default(false)
+  /// Active product mode: hogar | pro
+  mode                  String    @default("hogar")
+  /// IANA timezone; MVP default UTC
+  timeZone              String    @default("UTC")
+  /// Null until onboarding wizard completes (FR-010)
+  onboardingCompletedAt DateTime?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
 
   book Book @relation(fields: [bookId], references: [id], onDelete: Cascade)
 

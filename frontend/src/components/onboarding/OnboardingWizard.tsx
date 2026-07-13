@@ -4,27 +4,45 @@ import Icon from '../ui/Icon.tsx';
 
 export type OnboardingStep = 1 | 2 | 3;
 
+export interface OnboardingResult {
+  mode: 'hogar';
+  currency: string;
+  timeZone: string;
+}
+
 export interface OnboardingWizardProps {
   initialStep?: OnboardingStep;
   /** MVP: only hogar is selectable; pro shown as coming soon when true */
   showProComingSoon?: boolean;
   tipMessage?: string;
-  onComplete: (result: { mode: 'hogar'; currency?: string }) => void;
+  submitting?: boolean;
+  onComplete: (result: OnboardingResult) => void;
 }
 
 const DEFAULT_TIP =
   'Vamos a preparar tu libro juntos. Empezá simple: elegí cómo querés usar TADOR.';
+
+const TIME_ZONES = [
+  { value: 'UTC', label: 'UTC (recomendado)' },
+  { value: 'America/Bogota', label: 'America/Bogota' },
+  { value: 'America/Mexico_City', label: 'America/Mexico_City' },
+  { value: 'America/Argentina/Buenos_Aires', label: 'America/Buenos_Aires' },
+  { value: 'America/Santiago', label: 'America/Santiago' },
+  { value: 'Europe/Madrid', label: 'Europe/Madrid' },
+] as const;
 
 /** Multi-step first-run wizard. No Pacho — tip callout only. */
 export default function OnboardingWizard({
   initialStep = 1,
   showProComingSoon = true,
   tipMessage = DEFAULT_TIP,
+  submitting = false,
   onComplete,
 }: OnboardingWizardProps) {
   const [step, setStep] = useState<OnboardingStep>(initialStep);
   const [mode, setMode] = useState<'hogar' | null>(null);
   const [currency, setCurrency] = useState('USD');
+  const [timeZone, setTimeZone] = useState('UTC');
 
   function continueFromStep1() {
     if (!mode) return;
@@ -36,8 +54,8 @@ export default function OnboardingWizard({
   }
 
   function finish() {
-    if (!mode) return;
-    onComplete({ mode, currency });
+    if (!mode || submitting) return;
+    onComplete({ mode, currency, timeZone });
   }
 
   return (
@@ -102,9 +120,10 @@ export default function OnboardingWizard({
       {step === 2 && (
         <>
           <section className="mb-lg">
-            <h1 className="text-headline-lg-mobile text-on-surface mb-xs font-bold">Moneda del libro</h1>
+            <h1 className="text-headline-lg-mobile text-on-surface mb-xs font-bold">Moneda y zona horaria</h1>
             <p className="text-body-md text-on-surface-variant">
-              Elegí la moneda principal. Después de registrar movimientos, no se podrá cambiar.
+              Elegí la moneda principal y la zona horaria del libro. Después de registrar movimientos, la
+              moneda no se podrá cambiar.
             </p>
           </section>
           <label className="text-label-md text-on-surface-variant mb-xs block" htmlFor="currency">
@@ -114,7 +133,7 @@ export default function OnboardingWizard({
             id="currency"
             value={currency}
             onChange={(e) => setCurrency(e.target.value)}
-            className="w-full h-12 px-md mb-xl rounded-lg border border-outline-variant bg-surface-container-lowest text-body-md"
+            className="w-full h-12 px-md mb-md rounded-lg border border-outline-variant bg-surface-container-lowest text-body-md"
           >
             <option value="USD">USD — Dólar</option>
             <option value="EUR">EUR — Euro</option>
@@ -122,6 +141,21 @@ export default function OnboardingWizard({
             <option value="MXN">MXN — Peso mexicano</option>
             <option value="COP">COP — Peso colombiano</option>
             <option value="CLP">CLP — Peso chileno</option>
+          </select>
+          <label className="text-label-md text-on-surface-variant mb-xs block" htmlFor="timezone">
+            Zona horaria
+          </label>
+          <select
+            id="timezone"
+            value={timeZone}
+            onChange={(e) => setTimeZone(e.target.value)}
+            className="w-full h-12 px-md mb-xl rounded-lg border border-outline-variant bg-surface-container-lowest text-body-md"
+          >
+            {TIME_ZONES.map((tz) => (
+              <option key={tz.value} value={tz.value}>
+                {tz.label}
+              </option>
+            ))}
           </select>
           <div className="flex gap-md">
             <Button variant="outline" fullWidth size="lg" className="rounded-xl" onClick={() => setStep(1)}>
@@ -150,13 +184,23 @@ export default function OnboardingWizard({
             <p className="text-label-md text-on-surface-variant">
               Moneda: <span className="font-semibold text-primary">{currency}</span>
             </p>
+            <p className="text-label-md text-on-surface-variant">
+              Zona: <span className="font-semibold text-primary">{timeZone}</span>
+            </p>
           </div>
           <div className="flex gap-md">
-            <Button variant="outline" fullWidth size="lg" className="rounded-xl" onClick={() => setStep(2)}>
+            <Button
+              variant="outline"
+              fullWidth
+              size="lg"
+              className="rounded-xl"
+              disabled={submitting}
+              onClick={() => setStep(2)}
+            >
               Atrás
             </Button>
-            <Button fullWidth size="lg" className="rounded-xl" onClick={finish}>
-              Empezar
+            <Button fullWidth size="lg" className="rounded-xl" disabled={submitting} onClick={finish}>
+              {submitting ? 'Guardando…' : 'Empezar'}
             </Button>
           </div>
           <p className="text-center mt-sm text-label-sm text-outline">Paso 3 de 3</p>

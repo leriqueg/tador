@@ -28,7 +28,7 @@
 **Purpose**: Align frontend docs and API client surface for Hogar
 
 - [x] T001 Document active Spec Kit plan pointer for 006 in `.cursor/rules/specify-rules.mdc` (SPECKIT section → `specs/006-frontend-hogar/plan.md`)
-- [ ] T002 [P] Extend `frontend/src/lib/api.ts` with typed clients for book, chart, accounts, entities, plantillas, apuntes, reports (stubs OK until backend follow-ups land)
+- [ ] T002 [P] Extend `frontend/src/lib/api.ts` with typed clients for book, chart, accounts, entities, plantillas, apuntes, reports (stubs OK until backend follow-ups land) — **partial**: `book` client done; remaining endpoints still pending
 - [x] T003 [P] Confirm Storybook scripts and link from `frontend/README.md` to `frontend/docs/component-inventory.md` (already drafted — verify)
 
 ---
@@ -63,11 +63,11 @@
 
 **Independent test**: New user finishes onboarding and can open `/accounts` with at least one guided account path available
 
-- [ ] T012 [US1] Add route `/onboarding` in `frontend/src/App.tsx` and page `frontend/src/pages/Onboarding.tsx` using `OnboardingWizard` (modo + moneda + timezone UTC)
-- [ ] T013 [US1] Wire onboarding to `GET/PATCH /book` via `frontend/src/lib/api.ts`; persist mode, currency, locale/format, timeZone; mark book initialized
+- [x] T012 [US1] Add route `/onboarding` in `frontend/src/App.tsx` and page `frontend/src/pages/Onboarding.tsx` using `OnboardingWizard` (modo + moneda + timezone UTC)
+- [x] T013 [US1] Wire onboarding to `GET/PATCH /book` via `frontend/src/lib/api.ts`; persist mode, currency, locale/format, timeZone; mark book initialized
 - [ ] T014 [US1] After book config, CTA to guided account creation (`GuidedAccountCreate` or `/accounts` create flow) without showing account codes
 - [ ] T015 [US1] Add `/settings` page `frontend/src/pages/Settings.tsx` with `BookConfigForm`; mockup `configuraci_n_tador`
-- [ ] T016 [US1] Gate authenticated app: post-login / protected routes — if book not initialized → `/onboarding`; else → `/dashboard` (FR-009)
+- [x] T016 [US1] Gate authenticated app: post-login / protected routes — if book not initialized → `/onboarding`; else → `/dashboard` (FR-009)
 - [ ] T017 [P] [US1] Add `/contact` page from `contacto_tador_neutro` using **`mailto:`** (FR-011)
 - [ ] T017b [P] [US1] Add `/recovery` request + reset pages (UI); email send depends on 001 Follow-up D1–D3
 

@@ -45,4 +45,4 @@ npm run lint             # Oxlint
 - `/register` — Register
 - `/faq` — FAQ
 
-API proxy: `/auth` and `/api` → `http://localhost:3000` (see `vite.config.ts`).
+API proxy: `/auth`, `/book`, `/api`, `/health` → backend (`VITE_PROXY_TARGET`, default `http://localhost:3000`). Document navigations (`Accept: text/html`) stay on the SPA.

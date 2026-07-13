@@ -10,7 +10,7 @@ import ApunteMiniForm, {
 import { ApunteConfirm } from '../components/entries/ApunteForm.tsx';
 import RecentEntriesList from '../components/entries/RecentEntriesList.tsx';
 import ValidationMessage from '../components/ui/ValidationMessage.tsx';
-import { apuntes, plantillas, type PlantillaView, type ApunteSummary } from '../lib/api.ts';
+import { apuntes, plantillas, type PlantillaView, type PlantillaDetail, type ApunteSummary } from '../lib/api.ts';
 import { useAuth } from '../lib/auth.tsx';
 import { useBookGate } from '../lib/use-book-gate.ts';
 import {
@@ -31,12 +31,14 @@ export default function Entries() {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [catalog, setCatalog] = useState<PlantillaView[]>([]);
+  const [selectedDetail, setSelectedDetail] = useState<PlantillaDetail | null>(null);
   const [recent, setRecent] = useState<ApunteSummary[]>([]);
   const [loadError, setLoadError] = useState('');
   const [submitError, setSubmitError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [loadingCatalog, setLoadingCatalog] = useState(true);
+  const [loadingDetail, setLoadingDetail] = useState(false);
 
   const [kind, setKind] = useState<PlantillaKind>('gasto');
   const [category, setCategory] = useState<PlantillaCategory | null>('compras');
@@ -103,9 +105,35 @@ export default function Entries() {
       .slice(0, 3);
   }, [catalog, kind, category]);
 
-  const selectedPlantilla = selectedCode
-    ? catalog.find((p) => p.code === selectedCode) ?? null
-    : null;
+  // Enrich only when a plantilla is selected (fast list → detail)
+  useEffect(() => {
+    if (!selectedCode) {
+      setSelectedDetail(null);
+      return;
+    }
+    let cancelled = false;
+    async function loadDetail() {
+      setLoadingDetail(true);
+      setSubmitError('');
+      try {
+        const res = await plantillas.get(selectedCode!);
+        if (!cancelled) setSelectedDetail(res.plantilla);
+      } catch (err) {
+        if (!cancelled) {
+          setSelectedDetail(null);
+          setSubmitError(
+            err instanceof Error ? err.message : 'No se pudo cargar la plantilla',
+          );
+        }
+      } finally {
+        if (!cancelled) setLoadingDetail(false);
+      }
+    }
+    void loadDetail();
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedCode]);
 
   function selectPlantilla(code: string) {
     setSelectedCode(code);
@@ -116,6 +144,7 @@ export default function Entries() {
 
   function clearPlantilla() {
     setSelectedCode(null);
+    setSelectedDetail(null);
     setSearchParams({}, { replace: true });
   }
 
@@ -179,14 +208,18 @@ export default function Entries() {
 
         {loadingCatalog ? (
           <p className="text-on-surface-variant">Cargando plantillas…</p>
-        ) : selectedPlantilla ? (
-          <ApunteMiniForm
-            plantilla={selectedPlantilla}
-            error={submitError}
-            submitting={submitting}
-            onSubmit={handleSubmit}
-            onCancel={clearPlantilla}
-          />
+        ) : selectedCode ? (
+          loadingDetail || !selectedDetail ? (
+            <p className="text-on-surface-variant">Cargando cuentas de la plantilla…</p>
+          ) : (
+            <ApunteMiniForm
+              plantilla={selectedDetail}
+              error={submitError}
+              submitting={submitting}
+              onSubmit={handleSubmit}
+              onCancel={clearPlantilla}
+            />
+          )
         ) : (
           <>
             <FrequentTemplatesGrid tiles={frequentTiles} onSelect={selectPlantilla} />
@@ -194,9 +227,19 @@ export default function Entries() {
             <KindCategoryNav
               kind={kind}
               category={category}
+              availableCategories={categoriesForKind(kind).filter((c) =>
+                catalog.some(
+                  (p) => plantillaKind(p.code) === kind && plantillaCategory(p.code) === c,
+                ),
+              )}
               onKindChange={(k) => {
                 setKind(k);
-                setCategory(categoriesForKind(k)[0] ?? null);
+                const next = categoriesForKind(k).filter((c) =>
+                  catalog.some(
+                    (p) => plantillaKind(p.code) === k && plantillaCategory(p.code) === c,
+                  ),
+                );
+                setCategory(next[0] ?? null);
               }}
               onCategoryChange={setCategory}
             />

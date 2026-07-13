@@ -295,7 +295,7 @@ Se cargan en memoria al arrancar el servidor desde los archivos JSON. No hay tab
 
 ### 5.1 `GET /api/plantillas` (require auth)
 
-Devuelve todas las plantillas disponibles. El frontend filtra por `modes` según el modo del usuario. Cada línea incluye `availableAccounts` con las CuentaGlobal y CuentaUsuario del usuario que cumplen la estrategia declarada.
+Devuelve el **catálogo liviano** de plantillas (metadata + líneas sin `availableAccounts`). Pensado para descubrimiento/UI de tiles y chips.
 
 ```jsonc
 // Response 200
@@ -311,29 +311,28 @@ Devuelve todas las plantillas disponibles. El frontend filtra por `modes` según
       "date": { "type": "date", "default": "today", "required": true, "label": "Fecha" },
       "entity": { "type": "entity", "required": false, "label": "Relacionado con" },
       "amountMode": "single",
+      "descriptionTemplate": "{concept}",
       "lines": [
         { "id": 1, "side": "debit",  "label": "Tipo de servicio",  "strategy": "from_group",    "groupCode": "61120000" },
         { "id": 2, "side": "credit", "label": "Pagaste con",       "strategy": "from_groups", "groupCodes": ["11110000","11120000","21200000"] }
       ]
     }
-    // ... más plantillas
   ]
 }
 ```
 
-**Nota**: El backend enriquece cada línea según su estrategia:
-- `from_group` / `from_groups`: resuelve las CuentaGlobal y CuentaUsuario del usuario que cuelgan de esos grupos, y las incluye como `availableAccounts` en cada línea.
+**Rendimiento (2026-07-13)**: El listado **MUST NOT** resolver `availableAccounts` por línea. Una implementación previa hacía N+1 queries (walk de ancestros por cada cuenta global × cada línea × cada plantilla) y demoraba ~6–7s para ~10 KB. El matching de cuentas se hace en memoria tras **una** carga del plan + **una** carga de cuentas del usuario, y solo en el detalle.
 
 ### 5.2 `GET /api/plantillas/:code`
 
-Devuelve una plantilla específica con cuentas disponibles resueltas.
+Devuelve una plantilla específica con `availableAccounts` resueltas por línea (CuentaGlobal postables + CuentaUsuario del usuario bajo los grupos de la estrategia).
 
 ```jsonc
 // Response 200
 {
   "plantilla": {
     "code": "pagar_servicios",
-    // ... mismo que arriba, cada línea con `availableAccounts`
+    // ... mismo que listado, cada línea con `availableAccounts`
   }
 }
 ```
@@ -495,12 +494,12 @@ Este sprint no implementa frontend. Pero el spec define cómo el frontend DEBE c
 
 ### 8.1 Modo HOME
 
-1. GET /api/plantillas → obtiene lista filtrada por `modes: ["hogar"]`
-2. UI muestra botones/íconos por cada plantilla (ej: "Pagar servicios", "Depositar", "Sueldo"...)
-3. Usuario selecciona una → GET /api/plantillas/:code → obtiene la plantilla con cuentas disponibles resueltas
-4. UI renderiza los campos (`amount`, `concept`, `date`, `entity`) y los slots de cuenta con selectores filtrados
+1. GET /api/plantillas?mode=hogar → catálogo **liviano** (sin availableAccounts)
+2. UI muestra botones/íconos / capas de descubrimiento
+3. Usuario selecciona una → GET /api/plantillas/:code → plantilla **enriquecida** con cuentas
+4. UI renderiza monto, concepto, date y selectores por línea (labels, sin códigos en Hogar)
 5. Usuario llena → POST /api/apuntes
-6. Lista reciente / historial → GET /api/apuntes (proyección sin líneas contables)
+6. Lista reciente / historial → GET /api/apuntes
 
 ### 8.2 Modo PRO (wizard)
 
@@ -533,13 +532,14 @@ Cada plantilla referencia grupos del plan de cuentas. Tabla de referencia:
 ## 10. Success Criteria
 
 - **SC-001**: Las 10 plantillas HOME están definidas como JSON y se cargan al iniciar el servidor.
-- **SC-002**: GET /api/plantillas devuelve las 10 plantillas con cuentas disponibles resueltas.
+- **SC-002**: GET /api/plantillas devuelve las 10 plantillas en catálogo liviano; GET /api/plantillas/:code resuelve `availableAccounts`.
 - **SC-003**: POST /api/apuntes con `templateCode` válido crea asiento balanceado.
 - **SC-004**: POST /api/apuntes sin `templateCode` (PRO wizard) crea asiento balanceado.
 - **SC-005**: Validaciones V1-V9 rechazan apuntes inválidos con mensajes claros.
 - **SC-006**: Apunte queda registrado y vinculado al Asiento generado.
 - **SC-007**: POST /api/apuntes con `amountMode: "single"` replica el monto en todas las líneas.
 - **SC-008**: GET /api/apuntes devuelve solo apuntes del usuario autenticado, ordenados por fecha desc, sin líneas contables.
+- **SC-009**: GET /api/plantillas (listado) no realiza N+1 de ancestros; enrichment solo en `:code`.
 
 ## 11. Fuera de scope (sprint actual)
 
@@ -551,3 +551,17 @@ Cada plantilla referencia grupos del plan de cuentas. Tabla de referencia:
 - Plantillas PRO (ingreso_tercero, gasto_proyecto_puente, asiento_manual)
 - Motor de plantillas en DB
 - Edición de apuntes
+
+## 12. Diagnóstico — Plantillas Admin (dev / post-MVP admin UI)
+
+Herramienta **no producto** para validar plantillas. El frontend de administración completo es post-MVP; por ahora API + HTML mínimo.
+
+| Método | Ruta | Uso |
+|--------|------|-----|
+| GET | `/api/dev/plantillas-admin?mode=hogar` | Resumen kind/categoría, `emptyCategories`, `ready` + muestras de cuentas |
+| GET | `/api/dev/plantillas-admin/:code` | Detalle enriquecido |
+| POST | `/api/dev/plantillas-admin/:code/preview` | Dry-run del asiento (no persiste) |
+
+- Auth requerida. Gate: `ENABLE_PLANTILLAS_ADMIN=true` o `NODE_ENV !== 'production'` (sin flag en prod → 404).
+- HTML: `?format=html` o `Accept: text/html`.
+- Capacidades: (a) chips vacíos, (b) colecciones/ready por línea, (c) preview de asiento.

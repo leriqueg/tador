@@ -177,7 +177,8 @@ export interface PlantillaLineView {
   groupCode?: string;
   groupCodes?: string[];
   suggestedChild?: string | null;
-  availableAccounts: PlantillaAccountOption[];
+  /** Present only on GET /api/plantillas/:code */
+  availableAccounts?: PlantillaAccountOption[];
 }
 
 export interface PlantillaView {
@@ -190,6 +191,10 @@ export interface PlantillaView {
   lines: PlantillaLineView[];
 }
 
+export type PlantillaDetail = PlantillaView & {
+  lines: Array<PlantillaLineView & { availableAccounts: PlantillaAccountOption[] }>;
+};
+
 export const plantillas = {
   list(mode?: 'hogar' | 'pro') {
     const q = mode ? `?mode=${mode}` : '';
@@ -197,7 +202,7 @@ export const plantillas = {
   },
 
   get(code: string) {
-    return request<{ plantilla: PlantillaView }>('GET', `/api/plantillas/${code}`);
+    return request<{ plantilla: PlantillaDetail }>('GET', `/api/plantillas/${code}`);
   },
 };
 

@@ -27,6 +27,7 @@ import { registerReportRoutes } from './api/routes/reports.js';
 import { registerPeriodRoutes } from './api/routes/periods.js';
 import { registerPlantillaRoutes } from './api/routes/plantillas.js';
 import { registerApunteRoutes } from './api/routes/apuntes.js';
+import { registerPlantillasAdminRoutes } from './api/routes/plantillas-admin.js';
 import { loadPlantillas } from './plantillas/index.js';
 
 const PORT = parseInt(process.env.PORT || '3000', 10);
@@ -96,6 +97,7 @@ export async function buildApp(opts?: { logger?: boolean | object }) {
   registerPeriodRoutes(app, authService, accountingService);
   registerPlantillaRoutes(app, authService);
   registerApunteRoutes(app, authService);
+  registerPlantillasAdminRoutes(app, authService);
 
   // Eagerly load plantillas into memory
   loadPlantillas();

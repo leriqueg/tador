@@ -201,3 +201,9 @@ Historial de apuntes requerido por UI Hogar (`/entries`, dashboard recientes). C
 - [x] F1 Escribir test: `GET /api/apuntes` → 200 lista del usuario A; usuario B no ve apuntes de A (SC-008)
 - [x] F2 Escribir test: orden por `date` desc; `limit`/`offset` respetados; respuesta sin líneas de asiento
 - [x] F3 Implementar `GET /api/apuntes` en `backend/src/api/routes/apuntes.ts` según §5.4
+
+## Follow-up (2026-07-13 — rendimiento + admin diagnóstico)
+
+- [x] F4 Listado liviano: `GET /api/plantillas` sin `availableAccounts`; enrichment solo en `:code` (SC-002/SC-009)
+- [x] F5 Resolver cuentas en memoria (`plantilla-account-resolver.ts`) — una carga de chart + cuentas usuario
+- [x] F6 Plantillas Admin dev: `GET/POST /api/dev/plantillas-admin*` (spec §12); gate env; HTML opcional; preview dry-run

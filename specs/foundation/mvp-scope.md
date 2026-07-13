@@ -69,6 +69,7 @@ Los dos paneles se presentan juntos en el dashboard pero se calculan desde fuent
 | Reportes avanzados | Comparativos, exportaciones y filtros complejos quedan después. |
 | IA autónoma | La IA no decide ni ejecuta contabilidad sin validación y confirmación. |
 | Personalidad completa de Pacho | Branding y guía conversacional quedan para después. |
+| Frontend de administración | Panel interno (plantillas, catálogos, diagnóstico). En MVP solo existe `/api/dev/plantillas-admin` (004 §12). |
 
 ## Decisiones de producto
 

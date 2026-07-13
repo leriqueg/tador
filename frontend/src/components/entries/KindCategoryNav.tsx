@@ -8,6 +8,8 @@ import {
 export interface KindCategoryNavProps {
   kind: PlantillaKind;
   category: PlantillaCategory | null;
+  /** When set, only these chips render (hide empty categories). */
+  availableCategories?: PlantillaCategory[];
   onKindChange: (kind: PlantillaKind) => void;
   onCategoryChange: (category: PlantillaCategory) => void;
 }
@@ -22,10 +24,11 @@ const KINDS: { id: PlantillaKind; label: string }[] = [
 export default function KindCategoryNav({
   kind,
   category,
+  availableCategories,
   onKindChange,
   onCategoryChange,
 }: KindCategoryNavProps) {
-  const chips = categoriesForKind(kind);
+  const chips = availableCategories ?? categoriesForKind(kind);
 
   return (
     <div className="space-y-md mb-lg">

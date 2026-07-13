@@ -164,3 +164,5 @@ Como usuario Hogar, quiero ver saldos actuales y el dashboard (resultado del eje
 - Recuperación de contraseña: UI en alcance de producto; envío real de email depende del follow-up de 001.
 - Ranking de plantillas frecuentes MAY empezar en cliente (local) y migrar a backend después; el fallback curado es suficiente para MVP.
 - Categorías de chips (Compras, Comida, Hogar, Transporte, Salud, Otros, etc.) se derivan de metadatos/agrupación de plantillas; si faltan metadatos, se usan grupos curados en frontend hasta que el backend los exponga.
+- Diagnóstico de plantillas (`/api/dev/plantillas-admin`) es tool de desarrollo; **frontend de administración** de plantillas es post-MVP (ver 004 §12). Hogar Entries usa listado liviano + detalle enriquecido al elegir.
+- Entries carga `GET /api/plantillas?mode=hogar` sin `availableAccounts` y solo llama `GET /api/plantillas/:code` al seleccionar (perf; SC-009 en 004).

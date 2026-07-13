@@ -267,6 +267,11 @@ describe('US7 — GET /api/plantillas', () => {
     expect(res.statusCode).toBe(200);
     const body = res.json();
     expect(body.plantillas).toHaveLength(10);
+    for (const p of body.plantillas) {
+      for (const line of p.lines) {
+        expect(line.availableAccounts).toBeUndefined();
+      }
+    }
 
     await app.close();
   });
@@ -1108,6 +1113,67 @@ describe('SC-008 ? GET /api/apuntes', () => {
     expect(body.total).toBe(3);
     expect(body.apuntes).toHaveLength(1);
     expect(body.apuntes[0].concept).toBe("Apunte 2");
+
+    await app.close();
+  });
+});
+
+describe('Plantillas Admin (dev)', () => {
+  it('GET /api/dev/plantillas-admin?mode=hogar returns readiness summary', async () => {
+    const app = await createTestApp();
+    const cookies = await registerAndVerify(app, 'admin-plantillas@test.com');
+    await setupTemplateAccounts(app, cookies);
+
+    const res = await app.inject({
+      method: 'GET',
+      url: '/api/dev/plantillas-admin?mode=hogar',
+      headers: { cookie: cookies.join('; ') },
+    });
+
+    expect(res.statusCode).toBe(200);
+    const body = res.json();
+    expect(body.summary).toBeDefined();
+    expect(Array.isArray(body.summary.emptyCategories)).toBe(true);
+    expect(body.plantillas.length).toBeGreaterThanOrEqual(1);
+    expect(body.plantillas[0]).toHaveProperty('ready');
+    expect(body.plantillas[0].lines[0]).toHaveProperty('availableCount');
+
+    await app.close();
+  });
+
+  it('POST preview dry-runs without persisting', async () => {
+    const app = await createTestApp();
+    const cookies = await registerAndVerify(app, 'admin-preview@test.com');
+    const accounts = await setupTemplateAccounts(app, cookies);
+    const user = await prisma.user.findUnique({
+      where: { email: 'admin-preview@test.com' },
+    });
+    expect(user).toBeTruthy();
+
+    const before = await prisma.apunte.count({ where: { userId: user!.id } });
+
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/dev/plantillas-admin/pagar_servicios/preview',
+      headers: { cookie: cookies.join('; ') },
+      payload: {
+        amount: 42.5,
+        concept: 'Preview only',
+        lines: [
+          { id: 1, accountId: accounts.servicioUserAccountId },
+          { id: 2, accountId: accounts.bancoUserAccountId },
+        ],
+      },
+    });
+
+    expect(res.statusCode).toBe(200);
+    const body = res.json();
+    expect(body.persisted).toBe(false);
+    expect(body.balanced).toBe(true);
+    expect(body.lines).toHaveLength(2);
+
+    const after = await prisma.apunte.count({ where: { userId: user!.id } });
+    expect(after).toBe(before);
 
     await app.close();
   });

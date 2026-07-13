@@ -44,3 +44,7 @@ One `POST /api/apuntes` path; UI presentation differs by `BookConfig.mode`. PRO 
 **Rationale**: DRY + Clean Architecture — accounting rules stay in plantillas/backend.
 
 **Alternatives considered**: Separate Hogar-only write API — rejected as unnecessary duplication.
+
+## Decision: Plantillas list light + detail enrich (2026-07-13)
+
+Entries loads `GET /api/plantillas?mode=hogar` for discovery, then `GET /api/plantillas/:code` when selecting. Hides empty category chips using catalog codes. Diagnóstico: `/api/dev/plantillas-admin` (004 §12).

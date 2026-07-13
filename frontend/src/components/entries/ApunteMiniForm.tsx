@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import Button from '../ui/Button.tsx';
 import TextInput from '../ui/TextInput.tsx';
 import ValidationMessage from '../ui/ValidationMessage.tsx';
-import type { PlantillaView } from '../../lib/api.ts';
+import type { PlantillaDetail } from '../../lib/api.ts';
 import { readLastAccount, writeLastAccount } from '../../lib/plantilla-meta.ts';
 
 export interface ApunteMiniFormValues {
@@ -16,7 +16,7 @@ export interface ApunteMiniFormValues {
 }
 
 export interface ApunteMiniFormProps {
-  plantilla: PlantillaView;
+  plantilla: PlantillaDetail;
   error?: string;
   submitting?: boolean;
   onSubmit: (values: ApunteMiniFormValues, opts: { burst: boolean }) => void;
@@ -24,7 +24,7 @@ export interface ApunteMiniFormProps {
 }
 
 function pickDefaultAccount(
-  plantilla: PlantillaView,
+  plantilla: PlantillaDetail,
   lineId: number,
   sticky?: string | null,
 ): string {

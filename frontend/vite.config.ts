@@ -14,6 +14,11 @@ function apiProxy(): ProxyOptions {
     changeOrigin: true,
     bypass(req) {
       const accept = req.headers.accept ?? ''
+      const url = req.url ?? ''
+      // Dev admin HTML must reach the backend, not the SPA fallback
+      if (url.startsWith('/api/dev/')) {
+        return undefined
+      }
       if (accept.includes('text/html')) {
         return '/index.html'
       }

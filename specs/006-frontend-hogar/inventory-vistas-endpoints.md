@@ -132,8 +132,9 @@ Componente objetivo: **AppShell** (ver inventario frontend). Sin avatar Pacho.
 
 | Endpoint | Uso |
 |----------|-----|
-| `GET /api/plantillas?mode=hogar` | Plantillas |
-| `GET /api/plantillas/:code` | Detalle |
+| `GET /api/plantillas?mode=hogar` | Catálogo liviano (sin availableAccounts) |
+| `GET /api/plantillas/:code` | Detalle enriquecido al elegir plantilla |
+| `GET /api/dev/plantillas-admin` | Diagnóstico (dev; post-MVP → admin UI) |
 | `POST /api/apuntes` | Registrar |
 | `GET /api/apuntes` | Recientes / historial (004 FR §5.4 — implementado) |
 | `GET /api/accounts` | Selector de cuenta en mini-form |

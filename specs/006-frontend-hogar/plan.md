@@ -6,27 +6,29 @@
 
 ## Summary
 
-Build the simple mobile-first Hogar experience for onboarding, guided account creation, Apuntes, balances and dashboard.
+Build the simple mobile-first Hogar experience for onboarding, guided account creation, **template-driven Apuntes** (three-layer discovery + mini-form + burst), balances and dashboard.
+
+**Capture decision (2026-07-13)**: Hogar = plantillas / recognition-over-recall. PRO EntryBuilder is **out of scope** (see `007-frontend-pro-ligero`). Shared write path via plantillas API.
 
 ## Technical Context
 
-**Language/Version**: TypeScript on Node.js (exact versions to be pinned during Sprint 01 setup)
+**Language/Version**: TypeScript — backend Node.js; frontend React 19 + Vite 8
 
-**Primary Dependencies**: Fastify, Prisma, PostgreSQL for backend; React, Vite, Mantine, Zustand and React Query for frontend when frontend sprints begin
+**Primary Dependencies**: Fastify, Prisma, PostgreSQL (backend); React, React Router, Tailwind v4 (frontend). Design-system components in `frontend/src/components/` + Storybook.
 
-**Storage**: PostgreSQL via Prisma for product data; JSON files in repo for MVP template definitions until a later persistence decision
+**Storage**: PostgreSQL via Prisma; plantilla definitions as versioned JSON under `backend/src/plantillas/`
 
-**Testing**: Test runner to be established in Sprint 01; backend behavior requires TDD once tooling exists
+**Testing**: Backend Vitest (unit + integration in Docker); frontend lint/build + Storybook stories for capture components; manual smoke for US2
 
-**Target Platform**: Linux-hosted web application, local Docker development, browser clients mobile-first plus desktop support
+**Target Platform**: Linux-hosted web app; local Docker Compose; mobile-first browser clients
 
 **Project Type**: Web application with backend API and frontend client
 
-**Performance Goals**: MVP user flows should feel interactive for a personal finance book; dashboard and balances should load within normal web-app expectations for pilot data
+**Performance Goals**: Register common expense via frequent tile in &lt;30s; interactive feel on pilot data
 
-**Constraints**: Tenant isolation, privacy-safe logs, stable per-book currency, balanced accounting entries, no autonomous AI execution
+**Constraints**: Tenant isolation; no account codes in Hogar UI; exact decimal money; no Pacho in functional pages; no EntryBuilder in this sprint
 
-**Scale/Scope**: MVP/pilot scale for personal and light professional use; one sprint per spec
+**Scale/Scope**: MVP/pilot; Sprint 06 Hogar only
 
 
 ## Constitution Check

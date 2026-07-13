@@ -77,16 +77,31 @@
 
 ## Phase 4: User Story 2 — Registrar apuntes cotidianos (P1)
 
-**Goal**: Register gasto/ingreso via plantillas; clear confirmation; no ledger lines (FR-005, FR-008)
+**Goal**: Template-driven QuickAdd — tres capas + mini-form + burst + recientes (FR-005, FR-005a–d, FR-008, FR-013)
 
-**Independent test**: With accounts configured, user posts a gasto and sees confirmation
+**Independent test**: With accounts configured, user picks a frequent plantilla (or category path), saves a gasto, sees confirmation, and can “Guardar y registrar otro” without re-picking plantilla/account
 
-- [ ] T018 [US2] Add `/entries` page `frontend/src/pages/Entries.tsx` with `AppShell` + `ApunteForm` (mockup `apuntes_tador`)
-- [ ] T019 [US2] Load `GET /api/plantillas?mode=hogar` and submit `POST /api/apuntes`; map errors through `ValidationMessage`
-- [ ] T020 [US2] Show `ApunteConfirm` on success; list recientes via `GET /api/apuntes` (`RecentEntriesList`)
-- [ ] T021 [US2] Edge case: missing required account for plantilla → everyday-language message (no codes)
+### 4A — API client + page shell
 
-**Checkpoint**: US2 demonstrable independently
+- [ ] T018 [US2] Add `/entries` (+ `/entries/new`) routes in `frontend/src/App.tsx` and page `frontend/src/pages/Entries.tsx` with `AppShell` (mockup `apuntes_tador`)
+- [ ] T018b [US2] Extend `frontend/src/lib/api.ts` with typed `plantillas` + `apuntes` clients (`GET /api/plantillas?mode=hogar`, `POST /api/apuntes`, `GET /api/apuntes`) and `accounts` list for mini-form
+
+### 4B — Discovery layers (template-driven)
+
+- [ ] T018c [P] [US2] Add `FrequentTemplatesGrid` in `frontend/src/components/entries/` (4–6 tiles; curated fallback; optional local usage ranking) + Storybook
+- [ ] T018d [P] [US2] Add `KindSegment` (Gasto | Ingreso | Transferencia) + `CategoryChips` (≤6) + filtered plantilla list (≤3 visible) in `frontend/src/components/entries/`
+- [ ] T018e [P] [US2] Add `TemplateSearch` typeahead (name/synonyms) in `frontend/src/components/entries/`
+
+### 4C — Mini-form + persist + burst
+
+- [ ] T019 [US2] Evolve `ApunteForm` → `ApunteMiniForm`: only account (sticky last-used), amount, short description; date default today; **no** ledger lines; wire submit to `POST /api/apuntes`; map errors via `ValidationMessage` (FR-005b, FR-008)
+- [ ] T019b [US2] Support deep link `/entries/new?plantilla=<code>` selecting plantilla and opening mini-form (FR-005d)
+- [ ] T019c [US2] Add “Guardar y registrar otro” (burst): keep plantilla + account; clear amount + description; focus amount (FR-005c)
+- [ ] T020 [US2] Show `ApunteConfirm` on success (`aria-live`); list recientes via `GET /api/apuntes` (`RecentEntriesList`)
+- [ ] T021 [US2] Edge case: missing required account for plantilla → everyday-language message + CTA to accounts (no codes)
+- [ ] T021b [US2] Warn before leaving mini-form with unsaved amount/description (router guard / beforeunload as appropriate)
+
+**Checkpoint**: US2 demonstrable independently (frequent path + category path + burst)
 
 ---
 
@@ -121,12 +136,14 @@
 ```text
 Phase 1 → Phase 2 (T004–T011)
     → US1 (T012–T017)
-    → US2 (T018–T021)  [needs accounts from US1 path]
+    → US2 (T018–T021b)  [needs accounts from US1 path]
     → US3 (T022–T027)  [needs apuntes from US2 for meaningful dashboard]
     → Polish (T028–T031)
 ```
 
 US1 settings/contact (T015, T017) can parallelize with onboarding wiring after T008–T009.
+
+US2 discovery components (T018c–T018e) can run in parallel after T018b API types exist.
 
 ## Parallel examples
 
@@ -140,16 +157,19 @@ T011 ApunteForm + ApunteConfirm
 
 # After US1 shell exists
 T015 Settings || T017 Contact
+
+# US2 discovery (after T018b)
+T018c FrequentTemplatesGrid || T018d KindSegment+CategoryChips || T018e TemplateSearch
 ```
 
 ## Implementation strategy
 
 1. **MVP first**: Phase 2 + US1 (onboarding/settings) so a new user can configure the book.
-2. **Then US2**: daily apunte loop.
+2. **Then US2**: template-driven QuickAdd (frecuentes → mini-form → burst) — **not** EntryBuilder.
 3. **Then US3**: feedback via saldos + dashboard.
 4. **Never** ship Pacho in functional pages in this sprint.
-5. Backend follow-ups T004–T006 should land before or in parallel with T018/T022/T025.
+5. Backend follow-ups T004–T006 already done; keep plantillas/apuntes clients honest in T018b.
 
 ## Suggested MVP slice
 
-T001–T016 + T018–T020 (onboarding + one apunte path) before full entities/dashboard polish.
+T001–T016 + T018–T020 (onboarding + frequent-plantilla apunte path + burst) before full category/search polish and entities/dashboard.

@@ -32,3 +32,4 @@
 ## Notes
 
 - Checklist generated during batch sprint specification creation.
+- Revalidated 2026-07-13: EntryBuilder capture UX locked (US2); asiento manual renumbered to US3. No [NEEDS CLARIFICATION]. Tasks/plan for 007 EntryBuilder implementation remain for when Sprint 07 is activated.

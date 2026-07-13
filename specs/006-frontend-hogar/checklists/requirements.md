@@ -32,3 +32,4 @@
 ## Notes
 
 - Checklist generated during batch sprint specification creation.
+- Revalidated 2026-07-13 after locking capture UX (US2 template-driven QuickAdd; FR-005a–d, FR-013). No [NEEDS CLARIFICATION] markers. Deep links and component names appear in inventory/tasks (implementation planning), not as stakeholder-blocking HOW in success criteria.

@@ -116,7 +116,19 @@ Componente objetivo: **AppShell** (ver inventario frontend). Sin avatar Pacho.
 | `GET/POST /api/entities` | Listar / crear |
 | `PUT/DELETE /api/entities/:id` | Editar / eliminar |
 
-#### `/entries`
+#### `/entries` (+ `/entries/new`)
+
+**UX (locked 2026-07-13)**: template-driven QuickAdd — *not* PRO EntryBuilder.
+
+| Capa / zona | Comportamiento |
+|-------------|----------------|
+| Frecuentes | 4–6 tiles (`FrequentTemplatesGrid`) |
+| Tipo | Gasto \| Ingreso \| Transferencia (`KindSegment`) |
+| Categoría | ≤6 chips; ≤3 plantillas visibles |
+| Búsqueda | Typeahead (`TemplateSearch`) |
+| Mini-form | Cuenta sticky + monto + descripción (`ApunteMiniForm`) |
+| Burst | “Guardar y registrar otro” |
+| Deep link | `/entries/new?plantilla=<code>` |
 
 | Endpoint | Uso |
 |----------|-----|
@@ -124,6 +136,7 @@ Componente objetivo: **AppShell** (ver inventario frontend). Sin avatar Pacho.
 | `GET /api/plantillas/:code` | Detalle |
 | `POST /api/apuntes` | Registrar |
 | `GET /api/apuntes` | Recientes / historial (004 FR §5.4 — implementado) |
+| `GET /api/accounts` | Selector de cuenta en mini-form |
 
 #### `/dashboard`
 
@@ -155,7 +168,9 @@ Componente objetivo: **AppShell** (ver inventario frontend). Sin avatar Pacho.
 
 Ver **[`frontend/docs/component-inventory.md`](../../frontend/docs/component-inventory.md)** para definiciones, anatomía, props y estado.
 
-**P0 antes de pantallas autenticadas:** ValidationMessage, AppShell, OnboardingWizard (sin Pacho), PygPanelHogar, PositionPanel, ApunteForm, ApunteConfirm.
+**P0 antes de pantallas autenticadas:** ValidationMessage, AppShell, OnboardingWizard (sin Pacho), PygPanelHogar, PositionPanel, ApunteForm/ApunteMiniForm, ApunteConfirm.
+
+**US2 adicionales:** FrequentTemplatesGrid, KindSegment, CategoryChips, TemplateSearch, RecentEntriesList.
 
 ---
 

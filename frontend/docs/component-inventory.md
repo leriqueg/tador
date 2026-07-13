@@ -127,21 +127,39 @@ Tokens in code: `src/design/tokens.ts` · CSS: `src/globals.css`
 
 ## Apuntes
 
-### ApunteForm — exists (P0)
-- **Purpose:** Register gasto/ingreso via plantilla without ledger lines
+> **UX locked 2026-07-13** (spec 006 US2): template-driven QuickAdd — three layers + mini-form + burst. **Not** PRO EntryBuilder.
+
+### FrequentTemplatesGrid — missing (P0 US2)
+- **Purpose:** 4–6 frequent plantilla tiles (usage ranking or curated fallback)
+- **Path (target):** `src/components/entries/FrequentTemplatesGrid.tsx`
+
+### KindSegment + CategoryChips — missing (P0 US2)
+- **Purpose:** Gasto | Ingreso | Transferencia + ≤6 category chips; ≤3 plantillas visible per category
+- **Path (target):** `src/components/entries/`
+
+### TemplateSearch — missing (P0 US2)
+- **Purpose:** Typeahead by name/synonym (long tail)
+- **Path (target):** `src/components/entries/TemplateSearch.tsx`
+
+### ApunteMiniForm (evolves ApunteForm) — exists as ApunteForm (P0)
+- **Purpose:** Confirm account (sticky), amount, short description only — no ledger lines
 - **Mockup:** `apuntes_tador`
-- **Anatomy:** Gasto/Ingreso toggle · amount · date · category/template grid · concept · Guardar
-- **States:** idle, validating, submitting, success
-- **Props:** `plantillas`, `onSubmit`, `error?`, `submitting?`
-- **API:** `GET /api/plantillas?mode=hogar`, `POST /api/apuntes`
+- **Actions:** Guardar | Guardar y registrar otro (burst)
+- **Deep link:** `/entries/new?plantilla=<code>`
+- **Props:** `plantillas`, `onSubmit`, `error?`, `submitting?`, burst handlers
+- **API:** `GET /api/plantillas?mode=hogar`, `POST /api/apuntes`, `GET /api/accounts`
 - **Story:** Hogar/P0 Foundations → ApunteFlow
-- **Path:** `src/components/entries/ApunteForm.tsx`
+- **Path:** `src/components/entries/ApunteForm.tsx` (rename/evolve to mini-form per FR-005b)
 
 ### ApunteConfirm / SuccessBanner — exists (P0)
-- **Purpose:** Clear confirmation after save (US2)
+- **Purpose:** Clear confirmation after save (`aria-live`) (US2)
 - **Anatomy:** Short success message + optional dismiss
 - **Story:** Hogar/P0 Foundations → ApunteFlow
 - **Path:** `src/components/entries/ApunteForm.tsx` (`ApunteConfirm`)
+
+### RecentEntriesList — missing (P1)
+- **Purpose:** Chronological apuntes list for `/entries`
+- **API:** `GET /api/apuntes`
 
 ---
 
@@ -204,12 +222,6 @@ Tokens in code: `src/design/tokens.ts` · CSS: `src/globals.css`
 - **Purpose:** No accounts / no apuntes edge cases
 - **Anatomy:** Short copy + single CTA
 - **Story:** Foundations/EmptyState
-
-### RecentEntriesList — missing (P2)
-- **Purpose:** Chronological apuntes list for `/entries` history
-- **Mockup:** `apuntes_tador`
-- **API:** `GET /api/apuntes` (004 follow-up; not yet implemented)
-- **Story:** Hogar/Entries → RecentList
 
 ---
 

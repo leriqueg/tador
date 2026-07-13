@@ -28,6 +28,7 @@ export default function AppShell({
   const bottomItems: BottomBarItem[] = HOGAR_NAV.map((item) => ({
     icon: item.icon,
     label: item.label,
+    to: item.to,
     active: activePath === item.to || activePath.startsWith(`${item.to}/`),
   }));
 

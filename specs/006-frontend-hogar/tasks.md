@@ -28,7 +28,7 @@
 **Purpose**: Align frontend docs and API client surface for Hogar
 
 - [x] T001 Document active Spec Kit plan pointer for 006 in `.cursor/rules/specify-rules.mdc` (SPECKIT section → `specs/006-frontend-hogar/plan.md`)
-- [ ] T002 [P] Extend `frontend/src/lib/api.ts` with typed clients for book, chart, accounts, entities, plantillas, apuntes, reports (stubs OK until backend follow-ups land) — **partial**: `book` client done; remaining endpoints still pending
+- [x] T002 [P] Extend `frontend/src/lib/api.ts` with typed clients for book, chart, accounts, entities, plantillas, apuntes, reports (stubs OK until backend follow-ups land) — **partial**: `book`, `accounts`, `plantillas`, `apuntes` done; chart/entities/reports still pending
 - [x] T003 [P] Confirm Storybook scripts and link from `frontend/README.md` to `frontend/docs/component-inventory.md` (already drafted — verify)
 
 ---
@@ -83,22 +83,22 @@
 
 ### 4A — API client + page shell
 
-- [ ] T018 [US2] Add `/entries` (+ `/entries/new`) routes in `frontend/src/App.tsx` and page `frontend/src/pages/Entries.tsx` with `AppShell` (mockup `apuntes_tador`)
-- [ ] T018b [US2] Extend `frontend/src/lib/api.ts` with typed `plantillas` + `apuntes` clients (`GET /api/plantillas?mode=hogar`, `POST /api/apuntes`, `GET /api/apuntes`) and `accounts` list for mini-form
+- [x] T018 [US2] Add `/entries` (+ `/entries/new`) routes in `frontend/src/App.tsx` and page `frontend/src/pages/Entries.tsx` with `AppShell` (mockup `apuntes_tador`)
+- [x] T018b [US2] Extend `frontend/src/lib/api.ts` with typed `plantillas` + `apuntes` clients (`GET /api/plantillas?mode=hogar`, `POST /api/apuntes`, `GET /api/apuntes`) and `accounts` list for mini-form
 
 ### 4B — Discovery layers (template-driven)
 
-- [ ] T018c [P] [US2] Add `FrequentTemplatesGrid` in `frontend/src/components/entries/` (4–6 tiles; curated fallback; optional local usage ranking) + Storybook
-- [ ] T018d [P] [US2] Add `KindSegment` (Gasto | Ingreso | Transferencia) + `CategoryChips` (≤6) + filtered plantilla list (≤3 visible) in `frontend/src/components/entries/`
-- [ ] T018e [P] [US2] Add `TemplateSearch` typeahead (name/synonyms) in `frontend/src/components/entries/`
+- [x] T018c [P] [US2] Add `FrequentTemplatesGrid` in `frontend/src/components/entries/` (4–6 tiles; curated fallback; optional local usage ranking) + Storybook
+- [x] T018d [P] [US2] Add `KindSegment` (Gasto | Ingreso | Transferencia) + `CategoryChips` (≤6) + filtered plantilla list (≤3 visible) in `frontend/src/components/entries/`
+- [x] T018e [P] [US2] Add `TemplateSearch` typeahead (name/synonyms) in `frontend/src/components/entries/`
 
 ### 4C — Mini-form + persist + burst
 
-- [ ] T019 [US2] Evolve `ApunteForm` → `ApunteMiniForm`: only account (sticky last-used), amount, short description; date default today; **no** ledger lines; wire submit to `POST /api/apuntes`; map errors via `ValidationMessage` (FR-005b, FR-008)
-- [ ] T019b [US2] Support deep link `/entries/new?plantilla=<code>` selecting plantilla and opening mini-form (FR-005d)
-- [ ] T019c [US2] Add “Guardar y registrar otro” (burst): keep plantilla + account; clear amount + description; focus amount (FR-005c)
-- [ ] T020 [US2] Show `ApunteConfirm` on success (`aria-live`); list recientes via `GET /api/apuntes` (`RecentEntriesList`)
-- [ ] T021 [US2] Edge case: missing required account for plantilla → everyday-language message + CTA to accounts (no codes)
+- [x] T019 [US2] Evolve `ApunteForm` → `ApunteMiniForm`: only account (sticky last-used), amount, short description; date default today; **no** ledger lines; wire submit to `POST /api/apuntes`; map errors via `ValidationMessage` (FR-005b, FR-008)
+- [x] T019b [US2] Support deep link `/entries/new?plantilla=<code>` selecting plantilla and opening mini-form (FR-005d)
+- [x] T019c [US2] Add “Guardar y registrar otro” (burst): keep plantilla + account; clear amount + description; focus amount (FR-005c)
+- [x] T020 [US2] Show `ApunteConfirm` on success (`aria-live`); list recientes via `GET /api/apuntes` (`RecentEntriesList`)
+- [x] T021 [US2] Edge case: missing required account for plantilla → everyday-language message + CTA to accounts (no codes)
 - [ ] T021b [US2] Warn before leaving mini-form with unsaved amount/description (router guard / beforeunload as appropriate)
 
 **Checkpoint**: US2 demonstrable independently (frequent path + category path + burst)

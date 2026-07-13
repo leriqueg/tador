@@ -141,3 +141,105 @@ export const book = {
     return request<{ config: BookConfig }>('PATCH', '/book/config', input);
   },
 };
+
+// ─── Accounts ──────────────────────────────────────────────────────
+
+export interface AccountSummary {
+  id: string;
+  codigo: string | null;
+  nombre: string;
+  tipoCuenta: string;
+  entidadId: string | null;
+  isEntityProvisioned: boolean;
+  activa: boolean;
+}
+
+export const accounts = {
+  list() {
+    return request<{ accounts: AccountSummary[] }>('GET', '/api/accounts');
+  },
+};
+
+// ─── Plantillas ────────────────────────────────────────────────────
+
+export interface PlantillaAccountOption {
+  id: string;
+  nombre: string;
+  codigo: string | null;
+  tipo: 'global' | 'usuario';
+}
+
+export interface PlantillaLineView {
+  id: number;
+  side: 'debit' | 'credit';
+  label: string;
+  strategy: string;
+  groupCode?: string;
+  groupCodes?: string[];
+  suggestedChild?: string | null;
+  availableAccounts: PlantillaAccountOption[];
+}
+
+export interface PlantillaView {
+  code: string;
+  version: number;
+  name: string;
+  modes: string[];
+  amountMode: 'single' | 'per_line';
+  descriptionTemplate: string;
+  lines: PlantillaLineView[];
+}
+
+export const plantillas = {
+  list(mode?: 'hogar' | 'pro') {
+    const q = mode ? `?mode=${mode}` : '';
+    return request<{ plantillas: PlantillaView[] }>('GET', `/api/plantillas${q}`);
+  },
+
+  get(code: string) {
+    return request<{ plantilla: PlantillaView }>('GET', `/api/plantillas/${code}`);
+  },
+};
+
+// ─── Apuntes ───────────────────────────────────────────────────────
+
+export interface ApunteLineInput {
+  id: number;
+  accountId: string;
+}
+
+export interface CreateApunteInput {
+  templateCode: string;
+  date: string;
+  concept: string;
+  amount: number;
+  lines: ApunteLineInput[];
+  entityId?: string | null;
+}
+
+export interface ApunteSummary {
+  id: string;
+  templateCode: string | null;
+  date: string;
+  concept: string;
+  amount: number;
+  asientoId: string;
+  createdAt: string;
+}
+
+export const apuntes = {
+  list(params?: { limit?: number; offset?: number }) {
+    const search = new URLSearchParams();
+    if (params?.limit != null) search.set('limit', String(params.limit));
+    if (params?.offset != null) search.set('offset', String(params.offset));
+    const q = search.toString();
+    return request<{ apuntes: ApunteSummary[]; total: number }>(
+      'GET',
+      `/api/apuntes${q ? `?${q}` : ''}`,
+    );
+  },
+
+  create(input: CreateApunteInput) {
+    return request<{ apunte: ApunteSummary }>('POST', '/api/apuntes', input);
+  },
+};

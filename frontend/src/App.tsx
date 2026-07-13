@@ -6,6 +6,7 @@ import Register from './pages/Register.tsx';
 import FAQ from './pages/FAQ.tsx';
 import Onboarding from './pages/Onboarding.tsx';
 import Dashboard from './pages/Dashboard.tsx';
+import Entries from './pages/Entries.tsx';
 
 export default function App() {
   return (
@@ -18,6 +19,8 @@ export default function App() {
           <Route path="/faq" element={<FAQ />} />
           <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/entries" element={<Entries />} />
+          <Route path="/entries/new" element={<Entries />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

@@ -40,6 +40,7 @@ export interface AuthApplicationService {
   resetPassword(token: string, newPassword: string): Promise<User>;
   getAuthenticatedUser(sessionToken: string): Promise<User | null>;
   logout(sessionToken: string): Promise<void>;
+  updateProfile(user: User): Promise<User>;
 }
 
 export function createAuthApplicationService(
@@ -208,6 +209,10 @@ export function createAuthApplicationService(
 
     async logout(sessionToken: string): Promise<void> {
       await sessionService.delete(sessionToken);
+    },
+
+    async updateProfile(user: User): Promise<User> {
+      return userRepo.update(user);
     },
   };
 }

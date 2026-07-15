@@ -315,4 +315,36 @@ describe('Edge cases', () => {
 
     await app.close();
   });
+
+  it('should update fullName via PATCH /auth/me', async () => {
+    const app = await createTestApp();
+
+    const reg = await app.inject({
+      method: 'POST',
+      url: '/auth/register',
+      payload: { email: 'profile-me@test.com', password: 'password123' },
+    });
+    expect(reg.statusCode).toBe(201);
+    expect(reg.json().user.fullName).toBeNull();
+    const cookies = reg.cookies.map((c) => `${c.name}=${c.value}`);
+
+    const patch = await app.inject({
+      method: 'PATCH',
+      url: '/auth/me',
+      headers: { cookie: cookies.join('; ') },
+      payload: { fullName: '  Ana Pérez  ' },
+    });
+    expect(patch.statusCode).toBe(200);
+    expect(patch.json().user.fullName).toBe('Ana Pérez');
+
+    const me = await app.inject({
+      method: 'GET',
+      url: '/auth/me',
+      headers: { cookie: cookies.join('; ') },
+    });
+    expect(me.statusCode).toBe(200);
+    expect(me.json().user.fullName).toBe('Ana Pérez');
+
+    await app.close();
+  });
 });

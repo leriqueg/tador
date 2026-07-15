@@ -1,7 +1,7 @@
 /**
- * Dev Plantillas Admin — diagnostic JSON/HTML for template readiness.
+ * Dev Plantillas Admin — interactive try tool + JSON API.
  *
- * Not linked from product nav. Post-MVP moves to admin frontend.
+ * Not linked from product nav. Full product admin UI is post-MVP.
  * Gate: ENABLE_PLANTILLAS_ADMIN=true OR NODE_ENV !== 'production'
  */
 
@@ -22,6 +22,7 @@ import {
 } from '../../application/plantilla-account-resolver.js';
 import { moneyToFixed, quantizeMoney, DEFAULT_CURRENCY } from '../../domain/money.js';
 import { prisma } from '../../infrastructure/database.js';
+import { renderPlantillasAdminTool } from './plantillas-admin-ui.js';
 
 type Kind = 'gasto' | 'ingreso' | 'transferencia';
 type Category =
@@ -101,40 +102,12 @@ function buildSummary(plantillas: Plantilla[]) {
   return { byKind, byCategory, emptyCategories };
 }
 
-function escapeHtml(s: string): string {
-  return s
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;');
-}
-
-function renderHtml(payload: unknown): string {
-  const json = escapeHtml(JSON.stringify(payload, null, 2));
-  return `<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="utf-8" />
-  <title>TADOR — Plantillas Admin (dev)</title>
-  <style>
-    body { font-family: ui-monospace, monospace; margin: 1.5rem; background: #f7f4f1; color: #1a1a1a; }
-    h1 { font-family: system-ui, sans-serif; color: #006a6a; }
-    .note { font-family: system-ui, sans-serif; color: #555; margin-bottom: 1rem; max-width: 52rem; }
-    pre { background: #fff; border: 1px solid #ddd; padding: 1rem; overflow: auto; border-radius: 8px; }
-    a { color: #006a6a; }
-  </style>
-</head>
-<body>
-  <h1>Plantillas Admin (dev)</h1>
-  <p class="note">
-    Herramienta de diagnóstico — no es UI de producto. Post-MVP vivirá en el frontend de administración.
-    Endpoints: <code>GET /api/dev/plantillas-admin</code>,
-    <code>GET /api/dev/plantillas-admin/:code</code>,
-    <code>POST /api/dev/plantillas-admin/:code/preview</code>.
-  </p>
-  <pre>${json}</pre>
-</body>
-</html>`;
+function wantsJson(query: { format?: string }, accept: string | undefined): boolean {
+  if (query.format === 'json') return true;
+  if (query.format === 'html') return false;
+  // Browsers navigate with Accept: text/html → interactive tool.
+  // API clients / inject without HTML preference → JSON.
+  return !(accept ?? '').includes('text/html');
 }
 
 export function registerPlantillasAdminRoutes(
@@ -156,6 +129,13 @@ export function registerPlantillasAdminRoutes(
     async (request, reply) => {
       const query = request.query as { mode?: string; format?: string };
       const mode = query.mode ?? 'hogar';
+
+      if (!wantsJson(query, request.headers.accept)) {
+        return reply
+          .type('text/html; charset=utf-8')
+          .send(renderPlantillasAdminTool(mode));
+      }
+
       const userId = request.userId!;
       const list = getAllPlantillas(mode);
       const enriched = await enrichPlantillas(list, userId);
@@ -186,7 +166,7 @@ export function registerPlantillasAdminRoutes(
         };
       });
 
-      const payload = {
+      return reply.status(200).send({
         mode,
         summary: buildSummary(list),
         plantillas,
@@ -197,17 +177,10 @@ export function registerPlantillasAdminRoutes(
             'ready=false means at least one line has no matching accounts for this user.',
           productSplit:
             'GET /api/plantillas is light; GET /api/plantillas/:code is enriched.',
+          tool:
+            'Browser GET without format=json serves the interactive Admin tool HTML.',
         },
-      };
-
-      const wantsHtml =
-        query.format === 'html' ||
-        (request.headers.accept ?? '').includes('text/html');
-
-      if (wantsHtml) {
-        return reply.type('text/html').send(renderHtml(payload));
-      }
-      return reply.status(200).send(payload);
+      });
     },
   );
 
@@ -216,27 +189,20 @@ export function registerPlantillasAdminRoutes(
     { preHandler: requireAuth },
     async (request, reply) => {
       const { code } = request.params as { code: string };
-      const query = request.query as { format?: string };
       const plantilla = getPlantilla(code);
       if (!plantilla) {
         return reply.status(404).send({ error: `Plantilla '${code}' not found` });
       }
 
       const enriched = await enrichPlantilla(plantilla, request.userId!);
-      const payload = {
+      return reply.status(200).send({
         kind: plantillaKind(code),
         category: plantillaCategory(code),
         plantilla: serializePlantillaEnriched(enriched),
+        // Raw catalog JSON for the "Código fuente" tab (no availableAccounts)
+        source: plantilla,
         ready: enriched.lines.every((l) => l.availableAccounts.length > 0),
-      };
-
-      const wantsHtml =
-        query.format === 'html' ||
-        (request.headers.accept ?? '').includes('text/html');
-      if (wantsHtml) {
-        return reply.type('text/html').send(renderHtml(payload));
-      }
-      return reply.status(200).send(payload);
+      });
     },
   );
 

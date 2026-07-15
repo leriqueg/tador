@@ -24,14 +24,19 @@ async function request<T>(
   path: string,
   body?: unknown,
 ): Promise<T> {
+  const headers: Record<string, string> = {
+    Accept: 'application/json',
+  };
+  // Fastify rejects Content-Type: application/json with an empty body (400).
+  if (body !== undefined) {
+    headers['Content-Type'] = 'application/json';
+  }
+
   const res = await fetch(`${BASE}${path}`, {
     method,
-    headers: {
-      'Content-Type': 'application/json',
-      Accept: 'application/json',
-    },
+    headers,
     credentials: 'include',
-    body: body ? JSON.stringify(body) : undefined,
+    body: body !== undefined ? JSON.stringify(body) : undefined,
   });
 
   if (!res.ok) {
@@ -56,6 +61,7 @@ async function request<T>(
 export interface User {
   id: string;
   email: string;
+  fullName: string | null;
   verifiedAt: string | null;
 }
 
@@ -86,6 +92,10 @@ export const auth = {
 
   me() {
     return request<{ user: User }>('GET', '/auth/me');
+  },
+
+  updateProfile(input: { fullName?: string | null }) {
+    return request<{ user: User }>('PATCH', '/auth/me', input);
   },
 
   verify(token: string) {
@@ -151,12 +161,76 @@ export interface AccountSummary {
   tipoCuenta: string;
   entidadId: string | null;
   isEntityProvisioned: boolean;
+  metadata?: AccountMetadata | null;
   activa: boolean;
+}
+
+export interface AccountMetadata {
+  network?: string;
+  lastFour?: string;
+  cutoffDay?: number;
+}
+
+export interface CreateAccountInput {
+  tipoCuenta: 'bank' | 'card' | 'wallet' | 'bridge' | 'incomeCategory' | 'expenseCategory';
+  nombre: string;
+  globalId?: string;
+  parentGroupCodigo?: string;
+  entidadId?: string;
+  codigoPersonalizado?: string;
+  metadata?: AccountMetadata;
 }
 
 export const accounts = {
   list() {
     return request<{ accounts: AccountSummary[] }>('GET', '/api/accounts');
+  },
+
+  create(input: CreateAccountInput) {
+    return request<{ account: AccountSummary & { globalId?: string | null } }>(
+      'POST',
+      '/api/accounts',
+      input,
+    );
+  },
+};
+
+export interface EntitySummary {
+  id: string;
+  nombre: string;
+  tipo: string;
+  notas: string | null;
+  provisionedAccountId?: string | null;
+}
+
+export interface EntityCreateResponse {
+  entity: EntitySummary;
+  provisionedAccount: AccountSummary | null;
+}
+
+export type EntityTipo =
+  | 'person'
+  | 'bank'
+  | 'card_issuer'
+  | 'wallet_platform'
+  | 'organization';
+
+export const entities = {
+  list() {
+    return request<{ entities: EntitySummary[] }>('GET', '/api/entities');
+  },
+
+  create(input: {
+    nombre: string;
+    tipo: EntityTipo;
+    notas?: string;
+    metadata?: AccountMetadata;
+  }) {
+    return request<EntityCreateResponse>('POST', '/api/entities', input);
+  },
+
+  remove(id: string) {
+    return request<void>('DELETE', `/api/entities/${id}`);
   },
 };
 
@@ -232,6 +306,10 @@ export interface ApunteSummary {
   createdAt: string;
 }
 
+export interface ApunteDetail extends ApunteSummary {
+  lines: ApunteLineInput[];
+}
+
 export const apuntes = {
   list(params?: { limit?: number; offset?: number }) {
     const search = new URLSearchParams();
@@ -244,7 +322,15 @@ export const apuntes = {
     );
   },
 
+  get(id: string) {
+    return request<{ apunte: ApunteDetail }>('GET', `/api/apuntes/${id}`);
+  },
+
   create(input: CreateApunteInput) {
     return request<{ apunte: ApunteSummary }>('POST', '/api/apuntes', input);
+  },
+
+  update(id: string, input: CreateApunteInput) {
+    return request<{ apunte: ApunteSummary }>('PATCH', `/api/apuntes/${id}`, input);
   },
 };

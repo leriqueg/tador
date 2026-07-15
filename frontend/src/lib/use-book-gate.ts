@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { book, type BookConfig } from './api';
 
 interface BookGateState {
@@ -6,6 +6,7 @@ interface BookGateState {
   config: BookConfig | null;
   /** When set, navigate here (e.g. uninitialized → /onboarding) */
   redirectTo: '/onboarding' | null;
+  reload: () => Promise<void>;
 }
 
 /**
@@ -16,6 +17,17 @@ export function useBookGate(): BookGateState {
   const [loading, setLoading] = useState(true);
   const [config, setConfig] = useState<BookConfig | null>(null);
   const [redirectTo, setRedirectTo] = useState<'/onboarding' | null>(null);
+
+  const reload = useCallback(async () => {
+    try {
+      const res = await book.get();
+      setConfig(res.config);
+      setRedirectTo(res.config.initialized ? null : '/onboarding');
+    } catch {
+      setConfig(null);
+      setRedirectTo(null);
+    }
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -41,5 +53,5 @@ export function useBookGate(): BookGateState {
     };
   }, []);
 
-  return { loading, config, redirectTo };
+  return { loading, config, redirectTo, reload };
 }

@@ -4,14 +4,17 @@ import {
   type PlantillaCategory,
   type PlantillaKind,
 } from '../../lib/plantilla-meta.ts';
+import Icon from '../ui/Icon.tsx';
 
 export interface KindCategoryNavProps {
   kind: PlantillaKind;
   category: PlantillaCategory | null;
   /** When set, only these chips render (hide empty categories). */
   availableCategories?: PlantillaCategory[];
+  searchOpen?: boolean;
   onKindChange: (kind: PlantillaKind) => void;
   onCategoryChange: (category: PlantillaCategory) => void;
+  onSearchToggle?: () => void;
 }
 
 const KINDS: { id: PlantillaKind; label: string }[] = [
@@ -20,13 +23,15 @@ const KINDS: { id: PlantillaKind; label: string }[] = [
   { id: 'transferencia', label: 'Transferencia' },
 ];
 
-/** Kind segment + category chips (≤6). */
+/** Kind segment + category chips + Buscar toggle. */
 export default function KindCategoryNav({
   kind,
   category,
   availableCategories,
+  searchOpen = false,
   onKindChange,
   onCategoryChange,
+  onSearchToggle,
 }: KindCategoryNavProps) {
   const chips = availableCategories ?? categoriesForKind(kind);
 
@@ -64,6 +69,21 @@ export default function KindCategoryNav({
             {CATEGORY_LABELS[c]}
           </button>
         ))}
+        {onSearchToggle && (
+          <button
+            type="button"
+            onClick={onSearchToggle}
+            aria-pressed={searchOpen}
+            className={`inline-flex items-center gap-xs px-md py-xs rounded-full text-label-md border transition-colors cursor-pointer ${
+              searchOpen
+                ? 'border-primary bg-primary/10 text-primary font-semibold'
+                : 'border-outline-variant/50 text-on-surface-variant'
+            }`}
+          >
+            <Icon name="search" className="text-base" />
+            Buscar
+          </button>
+        )}
       </div>
     </div>
   );

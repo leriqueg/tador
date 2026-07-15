@@ -5,15 +5,17 @@ import FrequentTemplatesGrid from '../components/entries/FrequentTemplatesGrid.t
 import KindCategoryNav from '../components/entries/KindCategoryNav.tsx';
 import TemplateSearch from '../components/entries/TemplateSearch.tsx';
 import ApunteMiniForm, {
+  type ApunteMiniFormInitialValues,
   type ApunteMiniFormValues,
 } from '../components/entries/ApunteMiniForm.tsx';
-import { ApunteConfirm } from '../components/entries/ApunteForm.tsx';
+import ApunteSuccessPanel from '../components/entries/ApunteSuccessPanel.tsx';
 import RecentEntriesList from '../components/entries/RecentEntriesList.tsx';
 import ValidationMessage from '../components/ui/ValidationMessage.tsx';
 import { apuntes, plantillas, type PlantillaView, type PlantillaDetail, type ApunteSummary } from '../lib/api.ts';
 import { useAuth } from '../lib/auth.tsx';
 import { useBookGate } from '../lib/use-book-gate.ts';
 import {
+  CATEGORY_LABELS,
   CURATED_FREQUENT_CODES,
   bumpPlantillaUsage,
   categoriesForKind,
@@ -23,6 +25,8 @@ import {
   type PlantillaCategory,
   type PlantillaKind,
 } from '../lib/plantilla-meta.ts';
+
+type CapturePhase = 'form' | 'success';
 
 /** Hogar QuickAdd — template-driven capture (US2). */
 export default function Entries() {
@@ -36,13 +40,22 @@ export default function Entries() {
   const [loadError, setLoadError] = useState('');
   const [submitError, setSubmitError] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [capturePhase, setCapturePhase] = useState<CapturePhase>('form');
+  const [formSession, setFormSession] = useState(0);
   const [loadingCatalog, setLoadingCatalog] = useState(true);
   const [loadingDetail, setLoadingDetail] = useState(false);
 
   const [kind, setKind] = useState<PlantillaKind>('gasto');
   const [category, setCategory] = useState<PlantillaCategory | null>('compras');
   const [selectedCode, setSelectedCode] = useState<string | null>(null);
+
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const [editingApunteId, setEditingApunteId] = useState<string | null>(null);
+  const [editInitial, setEditInitial] = useState<ApunteMiniFormInitialValues | null>(null);
+  const [successMode, setSuccessMode] = useState<'create' | 'edit'>('create');
+  const [loadingEdit, setLoadingEdit] = useState(false);
 
   const refreshRecent = useCallback(async () => {
     const res = await apuntes.list({ limit: 10 });
@@ -77,6 +90,7 @@ export default function Entries() {
     const code = searchParams.get('plantilla');
     if (code && catalog.some((p) => p.code === code)) {
       setSelectedCode(code);
+      setCapturePhase('form');
       setKind(plantillaKind(code));
       setCategory(plantillaCategory(code));
     }
@@ -98,12 +112,16 @@ export default function Entries() {
       .map((p) => ({ code: p.code, name: p.name }));
   }, [catalog]);
 
-  const filteredByCategory = useMemo(() => {
-    if (!category) return [];
-    return catalog
-      .filter((p) => plantillaKind(p.code) === kind && plantillaCategory(p.code) === category)
-      .slice(0, 3);
-  }, [catalog, kind, category]);
+  const searchable = useMemo(
+    () =>
+      catalog.map((p) => ({
+        code: p.code,
+        name: p.name,
+        kind: plantillaKind(p.code),
+        categoryLabel: CATEGORY_LABELS[plantillaCategory(p.code)],
+      })),
+    [catalog],
+  );
 
   // Enrich only when a plantilla is selected (fast list → detail)
   useEffect(() => {
@@ -137,37 +155,95 @@ export default function Entries() {
 
   function selectPlantilla(code: string) {
     setSelectedCode(code);
+    setCapturePhase('form');
     setSubmitError('');
-    setConfirmOpen(false);
+    setEditingApunteId(null);
+    setEditInitial(null);
+    setSuccessMode('create');
+    setSearchOpen(false);
+    setSearchQuery('');
     setSearchParams({ plantilla: code }, { replace: true });
   }
 
   function clearPlantilla() {
     setSelectedCode(null);
     setSelectedDetail(null);
+    setCapturePhase('form');
+    setEditingApunteId(null);
+    setEditInitial(null);
+    setSuccessMode('create');
     setSearchParams({}, { replace: true });
   }
 
-  async function handleSubmit(values: ApunteMiniFormValues, opts: { burst: boolean }) {
+  function continueSamePlantilla() {
+    setCapturePhase('form');
+    setSubmitError('');
+    setEditingApunteId(null);
+    setEditInitial(null);
+    setSuccessMode('create');
+    setFormSession((n) => n + 1);
+  }
+
+  async function beginEdit(item: ApunteSummary) {
+    if (!item.templateCode) return;
+    setLoadingEdit(true);
+    setSubmitError('');
+    try {
+      const { apunte } = await apuntes.get(item.id);
+      const accountByLine = Object.fromEntries(
+        apunte.lines.map((line) => [line.id, line.accountId]),
+      ) as Record<number, string>;
+      setEditingApunteId(apunte.id);
+      setEditInitial({
+        amount: String(apunte.amount),
+        date: apunte.date,
+        concept: apunte.concept,
+        accountByLine,
+      });
+      setSuccessMode('create');
+      setSelectedCode(apunte.templateCode);
+      setCapturePhase('form');
+      setSearchParams({ plantilla: apunte.templateCode! }, { replace: true });
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : 'No se pudo cargar el apunte');
+    } finally {
+      setLoadingEdit(false);
+    }
+  }
+
+  async function handleSubmit(values: ApunteMiniFormValues) {
     setSubmitting(true);
     setSubmitError('');
     try {
-      await apuntes.create({
-        templateCode: values.templateCode,
-        date: values.date,
-        concept: values.concept,
-        amount: values.amount,
-        lines: values.lines,
-      });
-      bumpPlantillaUsage(values.templateCode);
-      await refreshRecent();
-      setConfirmOpen(true);
-      if (!opts.burst) {
-        // stay on form; user can change plantilla
+      if (editingApunteId) {
+        await apuntes.update(editingApunteId, {
+          templateCode: values.templateCode,
+          date: values.date,
+          concept: values.concept,
+          amount: values.amount,
+          lines: values.lines,
+        });
+        setSuccessMode('edit');
+        setEditingApunteId(null);
+        setEditInitial(null);
+      } else {
+        await apuntes.create({
+          templateCode: values.templateCode,
+          date: values.date,
+          concept: values.concept,
+          amount: values.amount,
+          lines: values.lines,
+        });
+        bumpPlantillaUsage(values.templateCode);
+        setSuccessMode('create');
       }
+      await refreshRecent();
+      setCapturePhase('success');
     } catch (err) {
-      setSubmitError(err instanceof Error ? err.message : 'No se pudo guardar el apunte');
-      setConfirmOpen(false);
+      setSubmitError(
+        err instanceof Error ? err.message : 'No se pudo guardar el apunte',
+      );
+      setCapturePhase('form');
     } finally {
       setSubmitting(false);
     }
@@ -188,16 +264,24 @@ export default function Entries() {
     <AppShell activePath="/entries" userLabel={user.email} onLogout={() => void logout()}>
       <div className="max-w-lg mx-auto">
         <header className="mb-lg">
-          <h1 className="text-headline-lg text-on-surface font-bold mb-xs">Nuevo apunte</h1>
+          <h1 className="text-headline-lg text-on-surface font-bold mb-xs">
+            {editingApunteId ? 'Editar apunte' : 'Nuevo apunte'}
+          </h1>
           <p className="text-body-md text-on-surface-variant">
-            Elegí una plantilla y confirmá cuenta, monto y descripción.
+            {editingApunteId
+              ? 'Corregí cuenta, monto, fecha o descripción.'
+              : 'Elegí una plantilla y confirmá cuenta, monto y descripción.'}
           </p>
         </header>
 
-        {confirmOpen && (
-          <div className="mb-md" aria-live="polite">
-            <ApunteConfirm onDismiss={() => setConfirmOpen(false)} />
+        {submitError && !selectedCode && (
+          <div className="mb-md">
+            <ValidationMessage tone="error">{submitError}</ValidationMessage>
           </div>
+        )}
+
+        {loadingEdit && (
+          <p className="text-on-surface-variant mb-md">Cargando apunte…</p>
         )}
 
         {loadError && (
@@ -211,11 +295,34 @@ export default function Entries() {
         ) : selectedCode ? (
           loadingDetail || !selectedDetail ? (
             <p className="text-on-surface-variant">Cargando cuentas de la plantilla…</p>
+          ) : capturePhase === 'success' ? (
+            <ApunteSuccessPanel
+              plantillaName={selectedDetail.name}
+              title={successMode === 'edit' ? 'Apunte actualizado' : 'Apunte guardado'}
+              message={
+                successMode === 'edit'
+                  ? `Los cambios quedaron guardados en ${selectedDetail.name}.`
+                  : undefined
+              }
+              continueLabel={
+                successMode === 'edit' ? 'Listo' : 'Otro con esta plantilla'
+              }
+              chooseOtherLabel="Elegir otra plantilla"
+              onContinueSame={
+                successMode === 'edit' ? clearPlantilla : continueSamePlantilla
+              }
+              onChooseOther={clearPlantilla}
+            />
           ) : (
             <ApunteMiniForm
+              key={`${selectedDetail.code}-${formSession}-${editingApunteId ?? 'new'}`}
               plantilla={selectedDetail}
+              mode={editingApunteId ? 'edit' : 'create'}
               error={submitError}
               submitting={submitting}
+              initialValues={editInitial ?? undefined}
+              submitLabel={editingApunteId ? 'Guardar cambios' : 'Guardar'}
+              cancelLabel={editingApunteId ? 'Cancelar edición' : 'Cambiar plantilla'}
               onSubmit={handleSubmit}
               onCancel={clearPlantilla}
             />
@@ -227,6 +334,7 @@ export default function Entries() {
             <KindCategoryNav
               kind={kind}
               category={category}
+              searchOpen={searchOpen}
               availableCategories={categoriesForKind(kind).filter((c) =>
                 catalog.some(
                   (p) => plantillaKind(p.code) === kind && plantillaCategory(p.code) === c,
@@ -239,35 +347,45 @@ export default function Entries() {
                     (p) => plantillaKind(p.code) === k && plantillaCategory(p.code) === c,
                   ),
                 );
-                setCategory(next[0] ?? null);
+                const nextCat = next[0] ?? null;
+                setCategory(nextCat);
+                if (nextCat) {
+                  setSearchQuery(CATEGORY_LABELS[nextCat]);
+                  setSearchOpen(true);
+                } else {
+                  setSearchQuery('');
+                  setSearchOpen(false);
+                }
               }}
-              onCategoryChange={setCategory}
+              onCategoryChange={(c) => {
+                setCategory(c);
+                setSearchQuery(CATEGORY_LABELS[c]);
+                setSearchOpen(true);
+              }}
+              onSearchToggle={() => {
+                setSearchOpen((prev) => {
+                  const next = !prev;
+                  if (!next) setSearchQuery('');
+                  return next;
+                });
+              }}
             />
-
-            {filteredByCategory.length > 0 ? (
-              <ul className="mb-lg space-y-sm">
-                {filteredByCategory.map((p) => (
-                  <li key={p.code}>
-                    <button
-                      type="button"
-                      onClick={() => selectPlantilla(p.code)}
-                      className="w-full text-left p-md rounded-xl border border-outline-variant/40 bg-surface-container-lowest hover:border-primary/40 cursor-pointer"
-                    >
-                      <span className="text-label-md font-semibold text-on-surface">{p.name}</span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-label-md text-on-surface-variant mb-lg">
-                No hay plantillas en esta categoría. Probá buscar.
-              </p>
-            )}
 
             <TemplateSearch
-              plantillas={catalog.map((p) => ({ code: p.code, name: p.name }))}
+              plantillas={searchable}
               onSelect={selectPlantilla}
+              open={searchOpen}
+              onOpenChange={setSearchOpen}
+              query={searchQuery}
+              onQueryChange={setSearchQuery}
+              kindFilter={kind}
             />
+
+            {!searchOpen && (
+              <p className="text-label-md text-on-surface-variant mb-lg">
+                Tocá un chip de categoría o Buscar para ver plantillas.
+              </p>
+            )}
           </>
         )}
 
@@ -278,7 +396,7 @@ export default function Entries() {
               Actualizar
             </Link>
           </div>
-          <RecentEntriesList items={recent} />
+          <RecentEntriesList items={recent} onEdit={(item) => void beginEdit(item)} />
         </section>
       </div>
     </AppShell>

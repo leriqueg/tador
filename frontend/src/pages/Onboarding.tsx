@@ -5,10 +5,10 @@ import OnboardingWizard, {
 } from '../components/onboarding/OnboardingWizard.tsx';
 import { MinimalHeader } from '../components/layout/MarketingHeader.tsx';
 import { AuthFooter } from '../components/layout/AppFooter.tsx';
-import { book } from '../lib/api';
+import { book, entities } from '../lib/api';
 import { useAuth } from '../lib/auth.tsx';
 
-/** First-run book setup (FR-010). */
+/** First-run book setup — banks/cards/wallets via entity provision (FR-003a–c, FR-010). */
 export default function Onboarding() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -37,6 +37,40 @@ export default function Onboarding() {
         timeZone: result.timeZone,
         completeOnboarding: true,
       });
+
+      for (const bank of result.banks) {
+        await entities.create({
+          nombre: bank.nombre,
+          tipo: 'bank',
+        });
+      }
+
+      for (const wallet of result.wallets) {
+        await entities.create({
+          nombre: wallet.nombre,
+          tipo: 'wallet_platform',
+        });
+      }
+
+      for (const card of result.cards) {
+        const cutoffDay = Number.parseInt(card.cutoffDay, 10);
+        await entities.create({
+          nombre: card.lastFour ? `${card.nombre} ····${card.lastFour}` : card.nombre,
+          tipo: 'card_issuer',
+          notas:
+            Number.isInteger(cutoffDay) && cutoffDay >= 1 && cutoffDay <= 31
+              ? `Día de corte: ${cutoffDay}`
+              : undefined,
+          metadata: {
+            network: card.network,
+            ...(card.lastFour ? { lastFour: card.lastFour } : {}),
+            ...(Number.isInteger(cutoffDay) && cutoffDay >= 1 && cutoffDay <= 31
+              ? { cutoffDay }
+              : {}),
+          },
+        });
+      }
+
       navigate('/dashboard', { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No se pudo guardar la configuración');

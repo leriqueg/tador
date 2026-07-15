@@ -108,6 +108,18 @@ async function createUserAccount(
   nombre: string,
   tipoCuenta = 'wallet',
 ) {
+  if (tipoCuenta === 'bank' || tipoCuenta === 'card') {
+    const tipoEntidad = tipoCuenta === 'bank' ? 'bank' : 'card_issuer';
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/entities',
+      headers: { cookie: cookies.join('; ') },
+      payload: { nombre, tipo: tipoEntidad },
+    });
+    expect(res.statusCode).toBe(201);
+    return res.json().provisionedAccount;
+  }
+
   const global = await findGlobalByCodigo(globalCodigo);
   if (!global) {
     throw new Error(`Global account ${globalCodigo} not found`);
@@ -566,6 +578,67 @@ describe('US3 — Register traspasos', () => {
     expect(body.apunte.templateCode).toBe('transferencia');
     expect(Number(body.asiento.lines[0].debito)).toBe(300);
     expect(Number(body.asiento.lines[1].credito)).toBe(300);
+
+    await app.close();
+  });
+
+  it('transferencia same account origen=destino → 400 (V10)', async () => {
+    const app = await createTestApp();
+    const cookies = await registerAndVerify(app, 'us3-transfer-v10@test.com');
+    const accounts = await setupTemplateAccounts(app, cookies);
+
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/apuntes',
+      headers: { cookie: cookies.join('; ') },
+      payload: {
+        templateCode: 'transferencia',
+        date: '2026-07-01',
+        concept: 'Transferencia inválida',
+        amount: 50,
+        lines: [
+          { id: 1, accountId: accounts.bancoUserAccountId },
+          { id: 2, accountId: accounts.bancoUserAccountId },
+        ],
+      },
+    });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.json().error).toMatch(/V10/);
+
+    await app.close();
+  });
+
+  it('transferencia wallet → bank → 201 (groups include billeteras)', async () => {
+    const app = await createTestApp();
+    const cookies = await registerAndVerify(app, 'us3-transfer-wallet@test.com');
+    const accounts = await setupTemplateAccounts(app, cookies);
+
+    const walletUser = await createUserAccount(
+      app,
+      cookies,
+      '11110001',
+      'PayPal',
+      'wallet',
+    );
+
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/apuntes',
+      headers: { cookie: cookies.join('; ') },
+      payload: {
+        templateCode: 'transferencia',
+        date: '2026-07-01',
+        concept: 'Cash out',
+        amount: 80,
+        lines: [
+          { id: 1, accountId: accounts.bancoUserAccountId },
+          { id: 2, accountId: walletUser.id },
+        ],
+      },
+    });
+
+    expect(res.statusCode).toBe(201);
 
     await app.close();
   });
@@ -1066,6 +1139,61 @@ describe('SC-008 ? GET /api/apuntes', () => {
     await app.close();
   });
 
+  it("should list apuntes by createdAt desc (not movement date)", async () => {
+    const app = await createTestApp();
+    const cookies = await registerAndVerify(app, "list-apuntes-created@test.com");
+
+    const energia = await findGlobalByCodigo("61120002");
+    if (!energia) throw new Error("61120002 not seeded");
+
+    async function createGasto(concept: string, amount: number, date: string) {
+      const bancoPostable = await createPostableGlobal(
+        nextCodigo("111214"),
+        `Banco ${concept}`,
+        "11120000",
+      );
+      const bancoUser = await createUserAccount(
+        app,
+        cookies,
+        bancoPostable.codigo,
+        `Banco ${concept}`,
+      );
+      const res = await app.inject({
+        method: "POST",
+        url: "/api/apuntes",
+        headers: { cookie: cookies.join("; ") },
+        payload: {
+          templateCode: "pagar_servicios",
+          date,
+          concept,
+          amount,
+          lines: [
+            { id: 1, accountId: energia.id },
+            { id: 2, accountId: bancoUser.id },
+          ],
+        },
+      });
+      expect(res.statusCode).toBe(201);
+      return res.json().apunte;
+    }
+
+    // Newer movement date first, older movement date second (last capture wins)
+    await createGasto("Reciente en libro", 90, "2026-07-10");
+    await createGasto("Corrección antigua", 40, "2026-06-01");
+
+    const list = await app.inject({
+      method: "GET",
+      url: "/api/apuntes",
+      headers: { cookie: cookies.join("; ") },
+    });
+    expect(list.statusCode).toBe(200);
+    const body = list.json();
+    expect(body.apuntes[0].concept).toBe("Corrección antigua");
+    expect(body.apuntes[1].concept).toBe("Reciente en libro");
+
+    await app.close();
+  });
+
   it("should respect limit and offset pagination", async () => {
     const app = await createTestApp();
     const cookies = await registerAndVerify(app, "list-apuntes-page@test.com");
@@ -1126,7 +1254,7 @@ describe('Plantillas Admin (dev)', () => {
 
     const res = await app.inject({
       method: 'GET',
-      url: '/api/dev/plantillas-admin?mode=hogar',
+      url: '/api/dev/plantillas-admin?mode=hogar&format=json',
       headers: { cookie: cookies.join('; ') },
     });
 
@@ -1137,6 +1265,28 @@ describe('Plantillas Admin (dev)', () => {
     expect(body.plantillas.length).toBeGreaterThanOrEqual(1);
     expect(body.plantillas[0]).toHaveProperty('ready');
     expect(body.plantillas[0].lines[0]).toHaveProperty('availableCount');
+
+    await app.close();
+  });
+
+  it('GET /api/dev/plantillas-admin serves interactive HTML tool for browsers', async () => {
+    const app = await createTestApp();
+    const cookies = await registerAndVerify(app, 'admin-html@test.com');
+
+    const res = await app.inject({
+      method: 'GET',
+      url: '/api/dev/plantillas-admin?mode=hogar',
+      headers: {
+        cookie: cookies.join('; '),
+        accept: 'text/html,application/xhtml+xml',
+      },
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(String(res.headers['content-type'])).toContain('text/html');
+    expect(res.body).toContain('Plantillas Admin');
+    expect(res.body).toContain('Generar mockup del asiento');
+    expect(res.body).toContain('Código fuente');
 
     await app.close();
   });

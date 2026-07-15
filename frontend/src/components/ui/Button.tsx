@@ -26,8 +26,8 @@ const VARIANT_CLASS: Record<ButtonVariant, string> = {
 
 const SIZE_CLASS: Record<ButtonSize, string> = {
   sm: 'h-10 px-6 py-2 text-label-md rounded-xl',
-  md: 'h-12 px-lg py-sm text-label-md rounded-full',
-  lg: 'h-14 px-xl py-md text-headline-md rounded-full',
+  md: 'h-12 px-lg py-sm text-label-md rounded-full md:h-11 md:px-md',
+  lg: 'h-14 px-xl py-md text-headline-md rounded-full md:h-11 md:px-lg md:text-label-md md:rounded-xl',
 };
 
 function buttonClassName(

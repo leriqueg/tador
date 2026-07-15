@@ -6,6 +6,14 @@
 
 export type TipoCuenta = 'bank' | 'card' | 'wallet' | 'bridge' | 'incomeCategory' | 'expenseCategory';
 
+export type CardNetwork = 'VISA' | 'MASTERCARD' | 'AMEX' | 'OTRO';
+
+export interface CuentaUsuarioMetadata {
+  network?: CardNetwork | string;
+  lastFour?: string;
+  cutoffDay?: number;
+}
+
 export interface CuentaUsuario {
   id: string;
   userId: string;
@@ -15,6 +23,7 @@ export interface CuentaUsuario {
   tipoCuenta: TipoCuenta;
   nombre: string;
   codigoPersonalizado: string | null;
+  metadata: CuentaUsuarioMetadata | null;
   activa: boolean;
   createdAt: Date;
   updatedAt: Date;

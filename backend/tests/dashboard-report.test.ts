@@ -386,15 +386,15 @@ describe('Position Report — GET /api/reports/position', () => {
     });
     createdGlobalIds.push(globalIncome.id);
 
-    // Create CuentaUsuario accounts with specific tipos
+    // Create CuentaUsuario — bank/card via entities; wallet/income via accounts
     const bankRes = await app.inject({
       method: 'POST',
-      url: '/api/accounts',
+      url: '/api/entities',
       headers: { cookie: cookies.join('; ') },
-      payload: { tipoCuenta: 'bank', nombre: 'Main Bank', globalId: globalBank.id },
+      payload: { nombre: `Main Bank ${Date.now()}`, tipo: 'bank' },
     });
     expect(bankRes.statusCode).toBe(201);
-    const bankId = bankRes.json().account.id;
+    const bankId = bankRes.json().provisionedAccount.id;
 
     const walletRes = await app.inject({
       method: 'POST',
@@ -405,23 +405,28 @@ describe('Position Report — GET /api/reports/position', () => {
     expect(walletRes.statusCode).toBe(201);
     const walletId = walletRes.json().account.id;
 
+    // Asset-like debit card: use wallet under asset-coded global (card create banned)
     const debitRes = await app.inject({
       method: 'POST',
       url: '/api/accounts',
       headers: { cookie: cookies.join('; ') },
-      payload: { tipoCuenta: 'card', nombre: 'Debit Card', globalId: globalDebitCard.id },
+      payload: {
+        tipoCuenta: 'wallet',
+        nombre: 'Debit Card',
+        globalId: globalDebitCard.id,
+      },
     });
     expect(debitRes.statusCode).toBe(201);
     const debitId = debitRes.json().account.id;
 
     const creditRes = await app.inject({
       method: 'POST',
-      url: '/api/accounts',
+      url: '/api/entities',
       headers: { cookie: cookies.join('; ') },
-      payload: { tipoCuenta: 'card', nombre: 'Credit Card', globalId: globalCreditCard.id },
+      payload: { nombre: `Credit Card ${Date.now()}`, tipo: 'card_issuer' },
     });
     expect(creditRes.statusCode).toBe(201);
-    const creditId = creditRes.json().account.id;
+    const creditId = creditRes.json().provisionedAccount.id;
 
     // Create an income account for counterparty
     const incomeRes = await app.inject({
@@ -733,12 +738,12 @@ describe('Edge cases', () => {
     // Expense → expenseCategory (will be 'excluded' in position)
     const assetRes = await app.inject({
       method: 'POST',
-      url: '/api/accounts',
+      url: '/api/entities',
       headers: { cookie: cookies.join('; ') },
-      payload: { tipoCuenta: 'bank', nombre: 'Asset Account', globalId: globalAsset.id },
+      payload: { nombre: `Asset Account ${Date.now()}`, tipo: 'bank' },
     });
     expect(assetRes.statusCode).toBe(201);
-    const assetId = assetRes.json().account.id;
+    const assetId = assetRes.json().provisionedAccount.id;
 
     const incomeRes = await app.inject({
       method: 'POST',

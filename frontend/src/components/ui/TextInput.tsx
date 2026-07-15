@@ -43,7 +43,7 @@ export default function TextInput({
         <input
           id={inputId}
           className={[
-            'w-full h-12 bg-surface-container-low border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-body-md placeholder:text-outline',
+            'w-full h-12 bg-surface-container-lowest border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-body-md placeholder:text-outline',
             icon ? 'pl-11 pr-md' : 'px-md',
             trailing ? 'pr-11' : '',
             error ? 'border-error' : 'border-outline-variant',

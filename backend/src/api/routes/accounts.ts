@@ -1,62 +1,56 @@
 /**
- * Accounts routes: user account creation.
+ * Accounts routes: list + create non-entity-provisioned accounts.
+ * bank/card MUST be created via POST /api/entities.
  */
 
 import type { FastifyInstance } from 'fastify';
 import type { AuthApplicationService } from '../../application/auth-service.js';
 import { createAuthMiddleware } from '../middleware/auth.js';
 import { prisma } from '../../infrastructure/database.js';
-import type { TipoCuenta } from '../../domain/cuenta-usuario.js';
+import { autoAsignarCodigo } from '../../application/account-codigo.js';
+import type {
+  CuentaUsuarioMetadata,
+  TipoCuenta,
+} from '../../domain/cuenta-usuario.js';
 
 interface CreateAccountBody {
   tipoCuenta: TipoCuenta;
   nombre: string;
   globalId?: string;
+  parentGroupCodigo?: string;
   entidadId?: string;
   codigoPersonalizado?: string;
+  metadata?: CuentaUsuarioMetadata;
 }
 
-/**
- * Auto-assign a codigo for a user account based on its parent CuentaGlobal.
- *
- * The scheme follows the pattern [A][BBB][1][DDD] (8 digits):
- *   A   = first digit of parent (class: 1=Activo, 2=Pasivo, 4=Ingreso, 6=Gasto)
- *   BBB = digits 2-4 of parent (group identifier)
- *   1   = N3 always 1 for user accounts
- *   DDD = auto-incrementing sequence (001-999)
- *
- * Example: parent 11120000 → base "11121" → "11121001", "11121002", ...
- */
-async function autoAsignarCodigo(globalId: string | null, userId: string): Promise<string | null> {
-  if (!globalId) return null;
+const MANUAL_ALLOWED: TipoCuenta[] = [
+  'wallet',
+  'bridge',
+  'incomeCategory',
+  'expenseCategory',
+];
 
-  const parent = await prisma.cuentaGlobal.findUnique({
-    where: { id: globalId },
-    select: { codigo: true },
-  });
-  if (!parent) return null;
-
-  const n1 = parent.codigo[0];
-  const n2 = parent.codigo.substring(1, 4);
-  const base = `${n1}${n2}1`; // N3 always 1 for user accounts
-
-  // Find highest existing N4 for this base
-  const existing = await prisma.cuentaUsuario.findFirst({
-    where: {
-      codigo: { startsWith: base },
-      userId,
-    },
-    orderBy: { codigo: 'desc' },
-    select: { codigo: true },
-  });
-
-  let nextN4 = 1;
-  if (existing?.codigo) {
-    const lastN4 = parseInt(existing.codigo.substring(7), 10);
-    nextN4 = lastN4 + 1;
+function sanitizeMetadata(
+  input: CuentaUsuarioMetadata | undefined,
+): CuentaUsuarioMetadata | null {
+  if (!input || typeof input !== 'object') return null;
+  const out: CuentaUsuarioMetadata = {};
+  if (typeof input.network === 'string' && input.network.trim()) {
+    out.network = input.network.trim().toUpperCase();
   }
-
-  return `${base}${nextN4.toString().padStart(3, '0')}`;
+  if (typeof input.lastFour === 'string') {
+    const digits = input.lastFour.replace(/\D/g, '').slice(-4);
+    if (digits) out.lastFour = digits;
+  }
+  if (
+    typeof input.cutoffDay === 'number' &&
+    Number.isInteger(input.cutoffDay) &&
+    input.cutoffDay >= 1 &&
+    input.cutoffDay <= 31
+  ) {
+    out.cutoffDay = input.cutoffDay;
+  }
+  return Object.keys(out).length > 0 ? out : null;
 }
 
 export function registerAccountRoutes(
@@ -65,7 +59,6 @@ export function registerAccountRoutes(
 ): void {
   const requireAuth = createAuthMiddleware(authService);
 
-  // GET /api/accounts — list user-owned accounts (FR-014)
   app.get(
     '/api/accounts',
     { preHandler: requireAuth },
@@ -85,6 +78,7 @@ export function registerAccountRoutes(
           tipoCuenta: row.tipoCuenta,
           entidadId: row.entidadId,
           isEntityProvisioned: row.entidadId != null,
+          metadata: row.metadata,
           activa: row.activa,
         }));
 
@@ -96,14 +90,20 @@ export function registerAccountRoutes(
     },
   );
 
-  // POST /api/accounts — create a user account
   app.post(
     '/api/accounts',
     { preHandler: requireAuth },
     async (request, reply) => {
       const userId = request.userId!;
-      const { tipoCuenta, nombre, globalId, entidadId, codigoPersonalizado } =
-        request.body as CreateAccountBody;
+      const {
+        tipoCuenta,
+        nombre,
+        globalId: bodyGlobalId,
+        parentGroupCodigo,
+        entidadId,
+        codigoPersonalizado,
+        metadata: bodyMetadata,
+      } = request.body as CreateAccountBody;
 
       if (!tipoCuenta || !nombre) {
         return reply
@@ -111,18 +111,73 @@ export function registerAccountRoutes(
           .send({ error: 'tipoCuenta and nombre are required' });
       }
 
+      if (tipoCuenta === 'bank' || tipoCuenta === 'card') {
+        return reply.status(422).send({
+          error:
+            'bank and card accounts must be created via POST /api/entities (FR-004b)',
+        });
+      }
+
+      if (!MANUAL_ALLOWED.includes(tipoCuenta)) {
+        return reply.status(400).send({
+          error: `tipoCuenta '${tipoCuenta}' is not allowed for manual create`,
+        });
+      }
+
       try {
-        const codigo = await autoAsignarCodigo(globalId ?? null, userId);
+        let globalId = bodyGlobalId ?? null;
+
+        if (!globalId && parentGroupCodigo) {
+          const parent = await prisma.cuentaGlobal.findUnique({
+            where: { codigo: parentGroupCodigo },
+            select: { id: true },
+          });
+          if (!parent) {
+            return reply.status(400).send({
+              error: `Unknown parentGroupCodigo '${parentGroupCodigo}'`,
+            });
+          }
+          globalId = parent.id;
+        }
+
+        // Default parents for income/expense when not provided
+        if (!globalId && tipoCuenta === 'incomeCategory') {
+          const parent = await prisma.cuentaGlobal.findUnique({
+            where: { codigo: '41010000' },
+            select: { id: true },
+          });
+          globalId = parent?.id ?? null;
+        }
+        if (!globalId && tipoCuenta === 'expenseCategory') {
+          const parent = await prisma.cuentaGlobal.findUnique({
+            where: { codigo: '61000000' },
+            select: { id: true },
+          });
+          // fallback to a common expense group if seed uses different roots
+          if (!parent) {
+            const alt = await prisma.cuentaGlobal.findFirst({
+              where: { codigo: { startsWith: '61' }, esPostable: false },
+              select: { id: true },
+            });
+            globalId = alt?.id ?? null;
+          } else {
+            globalId = parent.id;
+          }
+        }
+
+        const codigo = await autoAsignarCodigo(globalId, userId);
+        const metadata = sanitizeMetadata(bodyMetadata);
 
         const account = await prisma.cuentaUsuario.create({
           data: {
             userId,
             codigo,
             tipoCuenta,
-            nombre,
-            globalId: globalId ?? null,
+            nombre: nombre.trim(),
+            globalId,
             entidadId: entidadId ?? null,
             codigoPersonalizado: codigoPersonalizado ?? null,
+            metadata: metadata ?? undefined,
           },
         });
 

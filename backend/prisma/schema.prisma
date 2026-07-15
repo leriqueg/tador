@@ -22,7 +22,8 @@ enum TipoEntidad {
   person
   organization
   bank
-  issuer
+  card_issuer
+  wallet_platform
 
   @@map("tipo_entidad")
 }
@@ -38,6 +39,8 @@ model User {
   id           String    @id @default(cuid())
   email        String    @unique
   passwordHash String
+  /// Display name; editable in Settings (MVP). Not an auth identifier.
+  fullName     String?
   verifiedAt   DateTime?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
@@ -130,6 +133,8 @@ model CuentaUsuario {
   tipoCuenta         TipoCuenta
   nombre             String
   codigoPersonalizado String?
+  /// Optional Hogar metadata (e.g. card network, lastFour, cutoffDay)
+  metadata           Json?
   activa             Boolean    @default(true)
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt

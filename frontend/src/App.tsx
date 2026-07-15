@@ -7,6 +7,9 @@ import FAQ from './pages/FAQ.tsx';
 import Onboarding from './pages/Onboarding.tsx';
 import Dashboard from './pages/Dashboard.tsx';
 import Entries from './pages/Entries.tsx';
+import Accounts from './pages/Accounts.tsx';
+import Entities from './pages/Entities.tsx';
+import Settings from './pages/Settings.tsx';
 
 export default function App() {
   return (
@@ -21,6 +24,9 @@ export default function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/entries" element={<Entries />} />
           <Route path="/entries/new" element={<Entries />} />
+          <Route path="/accounts" element={<Accounts />} />
+          <Route path="/entities" element={<Entities />} />
+          <Route path="/settings" element={<Settings />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

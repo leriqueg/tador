@@ -96,7 +96,7 @@ export async function buildApp(opts?: { logger?: boolean | object }) {
   registerReportRoutes(app, authService, accountingService, dashboardReportService);
   registerPeriodRoutes(app, authService, accountingService);
   registerPlantillaRoutes(app, authService);
-  registerApunteRoutes(app, authService);
+  registerApunteRoutes(app, authService, accountingService);
   registerPlantillasAdminRoutes(app, authService);
 
   // Eagerly load plantillas into memory

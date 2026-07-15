@@ -38,4 +38,4 @@ Keep MVP templates as versioned JSON in repo.
 
 **Rationale**: Discovery UI only needs code/name; account picks happen after selection.
 
-**Plantillas Admin**: `/api/dev/plantillas-admin` for readiness, empty categories, and journal preview; full admin frontend is post-MVP.
+**Plantillas Admin**: interactive HTML tool at `/api/dev/plantillas-admin` (left list, try-form, asiento mockup, source tab). Full product admin frontend is post-MVP. JSON via `?format=json`.

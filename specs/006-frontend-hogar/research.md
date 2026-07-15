@@ -48,3 +48,40 @@ One `POST /api/apuntes` path; UI presentation differs by `BookConfig.mode`. PRO 
 ## Decision: Plantillas list light + detail enrich (2026-07-13)
 
 Entries loads `GET /api/plantillas?mode=hogar` for discovery, then `GET /api/plantillas/:code` when selecting. Hides empty category chips using catalog codes. Diagnóstico: `/api/dev/plantillas-admin` (004 §12).
+
+## Decision: Onboarding Hogar — TZ, billeteras, tarjetas, sin bancos (2026-07-14)
+
+### Timezone
+Curated list covering North America, South America, Europe (must include `America/Guayaquil`). Default from `Intl.DateTimeFormat().resolvedOptions().timeZone` when listed; else `UTC`. Human labels.
+
+### Wallets first, banks later
+~~Onboarding prioritizes clarifying the default wallet and optionally adding 0–2 virtual wallets. Banks are created just-in-time~~ **Superseded 2026-07-14 evening.**
+
+## Decision: Ajustes / Entidades / Cuentas (2026-07-14 evening)
+
+### Settings (`/settings`)
+- Currency: readonly after onboarding (Book attribute; multi-book ≠ FX).
+- Timezone: editable (curated list).
+- User `fullName`: editable.
+- Email/password change: out of MVP.
+
+### Entity types & auto-provision
+| Tipo | UX | Cuenta | Grupo |
+|------|-----|--------|-------|
+| `bank` | Banco | `bank` | `11120000` |
+| `card_issuer` | Tarjeta de crédito | `card` | `21200000` |
+| `wallet_platform` | Billetera virtual | `wallet` | `11110000` |
+| `person` | Persona | balance CxC | `11320000` |
+| `organization` | PRO | — | — |
+
+Default plan wallet = **no** entity. Virtual wallets always `wallet_platform`.
+
+### Routes
+- Onboarding: optional declare Bank / Card / Virtual wallet (entity APIs).
+- Later adds: `/entities`.
+- `/accounts` Hogar: only income/expense category admin (no balance hero). Bridges = PRO door.
+
+### Rejected
+- Generic single `issuer` for both cards and PayPal.
+- Manual `POST /api/accounts` for bank/card.
+- Banks-only JIT without onboarding option.

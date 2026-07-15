@@ -28,7 +28,7 @@
 **Purpose**: Align frontend docs and API client surface for Hogar
 
 - [x] T001 Document active Spec Kit plan pointer for 006 in `.cursor/rules/specify-rules.mdc` (SPECKIT section → `specs/006-frontend-hogar/plan.md`)
-- [x] T002 [P] Extend `frontend/src/lib/api.ts` with typed clients for book, chart, accounts, entities, plantillas, apuntes, reports (stubs OK until backend follow-ups land) — **partial**: `book`, `accounts`, `plantillas`, `apuntes` done; chart/entities/reports still pending
+- [x] T002 [P] Extend `frontend/src/lib/api.ts` with typed clients for book, chart, accounts, entities, plantillas, apuntes, reports (stubs OK until backend follow-ups land) — **done**: book, accounts, entities, plantillas, apuntes, auth.profile; chart/reports still thin
 - [x] T003 [P] Confirm Storybook scripts and link from `frontend/README.md` to `frontend/docs/component-inventory.md` (already drafted — verify)
 
 ---
@@ -59,20 +59,46 @@
 
 ## Phase 3: User Story 1 — Primer uso guiado (P1)
 
-**Goal**: Login/register already exist; complete onboarding (currency + guided accounts path) without accounting codes (FR-001–003)
+**Goal**: Login/register already exist; complete onboarding (currency + timezone auto + optional wallets/cards; no banks) without accounting codes (FR-001–003, FR-003a–c, FR-010, FR-010a)
 
-**Independent test**: New user finishes onboarding and can open `/accounts` with at least one guided account path available
+**Independent test**: New user finishes onboarding with Guayaquil (or browser TZ), can skip or add wallets/cards, lands on dashboard without creating a bank
 
 - [x] T012 [US1] Add route `/onboarding` in `frontend/src/App.tsx` and page `frontend/src/pages/Onboarding.tsx` using `OnboardingWizard` (modo + moneda + timezone UTC)
 - [x] T013 [US1] Wire onboarding to `GET/PATCH /book` via `frontend/src/lib/api.ts`; persist mode, currency, locale/format, timeZone; mark book initialized
-- [ ] T014 [US1] After book config, CTA to guided account creation (`GuidedAccountCreate` or `/accounts` create flow) without showing account codes
-- [ ] T015 [US1] Add `/settings` page `frontend/src/pages/Settings.tsx` with `BookConfigForm`; mockup `configuraci_n_tador`
-- [x] T016 [US1] Gate authenticated app: post-login / protected routes — if book not initialized → `/onboarding`; else → `/dashboard` (FR-009)
-- [ ] T017 [P] [US1] Add `/contact` page from `contacto_tador_neutro` using **`mailto:`** (FR-011)
-- [ ] T017b [P] [US1] Add `/recovery` request + reset pages (UI); email send depends on 001 Follow-up D1–D3
+- [x] T032 [US1] Expand timezone list (NA/SA/EU incl. `America/Guayaquil`) + browser auto-default in `OnboardingWizard` / `frontend/src/lib/time-zones.ts` (FR-010a)
+- [x] T033 [US1] Backend: `POST /api/accounts` accepts `parentGroupCodigo` + optional `metadata` (network/lastFour/cutoffDay); persist `metadata` Json on `CuentaUsuario`
+- [x] T034 [US1] Add wallets step to onboarding: copy explaining default vs virtual extras; create 0–2 `wallet` under `11110000` (FR-003a)
+- [x] T035 [US1] Add optional credit-card step: network + name + optional last4 + cutoff; `card` under `21200000` without bank (FR-003b)
+- [x] T036 [US1] Ensure wizard has **no** employment step (FR-003c); banks/cards/wallets optional via entities
+- [x] T014 [US1] After book config, CTA paths documented — banks via entities not GuidedAccount bank on `/accounts`
+- [x] T015 [US1] Add `/settings` — currency readonly, timezone editable, fullName editable (FR-004c)
+- [x] T016 [US1] Gate authenticated app…
+- [ ] T017 [P] [US1] Add `/contact`…
+- [ ] T017b [P] [US1] Add `/recovery`…
 
 **Checkpoint**: US1 demonstrable (onboarding + settings + contact)
 
+---
+
+## Phase 3b: Delta plantillas — done
+
+- [x] T037 Complete 004 Follow-up F7–F9
+- [x] T038 [US2] ApunteMiniForm same-account block
+
+---
+
+## Phase 3c: Entidades + Cuentas + provisión (2026-07-14 evening)
+
+- [x] T039 Backend: rename `issuer`→`card_issuer`; add `wallet_platform`; User.fullName; migrate
+- [x] T040 Backend: `POST /api/entities` atomic provision (bank/card_issuer/wallet_platform/person); return provisionedAccount
+- [x] T041 Backend: `POST /api/accounts` reject bank|card with 422; allow incomeCategory|expenseCategory|bridge|wallet(non-platform)
+- [x] T042 Backend: `PATCH /auth/me` or `/api/profile` for fullName
+- [x] T043 [US1c] Page `/entities` — list/filter/create bank|card_issuer|wallet_platform|person
+- [x] T044 [US1d] Page `/accounts` — list/create incomeCategory|expenseCategory only (no saldo hero)
+- [x] T045 [US1] Onboarding steps: optional Bank / Card / Virtual wallet via entities API
+- [x] T046 [US1b] Page `/settings` + wire book TZ + profile fullName
+- [x] T047 Wire routes in App.tsx + AppShell nav destinations
+- [x] T048 Tests: entity provision atomic; reject manual bank/card; settings/profile
 ---
 
 ## Phase 4: User Story 2 — Registrar apuntes cotidianos (P1)
@@ -111,10 +137,10 @@
 
 **Independent test**: After apuntes, `/accounts` shows balances and `/dashboard` shows PYG + position
 
-- [ ] T022 [US3] Add `/accounts` page `frontend/src/pages/Accounts.tsx` with `SaldoTotalHero` + `AccountGroupList` (mockup `cuentas_tador`); data from `GET /api/accounts` + balances
-- [ ] T023 [US3] Add `GuidedAccountCreate` flow on `/accounts` (FAB / Nueva Cuenta)
-- [ ] T024 [US3] Add `/entities` page `frontend/src/pages/Entities.tsx` with EntityCard/Table + create form (mockup `entidades_tador`)
-- [ ] T025 [US3] Add `/dashboard` page `frontend/src/pages/Dashboard.tsx` with `PygPanelHogar` + `PositionPanel`; call `GET /api/reports/pyg?year=` and `GET /api/reports/position`
+- [ ] T022 [US3] Dashboard position/saldos (separate from `/accounts` admin) — wire P&G panels
+- [ ] T023 [cancelled] GuidedAccountCreate for bank on `/accounts` — **superseded** by entity provision
+- [ ] T024 [US1c] covered by T043 Entities page
+- [ ] T025 [US3] Add `/dashboard` page with `PygPanelHogar` + `PositionPanel`…
 - [ ] T026 [US3] Hide account codes everywhere in Hogar dashboard/accounts (FR-001, FR-H-006)
 - [ ] T027 [US3] Empty states when no accounts / no movements (`EmptyState`)
 
@@ -135,13 +161,16 @@
 
 ```text
 Phase 1 → Phase 2 (T004–T011)
-    → US1 (T012–T017)
-    → US2 (T018–T021b)  [needs accounts from US1 path]
-    → US3 (T022–T027)  [needs apuntes from US2 for meaningful dashboard]
+    → US1 (T012–T013, T032–T036, T014–T017)
+    → 004 delta T037 + mini-form T038
+    → US2 (T018–T021b)
+    → US3 (T022–T027)
     → Polish (T028–T031)
 ```
 
 US1 settings/contact (T015, T017) can parallelize with onboarding wiring after T008–T009.
+
+T032–T036 (onboarding delta) block polished US1 demo; T037 blocks correct transferencia catalog.
 
 US2 discovery components (T018c–T018e) can run in parallel after T018b API types exist.
 
@@ -172,4 +201,4 @@ T018c FrequentTemplatesGrid || T018d KindSegment+CategoryChips || T018e Template
 
 ## Suggested MVP slice
 
-T001–T016 + T018–T020 (onboarding + frequent-plantilla apunte path + burst) before full category/search polish and entities/dashboard.
+T001–T016 + T032–T038 + T018–T020 (onboarding delta + frequent-plantilla apunte path + burst) before full category/search polish and entities/dashboard.

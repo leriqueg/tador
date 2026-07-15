@@ -20,6 +20,17 @@ This contract describes observable behavior, not implementation details.
 - Financial behavior never bypasses accounting integrity rules (plantillas + backend only).
 - Hogar capture never displays account codes or ledger lines.
 - Out-of-scope MVP modules (PRO EntryBuilder, IA, documentary CxC) are not required for this sprint to complete.
+- Onboarding never requires banks or employment status in Hogar.
+- Transferencia (and similar dual-account plantillas) never posts the same account on both sides.
+
+## US1 — Onboarding observable contract
+
+1. Uninitialized book → `/onboarding`.
+2. Timezone select: curated NA/SA/EU list; preselect browser IANA when listed; else UTC.
+3. After mode + currency + timezone: optional wallets step (default explained; up to 2 extras) and optional cards step (network + name + optional last4 + optional cutoff).
+4. Completing wizard stamps `onboardingCompletedAt` and routes to `/dashboard`.
+5. Skipping wallets/cards is valid.
+6. Card create does not require bank.
 
 ## US2 — QuickAdd / Entries (Hogar) observable contract
 
@@ -38,8 +49,10 @@ This contract describes observable behavior, not implementation details.
 3. Success → confirmation (live region) + recent list refresh.
 4. “Guardar y registrar otro” → same plantilla + account retained; amount and description cleared; focus amount.
 5. Missing required account for plantilla → everyday-language error + path to create/select account (no codes).
+6. For `transferencia` (and multi-slot account pickers with opposing sides): UI disables/rejects identical origin and destination; backend returns V10 on duplicate.
 
 ### Non-goals (this sprint)
 
 - EntryBuilder progressive disclosure (Sprint 07).
 - Showing asiento lines or account codes in capture UI.
+- Mandatory bank setup or employment profiling in Hogar onboarding.

@@ -10,6 +10,14 @@ Build the simple mobile-first Hogar experience for onboarding, guided account cr
 
 **Capture decision (2026-07-13)**: Hogar = plantillas / recognition-over-recall. PRO EntryBuilder is **out of scope** (see `007-frontend-pro-ligero`). Shared write path via plantillas API.
 
+**Onboarding delta (2026-07-14)**: Wizard = modo → moneda + TZ (browser default, lista NA/SA/EU) → banco + billeteras virtuales opcionales → tarjetas opcionales. Crear medios vía `POST /api/entities` (provisión atómica). Billetera del plan = sin entidad.
+
+**Ajustes / Entidades / Cuentas (2026-07-14 evening)**:
+- `/settings`: moneda readonly; TZ + `fullName` editables; sin email/password.
+- `/entities`: bank | card_issuer | wallet_platform | person (+ organization PRO).
+- `/accounts` Hogar: solo `incomeCategory` / `expenseCategory` (sin saldo hero). Puentes = PRO.
+- Manual `POST /api/accounts` de bank/card → 422.
+
 ## Technical Context
 
 **Language/Version**: TypeScript — backend Node.js; frontend React 19 + Vite 8

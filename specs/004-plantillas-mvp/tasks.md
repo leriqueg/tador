@@ -206,4 +206,10 @@ Historial de apuntes requerido por UI Hogar (`/entries`, dashboard recientes). C
 
 - [x] F4 Listado liviano: `GET /api/plantillas` sin `availableAccounts`; enrichment solo en `:code` (SC-002/SC-009)
 - [x] F5 Resolver cuentas en memoria (`plantilla-account-resolver.ts`) — una carga de chart + cuentas usuario
-- [x] F6 Plantillas Admin dev: `GET/POST /api/dev/plantillas-admin*` (spec §12); gate env; HTML opcional; preview dry-run
+- [x] F6 Plantillas Admin tool: HTML interactivo (lista | form | mockup asiento | pestaña fuente) + JSON `?format=json` + preview dry-run (spec §12)
+
+## Follow-up (2026-07-14 — transferencia + V10)
+
+- [x] F7 Bump `transferencia.json` v2: groupCodes incluyen `11110000`, `11120000`, `11320000`, `21120000`
+- [x] F8 Implementar V10 en `POST /api/apuntes`: misma `accountId` en debe y haber → 400
+- [x] F9 Tests: transferencia entre bancos/billeteras válida; misma cuenta en origen/destino → 400

@@ -15,6 +15,16 @@
 - Q: ¿Cómo se materializa el plan de cuentas global en cada usuario? → A: Híbrido: catálogo global compartido + activación/override por usuario cuando una cuenta se usa o personaliza.
 - Q: ¿Cómo se relacionan Tags y Entidades en el MVP? → A: Entidades y tags son catálogos separados; pueden duplicar nombres y se resuelve en reportes.
 
+### Session 2026-07-14 evening — Provisión por Entidad
+
+- Q: ¿Tipos Entidad canónicos? → A: `person` | `bank` | `card_issuer` | `wallet_platform` | `organization` (PRO). Renombrar legacy `issuer` → `card_issuer`.
+- Q: ¿Quién crea cuentas bank/card/wallet virtual? → A: Solo `POST /api/entities` (provisión atómica). `POST /api/accounts` rechaza `bank`/`card` (422). Billetera global del seed = sin entidad.
+- Q: ¿Mapa provisión? → A:
+  - `bank` → CuentaUsuario `bank` bajo `11120000`
+  - `card_issuer` → `card` bajo `21200000` (+ metadata opcional)
+  - `wallet_platform` → `wallet` bajo `11110000`
+  - `person` → cuenta bajo `11320000` (CxC personales) con `entidadId`
+- Q: ¿Cuentas manuales? → A: `incomeCategory` / `expenseCategory` / `bridge` (bridge PRO) / wallet libre solo si no es plataforma (billetera default ya existe en globales).
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Recibir plan inicial (Priority: P1)
@@ -78,8 +88,10 @@ Como usuario, quiero registrar nombres propios y etiquetas para relacionarlos co
 - **FR-001**: El sistema MUST mantener un plan de cuentas global base.
 - **FR-002**: El sistema MUST permitir plan de cuentas personalizado por usuario.
 - **FR-003**: El sistema MUST distinguir cuentas madre de cuentas postables.
-- **FR-004**: El sistema MUST permitir creación guiada de banco, tarjeta, billetera y cuenta puente.
-- **FR-005**: El sistema MUST permitir Entidades con tipo y capacidades iniciales.
+- **FR-004**: El sistema MUST permitir creación de cuentas usuario: provisión vía Entidad (bank/card/wallet_platform/person) o manual (`incomeCategory`/`expenseCategory`/`bridge`).
+- **FR-004a**: `POST /api/entities` MUST crear Entidad + CuentaUsuario en una transacción según tipo→grupo.
+- **FR-004b**: `POST /api/accounts` MUST reject `tipoCuenta` `bank` o `card` (usar flujo entidad).
+- **FR-005**: El sistema MUST permitir Entidades con tipos `person` | `bank` | `card_issuer` | `wallet_platform` | `organization`.
 - **FR-006**: El sistema MUST permitir tags simples por usuario.
 - **FR-007**: El sistema MUST asociar cuentas del usuario con Entidades cuando aplique.
 - **FR-008**: El sistema MUST preservar referencia legacy cuando una cuenta venga de migración.

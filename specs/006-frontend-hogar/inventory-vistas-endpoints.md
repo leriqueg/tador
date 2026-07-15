@@ -30,12 +30,12 @@ Rutas en inglés (código). Copy de UI en español neutro.
 | 3 | `/register` | Registro | `registro_tador_neutro` | FR-002 | **Hecho** (auth real) |
 | 4 | `/faq` | Preguntas frecuentes | `preguntas_frecuentes_tador_neutro` | Marketing | **Hecho** |
 | 5 | `/contact` | Contacto | `contacto_tador_neutro` | Marketing | Pendiente — **`mailto:`** (sin API) |
-| 6 | `/onboarding` | Primer uso guiado | `onboarding_tador_mobile` + `onboarding_tador_desktop` | US1, FR-009/010 | Pendiente — modo + moneda + timezone (UTC) |
-| 7 | `/dashboard` | Resumen Hogar (PYG + posición) | `dashboard_hogar_tador` (primario) | US3, FR-007 | Pendiente — post-login destino si libro OK |
-| 8 | `/entries` | Apuntes (nuevo + recientes) | `apuntes_tador` | US2, FR-005 | Pendiente |
-| 9 | `/accounts` | Cuentas + saldos | `cuentas_tador` | FR-003, FR-006 | Pendiente |
-| 10 | `/entities` | Entidades | `entidades_tador` | FR-004 | Pendiente — CxC/CxP informales vía Entidad |
-| 11 | `/settings` | Ajustes (libro / moneda / formato) | `configuraci_n_tador` | FR-002 | Pendiente |
+| 6 | `/onboarding` | Primer uso guiado | `onboarding_tador_mobile` + `onboarding_tador_desktop` | US1, FR-009/010 | **Hecho** — modo + moneda + TZ auto; banco/tarjeta/billetera vía entities |
+| 7 | `/dashboard` | Resumen Hogar (PYG + posición) | `dashboard_hogar_tador` (primario) | US3, FR-007 | Stub AuthShell — paneles P&G/posición pendientes |
+| 8 | `/entries` | Apuntes (nuevo + recientes) | `apuntes_tador` | US2, FR-005 | **Hecho** (QuickAdd template-driven) |
+| 9 | `/accounts` | Categorías ingreso/gasto | `cuentas_tador` | FR-004b | **Hecho** — solo income/expense; sin saldo hero |
+| 10 | `/entities` | Entidades | `entidades_tador` | FR-004 / US1c | **Hecho** — bank/card_issuer/wallet_platform/person + provisión |
+| 11 | `/settings` | Ajustes | `configuraci_n_tador` | FR-004c | **Hecho** — moneda RO; TZ + fullName editables |
 | 12 | `/recovery` | Recuperar contraseña | (definir mockup / flujo) | FR-003 de 001 | Pendiente — depende email config (delta 001) |
 
 ### Onboarding (detalle)
@@ -134,7 +134,7 @@ Componente objetivo: **AppShell** (ver inventario frontend). Sin avatar Pacho.
 |----------|-----|
 | `GET /api/plantillas?mode=hogar` | Catálogo liviano (sin availableAccounts) |
 | `GET /api/plantillas/:code` | Detalle enriquecido al elegir plantilla |
-| `GET /api/dev/plantillas-admin` | Diagnóstico (dev; post-MVP → admin UI) |
+| `GET /api/dev/plantillas-admin` | Tool HTML interactivo (lista + form + mockup asiento + fuente); `?format=json` para API |
 | `POST /api/apuntes` | Registrar |
 | `GET /api/apuntes` | Recientes / historial (004 FR §5.4 — implementado) |
 | `GET /api/accounts` | Selector de cuenta en mini-form |

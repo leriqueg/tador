@@ -262,17 +262,20 @@ Se cargan en memoria al arrancar el servidor desde los archivos JSON. No hay tab
 ```json
 {
   "code": "transferencia",
-  "version": 1,
+  "version": 2,
   "name": "Transferir entre cuentas",
   "modes": ["hogar"],
   "amountMode": "single",
   "descriptionTemplate": "Transferencia: {concept}",
   "lines": [
-    { "id": 1, "side": "debit",  "label": "Cuenta destino",  "strategy": "from_groups", "groupCodes": ["11110000","11120000"] },
-    { "id": 2, "side": "credit", "label": "Cuenta origen",    "strategy": "from_groups", "groupCodes": ["11110000","11120000"] }
+    { "id": 1, "side": "debit",  "label": "Cuenta destino",  "strategy": "from_groups", "groupCodes": ["11110000","11120000","11320000","21120000"] },
+    { "id": 2, "side": "credit", "label": "Cuenta origen",    "strategy": "from_groups", "groupCodes": ["11110000","11120000","11320000","21120000"] }
   ]
 }
 ```
+
+Grupos: efectivo/billeteras (`11110000`), bancos (`11120000`), CxC personales (`11320000`), CxP personales (`21120000`).
+Regla: cuenta destino ≠ cuenta origen (V10). Dos billeteras distintas sí pueden transferirse.
 
 ### 4.10 Pago Tarjeta de Crédito
 
@@ -454,6 +457,7 @@ El endpoint `POST /api/apuntes` también acepta apuntes sin `templateCode`. En e
 | V7 | Cuentas activas | 400 |
 | V8 | El asiento generado está balanceado (sum débitos = sum créditos) | 400 |
 | V9 | Tenant isolation: usuario A no usa cuentas de usuario B | 403 |
+| V10 | Si hay al menos una línea debe y una haber con `accountId`, no pueden referir la misma cuenta (origen ≠ destino) | 400 |
 
 ### 6.2 Sin plantilla (PRO wizard)
 
@@ -526,7 +530,7 @@ Cada plantilla referencia grupos del plan de cuentas. Tabla de referencia:
 | pagar_cita_medica | 61140000 Salud | Efectivo/Bancos/Tarjetas |
 | pagar_cine | 61180000 Gastos no escenciales | Efectivo/Bancos/Tarjetas |
 | retiro_bancario | 11110000 Efectivo (destino) | 11120000 Bancos |
-| transferencia | Efectivo/Bancos (destino) | Efectivo/Bancos (origen) |
+| transferencia | Efectivo/Billeteras/Bancos/CxC/CxP (destino) | Efectivo/Billeteras/Bancos/CxC/CxP (origen); destino ≠ origen |
 | pago_tarjeta | 21200000 Tarjetas crédito | 11120000 Bancos |
 
 ## 10. Success Criteria
@@ -535,7 +539,7 @@ Cada plantilla referencia grupos del plan de cuentas. Tabla de referencia:
 - **SC-002**: GET /api/plantillas devuelve las 10 plantillas en catálogo liviano; GET /api/plantillas/:code resuelve `availableAccounts`.
 - **SC-003**: POST /api/apuntes con `templateCode` válido crea asiento balanceado.
 - **SC-004**: POST /api/apuntes sin `templateCode` (PRO wizard) crea asiento balanceado.
-- **SC-005**: Validaciones V1-V9 rechazan apuntes inválidos con mensajes claros.
+- **SC-005**: Validaciones V1-V10 rechazan apuntes inválidos con mensajes claros.
 - **SC-006**: Apunte queda registrado y vinculado al Asiento generado.
 - **SC-007**: POST /api/apuntes con `amountMode: "single"` replica el monto en todas las líneas.
 - **SC-008**: GET /api/apuntes devuelve solo apuntes del usuario autenticado, ordenados por fecha desc, sin líneas contables.
@@ -552,16 +556,26 @@ Cada plantilla referencia grupos del plan de cuentas. Tabla de referencia:
 - Motor de plantillas en DB
 - Edición de apuntes
 
-## 12. Diagnóstico — Plantillas Admin (dev / post-MVP admin UI)
+## 12. Diagnóstico — Plantillas Admin (dev tool)
 
-Herramienta **no producto** para validar plantillas. El frontend de administración completo es post-MVP; por ahora API + HTML mínimo.
+Herramienta **no producto** para probar plantillas. El **frontend de administración** completo (producto interno) es post-MVP; este endpoint sirve un **tool HTML interactivo** + API JSON.
+
+### UI del tool (`Accept: text/html` o navegador)
+
+1. **Lista izquierda**: todas las plantillas del `mode` (ready / faltan cuentas).
+2. **Panel derecho — Probar**: formulario (concepto, monto, select de cuentas por línea).
+3. **Botón “Generar mockup del asiento”**: llama al preview dry-run y muestra el asiento en la franja inferior (no persiste).
+4. **Pestaña “Código fuente”**: muestra / oculta el JSON crudo de la plantilla (`source`).
+
+Abrir (sesión autenticada): `/api/dev/plantillas-admin?mode=hogar` (vía Vite `:5173` o backend `:3000`).
+
+### API JSON
 
 | Método | Ruta | Uso |
 |--------|------|-----|
-| GET | `/api/dev/plantillas-admin?mode=hogar` | Resumen kind/categoría, `emptyCategories`, `ready` + muestras de cuentas |
-| GET | `/api/dev/plantillas-admin/:code` | Detalle enriquecido |
-| POST | `/api/dev/plantillas-admin/:code/preview` | Dry-run del asiento (no persiste) |
+| GET | `/api/dev/plantillas-admin?mode=hogar&format=json` | Catálogo + summary (`emptyCategories`, `ready`) |
+| GET | `/api/dev/plantillas-admin/:code` | Detalle enriquecido + `source` (JSON plantilla) |
+| POST | `/api/dev/plantillas-admin/:code/preview` | Dry-run del asiento (`persisted: false`) |
 
 - Auth requerida. Gate: `ENABLE_PLANTILLAS_ADMIN=true` o `NODE_ENV !== 'production'` (sin flag en prod → 404).
-- HTML: `?format=html` o `Accept: text/html`.
-- Capacidades: (a) chips vacíos, (b) colecciones/ready por línea, (c) preview de asiento.
+- `format=json` fuerza JSON; sin él, un browser con `Accept: text/html` recibe el tool.

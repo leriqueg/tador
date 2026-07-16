@@ -1,0 +1,19 @@
+# ─── TADOR Frontend — Playwright E2E ───────────────────────────────
+# Browsers + deps live in the image so CI/compose can run without a host
+# Playwright install. Source is bind-mounted in compose for local iteration.
+
+FROM mcr.microsoft.com/playwright:v1.61.1-jammy
+
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+RUN npm ci
+
+COPY . .
+
+ENV CI=1
+ENV PLAYWRIGHT_SKIP_WEBSERVER=1
+ENV PLAYWRIGHT_BASE_URL=http://frontend:5173
+ENV PLAYWRIGHT_API_URL=http://backend:3000
+
+CMD ["npx", "playwright", "test"]

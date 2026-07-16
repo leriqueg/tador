@@ -8,6 +8,23 @@ Automated tests follow the **testing pyramid**: many fast, isolated checks at th
 | **Integration** | ~20% | Vitest + Testing Library | `src/**/*.integration.test.tsx` | Pages/shell with mocked auth, book gate, and API |
 | **E2E** | ~10% | Playwright | `e2e/**/*.spec.ts` | Critical user journeys against real Vite + backend |
 
+## Host vs Docker (E2E)
+
+| Mode | Who runs Playwright | Frontend URL | Backend URL (API setup) | Vite proxy |
+|------|---------------------|--------------|-------------------------|------------|
+| **Host** (`npm run test:e2e` / `make test-e2e-host`) | Your machine | `http://localhost:5173` | `http://localhost:3000` | default → localhost:3000 |
+| **Docker** (`make test-e2e`) | `e2e` container | `http://frontend:5173` | `http://backend:3000` | `VITE_PROXY_TARGET=http://backend:3000` |
+
+Defaults (`localhost`) are for host runs. Inside containers, `localhost` is the container itself — that is why E2E from the frontend container failed talking to `:3000`.
+
+**CI-friendly practice:** stack services + test runner share a Docker network and use **service DNS** (`backend`, `frontend`). Published host ports are optional (handy for debugging), not required for the runner.
+
+Env overrides:
+
+- `PLAYWRIGHT_BASE_URL` — browser `baseURL`
+- `PLAYWRIGHT_API_URL` — direct API calls in setup helpers
+- `PLAYWRIGHT_SKIP_WEBSERVER=1` — do not start Vite (reuse compose `frontend`)
+
 ## What each layer covers
 
 ### Unit (~70%)
@@ -33,27 +50,30 @@ High-value flows only:
 3. **Authenticated shell** — setup user via API → login UI → Resumen, Estado, Apuntes nav
 4. **Finances drill-down** — Estado landing → P&G / Balance headings
 
-E2E requires **Postgres + backend (`:3000`) + frontend (`:5173`)**. Playwright can start Vite via `webServer`; backend must be running separately (local `compose up` or CI job).
-
 ## Commands
 
 ```bash
-# Unit + integration (no backend)
+# From repo root (preferred for other machines / CI)
+make test-frontend   # Vitest in frontend container
+make test-e2e        # Postgres + backend + frontend + Playwright (compose network)
+
+# Host-only E2E (backend published on :3000)
+make test-e2e-host
+# or:
+cd frontend && npm run test:e2e
+
+# Vitest on host
+cd frontend
 npm run test
 npm run test:unit
 npm run test:integration
-
-# E2E (backend on :3000 required)
-npm run test:e2e
-
-# Coverage (unit + integration)
 npm run test:coverage
 ```
 
 ## CI
 
-- **Always**: `test:unit` + `test:integration` on PR (no Docker).
-- **E2E**: optional job with Postgres service, backend migrate/seed, Playwright — see `.github/workflows/ci.yml`.
+- **Always**: frontend `test:unit` + `test:integration` on PR (no Docker).
+- **E2E**: `make test-e2e` (or equivalent compose `--profile e2e`) so the runner never depends on host `localhost`.
 
 ## Adding tests
 

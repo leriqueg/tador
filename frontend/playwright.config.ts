@@ -1,7 +1,9 @@
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig, devices, type PlaywrightTestConfig } from '@playwright/test';
 import { FRONTEND_URL } from './e2e/helpers/env.ts';
 
-export default defineConfig({
+const skipWebServer = process.env.PLAYWRIGHT_SKIP_WEBSERVER === '1';
+
+const config: PlaywrightTestConfig = {
   testDir: './e2e',
   fullyParallel: false,
   forbidOnly: Boolean(process.env.CI),
@@ -23,7 +25,7 @@ export default defineConfig({
         ...devices['Desktop Chrome'],
         storageState: 'e2e/.auth/user.json',
       },
-      testIgnore: /auth\.setup\.ts/,
+      testIgnore: [/auth\.setup\.ts/, /(smoke|auth-guest)\.spec\.ts/],
     },
     {
       name: 'guest',
@@ -31,11 +33,17 @@ export default defineConfig({
       testMatch: /(smoke|auth-guest)\.spec\.ts/,
     },
   ],
-  webServer: {
-    command: 'npm run dev',
+  globalSetup: './e2e/global-setup.ts',
+};
+
+// Host mode starts Vite; Docker E2E reuses the frontend service on the compose network.
+if (!skipWebServer) {
+  config.webServer = {
+    command: 'npm run dev -- --host 0.0.0.0 --port 5173',
     url: FRONTEND_URL,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
-  },
-  globalSetup: './e2e/global-setup.ts',
-});
+  };
+}
+
+export default defineConfig(config);

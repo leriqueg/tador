@@ -73,6 +73,9 @@ build:                    ## Compila TypeScript (backend)
 # ─── Tests ─────────────────────────────────────────────
 # DATABASE_URL is resolved inside the app/tests from POSTGRES_* pieces
 # (Docker host = postgres, host/CI = localhost). No Makefile URL required.
+#
+# E2E runs inside the compose network (frontend / backend DNS), not localhost.
+# That mirrors CI: stack + runner containers on one network.
 
 .PHONY: test
 test: db-up               ## Tests de integración (Postgres + Fastify)
@@ -85,6 +88,22 @@ test-unit:                ## Tests unitarios de dominio (sin DB)
 .PHONY: test-watch
 test-watch: db-up         ## Tests de integración en modo watch
 	$(RUN_BACKEND) npm run test:integration -- --watch
+
+.PHONY: test-frontend
+test-frontend:            ## Vitest unit + integration (contenedor frontend)
+	$(COMPOSE) run --rm --no-deps frontend npm run test
+
+.PHONY: test-e2e
+test-e2e:                 ## E2E Playwright en red Docker (autónomo / CI-ready)
+	$(COMPOSE) up -d postgres backend frontend
+	$(COMPOSE) --profile e2e build e2e
+	$(COMPOSE) --profile e2e run --rm --build e2e
+
+.PHONY: test-e2e-host
+test-e2e-host:            ## E2E desde el host (Vite local → localhost:3000)
+	$(COMPOSE) up -d postgres backend
+	@echo "Backend debe responder en http://localhost:3000/health"
+	cd frontend && npm run test:e2e
 
 # ─── Calidad ───────────────────────────────────────────
 

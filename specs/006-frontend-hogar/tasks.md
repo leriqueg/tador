@@ -133,16 +133,22 @@
 
 ## Phase 5: User Story 3 — Revisar estado del hogar (P2)
 
-**Goal**: Saldos + dashboard PYG + posición (FR-006, FR-007)
+**Goal**: Hub dashboard + landing Finances (P&G / Balance / historial) (FR-006, FR-007–FR-007e)
 
-**Independent test**: After apuntes, `/accounts` shows balances and `/dashboard` shows PYG + position
+**Independent test**: After apuntes, `/dashboard` shows month KPIs + position; `/finances` opens P&G, Balance, filtered history
 
-- [ ] T022 [US3] Dashboard position/saldos (separate from `/accounts` admin) — wire P&G panels
+- [x] T022 [US3] Wire `/dashboard` hub: month (default) / year toggle from `GET /api/reports/pyg`; `PositionPanel` from `GET /api/reports/position`; CTA to `/finances`; tip slot (no Pacho)
 - [ ] T023 [cancelled] GuidedAccountCreate for bank on `/accounts` — **superseded** by entity provision
 - [ ] T024 [US1c] covered by T043 Entities page
-- [ ] T025 [US3] Add `/dashboard` page with `PygPanelHogar` + `PositionPanel`…
-- [ ] T026 [US3] Hide account codes everywhere in Hogar dashboard/accounts (FR-001, FR-H-006)
-- [ ] T027 [US3] Empty states when no accounts / no movements (`EmptyState`)
+- [x] T025 [US3] Add `/finances` landing (Estado financiero / Balance / Revisar apuntes) — FR-007a
+- [x] T049 [US3] Add `/finances/pyg` — totals, bars+line from monthlySeries, Top 10 pies; year|month period UI (FR-007b)
+- [x] T050 [US3] Add `/finances/balance` — position breakdown + optional client-only leverage hint (FR-007c)
+- [x] T051 Backend: extend `GET /api/apuntes` filters (`dateFrom`/`dateTo`, `accountId`, `amountMin`/`amountMax`, `q` concept) + order `createdAt` desc — TDD
+- [x] T052 [US3] Add `/finances/apuntes` history UI with filters + edit (FR-007d)
+- [x] T053 [P] API client `reports.pyg` / `reports.position` + apuntes list query params in `frontend/src/lib/api.ts`
+- [x] T026 [US3] Hide account codes everywhere in Hogar dashboard/finances (FR-001, FR-H-006)
+- [x] T027 [US3] Empty states when no movements (`EmptyState`) on dashboard/finances
+- [x] T054 Wire AppShell nav: Estado → `/finances`
 
 **Checkpoint**: US3 demonstrable; full Hogar loop works
 
@@ -154,6 +160,7 @@
 - [ ] T029 [P] Ensure no Pacho components imported from `frontend/src/pages/**`
 - [ ] T030 Quickstart update in `specs/006-frontend-hogar/quickstart.md` with concrete `npm` / Docker steps for the three stories
 - [ ] T031 Run `frontend` lint + build; fix regressions
+- [ ] T021b [US2] Warn before leaving mini-form with unsaved amount/description (router guard / beforeunload as appropriate)
 
 ---
 

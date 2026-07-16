@@ -5,7 +5,8 @@ alwaysApply: true
 <!-- SPECKIT START -->
 Current active plan: `specs/006-frontend-hogar/plan.md`.
 Capture UX: Hogar = template-driven QuickAdd (US2 T018–T021b); PRO EntryBuilder = Sprint 07.
-Onboarding delta (2026-07-14): TZ browser + NA/SA/EU; wallets/cards opcionales; sin bancos ni empleo en wizard; transferencia + V10.
+Onboarding delta (2026-07-14): TZ browser + NA/SA/EU; wallets/cards opcionales; transferencia + V10.
+Dashboard/Finances delta (2026-07-16): `/dashboard` hub (mes); `/finances` landing → pyg|balance|apuntes; `/entries` captura only.
 For roadmap context, also read `specs/foundation/estrategia-incremental-sprints.md`.
 Component inventory (UI): `frontend/docs/component-inventory.md`.
 <!-- SPECKIT END -->

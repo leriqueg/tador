@@ -18,6 +18,12 @@ Build the simple mobile-first Hogar experience for onboarding, guided account cr
 - `/accounts` Hogar: solo `incomeCategory` / `expenseCategory` (sin saldo hero). Puentes = PRO.
 - Manual `POST /api/accounts` de bank/card → 422.
 
+**Dashboard / Finances delta (2026-07-16)**:
+- `/dashboard` = hub (mes default vía `monthlySeries`; toggle año; posición; tip).
+- `/finances` landing → `/finances/pyg` | `/finances/balance` | `/finances/apuntes`.
+- Captura solo en `/entries`. Top 10 fijo. Endeudamiento solo front (sin FR).
+- API: filtros en `GET /api/apuntes`; P&G/position existentes; serie diaria mes = follow-up si falta.
+
 ## Technical Context
 
 **Language/Version**: TypeScript — backend Node.js; frontend React 19 + Vite 8

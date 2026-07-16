@@ -31,8 +31,12 @@ Rutas en inglés (código). Copy de UI en español neutro.
 | 4 | `/faq` | Preguntas frecuentes | `preguntas_frecuentes_tador_neutro` | Marketing | **Hecho** |
 | 5 | `/contact` | Contacto | `contacto_tador_neutro` | Marketing | Pendiente — **`mailto:`** (sin API) |
 | 6 | `/onboarding` | Primer uso guiado | `onboarding_tador_mobile` + `onboarding_tador_desktop` | US1, FR-009/010 | **Hecho** — modo + moneda + TZ auto; banco/tarjeta/billetera vía entities |
-| 7 | `/dashboard` | Resumen Hogar (PYG + posición) | `dashboard_hogar_tador` (primario) | US3, FR-007 | Stub AuthShell — paneles P&G/posición pendientes |
-| 8 | `/entries` | Apuntes (nuevo + recientes) | `apuntes_tador` | US2, FR-005 | **Hecho** (QuickAdd template-driven) |
+| 7 | `/dashboard` | Hub informativo (mes/año + posición + tip) | `dashboard_hogar_tador` (adaptado) | US3, FR-007 | **Hecho** — mes default; CTA a `/finances` |
+| 8 | `/entries` | Captura de apuntes | `apuntes_tador` | US2, FR-005 | **Hecho** (QuickAdd; historial filtrable no vive aquí) |
+| 8b | `/finances` | Landing Estado (P&G / Balance / apuntes) | (nuevo) | FR-007a | **Hecho** |
+| 8c | `/finances/pyg` | Estado financiero (P&G) | (charts 005) | FR-007b | **Hecho** — Top 10; mes sin serie diaria aún |
+| 8d | `/finances/balance` | Estado de Balance | (posición) | FR-007c | **Hecho** — hint endeudamiento solo UI |
+| 8e | `/finances/apuntes` | Historial filtrable | — | FR-007d | **Hecho** |
 | 9 | `/accounts` | Categorías ingreso/gasto | `cuentas_tador` | FR-004b | **Hecho** — solo income/expense; sin saldo hero |
 | 10 | `/entities` | Entidades | `entidades_tador` | FR-004 / US1c | **Hecho** — bank/card_issuer/wallet_platform/person + provisión |
 | 11 | `/settings` | Ajustes | `configuraci_n_tador` | FR-004c | **Hecho** — moneda RO; TZ + fullName editables |
@@ -60,6 +64,7 @@ Rutas en inglés (código). Copy de UI en español neutro.
 |----------|------|
 | Resumen | `/dashboard` |
 | Apuntes | `/entries` |
+| Estado | `/finances` |
 | Cuentas | `/accounts` |
 | Entidades | `/entities` |
 | Ajustes | `/settings` |

@@ -61,10 +61,11 @@ export default function ApunteMiniForm({
       ...plantilla.lines.filter((l) => l.side !== 'debit' && l.side !== 'credit'),
     ];
     for (const line of ordered) {
-      if (line.availableAccounts.length === 0) continue;
+      const available = line.availableAccounts ?? [];
+      if (available.length === 0) continue;
       const stickyOk =
         sticky &&
-        line.availableAccounts.some((a) => a.id === sticky) &&
+        available.some((a) => a.id === sticky) &&
         !used.has(sticky);
       if (stickyOk && sticky) {
         map[line.id] = sticky;
@@ -72,9 +73,9 @@ export default function ApunteMiniForm({
         continue;
       }
       const pick =
-        line.availableAccounts.find((a) => a.tipo === 'usuario' && !used.has(a.id)) ??
-        line.availableAccounts.find((a) => !used.has(a.id)) ??
-        line.availableAccounts[0];
+        available.find((a) => a.tipo === 'usuario' && !used.has(a.id)) ??
+        available.find((a) => !used.has(a.id)) ??
+        available[0];
       if (pick) {
         map[line.id] = pick.id;
         used.add(pick.id);
@@ -102,8 +103,12 @@ export default function ApunteMiniForm({
     setDate(new Date().toISOString().slice(0, 10));
   }, [plantilla.code, initialSelections, initialValues]);
 
-  const linesNeedingChoice = plantilla.lines.filter((l) => l.availableAccounts.length > 0);
-  const hasMissingLineAccounts = plantilla.lines.some((l) => l.availableAccounts.length === 0);
+  const linesNeedingChoice = plantilla.lines.filter(
+    (l) => (l.availableAccounts ?? []).length > 0,
+  );
+  const hasMissingLineAccounts = plantilla.lines.some(
+    (l) => (l.availableAccounts ?? []).length === 0,
+  );
   const incompleteSelection = linesNeedingChoice.some((l) => !accountByLine[l.id]);
 
   const debitLines = plantilla.lines.filter((l) => l.side === 'debit');
@@ -130,7 +135,9 @@ export default function ApunteMiniForm({
       const selected = accountByLine[other.id];
       if (selected) opposingIds.add(selected);
     }
-    return line.availableAccounts.filter((a) => !opposingIds.has(a.id) || a.id === accountByLine[lineId]);
+    return (line.availableAccounts ?? []).filter(
+      (a) => !opposingIds.has(a.id) || a.id === accountByLine[lineId],
+    );
   }
 
   function buildValues(): ApunteMiniFormValues | null {

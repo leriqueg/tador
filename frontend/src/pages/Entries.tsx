@@ -87,6 +87,8 @@ export default function Entries() {
 
   // Deep link ?plantilla=
   useEffect(() => {
+    const editId = searchParams.get('edit');
+    if (editId) return; // handled by edit deep-link effect
     const code = searchParams.get('plantilla');
     if (code && catalog.some((p) => p.code === code)) {
       setSelectedCode(code);
@@ -184,12 +186,16 @@ export default function Entries() {
     setFormSession((n) => n + 1);
   }
 
-  async function beginEdit(item: ApunteSummary) {
-    if (!item.templateCode) return;
+  async function beginEdit(item: { id: string; templateCode?: string | null }) {
+    if (!item.templateCode && !item.id) return;
     setLoadingEdit(true);
     setSubmitError('');
     try {
       const { apunte } = await apuntes.get(item.id);
+      if (!apunte.templateCode) {
+        setSubmitError('Este apunte no se puede editar desde Hogar (sin plantilla).');
+        return;
+      }
       const accountByLine = Object.fromEntries(
         apunte.lines.map((line) => [line.id, line.accountId]),
       ) as Record<number, string>;
@@ -203,13 +209,27 @@ export default function Entries() {
       setSuccessMode('create');
       setSelectedCode(apunte.templateCode);
       setCapturePhase('form');
-      setSearchParams({ plantilla: apunte.templateCode! }, { replace: true });
+      setSearchParams(
+        { plantilla: apunte.templateCode, edit: apunte.id },
+        { replace: true },
+      );
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : 'No se pudo cargar el apunte');
     } finally {
       setLoadingEdit(false);
     }
   }
+
+  // Deep link ?edit=<apunteId>
+  useEffect(() => {
+    const editId = searchParams.get('edit');
+    if (!editId || editingApunteId === editId) return;
+    void beginEdit({
+      id: editId,
+      templateCode: searchParams.get('plantilla'),
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   async function handleSubmit(values: ApunteMiniFormValues) {
     setSubmitting(true);

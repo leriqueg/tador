@@ -328,7 +328,8 @@ Devuelve la posición financiera actual a la fecha de consulta.
 - **Mode integrity**: Hogar y PRO operan sobre el mismo backend. Este sprint entrega los datos; los sprints 06 y 07 construyen la UI específica de cada modo.
 - **Tenant & Privacy**: Todos los endpoints filtran por usuario autenticado.
 - **Accounting Impact**: El dashboard solo lee datos existentes (asientos, saldos). No crea ni modifica asientos.
-- **MVP/Sprint Boundary**: Incluye panel PYG anual y panel de posición. Quedan fuera: PYG comparativo, drill-down por asiento, filtros por entidad/tag, reportes por centro de costo, ratios, exportación formal, estados de cuenta por Entidad.
+- **MVP/Sprint Boundary**: Incluye panel PYG anual y panel de posición. Quedan fuera: PYG comparativo, drill-down por asiento, filtros por entidad/tag, reportes por centro de costo, ratios en contrato API, exportación formal, estados de cuenta por Entidad.
+- **Hogar UI split (006, 2026-07-16)**: La UI Hogar **no** mete el P&G completo en `/dashboard`. Hub liviano + landing `/finances` (P&G / Balance / historial). Los **contratos API** de este sprint siguen siendo la fuente; cambia solo la presentación Hogar.
 - **Hogar scope**: El panel de posición Hogar muestra disponible, por cobrar y deudas (CxC/CxP **informales** vía cuentas de balance + Entidad). No incluye facturas, aging ni aplicación de pagos a documentos.
 - **PRO scope**: Además de los mismos saldos, PRO añade (post-MVP / Sprint 07+) el módulo documental: facturas, pagos parciales aplicados a documentos viejos, aging.
 - **Testing**: Los cálculos PYG y posición deben tener tests contables que verifiquen: totales correctos, exclusión de cuentas puente en PYG, exclusión de ingreso/egreso en posición, y separación de fuentes entre paneles.

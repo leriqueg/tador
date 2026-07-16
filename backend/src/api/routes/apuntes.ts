@@ -25,6 +25,7 @@ import {
   quantizeMoney,
   sumMoney,
 } from '../../domain/money.js';
+import { buildApunteListWhere } from '../../application/apunte-list-filters.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -222,7 +223,16 @@ export function registerApunteRoutes(
     { preHandler: requireAuth },
     async (request, reply) => {
       const userId = request.userId!;
-      const query = request.query as { limit?: string; offset?: string };
+      const query = request.query as {
+        limit?: string;
+        offset?: string;
+        dateFrom?: string;
+        dateTo?: string;
+        amountMin?: string;
+        amountMax?: string;
+        q?: string;
+        accountId?: string;
+      };
 
       const limitRaw = query.limit ? parseInt(query.limit, 10) : 20;
       const offsetRaw = query.offset ? parseInt(query.offset, 10) : 0;
@@ -231,11 +241,17 @@ export function registerApunteRoutes(
         : 20;
       const offset = Number.isFinite(offsetRaw) ? Math.max(offsetRaw, 0) : 0;
 
+      const where = buildApunteListWhere(userId, query) as Parameters<
+        typeof prisma.apunte.findMany
+      >[0] extends { where?: infer W }
+        ? W
+        : never;
+
       try {
         const [total, rows] = await Promise.all([
-          prisma.apunte.count({ where: { userId } }),
+          prisma.apunte.count({ where }),
           prisma.apunte.findMany({
-            where: { userId },
+            where,
             orderBy: { createdAt: 'desc' },
             take: limit,
             skip: offset,

@@ -6,6 +6,7 @@ import Icon from '../ui/Icon.tsx';
 export const HOGAR_NAV = [
   { to: '/dashboard', icon: 'dashboard', label: 'Resumen' },
   { to: '/entries', icon: 'edit_note', label: 'Apuntes' },
+  { to: '/finances', icon: 'monitoring', label: 'Estado' },
   { to: '/accounts', icon: 'account_balance_wallet', label: 'Cuentas' },
   { to: '/entities', icon: 'group', label: 'Entidades' },
   { to: '/settings', icon: 'settings', label: 'Ajustes' },

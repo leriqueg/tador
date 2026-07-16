@@ -306,15 +306,32 @@ export interface ApunteSummary {
   createdAt: string;
 }
 
+export interface ApunteListParams {
+  limit?: number;
+  offset?: number;
+  dateFrom?: string;
+  dateTo?: string;
+  amountMin?: number;
+  amountMax?: number;
+  q?: string;
+  accountId?: string;
+}
+
 export interface ApunteDetail extends ApunteSummary {
   lines: ApunteLineInput[];
 }
 
 export const apuntes = {
-  list(params?: { limit?: number; offset?: number }) {
+  list(params?: ApunteListParams) {
     const search = new URLSearchParams();
     if (params?.limit != null) search.set('limit', String(params.limit));
     if (params?.offset != null) search.set('offset', String(params.offset));
+    if (params?.dateFrom) search.set('dateFrom', params.dateFrom);
+    if (params?.dateTo) search.set('dateTo', params.dateTo);
+    if (params?.amountMin != null) search.set('amountMin', String(params.amountMin));
+    if (params?.amountMax != null) search.set('amountMax', String(params.amountMax));
+    if (params?.q) search.set('q', params.q);
+    if (params?.accountId) search.set('accountId', params.accountId);
     const q = search.toString();
     return request<{ apuntes: ApunteSummary[]; total: number }>(
       'GET',
@@ -332,5 +349,60 @@ export const apuntes = {
 
   update(id: string, input: CreateApunteInput) {
     return request<{ apunte: ApunteSummary }>('PATCH', `/api/apuntes/${id}`, input);
+  },
+};
+
+// ─── Reports ───────────────────────────────────────────────────────
+
+export interface PyGMonthlyPoint {
+  month: number;
+  income: number;
+  expenses: number;
+  balance: number;
+}
+
+export interface PyGTopAccount {
+  accountId: string;
+  accountCode: string;
+  accountName: string;
+  accumulated: number;
+}
+
+export interface PyGReport {
+  year: number;
+  totalIncome: number;
+  totalExpenses: number;
+  netResult: number;
+  monthlySeries: PyGMonthlyPoint[];
+  topIncome: PyGTopAccount[];
+  topExpenses: PyGTopAccount[];
+}
+
+export interface PositionBreakdownEntry {
+  accountId: string;
+  accountCode: string;
+  accountName: string;
+  balance: number;
+}
+
+export interface PositionReport {
+  totalAvailable: number;
+  totalReceivables: number;
+  totalPayables: number;
+  netPosition: number;
+  breakdown: {
+    available: PositionBreakdownEntry[];
+    receivables: PositionBreakdownEntry[];
+    payables: PositionBreakdownEntry[];
+  };
+}
+
+export const reports = {
+  pyg(year: number) {
+    return request<PyGReport>('GET', `/api/reports/pyg?year=${year}`);
+  },
+
+  position() {
+    return request<PositionReport>('GET', '/api/reports/position');
   },
 };

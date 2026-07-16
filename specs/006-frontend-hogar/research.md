@@ -85,3 +85,27 @@ Default plan wallet = **no** entity. Virtual wallets always `wallet_platform`.
 - Generic single `issuer` for both cards and PayPal.
 - Manual `POST /api/accounts` for bank/card.
 - Banks-only JIT without onboarding option.
+
+## Decision: Dashboard hub vs Finances landing (2026-07-15 / 2026-07-16)
+
+### Problem
+Spec 005 bundled annual PYG + position into one “dashboard”. Hogar users need a light home and a separate place for deeper analysis without nested menus or the word “reporte”.
+
+### Decision
+| Surface | Role |
+|---------|------|
+| `/dashboard` | Hub: default **current month** KPIs from `monthlySeries[m]`; optional year totals; condensed position; insight tip (Pacho later). |
+| `/finances` | Landing with three CTAs (plain language). |
+| `/finances/pyg` | Full P&G: bars + balance line; Top **10** pies; exercise→months or month→days when API allows. |
+| `/finances/balance` | Position breakdown; optional client-only leverage index (not in API/spec MVP). |
+| `/finances/apuntes` | Filtered history (dates, accounts, amounts, description). |
+| `/entries` | Capture only. |
+
+### Month data
+Reuse `GET /api/reports/pyg?year=` — no month-to-date endpoint in MVP.
+
+### Out of Hogar MVP
+Account/entity filters on P&G; Top 5/20 selector; formal debt-ratio FR; nested nav.
+
+**Alternatives considered**: Nested “Reportes” menu — rejected (heavy). P&G inside dashboard — rejected (saturates home).
+

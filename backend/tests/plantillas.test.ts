@@ -1194,6 +1194,88 @@ describe('SC-008 ? GET /api/apuntes', () => {
     await app.close();
   });
 
+  it("should filter apuntes by date range, amount, concept and accountId", async () => {
+    const app = await createTestApp();
+    const cookies = await registerAndVerify(app, "list-apuntes-filter@test.com");
+
+    const energia = await findGlobalByCodigo("61120002");
+    if (!energia) throw new Error("61120002 not seeded");
+
+    const bancoPostable = await createPostableGlobal(
+      nextCodigo("111214"),
+      "Banco filtro",
+      "11120000",
+    );
+    const bancoUser = await createUserAccount(
+      app,
+      cookies,
+      bancoPostable.codigo,
+      "Banco filtro",
+    );
+
+    async function createGasto(concept: string, amount: number, date: string) {
+      const res = await app.inject({
+        method: "POST",
+        url: "/api/apuntes",
+        headers: { cookie: cookies.join("; ") },
+        payload: {
+          templateCode: "pagar_servicios",
+          date,
+          concept,
+          amount,
+          lines: [
+            { id: 1, accountId: energia.id },
+            { id: 2, accountId: bancoUser.id },
+          ],
+        },
+      });
+      expect(res.statusCode).toBe(201);
+      return res.json().apunte;
+    }
+
+    await createGasto("Luz junio", 50, "2026-06-15");
+    await createGasto("Luz julio", 80, "2026-07-10");
+    await createGasto("Agua julio", 20, "2026-07-12");
+
+    const byConcept = await app.inject({
+      method: "GET",
+      url: "/api/apuntes?q=luz",
+      headers: { cookie: cookies.join("; ") },
+    });
+    expect(byConcept.statusCode).toBe(200);
+    expect(byConcept.json().apuntes.every((a: { concept: string }) =>
+      a.concept.toLowerCase().includes("luz"),
+    )).toBe(true);
+    expect(byConcept.json().total).toBe(2);
+
+    const byAmount = await app.inject({
+      method: "GET",
+      url: "/api/apuntes?amountMin=40&amountMax=60",
+      headers: { cookie: cookies.join("; ") },
+    });
+    expect(byAmount.statusCode).toBe(200);
+    expect(byAmount.json().apuntes).toHaveLength(1);
+    expect(byAmount.json().apuntes[0].concept).toBe("Luz junio");
+
+    const byDate = await app.inject({
+      method: "GET",
+      url: "/api/apuntes?dateFrom=2026-07-01&dateTo=2026-07-31",
+      headers: { cookie: cookies.join("; ") },
+    });
+    expect(byDate.statusCode).toBe(200);
+    expect(byDate.json().total).toBe(2);
+
+    const byAccount = await app.inject({
+      method: "GET",
+      url: `/api/apuntes?accountId=${bancoUser.id}`,
+      headers: { cookie: cookies.join("; ") },
+    });
+    expect(byAccount.statusCode).toBe(200);
+    expect(byAccount.json().total).toBe(3);
+
+    await app.close();
+  });
+
   it("should respect limit and offset pagination", async () => {
     const app = await createTestApp();
     const cookies = await registerAndVerify(app, "list-apuntes-page@test.com");

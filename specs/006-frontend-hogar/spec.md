@@ -43,7 +43,12 @@
 - Q: ¿Quién crea la cuenta contable? → A: **La Entidad**, atómicamente. **MUST NOT** crear a mano `bank` / `card` / billetera virtual. Billetera default del plan = sin entidad.
 - Q: ¿Dónde se agregan después del onboarding? → A: **`/entities`**. Onboarding solo pregunta declarar Banco / Tarjetas / Billeteras virtuales.
 - Q: ¿Qué es `/accounts` en Hogar? → A: **Admin de categorías de ingreso/egreso** (no saldos, no P&G, no bancos/TC/billeteras virtuales/CxP auto). Puentes = posibilidad PRO.
-- Q: ¿Ajustes post-onboarding? → A: Moneda **readonly**; timezone **editable**; nombre completo **editable**; email/contraseña **fuera de MVP**.
+- Q: ¿Dashboard vs P&G vs Balance en Hogar? → A: **Separados**. `/dashboard` = hub informativo (default **mes actual** vía `monthlySeries`; toggle año; posición condensada; tip/slot Pacho). Análisis elaborado vive en landing `/finances` (sin menú 2 niveles): Estado financiero (P&G), Estado de Balance, historial de apuntes. Filtro por cuentas/entidades en P&G = PRO.
+- Q: ¿Ruta de análisis? → A: `/finances` landing explicativa + `/finances/pyg` | `/finances/balance` | `/finances/apuntes`.
+- Q: ¿Top N en P&G? → A: **Top 10** fijo (sin selector 5/10/20 en MVP).
+- Q: ¿Índice de endeudamiento? → A: **No en specs MVP**; la UI MAY calcularlo en front a partir de saldos de posición (no cambia contrato API).
+- Q: ¿Captura vs listado de apuntes? → A: `/entries` = solo captura; historial filtrable en `/finances/apuntes`.
+- Q: ¿Datos del mes en Dashboard? → A: Reusar `GET /api/reports/pyg?year=` y tomar `monthlySeries[mesActual]` (sin endpoint MTD nuevo en MVP).
 - Q: ¿Por qué entidad en billetera/banco? → A: Trazar comisiones/mantenimiento (“¿cuánto me costó PayPal / el banco este mes?”).
 ## User Scenarios & Testing *(mandatory)*
 
@@ -145,17 +150,20 @@ Como usuaria Hogar (uso básico: ama de casa / trabajadora dependiente), quiero 
 
 ### User Story 3 - Revisar estado del hogar (Priority: P2)
 
-Como usuario Hogar, quiero ver saldos actuales y el dashboard (resultado del ejercicio y posición financiera) para entender mi situación — incluyendo cuánto me deben y cuánto debo de forma informal.
+Como usuario Hogar, quiero un **hub** en `/dashboard` (mes actual + posición) y, cuando necesite profundidad, una landing **Estado** (`/finances`) con P&G, Balance e historial de apuntes — sin menús de segundo nivel.
 
-**Why this priority**: La captura no tiene valor sin retroalimentación simple.
+**Why this priority**: La captura no tiene valor sin retroalimentación simple; el análisis profundo no debe saturar el home.
 
-**Independent Test**: Después de registrar apuntes (incl. deudas con Entidades), ver saldos y dashboard actualizados.
+**Independent Test**: Tras apuntes, el dashboard muestra mes/año y posición; desde `/finances` abro P&G (ejercicio o mes), Balance (saldos) y busco apuntes con filtros.
 
 **Acceptance Scenarios**:
 
-1. **Given** apuntes registrados, **When** abro saldos, **Then** veo cuentas con importes actuales.
-2. **Given** apuntes con PYG y saldos de balance, **When** abro dashboard, **Then** veo resumen anual PYG y posición (disponible, por cobrar, por pagar) en lenguaje cotidiano.
-3. **Given** préstamos a un amigo registrados vía Entidad + cuenta por cobrar, **When** consulto posición / saldos, **Then** veo el rastro de lo que aún me debe sin ver facturas ni aging.
+1. **Given** apuntes en el mes actual, **When** abro `/dashboard`, **Then** veo mini P&G del mes (desde `monthlySeries`), totales disponibles/me deben/debo, y CTA hacia `/finances`.
+2. **Given** dashboard, **When** elijo vista año, **Then** veo totales del ejercicio sin reemplazar el detalle de `/finances/pyg`.
+3. **Given** `/finances`, **When** elijo Estado financiero, **Then** veo P&G con barras ingresos/egresos + línea de saldo por período (ejercicio→meses; mes→días cuando el API lo permita; MVP mes puede mostrar el punto mensual) y pies Top 10 ingresos/egresos sin códigos.
+4. **Given** `/finances/balance`, **When** abro, **Then** veo saldos agrupados (disponible, por cobrar, deudas) a partir de posición; la UI MAY mostrar un índice de endeudamiento calculado en cliente (no exigido por contrato API).
+5. **Given** `/finances/apuntes`, **When** filtro por fechas/cuentas/montos/descripción, **Then** veo coincidencias ordenadas por `createdAt` desc y puedo editar.
+6. **Given** préstamos vía Entidad + CxC, **When** consulto posición en dashboard o balance, **Then** veo “me deben” sin facturas ni aging.
 
 ### Edge Cases
 
@@ -169,6 +177,8 @@ Como usuario Hogar, quiero ver saldos actuales y el dashboard (resultado del eje
 - Browser timezone no está en la lista curada → preseleccionar UTC y permitir elegir otra zona.
 - Usuario intenta transferir la misma cuenta a sí misma → validación cotidiana (cliente + V10 backend).
 - Usuario salta pasos de billeteras/tarjetas → onboarding igualmente completo.
+- Mes actual sin movimientos → empty state en dashboard con CTA a `/entries`.
+- Serie diaria P&G (vista mes) ausente en API → UI muestra KPIs del mes desde `monthlySeries` y no inventa días.
 
 ## Requirements *(mandatory)*
 
@@ -190,8 +200,13 @@ Como usuario Hogar, quiero ver saldos actuales y el dashboard (resultado del eje
 - **FR-005b**: Tras elegir plantilla, el mini-formulario MUST pedir solo cuenta, monto y descripción breve (fecha default hoy); MUST NOT mostrar líneas contables.
 - **FR-005c**: La UI MUST ofrecer “Guardar y registrar otro” (burst entry) conservando plantilla y cuenta.
 - **FR-005d**: La UI MUST soportar deep link `/entries/new?plantilla=<code>`.
-- **FR-006**: La UI MUST mostrar saldos actuales.
-- **FR-007**: La UI MUST mostrar dashboard con panel PYG anual y panel de posición (**disponible**, **por cobrar**, **por pagar**) en modo Hogar, en lenguaje cotidiano (sin códigos).
+- **FR-006**: La UI MUST mostrar saldos de posición (disponible / por cobrar / deudas) en dashboard y/o `/finances/balance`.
+- **FR-007**: `/dashboard` MUST ser un **hub informativo** (default mes actual desde `monthlySeries`; toggle año; posición condensada; tip o slot post-MVP Pacho). MUST NOT ser el reporte P&G completo.
+- **FR-007a**: `/finances` MUST ser landing explicativa (sin submenú) con CTAs a Estado financiero (P&G), Estado de Balance e historial de apuntes.
+- **FR-007b**: `/finances/pyg` MUST mostrar resultado P&G, gráfico ingresos/egresos + saldo por período, y pies Top 10 ingresos/egresos sin códigos. Período: ejercicio (meses) o mes (días cuando API disponible). Filtro por cuenta/entidad = fuera de Hogar MVP (PRO).
+- **FR-007c**: `/finances/balance` MUST presentar saldos de activo/pasivo relevantes (vía posición). Índice de endeudamiento MAY calcularse solo en UI (no requisito de contrato).
+- **FR-007d**: `/finances/apuntes` MUST permitir buscar/listar apuntes con filtros básicos (fechas, cuentas, montos, descripción); orden `createdAt` desc; edición reutiliza flujo de captura.
+- **FR-007e**: `/entries` MUST enfocarse en captura; MUST NOT ser el único lugar del historial filtrable.
 - **FR-008**: La UI MUST presentar errores de validación en lenguaje cotidiano.
 - **FR-009**: Tras login exitoso, la UI MUST redirigir a `/onboarding` si el libro no está inicializado; en caso contrario a `/dashboard`.
 - **FR-010**: El onboarding MUST capturar modo (Hogar | PRO), moneda y timezone y persistirlos en la configuración del libro antes de considerar el libro “inicializado”.
@@ -215,8 +230,11 @@ Como usuario Hogar, quiero ver saldos actuales y el dashboard (resultado del eje
 - **Plantilla (Hogar)**: Intención cotidiana versionada que resuelve la estructura contable.
 - **QuickAdd / Entries**: Pantalla de captura por plantillas (tres capas + mini-form).
 - **ApunteMiniForm**: Confirmación de cuenta, monto y descripción.
-- **Saldos visibles**: Resumen de cuentas del usuario.
-- **Dashboard MVP**: Reporte con panel PYG y panel de posición presentado al usuario.
+- **Dashboard hub**: `/dashboard` — mes/año + posición + tip (no reporte completo).
+- **Finances landing**: `/finances` — Estado financiero / Balance / historial apuntes.
+- **P&G Hogar**: `/finances/pyg` — reporte elaborado Top 10.
+- **Balance Hogar**: `/finances/balance` — lo que tengo / me deben / debo.
+- **Historial apuntes**: `/finances/apuntes` — búsqueda filtrable.
 - **Libro inicializado**: BookConfig con modo, moneda y timezone definidos por el wizard.
 - **Billetera virtual**: Entidad `wallet_platform` + CuentaUsuario `wallet` bajo efectivo/billeteras.
 - **Tarjeta Hogar**: Entidad `card_issuer` + CuentaUsuario `card` (+ metadata).

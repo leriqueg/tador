@@ -12,6 +12,9 @@ dist
 dist-ssr
 storybook-static
 *.local
+e2e/.auth
+playwright-report
+test-results
 
 # Editor directories and files
 .vscode/*

@@ -32,7 +32,7 @@ Build the simple mobile-first Hogar experience for onboarding, guided account cr
 
 **Storage**: PostgreSQL via Prisma; plantilla definitions as versioned JSON under `backend/src/plantillas/`
 
-**Testing**: Backend Vitest (unit + integration in Docker); frontend lint/build + Storybook stories for capture components; manual smoke for US2
+**Testing**: Backend Vitest (unit + integration in Docker); frontend Vitest (unit ~70% / integration ~20%) + Playwright E2E (~10%, `make test-e2e` on `tador_test`); Storybook for capture components
 
 **Target Platform**: Linux-hosted web app; local Docker Compose; mobile-first browser clients
 

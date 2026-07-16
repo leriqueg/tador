@@ -1,0 +1,11 @@
+node_modules
+dist
+dist-ssr
+storybook-static
+playwright-report
+test-results
+e2e/.auth
+coverage
+*.local
+.git
+.DS_Store

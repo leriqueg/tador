@@ -8,6 +8,17 @@ Automated tests follow the **testing pyramid**: many fast, isolated checks at th
 | **Integration** | ~20% | Vitest + Testing Library | `src/**/*.integration.test.tsx` | Pages/shell with mocked auth, book gate, and API |
 | **E2E** | ~10% | Playwright | `e2e/**/*.spec.ts` | Critical user journeys against real Vite + backend |
 
+## Database isolation
+
+| Suite | Database | Notes |
+|-------|----------|--------|
+| Backend unit | none | Pure domain |
+| Backend integration (`make test`) | **`tador_test`** | Vitest forces this; never wipe `tador_dev` |
+| Frontend Vitest | none | Mocks |
+| Frontend E2E (`make test-e2e`) | **`tador_test`** | via `compose.e2e.yaml` (`POSTGRES_DB=tador_test`) |
+
+E2E **registers real users and mutates data**. Always use `make test-e2e` / `make test-e2e-host` so the backend is pointed at `tador_test`. Do not run Playwright against a casual `make up` stack on `tador_dev` unless you accept polluting your local book.
+
 ## Host vs Docker (E2E)
 
 | Mode | Who runs Playwright | Frontend URL | Backend URL (API setup) | Vite proxy |
@@ -18,6 +29,8 @@ Automated tests follow the **testing pyramid**: many fast, isolated checks at th
 Defaults (`localhost`) are for host runs. Inside containers, `localhost` is the container itself — that is why E2E from the frontend container failed talking to `:3000`.
 
 **CI-friendly practice:** stack services + test runner share a Docker network and use **service DNS** (`backend`, `frontend`). Published host ports are optional (handy for debugging), not required for the runner.
+
+**Vite note:** E2E uses Host `frontend`. `server.allowedHosts` must include `frontend` or Playwright only sees Vite’s “host not allowed” page (no Email field / no landing heading).
 
 Env overrides:
 

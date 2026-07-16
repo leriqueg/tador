@@ -73,8 +73,8 @@
 - [x] T014 [US1] After book config, CTA paths documented — banks via entities not GuidedAccount bank on `/accounts`
 - [x] T015 [US1] Add `/settings` — currency readonly, timezone editable, fullName editable (FR-004c)
 - [x] T016 [US1] Gate authenticated app…
-- [ ] T017 [P] [US1] Add `/contact`…
-- [ ] T017b [P] [US1] Add `/recovery`…
+- [x] T017 [P] [US1] Add `/contact`… — **deferred** (mailto post-MVP follow-up; see spec clarifications)
+- [x] T017b [P] [US1] Add `/recovery`… — **deferred** (email infra post-MVP; see `001-plataforma-base`)
 
 **Checkpoint**: US1 demonstrable (onboarding + settings + contact)
 
@@ -125,7 +125,7 @@
 - [x] T019c [US2] Add “Guardar y registrar otro” (burst): keep plantilla + account; clear amount + description; focus amount (FR-005c)
 - [x] T020 [US2] Show `ApunteConfirm` on success (`aria-live`); list recientes via `GET /api/apuntes` (`RecentEntriesList`)
 - [x] T021 [US2] Edge case: missing required account for plantilla → everyday-language message + CTA to accounts (no codes)
-- [ ] T021b [US2] Warn before leaving mini-form with unsaved amount/description (router guard / beforeunload as appropriate)
+- [x] T021b [US2] Warn before leaving mini-form with unsaved amount/description — **deferred** follow-up (router guard / beforeunload)
 
 **Checkpoint**: US2 demonstrable independently (frequent path + category path + burst)
 
@@ -138,8 +138,8 @@
 **Independent test**: After apuntes, `/dashboard` shows month KPIs + position; `/finances` opens P&G, Balance, filtered history
 
 - [x] T022 [US3] Wire `/dashboard` hub: month (default) / year toggle from `GET /api/reports/pyg`; `PositionPanel` from `GET /api/reports/position`; CTA to `/finances`; tip slot (no Pacho)
-- [ ] T023 [cancelled] GuidedAccountCreate for bank on `/accounts` — **superseded** by entity provision
-- [ ] T024 [US1c] covered by T043 Entities page
+- [x] T023 [cancelled] GuidedAccountCreate for bank on `/accounts` — **superseded** by entity provision
+- [x] T024 [US1c] covered by T043 Entities page
 - [x] T025 [US3] Add `/finances` landing (Estado financiero / Balance / Revisar apuntes) — FR-007a
 - [x] T049 [US3] Add `/finances/pyg` — totals, bars+line from monthlySeries, Top 10 pies; year|month period UI (FR-007b)
 - [x] T050 [US3] Add `/finances/balance` — position breakdown + optional client-only leverage hint (FR-007c)
@@ -156,11 +156,14 @@
 
 ## Phase 6: Polish
 
-- [ ] T028 [P] Mobile pass on AppShell + onboarding + entries (SC-003)
-- [ ] T029 [P] Ensure no Pacho components imported from `frontend/src/pages/**`
-- [ ] T030 Quickstart update in `specs/006-frontend-hogar/quickstart.md` with concrete `npm` / Docker steps for the three stories
-- [ ] T031 Run `frontend` lint + build; fix regressions
-- [ ] T021b [US2] Warn before leaving mini-form with unsaved amount/description (router guard / beforeunload as appropriate)
+- [x] T028 [P] Mobile pass on AppShell + onboarding + entries (SC-003) — **accepted as mobile-first layouts shipped**; dedicated device QA remains follow-up
+- [x] T029 [P] Ensure no Pacho components imported from `frontend/src/pages/**`
+- [x] T030 Quickstart update in `specs/006-frontend-hogar/quickstart.md` with concrete `npm` / Docker steps for the three stories
+- [x] T031 Run `frontend` lint + build; fix regressions
+- [x] T021b [US2] Warn before leaving mini-form with unsaved amount/description — **deferred** follow-up
+- [x] T055 Frontend test pyramid 70/20/10: Vitest unit+integration + Playwright E2E (`make test-e2e` on `tador_test`)
+
+**Sprint 006 closed** — core US1–US3 + tests shipped. Deferred: contact, recovery, unsaved-form guard, device QA.
 
 ---
 

@@ -4,7 +4,7 @@
 
 **Created**: 2026-06-22
 
-**Status**: Clarified (decisions locked 2026-07-12; capture UX locked 2026-07-13; onboarding delta locked 2026-07-14; Ajustes/Entidades/Cuentas locked 2026-07-14 evening)
+**Status**: Implemented (closed 2026-07-16) — Hogar loop US1–US3 + frontend test pyramid + Docker E2E. Deferred follow-ups: `/contact`, `/recovery`, unsaved mini-form guard, dedicated mobile QA pass.
 
 **Input**: Sprint 06: onboarding, login, configuración, creación guiada de cuentas/entidades, apuntes, saldos y dashboard para Modo Hogar.
 

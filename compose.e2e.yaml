@@ -1,0 +1,12 @@
+# Override for E2E — use isolated DB (tador_test), never tador_dev.
+# Usage: docker compose -f compose.yaml -f compose.e2e.yaml --profile e2e …
+
+services:
+  backend:
+    environment:
+      POSTGRES_DB: tador_test
+
+  e2e:
+    environment:
+      PLAYWRIGHT_BASE_URL: http://frontend:5173
+      PLAYWRIGHT_API_URL: http://backend:3000

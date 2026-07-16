@@ -4,7 +4,10 @@
 # Los comandos de app/DB se ejecutan dentro de contenedores.
 
 COMPOSE = docker compose
+# E2E stack: same services, but backend points at tador_test (isolated from tador_dev).
+COMPOSE_E2E = $(COMPOSE) -f compose.yaml -f compose.e2e.yaml
 RUN_BACKEND = $(COMPOSE) run --rm backend
+RUN_BACKEND_E2E = $(COMPOSE_E2E) run --rm backend
 EXEC_BACKEND = $(COMPOSE) exec backend
 
 # ─── Base de datos ─────────────────────────────────────
@@ -93,17 +96,31 @@ test-watch: db-up         ## Tests de integración en modo watch
 test-frontend:            ## Vitest unit + integration (contenedor frontend)
 	$(COMPOSE) run --rm --no-deps frontend npm run test
 
+.PHONY: test-db-ensure
+test-db-ensure: db-up     ## Asegura que exista la DB tador_test
+	@$(COMPOSE) exec -T postgres \
+		psql -U tador -d tador_dev -tc "SELECT 1 FROM pg_database WHERE datname='tador_test'" \
+		| grep -q 1 || $(COMPOSE) exec -T postgres \
+		psql -U tador -d tador_dev -c "CREATE DATABASE tador_test;"
+
 .PHONY: test-e2e
-test-e2e:                 ## E2E Playwright en red Docker (autónomo / CI-ready)
-	$(COMPOSE) up -d postgres backend frontend
-	$(COMPOSE) --profile e2e build e2e
-	$(COMPOSE) --profile e2e run --rm --build e2e
+test-e2e: test-db-ensure  ## E2E Playwright en red Docker sobre tador_test (no toca tador_dev)
+	$(COMPOSE_E2E) up -d --force-recreate postgres backend frontend
+	$(RUN_BACKEND_E2E) npm run db:migrate:deploy
+	$(RUN_BACKEND_E2E) npm run seed:catalogos
+	$(COMPOSE_E2E) --profile e2e run --rm --build e2e
+	@echo "Restaurando backend/frontend a tador_dev..."
+	$(COMPOSE) up -d --force-recreate backend frontend
 
 .PHONY: test-e2e-host
-test-e2e-host:            ## E2E desde el host (Vite local → localhost:3000)
-	$(COMPOSE) up -d postgres backend
-	@echo "Backend debe responder en http://localhost:3000/health"
+test-e2e-host: test-db-ensure ## E2E desde el host (backend → tador_test, Vite → localhost)
+	$(COMPOSE_E2E) up -d --force-recreate postgres backend
+	$(RUN_BACKEND_E2E) npm run db:migrate:deploy
+	$(RUN_BACKEND_E2E) npm run seed:catalogos
+	@echo "Backend E2E en http://localhost:3000 (DB tador_test)"
 	cd frontend && npm run test:e2e
+	@echo "Restaurando backend a tador_dev..."
+	$(COMPOSE) up -d --force-recreate backend
 
 # ─── Calidad ───────────────────────────────────────────
 

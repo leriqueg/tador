@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { emailField, passwordField } from './helpers/forms';
 
 test.describe('Marketing smoke', () => {
   test('landing shows hero and signup CTA', async ({ page }) => {
@@ -20,7 +21,7 @@ test.describe('Marketing smoke', () => {
     await page.goto('/login');
 
     await expect(page.getByRole('heading', { name: /Hola de nuevo/i })).toBeVisible();
-    await expect(page.getByLabel('Email')).toBeVisible();
-    await expect(page.getByLabel('Contraseña')).toBeVisible();
+    await expect(emailField(page)).toBeVisible();
+    await expect(passwordField(page)).toBeVisible();
   });
 });

@@ -31,6 +31,8 @@ export default defineConfig({
   server: {
     port: 5173,
     host: true, // listen on 0.0.0.0 inside container
+    // Playwright/E2E hits http://frontend:5173 — Vite blocks unknown Host headers otherwise.
+    allowedHosts: ['frontend', 'localhost', '127.0.0.1'],
     watch: {
       usePolling: true, // needed for bind mounts on Windows/macOS
     },

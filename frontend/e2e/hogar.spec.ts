@@ -5,11 +5,12 @@ test.describe('Hogar shell navigation', () => {
     await page.goto('/dashboard');
     await expect(page.getByRole('heading', { name: 'Resumen' })).toBeVisible();
 
-    await page.getByRole('link', { name: 'Estado' }).click();
+    const nav = page.getByRole('complementary');
+    await nav.getByRole('link', { name: 'Estado', exact: true }).click();
     await expect(page).toHaveURL(/\/finances$/);
     await expect(page.getByRole('heading', { name: 'Estado' })).toBeVisible();
 
-    await page.getByRole('link', { name: 'Apuntes' }).click();
+    await nav.getByRole('link', { name: 'Apuntes', exact: true }).click();
     await expect(page).toHaveURL(/\/entries/);
   });
 

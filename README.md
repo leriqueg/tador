@@ -1,8 +1,19 @@
 # TADOR
 
+<!-- Proyecto -->
 ![GitHub last commit](https://img.shields.io/github/last-commit/leriqueg/tador)
 ![GitHub repo size](https://img.shields.io/github/repo-size/leriqueg/tador)
 ![GitHub](https://img.shields.io/github/license/leriqueg/tador)
+
+<!-- Calidad, seguridad y pruebas -->
+[![CI](https://github.com/leriqueg/tador/actions/workflows/ci.yml/badge.svg)](https://github.com/leriqueg/tador/actions/workflows/ci.yml)
+[![Tests](https://img.shields.io/badge/tests-162%20passing%20%2F%20165-yellow)](docs/testing-strategy.md)
+[![Test pyramid](https://img.shields.io/badge/70%2F20%2F10-68%20unit%20%7C%2092%20int%20%7C%205%20e2e-informational)](docs/testing-strategy.md)
+[![Typecheck](https://img.shields.io/badge/typecheck-strict-3178C6?logo=typescript&logoColor=white)](docs/quality-tooling.md)
+[![Lint](https://img.shields.io/badge/lint-oxlint-6a5acd)](docs/quality-tooling.md)
+[![Security](https://img.shields.io/badge/security-JudgmentDay%20pending-orange)](docs/security.md)
+
+<!-- Stack -->
 ![Prisma](https://img.shields.io/badge/Prisma-2D3748?logo=prisma)
 ![Fastify](https://img.shields.io/badge/Fastify-000000?logo=fastify)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?logo=postgresql&logoColor=white)
@@ -99,6 +110,26 @@ infrastructure/
 ```
 
 Las reglas contables (balance de asientos, tenant isolation, idempotencia) viven en `domain/`. Los casos de uso viven en `application/`. La infraestructura (Prisma, Fastify) implementa interfaces definidas en dominio/aplicación.
+
+---
+
+## Calidad, seguridad y pruebas
+
+TADOR se desarrolla con **TDD** y una pirámide de pruebas 70/20/10. Estado actual:
+
+| Dimensión | Estado | Detalle |
+|-----------|--------|---------|
+| **Pruebas** | 165 casos · **162 passing** (3 fallos Position en dashboard-report) | [`docs/testing-strategy.md`](docs/testing-strategy.md) |
+| **Calidad** | TypeScript strict, oxlint, Vitest, Playwright, CI en cada PR | [`docs/quality-tooling.md`](docs/quality-tooling.md) |
+| **Seguridad** | *Secure-by-design*; auditoría **JudgmentDay** pendiente | [`docs/security.md`](docs/security.md) |
+| **Entrega** | Checklist de requisitos de publicación | [`docs/delivery-checklist.md`](docs/delivery-checklist.md) |
+
+Los badges de la cabecera reflejan calidad, seguridad y pruebas y enlazan a cada
+documento técnico. El badge de seguridad quedará como *JudgmentDay pending* hasta
+ejecutar la auditoría del ecosistema *gentleman-ia* al cierre de la implementación.
+
+Para **recontar tests / actualizar badges** o **cerrar brechas de tooling**, ver
+[`specs/010-seguridad-calidad-y-tests/`](specs/010-seguridad-calidad-y-tests/).
 
 ---
 

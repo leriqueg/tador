@@ -372,7 +372,11 @@ async function validateEntryAccounts(
     if (l.cuentaGlobalId) cuentaGlobalIds.push(l.cuentaGlobalId);
   }
 
-  // Validate CuentaUsuario references
+  // Validate CuentaUsuario references.
+  // User accounts (incl. entity-provisioned banks/cards under a chart group)
+  // are themselves the posting surface — the linked CuentaGlobal may be a
+  // non-postable group (permiteCustom / ConEntidadAutomatica). Direct posts
+  // to CuentaGlobal still require esPostable below.
   if (cuentaIds.length > 0) {
     const uniqueCuentaIds = [...new Set(cuentaIds)];
     const cuentas = await prisma.cuentaUsuario.findMany({
@@ -380,7 +384,6 @@ async function validateEntryAccounts(
         id: { in: uniqueCuentaIds },
         userId: book.userId,
         activa: true,
-        global: { esPostable: true },
       },
       select: { id: true },
     });
@@ -389,7 +392,7 @@ async function validateEntryAccounts(
     for (const cid of uniqueCuentaIds) {
       if (!foundIds.has(cid)) {
         throw new Error(
-          `Account ${cid} not found, not active, not postable, or does not belong to this book`,
+          `Account ${cid} not found, not active, or does not belong to this book`,
         );
       }
     }

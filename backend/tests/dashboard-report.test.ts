@@ -526,7 +526,7 @@ describe('Position Report — GET /api/reports/position', () => {
     const app = await createTestApp();
     const cookies = await registerAndVerify(app, 'pos-receivable@test.com');
 
-    // Create an entity (loan to a person)
+    // Person entities auto-provision a CxC wallet under 1132xxxx
     const entityRes = await app.inject({
       method: 'POST',
       url: '/api/entities',
@@ -534,33 +534,13 @@ describe('Position Report — GET /api/reports/position', () => {
       payload: { nombre: 'Juan Perez', tipo: 'person' },
     });
     expect(entityRes.statusCode).toBe(201);
-    const entityId = entityRes.json().entity.id;
-
-    // Create a CuentaGlobal with asset codigo (1xxx)
-    const globalReceivable = await prisma.cuentaGlobal.create({
-      data: { codigo: nextCodigo('1155'), nombre: 'Loans Receivable', esPostable: true },
-    });
-    createdGlobalIds.push(globalReceivable.id);
+    const receivableId = entityRes.json().provisionedAccount.id;
+    expect(receivableId).toBeTruthy();
 
     const globalIncome = await prisma.cuentaGlobal.create({
       data: { codigo: nextCodigo('4199'), nombre: 'Loan Income', esPostable: true },
     });
     createdGlobalIds.push(globalIncome.id);
-
-    // Create a CuentaUsuario linked to the entity AND the asset global
-    const receivableRes = await app.inject({
-      method: 'POST',
-      url: '/api/accounts',
-      headers: { cookie: cookies.join('; ') },
-      payload: {
-        tipoCuenta: 'wallet',
-        nombre: 'Loan to Juan',
-        globalId: globalReceivable.id,
-        entidadId: entityId,
-      },
-    });
-    expect(receivableRes.statusCode).toBe(201);
-    const receivableId = receivableRes.json().account.id;
 
     const incomeAccRes = await app.inject({
       method: 'POST',
@@ -596,7 +576,7 @@ describe('Position Report — GET /api/reports/position', () => {
 
     expect(Number(report.totalReceivables)).toBe(400);
     expect(report.breakdown.receivables).toHaveLength(1);
-    expect(report.breakdown.receivables[0].accountName).toBe('Loan to Juan');
+    expect(report.breakdown.receivables[0].accountName).toBe('Juan Perez');
 
     await app.close();
   });

@@ -1,0 +1,16 @@
+{
+  "code": "ganancia_inversion",
+  "version": 1,
+  "name": "Ganancias por invertir",
+  "modes": ["pro"],
+  "amount": { "type": "money", "required": true, "label": "Monto" },
+  "concept": { "type": "text", "required": true, "label": "Concepto" },
+  "date": { "type": "date", "default": "today", "required": true, "label": "Fecha" },
+  "entity": { "type": "entity", "required": false, "label": "Relacionado con" },
+  "amountMode": "single",
+  "descriptionTemplate": "Ganancias por invertir: {concept}",
+  "lines": [
+    { "id": 1, "side": "debit", "label": "¿Dónde recibiste?", "strategy": "from_groups", "groupCodes": ["11120000", "11210000", "11220000"] },
+    { "id": 2, "side": "credit", "label": "Ganancias por invertir", "strategy": "from_group", "groupCode": "41120002" }
+  ]
+}

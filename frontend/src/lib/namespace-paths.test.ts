@@ -9,10 +9,11 @@ describe('namespacePaths', () => {
     expect(paths.editApunte('abc')).toBe('/hogar/entries/new?edit=abc');
   });
 
-  it('maps PRO finances routes under /pro/*', () => {
+  it('maps PRO analysis routes under /pro/analysis/*', () => {
     const paths = namespacePaths('pro');
-    expect(paths.dashboard).toBe('/pro/dashboard');
-    expect(paths.financesApuntes).toBe('/pro/finances/apuntes');
-    expect(paths.entriesManual).toBe('/pro/entries/manual');
+    expect(paths.analysis).toBe('/pro/analysis');
+    expect(paths.analysisBanks).toBe('/pro/analysis/banks');
+    expect(paths.analysisCards).toBe('/pro/analysis/cards');
+    expect(paths.analysisPortfolio).toBe('/pro/analysis/portfolio');
   });
 });

@@ -12,11 +12,14 @@ export const HOGAR_NAV = [
   { to: '/hogar/settings', icon: 'settings', label: 'Ajustes' },
 ] as const;
 
-/** PRO namespace nav — same labels/icons as Hogar, distinct paths (specs/foundation/modos-hogar-pro.md). */
-export const PRO_NAV = HOGAR_NAV.map((item) => ({
-  ...item,
-  to: item.to.replace('/hogar/', '/pro/') as `/pro/${string}`,
-}));
+/** PRO namespace nav — Hogar items + analysis section (Sprint 009 T013). */
+export const PRO_NAV = [
+  ...HOGAR_NAV.map((item) => ({
+    ...item,
+    to: item.to.replace('/hogar/', '/pro/') as `/pro/${string}`,
+  })),
+  { to: '/pro/analysis', icon: 'analytics', label: 'Análisis' },
+] as const;
 
 export type AppShellMode = 'hogar' | 'pro';
 

@@ -10,6 +10,10 @@ export interface NamespacePaths {
   financesPyg: string;
   financesBalance: string;
   financesApuntes: string;
+  analysis: string;
+  analysisBanks: string;
+  analysisCards: string;
+  analysisPortfolio: string;
   accounts: string;
   entities: string;
   settings: string;
@@ -27,6 +31,10 @@ export function namespacePaths(namespace: AppNamespace): NamespacePaths {
     financesPyg: `${base}/finances/pyg`,
     financesBalance: `${base}/finances/balance`,
     financesApuntes: `${base}/finances/apuntes`,
+    analysis: `${base}/analysis`,
+    analysisBanks: `${base}/analysis/banks`,
+    analysisCards: `${base}/analysis/cards`,
+    analysisPortfolio: `${base}/analysis/portfolio`,
     accounts: `${base}/accounts`,
     entities: `${base}/entities`,
     settings: `${base}/settings`,

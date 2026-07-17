@@ -1,5 +1,20 @@
 # Reglas iniciales del plan de cuentas
 
+## Fuente de verdad (2026-07-17)
+
+| Archivo | Rol |
+|---------|-----|
+| `plan-de-cuentas-final.csv` | Estructura canónica editable |
+| `plan-de-cuentas-final-seed.json` | Catálogo runtime (+ metadatos); copiar a `backend/data/plan-de-cuentas/` antes de re-seed |
+| `plan-de-cuentas-legacy.csv` / `.normalized.json` | Solo migración / referencia |
+
+`plan-de-cuentas-seed.csv` fue **eliminado** (legado anterior al análisis final). No usarlo.
+
+Nombres financieros locked (009):
+
+- `62010000` **Servicios financieros** → Comisiones / Intereses / Multas (`62010001–03`)
+- `41120002` **Ganancias por invertir** (bajo `41120000` Rendimientos)
+
 ## Segmentación del código contable
 
 Los códigos de cuenta en TADOR siguen la convención `[A][BBB][C][DDD]` (8 dígitos):

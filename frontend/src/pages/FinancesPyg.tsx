@@ -3,7 +3,7 @@ import { Link, Navigate } from 'react-router-dom';
 import AppShell from '../components/layout/AppShell.tsx';
 import SimplePieChart from '../components/dashboard/SimplePieChart.tsx';
 import ValidationMessage from '../components/ui/ValidationMessage.tsx';
-import { reports, type PyGReport } from '../lib/api.ts';
+import { reports, accounts, entities, type PyGReport, type AccountSummary, type EntitySummary } from '../lib/api.ts';
 import { useAuth } from '../lib/auth.tsx';
 import { useBookGate } from '../lib/use-book-gate.ts';
 import { formatMoney, MONTH_LABELS, monthFromSeries } from '../lib/finance.ts';
@@ -28,6 +28,20 @@ export default function FinancesPyg({ namespace = 'hogar' }: FinancesPygProps) {
   const [pyg, setPyg] = useState<PyGReport | null>(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
+  const [accountOptions, setAccountOptions] = useState<AccountSummary[]>([]);
+  const [entityOptions, setEntityOptions] = useState<EntitySummary[]>([]);
+  const [filterAccountId, setFilterAccountId] = useState('');
+  const [filterEntityId, setFilterEntityId] = useState('');
+
+  useEffect(() => {
+    if (namespace !== 'pro' || !gate.config?.initialized) return;
+    void Promise.all([accounts.list(), entities.list()])
+      .then(([accRes, entRes]) => {
+        setAccountOptions(accRes.accounts.filter((a) => a.activa));
+        setEntityOptions(entRes.entities);
+      })
+      .catch(() => {});
+  }, [namespace, gate.config?.initialized]);
 
   useEffect(() => {
     let cancelled = false;
@@ -35,7 +49,14 @@ export default function FinancesPyg({ namespace = 'hogar' }: FinancesPygProps) {
       setLoading(true);
       setError('');
       try {
-        const report = await reports.pyg(year);
+        const filters =
+          namespace === 'pro'
+            ? {
+                accountId: filterAccountId || undefined,
+                entityId: filterEntityId || undefined,
+              }
+            : undefined;
+        const report = await reports.pyg(year, filters);
         if (!cancelled) setPyg(report);
       } catch (err) {
         if (!cancelled) {
@@ -49,7 +70,7 @@ export default function FinancesPyg({ namespace = 'hogar' }: FinancesPygProps) {
     return () => {
       cancelled = true;
     };
-  }, [year, gate.config?.initialized]);
+  }, [year, gate.config?.initialized, namespace, filterAccountId, filterEntityId]);
 
   const currency = gate.config?.currency ?? 'USD';
   const fmt = (n: number) => formatMoney(n, currency);
@@ -156,6 +177,41 @@ export default function FinancesPyg({ namespace = 'hogar' }: FinancesPygProps) {
             </label>
           )}
         </div>
+
+        {namespace === 'pro' && (
+          <div className="flex flex-wrap gap-sm items-end">
+            <label className="text-label-md text-on-surface-variant">
+              Cuenta
+              <select
+                value={filterAccountId}
+                onChange={(e) => setFilterAccountId(e.target.value)}
+                className="ml-xs h-10 px-sm rounded-lg border border-outline-variant bg-surface-container-lowest block mt-xs"
+              >
+                <option value="">Todas</option>
+                {accountOptions.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.nombre}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="text-label-md text-on-surface-variant">
+              Entidad
+              <select
+                value={filterEntityId}
+                onChange={(e) => setFilterEntityId(e.target.value)}
+                className="ml-xs h-10 px-sm rounded-lg border border-outline-variant bg-surface-container-lowest block mt-xs"
+              >
+                <option value="">Todas</option>
+                {entityOptions.map((e) => (
+                  <option key={e.id} value={e.id}>
+                    {e.nombre}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+        )}
 
         {error && <ValidationMessage tone="error">{error}</ValidationMessage>}
         {loading && <p className="text-on-surface-variant">Cargando…</p>}

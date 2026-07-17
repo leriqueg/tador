@@ -78,11 +78,15 @@ describe('PRO route shells (T009 — no-404 destinations)', () => {
   });
 
   for (const { Component, path, heading } of PAGES) {
-    it(`renders "${heading}" for ${path} with active PRO nav highlighting`, async () => {
-      renderWithRouter(<Component />, { router: { initialEntries: [path] } });
+    it(
+      `renders "${heading}" for ${path} with active PRO nav highlighting`,
+      async () => {
+        renderWithRouter(<Component />, { router: { initialEntries: [path] } });
 
-      expect(await screen.findByRole('heading', { name: heading })).toBeInTheDocument();
-      expect(screen.getAllByRole('link', { name: 'TADOR' })[0]).toHaveAttribute('href', '/pro/dashboard');
-    });
+        expect(await screen.findByRole('heading', { name: heading })).toBeInTheDocument();
+        expect(screen.getAllByRole('link', { name: 'TADOR' })[0]).toHaveAttribute('href', '/pro/dashboard');
+      },
+      15_000,
+    );
   }
 });

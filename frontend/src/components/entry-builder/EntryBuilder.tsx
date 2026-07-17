@@ -17,6 +17,11 @@ import {
   excludeAccount,
 } from './account-filters.ts';
 import {
+  EGRESO_FINANCIAL_SUBTYPES,
+  FINANCIAL_PLANTILLA_LABELS,
+  INGRESO_FINANCIAL_SUBTYPES,
+} from '../../lib/financial-plantillas.ts';
+import {
   buildApunteSubmitPayload,
   canAdvance,
   createInitialEntryBuilderState,
@@ -27,6 +32,7 @@ import {
   stepOrderFor,
   type ApunteSubmitPayload,
   type EntryStepId,
+  type EntrySubtype,
   type OperationType,
 } from './entry-builder-state.ts';
 import type { AccountSummary, EntitySummary } from '../../lib/api.ts';
@@ -388,11 +394,11 @@ export default function EntryBuilder({
 interface CuentasStepProps {
   headingRef: RefObject<HTMLHeadingElement | null>;
   tipo: OperationType;
-  subtype: 'general' | 'salario';
+  subtype: EntrySubtype;
   accounts: AccountSummary[];
   debitAccountId: string | null;
   creditAccountId: string | null;
-  onSelectSubtype: (subtype: 'general' | 'salario') => void;
+  onSelectSubtype: (subtype: EntrySubtype) => void;
   onSelectDebit: (accountId: string) => void;
   onSelectCredit: (accountId: string) => void;
   onContinue: () => void;
@@ -426,25 +432,43 @@ function CuentasStep({
       </h2>
 
       {tipo === 'INGRESO' && (
-        <div className="flex gap-sm mb-md">
-          <button
-            type="button"
+        <div className="flex flex-wrap gap-sm mb-md">
+          <SubtypeChip
+            active={subtype === 'salario'}
+            label="Sueldo"
             onClick={() => onSelectSubtype('salario')}
-            className={`p-sm rounded-lg border-2 text-label-md font-semibold ${
-              subtype === 'salario' ? 'border-primary text-primary' : 'border-outline-variant/40'
-            }`}
-          >
-            Sueldo
-          </button>
-          <button
-            type="button"
+          />
+          <SubtypeChip
+            active={subtype === 'general'}
+            label="Otro ingreso"
             onClick={() => onSelectSubtype('general')}
-            className={`p-sm rounded-lg border-2 text-label-md font-semibold ${
-              subtype === 'general' ? 'border-primary text-primary' : 'border-outline-variant/40'
-            }`}
-          >
-            Otro ingreso
-          </button>
+          />
+          {INGRESO_FINANCIAL_SUBTYPES.map((code) => (
+            <SubtypeChip
+              key={code}
+              active={subtype === code}
+              label={FINANCIAL_PLANTILLA_LABELS[code]}
+              onClick={() => onSelectSubtype(code)}
+            />
+          ))}
+        </div>
+      )}
+
+      {tipo === 'EGRESO' && (
+        <div className="flex flex-wrap gap-sm mb-md">
+          <SubtypeChip
+            active={subtype === 'general'}
+            label="Gasto general"
+            onClick={() => onSelectSubtype('general')}
+          />
+          {EGRESO_FINANCIAL_SUBTYPES.map((code) => (
+            <SubtypeChip
+              key={code}
+              active={subtype === code}
+              label={FINANCIAL_PLANTILLA_LABELS[code]}
+              onClick={() => onSelectSubtype(code)}
+            />
+          ))}
         </div>
       )}
 
@@ -502,6 +526,28 @@ function CuentasStep({
         Continuar
       </Button>
     </section>
+  );
+}
+
+function SubtypeChip({
+  active,
+  label,
+  onClick,
+}: {
+  active: boolean;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`p-sm rounded-lg border-2 text-label-md font-semibold ${
+        active ? 'border-primary text-primary' : 'border-outline-variant/40'
+      }`}
+    >
+      {label}
+    </button>
   );
 }
 

@@ -219,7 +219,19 @@ export const balances = {
   get(cuentaId: string) {
     return request<{ cuentaId: string; saldo: number }>('GET', `/api/balances/${cuentaId}`);
   },
+
+  monthly(cuentaId: string, year: number) {
+    return request<{ cuentaId: string; año: number; mensual: MonthlyBalancePoint[] }>(
+      'GET',
+      `/api/balances/${cuentaId}/monthly?año=${year}`,
+    );
+  },
 };
+
+export interface MonthlyBalancePoint {
+  mes: number;
+  saldo: number;
+}
 
 export interface EntitySummary {
   id: string;
@@ -463,12 +475,55 @@ export interface PositionReport {
   };
 }
 
+export interface PortfolioEntityEntry {
+  entityId: string;
+  entityName: string;
+  receivables: number;
+  payables: number;
+  net: number;
+}
+
+export interface PortfolioReport {
+  entities: PortfolioEntityEntry[];
+}
+
+export interface CostYieldTotals {
+  year: number;
+  entityId: string;
+  costs: {
+    comisiones: number;
+    intereses: number;
+    multas: number;
+  };
+  investmentYield: number;
+}
+
+export interface PyGReportFilters {
+  accountId?: string;
+  entityId?: string;
+}
+
 export const reports = {
-  pyg(year: number) {
-    return request<PyGReport>('GET', `/api/reports/pyg?year=${year}`);
+  pyg(year: number, filters?: PyGReportFilters) {
+    const search = new URLSearchParams({ year: String(year) });
+    if (filters?.accountId) search.set('accountId', filters.accountId);
+    if (filters?.entityId) search.set('entityId', filters.entityId);
+    return request<PyGReport>('GET', `/api/reports/pyg?${search.toString()}`);
   },
 
   position() {
     return request<PositionReport>('GET', '/api/reports/position');
+  },
+
+  portfolio() {
+    return request<PortfolioReport>('GET', '/api/reports/portfolio');
+  },
+
+  costYield(entityId: string, year: number) {
+    const search = new URLSearchParams({
+      entityId,
+      year: String(year),
+    });
+    return request<CostYieldTotals>('GET', `/api/reports/financial-analysis?${search.toString()}`);
   },
 };

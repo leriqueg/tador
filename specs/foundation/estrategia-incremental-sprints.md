@@ -209,25 +209,30 @@ El usuario PRO registra con EntryBuilder, ve el árbol con códigos y puede asie
 
 ### Objetivo
 
-Densidad analítica PRO sin ERP documental.
+Densidad analítica PRO sin ERP documental. Diferenciar PRO de Hogar tras Sprint 07.
 
-### Incluye (planificado)
+### Incluye
 
-- Analizar Bancos (saldos mensuales, costos; conciliación post-MVP).
-- Analizar Tarjetas (cargos del mes, intereses; conciliación post-MVP).
-- Analizar Cartera Entidades (CxC vs CxP + listados).
+- Rutas separadas: `/pro/analysis/banks`, `/pro/analysis/cards`, `/pro/analysis/portfolio`.
+- Analizar Bancos: saldos mensuales (`/api/balances/:id/monthly`), costos `62010001–03` atribuidos por Entidad, ganancias por invertir `41120002` **sin netear**.
+- Analizar Tarjetas: listado mensual vía `GET /api/apuntes?accountId=` (sin endpoint “cargos”).
+- Analizar Cartera: CxC vs CxP por Entidad.
+- Filtros P&G por cuenta/entidad.
+- Plantillas: comisión, interés tarjeta, multa, ganancias por invertir.
+- Auto-`entityId` desde cuenta banco/tarjeta en apuntes **ingreso/egreso** (no transferencias).
+- Conciliación → post-MVP.
 
 ### Criterio de cierre
 
-El usuario PRO responde “¿cómo van mis bancos/tarjetas/cartera?” con vistas dedicadas.
+El usuario PRO responde “¿cuánto me cuesta el banco / qué me cobran en la tarjeta / qué me deben vs qué debo?” con vistas dedicadas.
 
-Spec: `specs/009-frontend-pro-avanzado/`.
+Spec: `specs/009-frontend-pro-avanzado/`. ADR: `docs/adr/0002-sprint-08-ia-deferred-009-pro-analysis.md`.
 
 ## Sprint 08 - IA v0 — EXCLUIDO DEL MVP
 
 ### Estado
 
-**Fuera del MVP por falta de tiempo (2026-07-16).** El directorio `specs/008-ia-v0/` se **conserva** (no borrar) para implementación post-MVP. No bloquea el criterio de cierre del MVP.
+**Fuera del MVP** (2026-07-16 / ADR 0002). Motivo: complejidad del runtime IA + deadline; prioridad a diferenciar PRO vs Hogar vía Sprint 09. El directorio `specs/008-ia-v0/` se **conserva** (no borrar, no renumerar) para post-MVP. No bloquea el criterio de cierre del MVP. Ver `docs/adr/0002-sprint-08-ia-deferred-009-pro-analysis.md`.
 
 ### Objetivo (futuro)
 

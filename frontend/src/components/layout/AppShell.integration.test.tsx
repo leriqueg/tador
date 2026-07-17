@@ -38,6 +38,10 @@ describe('AppShell', () => {
       'href',
       '/pro/entries',
     );
+    expect(screen.getAllByRole('link', { name: /Análisis/i })[0]).toHaveAttribute(
+      'href',
+      '/pro/analysis',
+    );
     expect(screen.getAllByRole('link', { name: 'TADOR' })[0]).toHaveAttribute(
       'href',
       '/pro/dashboard',

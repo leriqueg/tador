@@ -26,6 +26,10 @@ import {
   sumMoney,
 } from '../../domain/money.js';
 import { buildApunteListWhere } from '../../application/apunte-list-filters.js';
+import {
+  loadLineAccountMetaForEntityResolution,
+  resolveApunteEntityId,
+} from '../../application/resolve-apunte-entity-id.js';
 import { assertEntityCapability, EntityCapabilityError } from '../../domain/entity-capability-rule.js';
 
 // ---------------------------------------------------------------------------
@@ -419,9 +423,43 @@ export function registerApunteRoutes(
 
           // V11: When a template requires an entity capability (e.g. salary →
           // is_employment_dependency) and an entity was selected, it must hold it.
-          if (body.entityId && template.entity?.requiresCapability) {
+          // (Resolved entityId is validated after line resolution below.)
+        }
+
+        // ---------------------------------------------------------------
+        // Resolve entityId (FR-009): explicit body or auto from bank/card
+        // ---------------------------------------------------------------
+        const lineAccountIds = body.lines.map((l) => l.accountId);
+        const lineAccountMeta = await loadLineAccountMetaForEntityResolution(
+          lineAccountIds,
+          userId,
+          prisma,
+        );
+        const entityResolution = resolveApunteEntityId({
+          templateCode: body.templateCode ?? null,
+          explicitEntityId: body.entityId ?? null,
+          lineAccounts: lineAccountMeta,
+        });
+        if (!entityResolution.ok) {
+          return reply
+            .status(entityResolution.statusCode)
+            .send({ error: entityResolution.error });
+        }
+        const resolvedEntityId = entityResolution.entityId;
+
+        if (resolvedEntityId) {
+          const entity = await prisma.entidad.findFirst({
+            where: { id: resolvedEntityId, userId },
+            select: { id: true },
+          });
+          if (!entity) {
+            return reply
+              .status(404)
+              .send({ error: `Entity ${resolvedEntityId} not found (V11)` });
+          }
+          if (template?.entity?.requiresCapability) {
             await requireEntityCapability(
-              body.entityId,
+              resolvedEntityId,
               userId,
               template.entity.requiresCapability,
             );
@@ -580,6 +618,7 @@ export function registerApunteRoutes(
               amount: quantizeMoney(amount, currency).toFixed(),
               asientoId: asiento.id,
               userId,
+              entityId: resolvedEntityId,
             },
           });
 
@@ -594,6 +633,7 @@ export function registerApunteRoutes(
             concept: result.apunte.concept,
             amount: moneyToNumber(result.apunte.amount.toString(), currency),
             asientoId: result.apunte.asientoId,
+            entityId: result.apunte.entityId,
           },
           asiento: {
             id: result.asiento.id,

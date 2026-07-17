@@ -161,6 +161,7 @@ model Entidad {
 
   user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   cuentasUsuario CuentaUsuario[]
+  apuntes       Apunte[]
 
   @@unique([userId, nombre])
   @@map("entidades")
@@ -255,8 +256,11 @@ model Apunte {
   asiento      Asiento  @relation(fields: [asientoId], references: [id])
   userId       String
   user         User     @relation(fields: [userId], references: [id])
+  entityId     String?
+  entity       Entidad? @relation(fields: [entityId], references: [id])
   createdAt    DateTime @default(now())
 
+  @@index([entityId])
   @@map("apuntes")
 }
 

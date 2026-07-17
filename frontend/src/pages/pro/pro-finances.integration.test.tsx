@@ -38,6 +38,9 @@ vi.mock('../../lib/api.ts', async (importOriginal) => {
     accounts: {
       list: vi.fn().mockResolvedValue({ accounts: [] }),
     },
+    entities: {
+      list: vi.fn().mockResolvedValue({ entities: [] }),
+    },
   };
 });
 
@@ -108,8 +111,15 @@ describe('PRO finances pages (US5, T025)', () => {
     renderWithRouter(<ProFinancesPyg />, { router: { initialEntries: ['/pro/finances/pyg'] } });
 
     expect(await screen.findByRole('heading', { name: 'Estado financiero' })).toBeInTheDocument();
-    expect(mockedPyg).toHaveBeenCalledWith(year);
+    expect(mockedPyg).toHaveBeenCalledWith(year, {});
     expect(screen.getByRole('link', { name: '← Estado' })).toHaveAttribute('href', '/pro/finances');
+  });
+
+  it('ProFinancesPyg shows account/entity filters (T017)', async () => {
+    renderWithRouter(<ProFinancesPyg />, { router: { initialEntries: ['/pro/finances/pyg'] } });
+
+    expect(await screen.findByLabelText('Cuenta')).toBeInTheDocument();
+    expect(screen.getByLabelText('Entidad')).toBeInTheDocument();
   });
 
   it('ProFinancesBalance loads position report with PRO shell nav', async () => {

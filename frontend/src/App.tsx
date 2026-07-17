@@ -25,6 +25,10 @@ import ProFinances from './pages/pro/ProFinances.tsx';
 import ProFinancesPyg from './pages/pro/ProFinancesPyg.tsx';
 import ProFinancesBalance from './pages/pro/ProFinancesBalance.tsx';
 import ProFinancesApuntes from './pages/pro/ProFinancesApuntes.tsx';
+import ProAnalysis from './pages/pro/ProAnalysis.tsx';
+import AnalysisBanks from './pages/pro/analysis/AnalysisBanks.tsx';
+import AnalysisCards from './pages/pro/analysis/AnalysisCards.tsx';
+import AnalysisPortfolio from './pages/pro/analysis/AnalysisPortfolio.tsx';
 
 export default function App() {
   return (
@@ -74,6 +78,10 @@ export default function App() {
             <Route path="/pro/accounts" element={<ProAccounts />} />
             <Route path="/pro/entities" element={<ProEntities />} />
             <Route path="/pro/settings" element={<ProSettings />} />
+            <Route path="/pro/analysis" element={<ProAnalysis />} />
+            <Route path="/pro/analysis/banks" element={<AnalysisBanks />} />
+            <Route path="/pro/analysis/cards" element={<AnalysisCards />} />
+            <Route path="/pro/analysis/portfolio" element={<AnalysisPortfolio />} />
           </Route>
         </Routes>
       </BrowserRouter>

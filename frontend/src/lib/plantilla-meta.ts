@@ -46,10 +46,14 @@ const CATEGORY_BY_CODE: Record<string, PlantillaCategory> = {
   transferencia: 'movimientos',
   deposito_bancario: 'movimientos',
   retiro_bancario: 'movimientos',
+  comision_bancaria: 'otros',
+  interes_tarjeta: 'otros',
+  multa_financiera: 'otros',
+  ganancia_inversion: 'ingresos',
 };
 
 export function plantillaKind(code: string): PlantillaKind {
-  if (code.startsWith('registrar_')) return 'ingreso';
+  if (code.startsWith('registrar_') || code === 'ganancia_inversion') return 'ingreso';
   if (
     code === 'transferencia' ||
     code.startsWith('deposito_') ||
@@ -58,6 +62,11 @@ export function plantillaKind(code: string): PlantillaKind {
     return 'transferencia';
   }
   return 'gasto';
+}
+
+/** Client-side guard when catalog is loaded without mode filter (T012). */
+export function plantillaSupportsMode(modes: string[], mode: 'hogar' | 'pro'): boolean {
+  return modes.includes(mode);
 }
 
 export function plantillaCategory(code: string): PlantillaCategory {

@@ -217,6 +217,35 @@ describe('EntryBuilder — salary path requires employer capability (US2.5, T018
   });
 });
 
+describe('EntryBuilder — financial plantillas (T011)', () => {
+  afterEach(() => cleanup());
+
+  it('submits comision_bancaria with templateCode via PRO financial branch', async () => {
+    const user = userEvent.setup();
+    const comision = account({ id: 'com-1', tipoCuenta: 'expenseCategory', nombre: 'Comisiones' });
+    const { onSubmit } = renderBuilder({ accounts: [comision, bank, wallet, incomeCategory] });
+
+    await user.click(screen.getByRole('button', { name: 'Egreso' }));
+    await user.click(screen.getByRole('button', { name: 'Comisión bancaria' }));
+    await user.selectOptions(screen.getByLabelText('Categoría del gasto'), 'com-1');
+    await user.selectOptions(screen.getByLabelText('¿Con qué pagaste?'), 'bank-1');
+    await user.click(screen.getByRole('button', { name: 'Continuar' }));
+    await user.click(screen.getByRole('button', { name: 'Omitir' }));
+    await user.type(screen.getByLabelText('Concepto'), 'Mantenimiento');
+    await user.click(screen.getByRole('button', { name: 'Continuar' }));
+    await user.type(screen.getByLabelText('Monto'), '9.99');
+    await user.click(screen.getByRole('button', { name: 'Guardar' }));
+
+    expect(onSubmit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        templateCode: 'comision_bancaria',
+        concept: 'Mantenimiento',
+        amount: 9.99,
+      }),
+    );
+  });
+});
+
 describe('EntryBuilder — sticky account defaults (T029)', () => {
   afterEach(() => {
     cleanup();

@@ -4,7 +4,7 @@
 
 **Created**: 2026-06-22
 
-**Status**: **Excluded from MVP** (2026-07-16 — deferred for time). Artifacts retained for post-MVP; do not delete this directory.
+**Status**: **Excluded from MVP** (2026-07-16 — deferred for complexity + deadline; ADR 0002). Artifacts retained for post-MVP; do not delete or renumber this directory.
 
 **Input**: Sprint 08: asistente local que interpreta lenguaje natural y sugiere plantillas en Modo Hogar.
 

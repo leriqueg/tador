@@ -9,7 +9,13 @@
  */
 
 export type OperationType = 'INGRESO' | 'EGRESO' | 'TRANSFERENCIA';
-export type EntrySubtype = 'general' | 'salario';
+export type EntrySubtype =
+  | 'general'
+  | 'salario'
+  | 'comision_bancaria'
+  | 'interes_tarjeta'
+  | 'multa_financiera'
+  | 'ganancia_inversion';
 export type EntryStepId = 'tipo' | 'cuentas' | 'entidad' | 'concepto' | 'monto';
 
 export interface EntityCapabilityLike {
@@ -210,7 +216,7 @@ export interface ApunteSubmitPayload {
   entityId?: string;
 }
 
-const SALARY_TEMPLATE_CODE = 'registrar_sueldo';
+import { templateCodeForSubtype } from '../../lib/financial-plantillas.ts';
 
 export function buildApunteSubmitPayload(
   state: EntryBuilderState,
@@ -223,10 +229,11 @@ export function buildApunteSubmitPayload(
   if (!Number.isFinite(amount) || amount <= 0) return null;
 
   const entityId = state.entityId ?? undefined;
+  const templateCode = templateCodeForSubtype(state.subtype);
 
-  if (state.subtype === 'salario') {
+  if (templateCode) {
     return {
-      templateCode: SALARY_TEMPLATE_CODE,
+      templateCode,
       date,
       concept,
       amount,

@@ -55,7 +55,7 @@ codigo;nombre;esPostable;codigoPadre;naturaleza;clasificacion;permite Custom/Ent
 41110001;Alquileres;true;41110000;income_category;income;false;;;
 41120000;Rendimientos;false;41100000;group;income;false;;;
 41120001;Intereses;true;41120000;income_category;income;false;;;
-41120002;Inversiones;true;41120000;income_category;income;false;;;
+41120002;Ganancias por invertir;true;41120000;income_category;income;false;;;
 41120003;Pensiones;true;41120000;income_category;income;false;;;
 41200000;Otros ingresos;false;40000000;group;income;false;;;
 41210000;Ingresos extraordinarios;false;41200000;group;income;false;;;
@@ -105,9 +105,9 @@ codigo;nombre;esPostable;codigoPadre;naturaleza;clasificacion;permite Custom/Ent
 61180004;Gimnasios / Spa ;true;61170000;expense_category;expense;false;;;
 61180005;Regalos;true;61170000;expense_category;expense;false;;;
 62000000;Gastos financieros;false;60000000;group;expense;Custom;;;
-62010000;Banca y tarjetas;false;62000000;group;expense;false;;;
-62010001;Comisiones bancarias;true;62010000;expense_category;expense;false;;;
-62010002;Intereses de tarjeta;true;62010000;expense_category;expense;false;;;
+62010000;Servicios financieros;false;62000000;group;expense;false;;;
+62010001;Comisiones;true;62010000;expense_category;expense;false;;;
+62010002;Intereses;true;62010000;expense_category;expense;false;;;
 62010003;Multas;true;62010000;expense_category;expense;false;;;
 62020000;Prestamos;false;62000000;group;expense;Custom;;;
 62020001;Intereses por prestamo;true;62020000;expense_category;expense;false;;;

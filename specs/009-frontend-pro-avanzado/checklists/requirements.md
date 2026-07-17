@@ -1,7 +1,6 @@
-# Checklist: Sprint 09 - Frontend PRO avanzado
+# Checklist: Sprint 09
 
-**Status**: Deferred — do not implement until 007 closes.
-
-- [ ] Clarify API gaps (monthly bank series, card charges)
-- [ ] Plan + inventory `/pro/analysis/*`
-- [ ] Tasks + TDD implementation
+- [x] No NEEDS CLARIFICATION for locked 2026-07-17 decisions
+- [x] Scope bounded (no conciliación, no cargos endpoint, no IA)
+- [x] Success criteria measurable
+- [x] ADR 0002 referenced

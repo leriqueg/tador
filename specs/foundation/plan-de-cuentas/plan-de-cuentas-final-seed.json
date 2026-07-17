@@ -1126,7 +1126,7 @@
     },
     {
       "codigo": "41120002",
-      "nombre": "Inversiones",
+      "nombre": "Ganancias por invertir",
       "esPostable": true,
       "codigoPadre": "41120000",
       "nivel": 3,
@@ -2176,7 +2176,7 @@
     },
     {
       "codigo": "62010000",
-      "nombre": "Banca y tarjetas",
+      "nombre": "Servicios financieros",
       "esPostable": false,
       "codigoPadre": "62000000",
       "nivel": 2,
@@ -2197,7 +2197,7 @@
     },
     {
       "codigo": "62010001",
-      "nombre": "Comisiones bancarias",
+      "nombre": "Comisiones",
       "esPostable": true,
       "codigoPadre": "62010000",
       "nivel": 3,
@@ -2218,7 +2218,7 @@
     },
     {
       "codigo": "62010002",
-      "nombre": "Intereses de tarjeta",
+      "nombre": "Intereses",
       "esPostable": true,
       "codigoPadre": "62010000",
       "nivel": 3,

@@ -279,6 +279,32 @@ describe('buildApunteSubmitPayload', () => {
       entityId: 'org-1',
     });
   });
+
+  it('builds a templateCode payload for financial plantillas (T011)', () => {
+    const state: EntryBuilderState = {
+      ...createInitialEntryBuilderState(),
+      tipo: 'EGRESO',
+      subtype: 'comision_bancaria',
+      step: 'monto',
+      debitAccountId: 'acc-comision',
+      creditAccountId: 'acc-bank',
+      entityId: null,
+      concept: 'Mantenimiento julio',
+      amount: '12',
+    };
+    const payload = buildApunteSubmitPayload(state, '2026-07-16');
+    expect(payload).toEqual({
+      templateCode: 'comision_bancaria',
+      date: '2026-07-16',
+      concept: 'Mantenimiento julio',
+      amount: 12,
+      lines: [
+        { id: 1, accountId: 'acc-comision' },
+        { id: 2, accountId: 'acc-bank' },
+      ],
+      entityId: undefined,
+    });
+  });
 });
 
 describe('entryBuilderHasDraft (T029 abandon warning)', () => {

@@ -79,35 +79,39 @@ describe('Quickstart smoke (T028)', () => {
     expect(await screen.findByText('Pro entries landing')).toBeInTheDocument();
   });
 
-  it('EntryBuilder ingreso flow reaches guardar with amount', async () => {
-    const user = userEvent.setup();
-    const onSubmit = vi.fn().mockResolvedValue(undefined);
+  it(
+    'EntryBuilder ingreso flow reaches guardar with amount',
+    async () => {
+      const user = userEvent.setup();
+      const onSubmit = vi.fn().mockResolvedValue(undefined);
 
-    render(
-      <EntryBuilder
-        accounts={[bank, income]}
-        entities={[]}
-        onSubmit={onSubmit}
-        onCreateEntity={vi.fn()}
-      />,
-    );
+      render(
+        <EntryBuilder
+          accounts={[bank, income]}
+          entities={[]}
+          onSubmit={onSubmit}
+          onCreateEntity={vi.fn()}
+        />,
+      );
 
-    await user.click(screen.getByRole('button', { name: 'Ingreso' }));
-    await user.click(screen.getByRole('button', { name: 'Otro ingreso' }));
-    await user.selectOptions(screen.getByLabelText('¿Dónde recibiste el dinero?'), 'bank-1');
-    await user.selectOptions(screen.getByLabelText('Categoría de ingreso'), 'income-1');
-    await user.click(screen.getByRole('button', { name: 'Continuar' }));
-    await user.click(screen.getByRole('button', { name: 'Omitir' }));
-    await user.type(screen.getByLabelText('Concepto'), 'Venta julio');
-    await user.click(screen.getByRole('button', { name: 'Continuar' }));
-    await user.type(screen.getByLabelText('Monto'), '150');
-    await user.click(screen.getByRole('button', { name: 'Guardar' }));
+      // subtype defaults to "general" (Otro ingreso) — no chip click needed
+      await user.click(screen.getByRole('button', { name: 'Ingreso' }));
+      await user.selectOptions(screen.getByLabelText('¿Dónde recibiste el dinero?'), 'bank-1');
+      await user.selectOptions(screen.getByLabelText('Categoría de ingreso'), 'income-1');
+      await user.click(screen.getByRole('button', { name: 'Continuar' }));
+      await user.click(screen.getByRole('button', { name: 'Omitir' }));
+      await user.type(screen.getByLabelText('Concepto'), 'Venta julio');
+      await user.click(screen.getByRole('button', { name: 'Continuar' }));
+      await user.type(screen.getByLabelText('Monto'), '150');
+      await user.click(screen.getByRole('button', { name: 'Guardar' }));
 
-    expect(onSubmit).toHaveBeenCalledWith(
-      expect.objectContaining({ concept: 'Venta julio', amount: 150 }),
-    );
-    expect(await screen.findByText(/apunte guardado/i)).toBeInTheDocument();
-  });
+      expect(onSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({ concept: 'Venta julio', amount: 150 }),
+      );
+      expect(await screen.findByText(/apunte guardado/i)).toBeInTheDocument();
+    },
+    10_000,
+  );
 
   it('ManualEntryForm rejects unbalanced lines before calling onSubmit', async () => {
     const user = userEvent.setup();

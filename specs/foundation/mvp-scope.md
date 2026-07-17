@@ -30,6 +30,7 @@ El MVP debe permitir que una persona use TADOR en su vida diaria sin sentir que 
 | Periodos | Cierre anual con reapertura. |
 | UI | Mobile-first con soporte desktop; namespaces `/hogar/*` y `/pro/*`. |
 | PRO ligero | EntryBuilder, árbol de cuentas con códigos, asiento manual; P&G/Balance iguales a Hogar (Sprint 07). |
+| PRO avanzado | Análisis bancos/tarjetas/cartera, plantillas financieras, filtros P&G, auto-entityId ingreso/egreso (Sprint 09; ADR 0002). |
 
 ## Reporte obligatorio
 
@@ -67,9 +68,8 @@ Los dos paneles se presentan juntos en el dashboard pero se calculan desde fuent
 | Control de materia prima | No se implementa como inventario en MVP. |
 | Índices financieros | Se agregarán con reportes PRO futuros. |
 | Reportes avanzados | Comparativos, exportaciones y filtros complejos quedan después. |
-| IA v0 (Sprint 08) | **Excluida del MVP por tiempo.** Spec `008-ia-v0` se conserva para post-MVP; no bloquea cierre. |
+| IA v0 (Sprint 08) | **Excluida del MVP** (complejidad + deadline; ADR 0002). Spec `008-ia-v0` se conserva; no renumerar. |
 | IA autónoma | La IA no decide ni ejecuta contabilidad sin validación y confirmación. |
-| PRO avanzado (Sprint 09) | Análisis bancos/tarjetas/cartera, filtros P&G por entidad — post 007. |
 | Personalidad completa de Pacho | Branding y guía conversacional quedan para después. |
 | Frontend de administración | Panel interno completo (catálogos, ops). En MVP: tool HTML `/api/dev/plantillas-admin` (lista + form + mockup asiento + fuente; 004 §12). |
 

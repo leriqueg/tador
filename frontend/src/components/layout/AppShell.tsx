@@ -4,29 +4,41 @@ import MobileBottomBar, { type BottomBarItem } from '../navigation/MobileBottomB
 import Icon from '../ui/Icon.tsx';
 
 export const HOGAR_NAV = [
-  { to: '/dashboard', icon: 'dashboard', label: 'Resumen' },
-  { to: '/entries', icon: 'edit_note', label: 'Apuntes' },
-  { to: '/finances', icon: 'monitoring', label: 'Estado' },
-  { to: '/accounts', icon: 'account_balance_wallet', label: 'Cuentas' },
-  { to: '/entities', icon: 'group', label: 'Entidades' },
-  { to: '/settings', icon: 'settings', label: 'Ajustes' },
+  { to: '/hogar/dashboard', icon: 'dashboard', label: 'Resumen' },
+  { to: '/hogar/entries', icon: 'edit_note', label: 'Apuntes' },
+  { to: '/hogar/finances', icon: 'monitoring', label: 'Estado' },
+  { to: '/hogar/accounts', icon: 'account_balance_wallet', label: 'Cuentas' },
+  { to: '/hogar/entities', icon: 'group', label: 'Entidades' },
+  { to: '/hogar/settings', icon: 'settings', label: 'Ajustes' },
 ] as const;
 
+/** PRO namespace nav — same labels/icons as Hogar, distinct paths (specs/foundation/modos-hogar-pro.md). */
+export const PRO_NAV = HOGAR_NAV.map((item) => ({
+  ...item,
+  to: item.to.replace('/hogar/', '/pro/') as `/pro/${string}`,
+}));
+
+export type AppShellMode = 'hogar' | 'pro';
+
 export interface AppShellProps {
+  mode?: AppShellMode;
   activePath?: string;
   userLabel?: string;
   onLogout?: () => void;
   children: ReactNode;
 }
 
-/** Authenticated Hogar shell — no Pacho avatar (post-MVP). */
+/** Authenticated shell — no Pacho avatar (post-MVP). Nav namespace follows `mode`. */
 export default function AppShell({
-  activePath = '/dashboard',
+  mode = 'hogar',
+  activePath = `/${mode}/dashboard`,
   userLabel,
   onLogout,
   children,
 }: AppShellProps) {
-  const bottomItems: BottomBarItem[] = HOGAR_NAV.map((item) => ({
+  const navItems = mode === 'pro' ? PRO_NAV : HOGAR_NAV;
+  const brandTo = `/${mode}/dashboard`;
+  const bottomItems: BottomBarItem[] = navItems.map((item) => ({
     icon: item.icon,
     label: item.label,
     to: item.to,
@@ -34,9 +46,12 @@ export default function AppShell({
   }));
 
   return (
-    <div className="min-h-screen bg-background text-on-surface font-body flex flex-col">
+    <div
+      data-mode={mode}
+      className="min-h-screen bg-background text-on-surface font-body flex flex-col"
+    >
       <header className="sticky top-0 z-40 bg-surface/90 backdrop-blur-md border-b border-surface-container px-md md:px-lg h-14 flex items-center justify-between">
-        <Link to="/dashboard" className="text-headline-md font-extrabold text-primary tracking-tight no-underline">
+        <Link to={brandTo} className="text-headline-md font-extrabold text-primary tracking-tight no-underline">
           TADOR
         </Link>
         <div className="flex items-center gap-md">
@@ -57,7 +72,7 @@ export default function AppShell({
 
       <div className="flex-1 flex w-full max-w-container-max mx-auto">
         <aside className="hidden md:flex w-52 shrink-0 flex-col gap-xs p-md border-r border-outline-variant/40">
-          {HOGAR_NAV.map((item) => {
+          {navItems.map((item) => {
             const active = activePath === item.to || activePath.startsWith(`${item.to}/`);
             return (
               <Link

@@ -63,7 +63,7 @@ export default function Settings() {
   }
 
   return (
-    <AppShell activePath="/settings" userLabel={user.email} onLogout={() => void logout()}>
+    <AppShell activePath="/hogar/settings" userLabel={user.email} onLogout={() => void logout()}>
       <section className="max-w-lg">
         <h1 className="text-headline-lg text-on-surface font-bold mb-xs">Ajustes</h1>
         <p className="text-body-md text-on-surface-variant mb-lg">

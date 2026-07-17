@@ -171,8 +171,14 @@ export interface AccountMetadata {
   cutoffDay?: number;
 }
 
+export type TipoCuentaManualCreate =
+  | 'wallet'
+  | 'bridge'
+  | 'incomeCategory'
+  | 'expenseCategory';
+
 export interface CreateAccountInput {
-  tipoCuenta: 'bank' | 'card' | 'wallet' | 'bridge' | 'incomeCategory' | 'expenseCategory';
+  tipoCuenta: TipoCuentaManualCreate | 'bank' | 'card';
   nombre: string;
   globalId?: string;
   parentGroupCodigo?: string;
@@ -195,11 +201,32 @@ export const accounts = {
   },
 };
 
+export interface ChartGlobalNode {
+  id: string;
+  parentId: string | null;
+  codigo: string;
+  nombre: string;
+  esPostable: boolean;
+}
+
+export const chart = {
+  list() {
+    return request<{ chart: ChartGlobalNode[]; activations: unknown[] }>('GET', '/api/chart');
+  },
+};
+
+export const balances = {
+  get(cuentaId: string) {
+    return request<{ cuentaId: string; saldo: number }>('GET', `/api/balances/${cuentaId}`);
+  },
+};
+
 export interface EntitySummary {
   id: string;
   nombre: string;
   tipo: string;
   notas: string | null;
+  capabilities?: string[];
   provisionedAccountId?: string | null;
 }
 
@@ -224,6 +251,7 @@ export const entities = {
     nombre: string;
     tipo: EntityTipo;
     notas?: string;
+    capabilities?: string[];
     metadata?: AccountMetadata;
   }) {
     return request<EntityCreateResponse>('POST', '/api/entities', input);
@@ -285,13 +313,18 @@ export const plantillas = {
 export interface ApunteLineInput {
   id: number;
   accountId: string;
+  /** Only required when no templateCode (PRO EntryBuilder free-form entries) */
+  side?: 'debit' | 'credit';
+  /** Only required when no templateCode (PRO EntryBuilder free-form entries) */
+  amount?: number;
 }
 
 export interface CreateApunteInput {
-  templateCode: string;
+  /** Omit for PRO EntryBuilder free-form entries (FR-007: apunte con o sin templateCode) */
+  templateCode?: string;
   date: string;
   concept: string;
-  amount: number;
+  amount?: number;
   lines: ApunteLineInput[];
   entityId?: string | null;
 }
@@ -349,6 +382,39 @@ export const apuntes = {
 
   update(id: string, input: CreateApunteInput) {
     return request<{ apunte: ApunteSummary }>('PATCH', `/api/apuntes/${id}`, input);
+  },
+};
+
+// ─── Manual entries (asientos) ─────────────────────────────────────
+
+export interface CreateEntryLineInput {
+  cuentaId?: string;
+  cuentaGlobalId?: string;
+  debito?: number;
+  credito?: number;
+}
+
+export interface CreateEntryInput {
+  fecha: string;
+  concepto: string;
+  lineas: CreateEntryLineInput[];
+}
+
+export interface EntrySummary {
+  id: string;
+  concepto: string;
+  fecha: string;
+  tipo: string;
+  anulado: boolean;
+}
+
+export const entries = {
+  create(input: CreateEntryInput) {
+    return request<{ entry: EntrySummary; lineas: CreateEntryLineInput[] }>(
+      'POST',
+      '/api/entries',
+      input,
+    );
   },
 };
 

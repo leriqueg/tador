@@ -281,7 +281,7 @@ export default function Entries() {
   if (gate.redirectTo) return <Navigate to={gate.redirectTo} replace />;
 
   return (
-    <AppShell activePath="/entries" userLabel={user.email} onLogout={() => void logout()}>
+    <AppShell activePath="/hogar/entries" userLabel={user.email} onLogout={() => void logout()}>
       <div className="max-w-lg mx-auto">
         <header className="mb-lg">
           <h1 className="text-headline-lg text-on-surface font-bold mb-xs">
@@ -412,7 +412,7 @@ export default function Entries() {
         <section className="mt-xl">
           <div className="flex items-center justify-between mb-sm">
             <h2 className="text-headline-md font-semibold text-on-surface">Recientes</h2>
-            <Link to="/entries" className="text-label-sm text-secondary no-underline">
+            <Link to="/hogar/entries" className="text-label-sm text-secondary no-underline">
               Actualizar
             </Link>
           </div>

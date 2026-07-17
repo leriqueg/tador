@@ -154,6 +154,8 @@ model Entidad {
   nombre    String
   tipo      TipoEntidad
   notas     String?
+  /// Capability tokens for organization roles (e.g. can_be_customer, is_employment_dependency).
+  capabilities Json     @default("[]")
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
 

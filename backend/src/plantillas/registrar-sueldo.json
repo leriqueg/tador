@@ -6,7 +6,7 @@
   "amount": { "type": "money", "required": true, "label": "Monto" },
   "concept": { "type": "text", "required": true, "label": "Concepto" },
   "date": { "type": "date", "default": "today", "required": true, "label": "Fecha" },
-  "entity": { "type": "entity", "required": false, "label": "Relacionado con" },
+  "entity": { "type": "entity", "required": false, "label": "Relacionado con", "requiresCapability": "is_employment_dependency" },
   "amountMode": "single",
   "descriptionTemplate": "Sueldo: {concept}",
   "lines": [

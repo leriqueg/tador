@@ -27,7 +27,8 @@ Sprint 04  Plantillas MVP
 Sprint 05  Dashboard PYG
 Sprint 06  Frontend Hogar
 Sprint 07  Frontend PRO ligero
-Sprint 08  IA v0
+Sprint 09  Frontend PRO avanzado (post 007)
+Sprint 08  IA v0 — EXCLUIDO del MVP (conservado post-MVP)
 ```
 
 ## Sprint 00 - Foundation Spec Kit
@@ -184,27 +185,55 @@ El usuario puede registrar una semana real de operaciones en Modo Hogar.
 
 ### Objetivo
 
-Agregar mayor control sin convertir TADOR en un ERP.
+Agregar mayor control sin convertir TADOR en un ERP. Namespaces `/pro/*`; mismas APIs.
 
 ### Incluye
 
-- Ver códigos de cuenta.
-- Elegir cuenta madre al crear cuentas.
-- Formularios con más detalle.
-- Asiento manual.
-- Vista más explícita de cuentas y saldos.
+- EntryBuilder (captura diaria PRO) + burst + Entidad JIT.
+- Ver códigos; crear cuentas bajo madre (excepto provisión por Entidad).
+- Asiento manual (escape hatch).
+- Onboarding PRO: dependencia laboral → organización empleadora (opcional).
+- P&G y Balance **iguales** a Hogar (sin densificar).
 
 ### Criterio de cierre
 
-El usuario PRO puede resolver casos que Hogar no expone, sin romper las reglas contables.
+El usuario PRO registra con EntryBuilder, ve el árbol con códigos y puede asiento manual, sin romper reglas contables.
 
-## Sprint 08 - IA v0
+### Fuera de 007 (ver Sprint 09)
+
+- Analizar bancos / tarjetas / cartera entidades.
+- Filtros P&G por cuenta/entidad.
+- Conciliación.
+
+## Sprint 09 - Frontend PRO avanzado
 
 ### Objetivo
 
+Densidad analítica PRO sin ERP documental.
+
+### Incluye (planificado)
+
+- Analizar Bancos (saldos mensuales, costos; conciliación post-MVP).
+- Analizar Tarjetas (cargos del mes, intereses; conciliación post-MVP).
+- Analizar Cartera Entidades (CxC vs CxP + listados).
+
+### Criterio de cierre
+
+El usuario PRO responde “¿cómo van mis bancos/tarjetas/cartera?” con vistas dedicadas.
+
+Spec: `specs/009-frontend-pro-avanzado/`.
+
+## Sprint 08 - IA v0 — EXCLUIDO DEL MVP
+
+### Estado
+
+**Fuera del MVP por falta de tiempo (2026-07-16).** El directorio `specs/008-ia-v0/` se **conserva** (no borrar) para implementación post-MVP. No bloquea el criterio de cierre del MVP.
+
+### Objetivo (futuro)
+
 Agregar un asistente local que interprete lenguaje natural y sugiera plantillas.
 
-### Incluye
+### Incluye (cuando se reactive)
 
 - Modelo local pequeño.
 - Endpoint o servicio de interpretación.
@@ -213,10 +242,6 @@ Agregar un asistente local que interprete lenguaje natural y sugiera plantillas.
 - Precarga de campos.
 - Confirmación del usuario.
 - Ejecución solo mediante APIs normales de TADOR.
-
-### Criterio de cierre
-
-Frases simples como `gasté $50 en almuerzo` sugieren una plantilla correcta y permiten confirmar el registro.
 
 ## Fuera de esta secuencia MVP
 

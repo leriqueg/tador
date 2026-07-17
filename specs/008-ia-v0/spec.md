@@ -4,9 +4,11 @@
 
 **Created**: 2026-06-22
 
-**Status**: Draft
+**Status**: **Excluded from MVP** (2026-07-16 — deferred for time). Artifacts retained for post-MVP; do not delete this directory.
 
 **Input**: Sprint 08: asistente local que interpreta lenguaje natural y sugiere plantillas en Modo Hogar.
+
+> **MVP note**: Cierre del MVP **no** requiere IA v0. Ver `mvp-scope.md` y `estrategia-incremental-sprints.md`.
 
 ## User Scenarios & Testing *(mandatory)*
 

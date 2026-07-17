@@ -26,6 +26,7 @@ import {
   sumMoney,
 } from '../../domain/money.js';
 import { buildApunteListWhere } from '../../application/apunte-list-filters.js';
+import { assertEntityCapability, EntityCapabilityError } from '../../domain/entity-capability-rule.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -150,6 +151,35 @@ async function validateLineAgainstTemplate(
         );
       }
     }
+  }
+}
+
+/**
+ * Resolve an entityId and assert it holds the required capability (V11).
+ * Never validates retroactively — only the entity selected for this apunte.
+ */
+async function requireEntityCapability(
+  entityId: string,
+  userId: string,
+  requiredCapability: string,
+): Promise<void> {
+  const entity = await prisma.entidad.findFirst({
+    where: { id: entityId, userId },
+    select: { tipo: true, capabilities: true },
+  });
+  if (!entity) {
+    throw new ValidationError(`Entity ${entityId} not found (V11)`, 404);
+  }
+  try {
+    assertEntityCapability(
+      { tipo: entity.tipo, capabilities: entity.capabilities as string[] },
+      requiredCapability,
+    );
+  } catch (err) {
+    if (err instanceof EntityCapabilityError) {
+      throw new ValidationError(`${err.message} (V11)`, 400);
+    }
+    throw err;
   }
 }
 
@@ -385,6 +415,16 @@ export function registerApunteRoutes(
                 .send({ error: 'amount is required when template has amountMode single (V5)' });
             }
             amount = moneyToNumber(quantizeMoney(body.amount, currency), currency);
+          }
+
+          // V11: When a template requires an entity capability (e.g. salary →
+          // is_employment_dependency) and an entity was selected, it must hold it.
+          if (body.entityId && template.entity?.requiresCapability) {
+            await requireEntityCapability(
+              body.entityId,
+              userId,
+              template.entity.requiresCapability,
+            );
           }
         }
 

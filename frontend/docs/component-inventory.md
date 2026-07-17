@@ -4,6 +4,8 @@ Living design-system catalog for the frontend. **Source of brand tokens:** [`spe
 
 Sprint 006 maps routes ↔ APIs in [`specs/006-frontend-hogar/inventory-vistas-endpoints.md`](../../specs/006-frontend-hogar/inventory-vistas-endpoints.md); this file owns **UI component definitions**.
 
+**Namespaces Hogar/PRO (007):** [`route-map.md`](./route-map.md) — `/hogar/*` vs `/pro/*`.
+
 **Status legend:** `exists` · `missing` · `post-MVP`
 
 **Pacho / mascot:** not used in functional MVP views. Keep Storybook entries as experimental until character design supports off | messages-only | character.

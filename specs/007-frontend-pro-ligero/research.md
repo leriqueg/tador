@@ -1,38 +1,35 @@
 # Research: Sprint 07 - Frontend PRO ligero
 
-## Decision: Sprint boundary
+## Decision: Separate frontend namespaces
 
-Light PRO UI only; excludes ERP, invoices and advanced reports.
+`/hogar/*` and `/pro/*` with mode guard redirects. Avoids `if (mode)` god-pages; allows distinct shell/color. Backend APIs stay shared.
 
-**Rationale**: Prevents broad MVP specs and keeps each sprint independently plannable.
+**Alternatives**: Same routes densified by mode — rejected (SOLID/composability).
 
-**Alternatives considered**: Full MVP planning in one spec.
+## Decision: EntryBuilder write path
+
+Primary: build valid apunte → `POST /api/apuntes` with or without `templateCode`. Escape: `POST /api/entries` (manual). Do not require loading-all-templates-and-pruning as the only algorithm; optional hybrid later.
+
+**Alternatives**: Template-filter-only — deferred; free-compose first.
+
+## Decision: P&G/Balance unchanged
+
+Analysis banks/cards/cartera → Sprint 009. Prevents scope explosion.
+
+## Decision: organization + capabilities
+
+Collapse client/supplier into `organization` with `can_be_customer`, `can_be_supplier`, `is_employment_dependency`. Validate on apunte submit only.
+
+**Rationale**: Same legal entity can change role over time; no retroactive rewrite.
+
+## Decision: PRO onboarding
+
+Ask employment dependency only → create employer org. No clients/suppliers in onboarding. Freelance may finish empty-handed. Clients/suppliers JIT in EntryBuilder with careful inline UI.
+
+## Decision: IA / 008
+
+Excluded from MVP (time). Spec retained.
 
 ## Decision: Testing posture
 
-Use TDD for backend behavior once Sprint 01 establishes test tooling.
-
-**Rationale**: Constitution requires test-first core behavior and tenant/accounting protection.
-
-**Alternatives considered**: Manual testing only.
-
-## Decision: Tenant/privacy default
-
-All user-owned data must be scoped by authenticated user.
-
-**Rationale**: Financial data is private and multiuser from the MVP.
-
-**Alternatives considered**: Add tenant scoping later.
-
-## Decision: Captura PRO = EntryBuilder (2026-07-13)
-
-Primary daily capture is **progressive disclosure / narrative form** (EntryBuilder): Tipo → cuenta/subtipo → (Entidad si aplica) → concepto → monto. Completed steps stay visible and editable. Burst: “Guardar y registrar otro”. Manual asiento remains escape hatch.
-
-**Rationale**: PRO persona still is not a full accountant; sequential filtered choices give validity-by-construction and teach the model. Dry multi-field form rejected as primary UX. Hogar plantilla UX must not be reused as the only PRO path, nor EntryBuilder shipped as Hogar UX (see Sprint 06).
-
-**Alternatives considered**:
-- Dry form + “guardar y escribir otro” only — rejected as primary; kept as behavior once steps are filled / via burst.
-- AI free-text (`registro_pro_asistente_ia_tador`) — post-MVP / Sprint 08; not Sprint 07 EntryBuilder.
-- Same Hogar tile grid for PRO — rejected: PRO needs branching (préstamo + entidad) and more control.
-
-**Reference**: `specs/foundation/modos-hogar-pro.md`; mockup `registro_pro_plantillas_tador`.
+TDD for capability checks (backend) and EntryBuilder step machine (unit). Integration for apunte/entry. E2E smoke for guards + one happy path.

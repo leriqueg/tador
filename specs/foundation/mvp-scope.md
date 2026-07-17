@@ -18,7 +18,7 @@ El MVP debe permitir que una persona use TADOR en su vida diaria sin sentir que 
 | Modos | Hogar y PRO como modos de uso (nivel de expectativa del usuario), no como pricing; el modelo de datos es el mismo en ambos. |
 | Plan de cuentas | Catálogo global base y plan personalizado por usuario. |
 | Cuentas | Cuentas madre y cuentas postables; Hogar oculta códigos, PRO puede mostrarlos. |
-| Entidades | Catálogo base de objetos con nombre propio: bancos, tarjetas, personas, clientes, proveedores, plataformas, etc. |
+| Entidades | Bancos, tarjetas, personas, plataformas, `organization` con capacidades (cliente/proveedor/empleador); sin tipos client/supplier separados. |
 | Tags | Etiquetas simples para contexto; si representan nombre propio deben apoyarse en Entidad. |
 | Asientos | Registro interno atómico, balanceado y auditable. |
 | Apuntes | Plantillas guiadas para registrar acciones cotidianas. |
@@ -28,8 +28,8 @@ El MVP debe permitir que una persona use TADOR en su vida diaria sin sentir que 
 | Deudas por cobrar/pagar | Registro como cuentas de balance vinculadas a Entidades (personas, bancos, emisores de tarjeta, clientes, proveedores); sin módulo documental formal. |
 | Reporte | Dashboard con panel PYG anual y panel de posición (disponible, por cobrar, por pagar) como reporte obligatorio del MVP. |
 | Periodos | Cierre anual con reapertura. |
-| UI | Mobile-first con soporte desktop. |
-| IA | Asistente IA v0 local para interpretar frases simples y sugerir plantillas en Modo Hogar, después de backend y frontend. |
+| UI | Mobile-first con soporte desktop; namespaces `/hogar/*` y `/pro/*`. |
+| PRO ligero | EntryBuilder, árbol de cuentas con códigos, asiento manual; P&G/Balance iguales a Hogar (Sprint 07). |
 
 ## Reporte obligatorio
 
@@ -67,7 +67,9 @@ Los dos paneles se presentan juntos en el dashboard pero se calculan desde fuent
 | Control de materia prima | No se implementa como inventario en MVP. |
 | Índices financieros | Se agregarán con reportes PRO futuros. |
 | Reportes avanzados | Comparativos, exportaciones y filtros complejos quedan después. |
+| IA v0 (Sprint 08) | **Excluida del MVP por tiempo.** Spec `008-ia-v0` se conserva para post-MVP; no bloquea cierre. |
 | IA autónoma | La IA no decide ni ejecuta contabilidad sin validación y confirmación. |
+| PRO avanzado (Sprint 09) | Análisis bancos/tarjetas/cartera, filtros P&G por entidad — post 007. |
 | Personalidad completa de Pacho | Branding y guía conversacional quedan para después. |
 | Frontend de administración | Panel interno completo (catálogos, ops). En MVP: tool HTML `/api/dev/plantillas-admin` (lista + form + mockup asiento + fuente; 004 §12). |
 
@@ -102,7 +104,7 @@ El MVP está completo cuando un usuario pueda:
 9. ver saldos actuales,
 10. ver dashboard con panel PYG y panel de posición,
 11. cerrar y reabrir un ejercicio,
-12. usar IA v0 para sugerir plantillas simples en Modo Hogar.
+12. usar Modo PRO ligero (EntryBuilder, árbol con códigos, asiento manual) cuando elija PRO.
 
 ## No decidido aún
 

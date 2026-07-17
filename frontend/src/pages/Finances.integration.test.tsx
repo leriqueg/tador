@@ -34,20 +34,20 @@ describe('Finances page (integration)', () => {
   });
 
   it('renders Estado landing with three navigation cards', () => {
-    renderWithRouter(<Finances />, { router: { initialEntries: ['/finances'] } });
+    renderWithRouter(<Finances />, { router: { initialEntries: ['/hogar/finances'] } });
 
     expect(screen.getByRole('heading', { name: 'Estado' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Estado financiero \(P&G\)/i })).toHaveAttribute(
       'href',
-      '/finances/pyg',
+      '/hogar/finances/pyg',
     );
     expect(screen.getByRole('link', { name: /Estado de Balance/i })).toHaveAttribute(
       'href',
-      '/finances/balance',
+      '/hogar/finances/balance',
     );
     expect(screen.getByRole('link', { name: /Revisar apuntes/i })).toHaveAttribute(
       'href',
-      '/finances/apuntes',
+      '/hogar/finances/apuntes',
     );
   });
 
@@ -59,7 +59,7 @@ describe('Finances page (integration)', () => {
     });
 
     renderWithRouter(<Finances />, {
-      router: { initialEntries: ['/finances'] },
+      router: { initialEntries: ['/hogar/finances'] },
       withAuthRoutes: true,
     });
 
@@ -75,7 +75,7 @@ describe('Finances page (integration)', () => {
     });
 
     renderWithRouter(<Finances />, {
-      router: { initialEntries: ['/finances'] },
+      router: { initialEntries: ['/hogar/finances'] },
       withAuthRoutes: true,
     });
 

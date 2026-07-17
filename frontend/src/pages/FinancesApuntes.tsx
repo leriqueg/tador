@@ -8,9 +8,15 @@ import ValidationMessage from '../components/ui/ValidationMessage.tsx';
 import { accounts, apuntes, type AccountSummary, type ApunteSummary } from '../lib/api.ts';
 import { useAuth } from '../lib/auth.tsx';
 import { useBookGate } from '../lib/use-book-gate.ts';
+import { namespacePaths, type AppNamespace } from '../lib/namespace-paths.ts';
+
+export interface FinancesApuntesProps {
+  namespace?: AppNamespace;
+}
 
 /** Historial filtrable de apuntes (FR-007d). */
-export default function FinancesApuntes() {
+export default function FinancesApuntes({ namespace = 'hogar' }: FinancesApuntesProps) {
+  const paths = namespacePaths(namespace);
   const { user, loading: authLoading, logout } = useAuth();
   const gate = useBookGate();
   const navigate = useNavigate();
@@ -68,10 +74,15 @@ export default function FinancesApuntes() {
   if (gate.redirectTo) return <Navigate to={gate.redirectTo} replace />;
 
   return (
-    <AppShell activePath="/finances" userLabel={user.email} onLogout={() => void logout()}>
+    <AppShell
+      mode={namespace}
+      activePath={paths.finances}
+      userLabel={user.email}
+      onLogout={() => void logout()}
+    >
       <div className="max-w-lg mx-auto space-y-lg">
         <header>
-          <Link to="/finances" className="text-label-md text-secondary no-underline mb-sm inline-block">
+          <Link to={paths.finances} className="text-label-md text-secondary no-underline mb-sm inline-block">
             ← Estado
           </Link>
           <h1 className="text-headline-lg text-on-surface font-bold mb-xs">Todos tus apuntes</h1>
@@ -152,7 +163,7 @@ export default function FinancesApuntes() {
               items={items}
               emptyMessage="No hay apuntes con esos filtros."
               onEdit={(item) => {
-                navigate(`/entries/new?edit=${item.id}`);
+                navigate(paths.editApunte(item.id));
               }}
             />
           </>

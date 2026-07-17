@@ -457,6 +457,84 @@ describe('US2 — Register ingreso with plantilla', () => {
 
     await app.close();
   });
+
+  it('should reject registrar_sueldo when the selected org lacks is_employment_dependency (T006)', async () => {
+    const app = await createTestApp();
+    const cookies = await registerAndVerify(app, 'us2-sueldo-no-cap@test.com');
+    const accounts = await setupTemplateAccounts(app, cookies);
+
+    const orgRes = await app.inject({
+      method: 'POST',
+      url: '/api/entities',
+      headers: { cookie: cookies.join('; ') },
+      payload: { nombre: 'Cliente SA', tipo: 'organization', capabilities: ['can_be_customer'] },
+    });
+    expect(orgRes.statusCode).toBe(201);
+    const { entity: org } = orgRes.json();
+
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/apuntes',
+      headers: { cookie: cookies.join('; ') },
+      payload: {
+        templateCode: 'registrar_sueldo',
+        date: '2026-07-01',
+        concept: 'Sueldo julio',
+        amount: 1500,
+        entityId: org.id,
+        lines: [
+          { id: 1, accountId: accounts.bancoUserAccountId },
+          { id: 2, accountId: accounts.ingresoUserAccountId },
+        ],
+      },
+    });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.json().error).toContain('is_employment_dependency');
+
+    await app.close();
+  });
+
+  it('should accept registrar_sueldo when the selected org has is_employment_dependency (T006)', async () => {
+    const app = await createTestApp();
+    const cookies = await registerAndVerify(app, 'us2-sueldo-with-cap@test.com');
+    const accounts = await setupTemplateAccounts(app, cookies);
+
+    const orgRes = await app.inject({
+      method: 'POST',
+      url: '/api/entities',
+      headers: { cookie: cookies.join('; ') },
+      payload: {
+        nombre: 'Empleador SA',
+        tipo: 'organization',
+        capabilities: ['is_employment_dependency'],
+      },
+    });
+    expect(orgRes.statusCode).toBe(201);
+    const { entity: org } = orgRes.json();
+
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/apuntes',
+      headers: { cookie: cookies.join('; ') },
+      payload: {
+        templateCode: 'registrar_sueldo',
+        date: '2026-07-01',
+        concept: 'Sueldo julio',
+        amount: 1500,
+        entityId: org.id,
+        lines: [
+          { id: 1, accountId: accounts.bancoUserAccountId },
+          { id: 2, accountId: accounts.ingresoUserAccountId },
+        ],
+      },
+    });
+
+    expect(res.statusCode).toBe(201);
+    expect(res.json().apunte.templateCode).toBe('registrar_sueldo');
+
+    await app.close();
+  });
 });
 
 // ---------------------------------------------------------------------------

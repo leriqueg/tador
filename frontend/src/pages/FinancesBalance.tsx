@@ -7,9 +7,15 @@ import { reports, type PositionReport } from '../lib/api.ts';
 import { useAuth } from '../lib/auth.tsx';
 import { useBookGate } from '../lib/use-book-gate.ts';
 import { formatMoney, leverageHint, leverageRatio } from '../lib/finance.ts';
+import { namespacePaths, type AppNamespace } from '../lib/namespace-paths.ts';
+
+export interface FinancesBalanceProps {
+  namespace?: AppNamespace;
+}
 
 /** Estado de Balance — posición + breakdown (FR-007c). */
-export default function FinancesBalance() {
+export default function FinancesBalance({ namespace = 'hogar' }: FinancesBalanceProps) {
+  const paths = namespacePaths(namespace);
   const { user, loading: authLoading, logout } = useAuth();
   const gate = useBookGate();
   const [position, setPosition] = useState<PositionReport | null>(null);
@@ -57,10 +63,15 @@ export default function FinancesBalance() {
       : null;
 
   return (
-    <AppShell activePath="/finances" userLabel={user.email} onLogout={() => void logout()}>
+    <AppShell
+      mode={namespace}
+      activePath={paths.finances}
+      userLabel={user.email}
+      onLogout={() => void logout()}
+    >
       <div className="max-w-2xl mx-auto space-y-lg">
         <header>
-          <Link to="/finances" className="text-label-md text-secondary no-underline mb-sm inline-block">
+          <Link to={paths.finances} className="text-label-md text-secondary no-underline mb-sm inline-block">
             ← Estado
           </Link>
           <h1 className="text-headline-lg text-on-surface font-bold mb-xs">Estado de Balance</h1>

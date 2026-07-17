@@ -7,11 +7,18 @@ import { reports, type PyGReport } from '../lib/api.ts';
 import { useAuth } from '../lib/auth.tsx';
 import { useBookGate } from '../lib/use-book-gate.ts';
 import { formatMoney, MONTH_LABELS, monthFromSeries } from '../lib/finance.ts';
+import { namespacePaths, type AppNamespace } from '../lib/namespace-paths.ts';
 
 type Scope = 'year' | 'month';
 
+export interface FinancesPygProps {
+  namespace?: AppNamespace;
+}
+
 /** Estado financiero P&G — Top 10, barras + línea (FR-007b). */
-export default function FinancesPyg() {
+export default function FinancesPyg({ namespace = 'hogar' }: FinancesPygProps) {
+  const paths = namespacePaths(namespace);
+  const scopeCopy = namespace === 'pro' ? 'tus movimientos' : 'tu hogar';
   const { user, loading: authLoading, logout } = useAuth();
   const gate = useBookGate();
   const now = new Date();
@@ -86,15 +93,20 @@ export default function FinancesPyg() {
   );
 
   return (
-    <AppShell activePath="/finances" userLabel={user.email} onLogout={() => void logout()}>
+    <AppShell
+      mode={namespace}
+      activePath={paths.finances}
+      userLabel={user.email}
+      onLogout={() => void logout()}
+    >
       <div className="max-w-2xl mx-auto space-y-lg">
         <header>
-          <Link to="/finances" className="text-label-md text-secondary no-underline mb-sm inline-block">
+          <Link to={paths.finances} className="text-label-md text-secondary no-underline mb-sm inline-block">
             ← Estado
           </Link>
           <h1 className="text-headline-lg text-on-surface font-bold mb-xs">Estado financiero</h1>
           <p className="text-body-md text-on-surface-variant">
-            Cómo entra y sale el dinero en tu hogar.
+            Cómo entra y sale el dinero en {scopeCopy}.
           </p>
         </header>
 

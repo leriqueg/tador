@@ -3,9 +3,10 @@ alwaysApply: true
 ---
 
 <!-- SPECKIT START -->
-Current active plan: none (Sprint 006 Frontend Hogar **closed** 2026-07-16).
-Last closed: `specs/006-frontend-hogar/plan.md` — Hogar US1–US3 + Vitest/Playwright E2E.
-Next candidate: `specs/007-frontend-pro-ligero/` (PRO EntryBuilder) when prioritized.
-For roadmap context, also read `specs/foundation/estrategia-incremental-sprints.md`.
+Current active plan: `specs/007-frontend-pro-ligero/plan.md`.
+Capture: Hogar = QuickAdd `/hogar/*` (006 closed); PRO = EntryBuilder `/pro/*` (007).
+Advanced PRO analysis → `specs/009-frontend-pro-avanzado/` (deferred).
+IA v0 `specs/008-ia-v0/` → **excluded from MVP** (retained post-MVP).
+Modos / QuickAdd vs EntryBuilder: `specs/foundation/modos-hogar-pro.md`.
 Component inventory (UI): `frontend/docs/component-inventory.md`.
 <!-- SPECKIT END -->

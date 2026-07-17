@@ -72,12 +72,12 @@ export default function Accounts() {
   }
 
   return (
-    <AppShell activePath="/accounts" userLabel={user.email} onLogout={() => void logout()}>
+    <AppShell activePath="/hogar/accounts" userLabel={user.email} onLogout={() => void logout()}>
       <section className="max-w-xl">
         <h1 className="text-headline-lg text-on-surface font-bold mb-xs">Cuentas</h1>
         <p className="text-body-md text-on-surface-variant mb-lg">
           Categorías de ingreso y gasto del hogar. Bancos, tarjetas y billeteras se gestionan en{' '}
-          <Link to="/entities" className="underline text-primary">
+          <Link to="/hogar/entities" className="underline text-primary">
             Entidades
           </Link>
           .

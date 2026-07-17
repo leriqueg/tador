@@ -175,7 +175,7 @@ export default function ApunteMiniForm({
     return (
       <ValidationMessage tone="error" title="Falta una cuenta">
         Esta plantilla necesita una cuenta que aún no tienes.{' '}
-        <Link to="/accounts" className="underline font-semibold">
+        <Link to="/hogar/accounts" className="underline font-semibold">
           Ir a Cuentas
         </Link>{' '}
         y volvé a intentar.

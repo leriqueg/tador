@@ -4,6 +4,7 @@
  */
 
 import type { FastifyInstance } from 'fastify';
+import type { Prisma } from '@prisma/client';
 import type { AuthApplicationService } from '../../application/auth-service.js';
 import { createAuthMiddleware } from '../middleware/auth.js';
 import { prisma } from '../../infrastructure/database.js';
@@ -177,7 +178,9 @@ export function registerAccountRoutes(
             globalId,
             entidadId: entidadId ?? null,
             codigoPersonalizado: codigoPersonalizado ?? null,
-            metadata: metadata ?? undefined,
+            metadata: (metadata ?? undefined) as
+              | Prisma.InputJsonValue
+              | undefined,
           },
         });
 

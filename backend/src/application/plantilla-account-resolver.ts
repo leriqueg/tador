@@ -17,6 +17,15 @@ export interface AvailableAccount {
   tipo: 'global' | 'usuario';
 }
 
+/** Plantilla with per-line account resolution (Omit avoids intersecting away `lines`). */
+export type PlantillaLineEnriched = PlantillaLine & {
+  availableAccounts: AvailableAccount[];
+};
+
+export type PlantillaEnriched = Omit<Plantilla, 'lines'> & {
+  lines: PlantillaLineEnriched[];
+};
+
 interface GlobalNode {
   id: string;
   codigo: string;
@@ -148,13 +157,7 @@ export async function enrichPlantilla(
   userId: string,
   charts?: Map<string, GlobalNode>,
   userAccounts?: Awaited<ReturnType<typeof loadUserAccounts>>,
-): Promise<
-  Plantilla & {
-    lines: Array<
-      PlantillaLine & { availableAccounts: AvailableAccount[] }
-    >;
-  }
-> {
+): Promise<PlantillaEnriched> {
   const byId = charts ?? (await loadChartIndex());
   const users = userAccounts ?? (await loadUserAccounts(userId));
 
@@ -173,13 +176,7 @@ export async function enrichPlantilla(
 export async function enrichPlantillas(
   plantillas: Plantilla[],
   userId: string,
-): Promise<
-  Array<
-    Plantilla & {
-      lines: Array<PlantillaLine & { availableAccounts: AvailableAccount[] }>;
-    }
-  >
-> {
+): Promise<PlantillaEnriched[]> {
   const byId = await loadChartIndex();
   const users = await loadUserAccounts(userId);
   return Promise.all(
@@ -214,11 +211,7 @@ export function serializePlantillaLight(plantilla: Plantilla) {
   };
 }
 
-export function serializePlantillaEnriched(
-  plantilla: Plantilla & {
-    lines: Array<PlantillaLine & { availableAccounts: AvailableAccount[] }>;
-  },
-) {
+export function serializePlantillaEnriched(plantilla: PlantillaEnriched) {
   return {
     ...serializePlantillaLight(plantilla),
     lines: plantilla.lines.map((line) => ({

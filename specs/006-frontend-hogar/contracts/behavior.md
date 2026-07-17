@@ -6,14 +6,53 @@ This contract describes observable behavior, not implementation details.
 
 - Authenticated user context when runtime data is involved.
 - User-provided data required by the sprint's stories.
+- For apuntes (US2): plantilla code, account selection, amount, short description, optional date (default today).
 
 ## Outputs
 
 - User-visible result that satisfies the acceptance scenarios in [spec.md](../spec.md).
 - Validation feedback when inputs are incomplete, unauthorized, or violate sprint rules.
+- On successful apunte: confirmation region + updated recent list; optional burst reset (keep plantilla + account).
 
 ## Invariants
 
 - Data from one user is never exposed to another user.
-- Financial behavior never bypasses accounting integrity rules.
-- Out-of-scope MVP modules are not required for this sprint to complete.
+- Financial behavior never bypasses accounting integrity rules (plantillas + backend only).
+- Hogar capture never displays account codes or ledger lines.
+- Out-of-scope MVP modules (PRO EntryBuilder, IA, documentary CxC) are not required for this sprint to complete.
+- Onboarding never requires banks or employment status in Hogar.
+- Transferencia (and similar dual-account plantillas) never posts the same account on both sides.
+
+## US1 — Onboarding observable contract
+
+1. Uninitialized book → `/onboarding`.
+2. Timezone select: curated NA/SA/EU list; preselect browser IANA when listed; else UTC.
+3. After mode + currency + timezone: optional wallets step (default explained; up to 2 extras) and optional cards step (network + name + optional last4 + optional cutoff).
+4. Completing wizard stamps `onboardingCompletedAt` and routes to `/dashboard`.
+5. Skipping wallets/cards is valid.
+6. Card create does not require bank.
+
+## US2 — QuickAdd / Entries (Hogar) observable contract
+
+### Discovery
+
+1. Screen `/entries` shows ≤6 frequent plantilla tiles (usage ranking or curated fallback).
+2. Kind segment: Gasto | Ingreso | Transferencia.
+3. Category chips (≤6) filter plantillas for the active kind; at most ~3 plantillas shown per category view.
+4. Typeahead search resolves plantilla by name/synonym.
+5. Deep link `/entries/new?plantilla=<code>` opens mini-form with that plantilla selected.
+
+### Mini-form
+
+1. Fields: account (sticky default = last used when available), amount, short description; date defaults to today.
+2. Submit disabled until request starts; spinner while in flight.
+3. Success → confirmation (live region) + recent list refresh.
+4. “Guardar y registrar otro” → same plantilla + account retained; amount and description cleared; focus amount.
+5. Missing required account for plantilla → everyday-language error + path to create/select account (no codes).
+6. For `transferencia` (and multi-slot account pickers with opposing sides): UI disables/rejects identical origin and destination; backend returns V10 on duplicate.
+
+### Non-goals (this sprint)
+
+- EntryBuilder progressive disclosure (Sprint 07).
+- Showing asiento lines or account codes in capture UI.
+- Mandatory bank setup or employment profiling in Hogar onboarding.

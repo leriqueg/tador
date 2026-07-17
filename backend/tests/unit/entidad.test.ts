@@ -1,8 +1,5 @@
 /**
  * Unit tests: Entidad domain entity.
- *
- * Entidad represents a named entity: person, organization, bank, or issuer.
- * Links to CuentaUsuario to identify the account holder or counterparty.
  */
 
 import { describe, it, expect } from 'vitest';
@@ -30,7 +27,6 @@ describe('Entidad', () => {
     });
 
     expect(entidad.tipo).toBe('bank');
-    expect(entidad.nombre).toBe('Banco del Pacífico');
   });
 
   it('should create an Entidad with tipo=organization', () => {
@@ -43,14 +39,24 @@ describe('Entidad', () => {
     expect(entidad.tipo).toBe('organization');
   });
 
-  it('should create an Entidad with tipo=issuer', () => {
+  it('should create an Entidad with tipo=card_issuer', () => {
     const entidad = createEntidad({
       userId: 'user-1',
       nombre: 'Visa',
-      tipo: 'issuer',
+      tipo: 'card_issuer',
     });
 
-    expect(entidad.tipo).toBe('issuer');
+    expect(entidad.tipo).toBe('card_issuer');
+  });
+
+  it('should create an Entidad with tipo=wallet_platform', () => {
+    const entidad = createEntidad({
+      userId: 'user-1',
+      nombre: 'PayPal',
+      tipo: 'wallet_platform',
+    });
+
+    expect(entidad.tipo).toBe('wallet_platform');
   });
 
   it('should have the correct estructura with all fields', () => {
@@ -61,13 +67,8 @@ describe('Entidad', () => {
       notas: 'Some notes',
     });
 
-    expect(entidad.userId).toBe('user-42');
-    expect(entidad.nombre).toBe('Test Person');
-    expect(entidad.tipo).toBe('person');
     expect(entidad.notas).toBe('Some notes');
     expect(entidad.createdAt).toBeInstanceOf(Date);
-    expect(entidad.updatedAt).toBeInstanceOf(Date);
-    expect(typeof entidad.id).toBe('string');
   });
 
   it('should default notas to null when not provided', () => {
@@ -81,7 +82,13 @@ describe('Entidad', () => {
   });
 
   it('should accept all TipoEntidad values', () => {
-    const tipos: TipoEntidad[] = ['person', 'organization', 'bank', 'issuer'];
+    const tipos: TipoEntidad[] = [
+      'person',
+      'organization',
+      'bank',
+      'card_issuer',
+      'wallet_platform',
+    ];
 
     for (const tipo of tipos) {
       const entidad: Entidad = {

@@ -42,6 +42,7 @@ export function createUserRepository(): UserRepository {
         data: {
           email: user.email,
           passwordHash: user.passwordHash,
+          fullName: user.fullName,
           verifiedAt: user.verifiedAt,
         },
       });
@@ -54,6 +55,7 @@ function mapToDomain(record: {
   id: string;
   email: string;
   passwordHash: string;
+  fullName: string | null;
   verifiedAt: Date | null;
   createdAt: Date;
 }): User {
@@ -61,6 +63,7 @@ function mapToDomain(record: {
     id: record.id,
     email: record.email,
     passwordHash: record.passwordHash,
+    fullName: record.fullName,
     verifiedAt: record.verifiedAt,
     createdAt: record.createdAt,
   };

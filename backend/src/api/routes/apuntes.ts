@@ -8,6 +8,7 @@
 
 import type { FastifyInstance } from 'fastify';
 import type { AuthApplicationService } from '../../application/auth-service.js';
+import type { AccountingService } from '../../application/accounting-service.js';
 import { createAuthMiddleware } from '../middleware/auth.js';
 import { prisma } from '../../infrastructure/database.js';
 import { getPlantilla } from '../../plantillas/index.js';
@@ -16,6 +17,15 @@ import {
   isCuentaGlobalUnderGroups,
   isCuentaUsuarioUnderGroups,
 } from '../../application/plantilla-validator.js';
+import {
+  DEFAULT_CURRENCY,
+  moneyEquals,
+  moneyToFixed,
+  moneyToNumber,
+  quantizeMoney,
+  sumMoney,
+} from '../../domain/money.js';
+import { buildApunteListWhere } from '../../application/apunte-list-filters.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -161,11 +171,157 @@ async function getBookId(userId: string): Promise<string> {
 // Route registration
 // ---------------------------------------------------------------------------
 
+function formatApunteDate(date: Date): string {
+  return date.toISOString().slice(0, 10);
+}
+
+function accountIdFromLinea(linea: {
+  cuentaId: string | null;
+  cuentaGlobalId: string | null;
+}): string {
+  return linea.cuentaId ?? linea.cuentaGlobalId ?? '';
+}
+
+/** Map persisted asiento lines back to template line ids (debit/credit order). */
+function templateLinesFromAsiento(
+  template: Plantilla,
+  lineas: Array<{
+    cuentaId: string | null;
+    cuentaGlobalId: string | null;
+    debito: { toString: () => string };
+    credito: { toString: () => string };
+  }>,
+): ApunteLineInput[] {
+  const debits = lineas.filter((l) => Number(l.debito.toString()) > 0);
+  const credits = lineas.filter((l) => Number(l.credito.toString()) > 0);
+  const tplDebits = template.lines.filter((l) => l.side === 'debit');
+  const tplCredits = template.lines.filter((l) => l.side === 'credit');
+  const out: ApunteLineInput[] = [];
+
+  tplDebits.forEach((tl, i) => {
+    const row = debits[i];
+    if (row) out.push({ id: tl.id, accountId: accountIdFromLinea(row) });
+  });
+  tplCredits.forEach((tl, i) => {
+    const row = credits[i];
+    if (row) out.push({ id: tl.id, accountId: accountIdFromLinea(row) });
+  });
+
+  return out;
+}
+
 export function registerApunteRoutes(
   app: FastifyInstance,
   authService: AuthApplicationService,
+  accountingService: AccountingService,
 ): void {
   const requireAuth = createAuthMiddleware(authService);
+
+  // GET /api/apuntes — recent/history list (no journal lines)
+  app.get(
+    '/api/apuntes',
+    { preHandler: requireAuth },
+    async (request, reply) => {
+      const userId = request.userId!;
+      const query = request.query as {
+        limit?: string;
+        offset?: string;
+        dateFrom?: string;
+        dateTo?: string;
+        amountMin?: string;
+        amountMax?: string;
+        q?: string;
+        accountId?: string;
+      };
+
+      const limitRaw = query.limit ? parseInt(query.limit, 10) : 20;
+      const offsetRaw = query.offset ? parseInt(query.offset, 10) : 0;
+      const limit = Number.isFinite(limitRaw)
+        ? Math.min(Math.max(limitRaw, 1), 100)
+        : 20;
+      const offset = Number.isFinite(offsetRaw) ? Math.max(offsetRaw, 0) : 0;
+
+      const where = buildApunteListWhere(userId, query) as Parameters<
+        typeof prisma.apunte.findMany
+      >[0] extends { where?: infer W }
+        ? W
+        : never;
+
+      try {
+        const [total, rows] = await Promise.all([
+          prisma.apunte.count({ where }),
+          prisma.apunte.findMany({
+            where,
+            orderBy: { createdAt: 'desc' },
+            take: limit,
+            skip: offset,
+          }),
+        ]);
+
+        return reply.status(200).send({
+          apuntes: rows.map((row) => ({
+            id: row.id,
+            templateCode: row.templateCode,
+            date: formatApunteDate(row.date),
+            concept: row.concept,
+            amount: moneyToNumber(row.amount.toString()),
+            asientoId: row.asientoId,
+            createdAt: row.createdAt.toISOString(),
+          })),
+          total,
+        });
+      } catch (err) {
+        request.log.error(err, 'Failed to list apuntes');
+        return reply.status(500).send({ error: 'Failed to list apuntes' });
+      }
+    },
+  );
+
+  // GET /api/apuntes/:id — detail for edit (template lines + amounts)
+  app.get(
+    '/api/apuntes/:id',
+    { preHandler: requireAuth },
+    async (request, reply) => {
+      const userId = request.userId!;
+      const { id } = request.params as { id: string };
+
+      try {
+        const row = await prisma.apunte.findFirst({
+          where: { id, userId },
+          include: {
+            asiento: { include: { lineas: { orderBy: { createdAt: 'asc' } } } },
+          },
+        });
+        if (!row) {
+          return reply.status(404).send({ error: 'Apunte not found' });
+        }
+
+        let lines: ApunteLineInput[] = [];
+        if (row.templateCode) {
+          const template = getPlantilla(row.templateCode);
+          if (template) {
+            lines = templateLinesFromAsiento(template, row.asiento.lineas);
+          }
+        }
+
+        return reply.status(200).send({
+          apunte: {
+            id: row.id,
+            templateCode: row.templateCode,
+            date: formatApunteDate(row.date),
+            concept: row.concept,
+            amount: moneyToNumber(row.amount.toString()),
+            asientoId: row.asientoId,
+            createdAt: row.createdAt.toISOString(),
+            lines,
+          },
+        });
+      } catch (err) {
+        request.log.error(err, 'Failed to get apunte');
+        return reply.status(500).send({ error: 'Failed to get apunte' });
+      }
+    },
+  );
 
   app.post(
     '/api/apuntes',
@@ -185,10 +341,21 @@ export function registerApunteRoutes(
         }
 
         // ---------------------------------------------------------------
+        // Resolve book + currency scale
+        // ---------------------------------------------------------------
+        const bookId = await getBookId(userId);
+        const bookConfig = await prisma.bookConfig.findUnique({
+          where: { bookId },
+          select: { currency: true },
+        });
+        const currency = bookConfig?.currency ?? DEFAULT_CURRENCY;
+        const amountD = quantizeMoney(body.amount ?? 0, currency);
+
+        // ---------------------------------------------------------------
         // Template-based (HOME) or free-form (PRO)
         // ---------------------------------------------------------------
         let template: Plantilla | undefined;
-        let amount = body.amount ?? 0;
+        let amount = moneyToNumber(amountD, currency);
         const amountMode = body.amountMode ?? 'single';
 
         if (body.templateCode) {
@@ -217,14 +384,9 @@ export function registerApunteRoutes(
                 .status(400)
                 .send({ error: 'amount is required when template has amountMode single (V5)' });
             }
-            amount = body.amount;
+            amount = moneyToNumber(quantizeMoney(body.amount, currency), currency);
           }
         }
-
-        // ---------------------------------------------------------------
-        // Resolve book
-        // ---------------------------------------------------------------
-        const bookId = await getBookId(userId);
 
         // ---------------------------------------------------------------
         // V6: Validate period is open (create if not exists)
@@ -248,8 +410,8 @@ export function registerApunteRoutes(
         const entryLines: Array<{
           cuentaId?: string;
           cuentaGlobalId?: string;
-          debito: number;
-          credito: number;
+          debito: string;
+          credito: string;
         }> = [];
 
         for (const line of body.lines) {
@@ -264,12 +426,13 @@ export function registerApunteRoutes(
             await validateLineAgainstTemplate(line, templateLine, userId);
 
             const isDebit = templateLine.side === 'debit';
+            const lineAmount = quantizeMoney(amount, currency).toFixed();
             entryLines.push({
               ...(resolved.tipo === 'global'
                 ? { cuentaGlobalId: resolved.id }
                 : { cuentaId: resolved.id }),
-              debito: isDebit ? amount : 0,
-              credito: isDebit ? 0 : amount,
+              debito: isDebit ? lineAmount : moneyToFixed(0, currency),
+              credito: isDebit ? moneyToFixed(0, currency) : lineAmount,
             });
           } else {
             // PRO wizard: side and amount come from the request
@@ -280,28 +443,58 @@ export function registerApunteRoutes(
             }
 
             const isDebit = line.side === 'debit';
-            const lineAmount = line.amount;
+            const lineAmount = quantizeMoney(line.amount, currency).toFixed();
             entryLines.push({
               ...(resolved.tipo === 'global'
                 ? { cuentaGlobalId: resolved.id }
                 : { cuentaId: resolved.id }),
-              debito: isDebit ? lineAmount : 0,
-              credito: isDebit ? 0 : lineAmount,
+              debito: isDebit ? lineAmount : moneyToFixed(0, currency),
+              credito: isDebit ? moneyToFixed(0, currency) : lineAmount,
             });
           }
         }
 
+        // V10: Origin and destination must be different accounts when both sides present
+        {
+          const debitIds = new Set<string>();
+          const creditIds = new Set<string>();
+          for (const line of body.lines) {
+            if (template) {
+              const templateLine = template.lines.find((l) => l.id === line.id);
+              if (!templateLine) continue;
+              if (templateLine.side === 'debit') debitIds.add(line.accountId);
+              else creditIds.add(line.accountId);
+            } else if (line.side === 'debit') {
+              debitIds.add(line.accountId);
+            } else if (line.side === 'credit') {
+              creditIds.add(line.accountId);
+            }
+          }
+          for (const id of debitIds) {
+            if (creditIds.has(id)) {
+              return reply.status(400).send({
+                error:
+                  'Origin and destination must be different accounts (V10)',
+              });
+            }
+          }
+        }
+
         // ---------------------------------------------------------------
-        // V8: Validate balance
+        // V8: Validate balance (decimal.js)
         // ---------------------------------------------------------------
-        const totalDebito = entryLines.reduce((s, l) => s + l.debito, 0);
-        const totalCredito = entryLines.reduce((s, l) => s + l.credito, 0);
-        if (totalDebito !== totalCredito) {
-          return reply
-            .status(400)
-            .send({
-              error: `Entry not balanced: debito ${totalDebito} ≠ credito ${totalCredito} (V8)`,
-            });
+        const totalDebito = sumMoney(
+          entryLines.map((l) => l.debito),
+          currency,
+        );
+        const totalCredito = sumMoney(
+          entryLines.map((l) => l.credito),
+          currency,
+        );
+        if (!moneyEquals(totalDebito, totalCredito, currency)) {
+          return reply.status(400).send({
+            error: `Entry not balanced: debito ${moneyToFixed(totalDebito, currency)} ≠ credito ${moneyToFixed(totalCredito, currency)} (V8)`,
+          });
         }
         if (entryLines.length < 2) {
           return reply
@@ -344,7 +537,7 @@ export function registerApunteRoutes(
               templateCode: body.templateCode ?? null,
               date: fecha,
               concept: body.concept,
-              amount,
+              amount: quantizeMoney(amount, currency).toFixed(),
               asientoId: asiento.id,
               userId,
             },
@@ -359,7 +552,7 @@ export function registerApunteRoutes(
             templateCode: result.apunte.templateCode,
             date: result.apunte.date.toISOString(),
             concept: result.apunte.concept,
-            amount: Number(result.apunte.amount),
+            amount: moneyToNumber(result.apunte.amount.toString(), currency),
             asientoId: result.apunte.asientoId,
           },
           asiento: {
@@ -369,8 +562,8 @@ export function registerApunteRoutes(
             lines: result.lineas.map((l) => ({
               cuentaId: l.cuentaId,
               cuentaGlobalId: l.cuentaGlobalId,
-              debito: Number(l.debito),
-              credito: Number(l.credito),
+              debito: moneyToNumber(l.debito.toString(), currency),
+              credito: moneyToNumber(l.credito.toString(), currency),
             })),
           },
         });
@@ -380,6 +573,195 @@ export function registerApunteRoutes(
         }
         request.log.error(err, 'Failed to create apunte');
         return reply.status(500).send({ error: 'Failed to create apunte' });
+      }
+    },
+  );
+
+  // PATCH /api/apuntes/:id — update apunte + underlying asiento (open period)
+  app.patch(
+    '/api/apuntes/:id',
+    { preHandler: requireAuth },
+    async (request, reply) => {
+      const userId = request.userId!;
+      const { id } = request.params as { id: string };
+      const body = request.body as CreateApunteBody;
+
+      try {
+        const existing = await prisma.apunte.findFirst({
+          where: { id, userId },
+        });
+        if (!existing) {
+          return reply.status(404).send({ error: 'Apunte not found' });
+        }
+
+        if (!body.date || !body.concept || !body.lines?.length) {
+          return reply
+            .status(400)
+            .send({ error: 'date, concept, and lines are required' });
+        }
+
+        const bookId = await getBookId(userId);
+        const bookConfig = await prisma.bookConfig.findUnique({
+          where: { bookId },
+          select: { currency: true },
+        });
+        const currency = bookConfig?.currency ?? DEFAULT_CURRENCY;
+        const amountD = quantizeMoney(body.amount ?? 0, currency);
+
+        let template: Plantilla | undefined;
+        let amount = moneyToNumber(amountD, currency);
+        const templateCode = body.templateCode ?? existing.templateCode ?? undefined;
+
+        if (templateCode) {
+          template = getPlantilla(templateCode);
+          if (!template) {
+            return reply
+              .status(400)
+              .send({ error: `Template '${templateCode}' not found (V1)` });
+          }
+          const templateLineIds = new Set(template.lines.map((l) => l.id));
+          for (const line of body.lines) {
+            if (!templateLineIds.has(line.id)) {
+              return reply
+                .status(400)
+                .send({ error: `Line id ${line.id} not found in template (V2)` });
+            }
+          }
+          if (template.amountMode === 'single') {
+            if (body.amount === undefined || body.amount === null) {
+              return reply
+                .status(400)
+                .send({ error: 'amount is required when template has amountMode single (V5)' });
+            }
+            amount = moneyToNumber(quantizeMoney(body.amount, currency), currency);
+          }
+        }
+
+        const fecha = new Date(body.date);
+        const año = fecha.getFullYear();
+        const period = await prisma.periodoContable.findUnique({
+          where: { bookId_año: { bookId, año } },
+        });
+        if (period && !period.abierto) {
+          return reply.status(400).send({ error: `Period ${año} is closed (V6)` });
+        }
+
+        const entryLines: Array<{
+          cuentaId?: string;
+          cuentaGlobalId?: string;
+          debito: number;
+          credito: number;
+        }> = [];
+
+        for (const line of body.lines) {
+          const resolved = await resolveAccount(line.accountId, userId);
+          if (template) {
+            const templateLine = template.lines.find((l) => l.id === line.id)!;
+            await validateLineAgainstTemplate(line, templateLine, userId);
+            const isDebit = templateLine.side === 'debit';
+            const lineAmount = quantizeMoney(amount, currency).toFixed();
+            entryLines.push({
+              ...(resolved.tipo === 'global'
+                ? { cuentaGlobalId: resolved.id }
+                : { cuentaId: resolved.id }),
+              debito: isDebit ? moneyToNumber(lineAmount, currency) : 0,
+              credito: isDebit ? 0 : moneyToNumber(lineAmount, currency),
+            });
+          } else {
+            if (!line.side || line.amount === undefined || line.amount === null) {
+              return reply
+                .status(400)
+                .send({ error: `Line ${line.id}: side and amount required when no template` });
+            }
+            const isDebit = line.side === 'debit';
+            const lineAmount = quantizeMoney(line.amount, currency).toFixed();
+            entryLines.push({
+              ...(resolved.tipo === 'global'
+                ? { cuentaGlobalId: resolved.id }
+                : { cuentaId: resolved.id }),
+              debito: isDebit ? moneyToNumber(lineAmount, currency) : 0,
+              credito: isDebit ? 0 : moneyToNumber(lineAmount, currency),
+            });
+          }
+        }
+
+        if (template) {
+          const debitIds = new Set<string>();
+          const creditIds = new Set<string>();
+          for (const line of body.lines) {
+            const templateLine = template.lines.find((l) => l.id === line.id);
+            if (!templateLine) continue;
+            if (templateLine.side === 'debit') debitIds.add(line.accountId);
+            else creditIds.add(line.accountId);
+          }
+          for (const accountId of debitIds) {
+            if (creditIds.has(accountId)) {
+              return reply.status(400).send({
+                error: 'Origin and destination must be different accounts (V10)',
+              });
+            }
+          }
+        }
+
+        const totalDebito = sumMoney(
+          entryLines.map((l) => String(l.debito)),
+          currency,
+        );
+        const totalCredito = sumMoney(
+          entryLines.map((l) => String(l.credito)),
+          currency,
+        );
+        if (!moneyEquals(totalDebito, totalCredito, currency)) {
+          return reply.status(400).send({
+            error: `Entry not balanced: debito ${moneyToFixed(totalDebito, currency)} ≠ credito ${moneyToFixed(totalCredito, currency)} (V8)`,
+          });
+        }
+
+        await accountingService.updateEntry(
+          existing.asientoId,
+          bookId,
+          {
+            fecha,
+            concepto: body.concept,
+            lineas: entryLines,
+          },
+          userId,
+        );
+
+        const updated = await prisma.apunte.update({
+          where: { id },
+          data: {
+            templateCode: templateCode ?? null,
+            date: fecha,
+            concept: body.concept,
+            amount: quantizeMoney(amount, currency).toFixed(),
+          },
+        });
+
+        return reply.status(200).send({
+          apunte: {
+            id: updated.id,
+            templateCode: updated.templateCode,
+            date: formatApunteDate(updated.date),
+            concept: updated.concept,
+            amount: moneyToNumber(updated.amount.toString(), currency),
+            asientoId: updated.asientoId,
+            createdAt: updated.createdAt.toISOString(),
+          },
+        });
+      } catch (err) {
+        if (err instanceof ValidationError) {
+          return reply.status(err.statusCode).send({ error: err.message });
+        }
+        const message = err instanceof Error ? err.message : 'Failed to update apunte';
+        if (message.includes('closed') || message.includes('voided')) {
+          return reply.status(400).send({ error: message });
+        }
+        if (message.includes('not found')) {
+          return reply.status(404).send({ error: message });
+        }
+        request.log.error(err, 'Failed to update apunte');
+        return reply.status(500).send({ error: 'Failed to update apunte' });
       }
     },
   );

@@ -1,9 +1,14 @@
 # TADOR — Makefile
 # ────────────────────────────────────────────────────────
 # Comandos rápidos para desarrollo local.
+# Los comandos de app/DB se ejecutan dentro de contenedores.
 
-BACKEND = backend
 COMPOSE = docker compose
+# E2E stack: same services, but backend points at tador_test (isolated from tador_dev).
+COMPOSE_E2E = $(COMPOSE) -f compose.yaml -f compose.e2e.yaml
+RUN_BACKEND = $(COMPOSE) run --rm backend
+RUN_BACKEND_E2E = $(COMPOSE_E2E) run --rm backend
+EXEC_BACKEND = $(COMPOSE) exec backend
 
 # ─── Base de datos ─────────────────────────────────────
 
@@ -19,49 +24,109 @@ db-up:                    ## Levanta PostgreSQL en Docker
 
 .PHONY: db-migrate
 db-migrate:               ## Ejecuta migraciones Prisma (dev)
-	cd $(BACKEND) && npx prisma migrate dev
+	$(RUN_BACKEND) npm run db:migrate
 
 .PHONY: db-seed
 db-seed:                  ## Siembra datos de catálogo global
-	cd $(BACKEND) && npx tsx prisma/seed/catalogos.ts
+	$(RUN_BACKEND) npm run seed:catalogos
 
 .PHONY: db-setup
 db-setup: db-up db-migrate db-seed  ## Postgres + migraciones + seed
 
 .PHONY: db-reset
 db-reset:                 ## Resetea DB: borra esquema, migra y seedea
-	cd $(BACKEND) && npx prisma migrate reset --force
+	$(RUN_BACKEND) node scripts/run-with-db-url.mjs npx prisma migrate reset --force
 	$(MAKE) db-seed
+
+.PHONY: db-generate
+db-generate:              ## Regenera Prisma Client
+	$(RUN_BACKEND) npm run db:generate
 
 .PHONY: db-studio
 db-studio:                ## Abre Prisma Studio
-	cd $(BACKEND) && npx prisma studio
+	$(COMPOSE) run --rm -p 5555:5555 backend \
+		npm run db:studio -- --hostname 0.0.0.0 --port 5555
 
-# ─── Servidor ──────────────────────────────────────────
+# ─── Servidores ────────────────────────────────────────
 
-.PHONY: dev
-dev:                      ## Arranca backend en modo watch
-	cd $(BACKEND) && npx tsx watch src/server.ts
+.PHONY: up
+up:                       ## Levanta todos los servicios (Docker)
+	$(COMPOSE) up -d
+
+.PHONY: down
+down:                     ## Detiene todos los servicios
+	$(COMPOSE) down
+
+.PHONY: rebuild
+rebuild:                  ## Reconstruye imágenes de desarrollo
+	$(COMPOSE) build
+
+.PHONY: dev-backend
+dev-backend:              ## Arranca backend en modo watch (contenedor)
+	$(COMPOSE) up backend
+
+.PHONY: dev-frontend
+dev-frontend:             ## Arranca frontend en modo watch (contenedor)
+	$(COMPOSE) up frontend
 
 .PHONY: build
-build:                    ## Compila TypeScript
-	cd $(BACKEND) && npx tsc
+build:                    ## Compila TypeScript (backend)
+	$(RUN_BACKEND) npx tsc
 
 # ─── Tests ─────────────────────────────────────────────
+# DATABASE_URL is resolved inside the app/tests from POSTGRES_* pieces
+# (Docker host = postgres, host/CI = localhost). No Makefile URL required.
+#
+# E2E runs inside the compose network (frontend / backend DNS), not localhost.
+# That mirrors CI: stack + runner containers on one network.
 
 .PHONY: test
-test:                     ## Tests de integración (todos)
-	cd $(BACKEND) && npx vitest run --config vitest.integration.config.ts
+test: db-up               ## Tests de integración (Postgres + Fastify)
+	$(RUN_BACKEND) npm run test:integration
+
+.PHONY: test-unit
+test-unit:                ## Tests unitarios de dominio (sin DB)
+	$(RUN_BACKEND) npm run test:unit
 
 .PHONY: test-watch
-test-watch:               ## Tests en modo watch
-	cd $(BACKEND) && npx vitest --config vitest.integration.config.ts
+test-watch: db-up         ## Tests de integración en modo watch
+	$(RUN_BACKEND) npm run test:integration -- --watch
+
+.PHONY: test-frontend
+test-frontend:            ## Vitest unit + integration (contenedor frontend)
+	$(COMPOSE) run --rm --no-deps frontend npm run test
+
+.PHONY: test-db-ensure
+test-db-ensure: db-up     ## Asegura que exista la DB tador_test
+	@$(COMPOSE) exec -T postgres \
+		psql -U tador -d tador_dev -tc "SELECT 1 FROM pg_database WHERE datname='tador_test'" \
+		| grep -q 1 || $(COMPOSE) exec -T postgres \
+		psql -U tador -d tador_dev -c "CREATE DATABASE tador_test;"
+
+.PHONY: test-e2e
+test-e2e: test-db-ensure  ## E2E Playwright en red Docker sobre tador_test (no toca tador_dev)
+	$(COMPOSE_E2E) up -d --force-recreate postgres backend frontend
+	$(RUN_BACKEND_E2E) npm run db:migrate:deploy
+	$(RUN_BACKEND_E2E) npm run seed:catalogos
+	$(COMPOSE_E2E) --profile e2e run --rm --build e2e
+	@echo "Restaurando backend/frontend a tador_dev..."
+	$(COMPOSE) up -d --force-recreate backend frontend
+
+.PHONY: test-e2e-host
+test-e2e-host: test-db-ensure ## E2E desde el host (backend → tador_test, Vite → localhost)
+	$(COMPOSE_E2E) up -d --force-recreate postgres backend
+	$(RUN_BACKEND_E2E) npm run db:migrate:deploy
+	$(RUN_BACKEND_E2E) npm run seed:catalogos
+	@echo "Backend E2E en http://localhost:3000 (DB tador_test)"
+	cd frontend && npm run test:e2e
+	@echo "Restaurando backend a tador_dev..."
+	$(COMPOSE) up -d --force-recreate backend
 
 # ─── Calidad ───────────────────────────────────────────
 
 .PHONY: typecheck
 typecheck:                ## Verifica TypeScript sin emitir
-	cd $(BACKEND) && npx tsc --noEmit
+	$(RUN_BACKEND) npx tsc --noEmit
 
 .PHONY: check
 check: typecheck test     ## Typecheck + tests
@@ -73,12 +138,24 @@ ps:                       ## Muestra contenedores activos
 	$(COMPOSE) ps
 
 .PHONY: logs
-logs:                     ## Logs del backend
+logs:                     ## Logs de todos los servicios
+	$(COMPOSE) logs -f
+
+.PHONY: logs-backend
+logs-backend:             ## Logs del backend
 	$(COMPOSE) logs -f backend
+
+.PHONY: logs-frontend
+logs-frontend:            ## Logs del frontend
+	$(COMPOSE) logs -f frontend
+
+.PHONY: shell-backend
+shell-backend:            ## Shell interactivo en el backend
+	$(EXEC_BACKEND) sh
 
 .PHONY: clean
 clean:                    ## Limpia artefactos de build
-	cd $(BACKEND) && rm -rf dist
+	$(RUN_BACKEND) rm -rf dist
 
 .PHONY: help
 help:                     ## Muestra esta ayuda

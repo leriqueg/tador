@@ -92,11 +92,13 @@ paths, and comments must remain English.
 
 | Concern | Candidate | Decision status |
 | --- | --- | --- |
-| Money/decimal arithmetic | `decimal.js` 10.6.0 | Strong candidate for application calculations; database values should use exact numeric/decimal mapping. |
+| Money/decimal arithmetic | `decimal.js` | **Required** for all monetary calculation in application/domain code. Persist with PostgreSQL `NUMERIC` / Prisma `Decimal`. Quantize to ISO 4217 minor units (MVP: USD = 2). |
 | Template JSON validation | `ajv` 8.20.0 or `zod` | Decide during template sprint; avoid duplicate schema systems if possible. |
 | Date/month grouping | Native `Temporal` only if runtime support is stable; otherwise a small utility library | Defer to PYG sprint. |
 
-Financial code must never use JavaScript floating-point numbers for money.
+Exact monetary arithmetic policy: see Constitution principle IX. IEEE 754 binary
+floating-point (`number`) MUST NOT be used for intermediate money math; API
+responses MAY expose `number` only after Decimal quantization.
 
 ## Docker development strategy
 

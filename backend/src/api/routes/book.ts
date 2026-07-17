@@ -4,8 +4,24 @@
 
 import type { FastifyInstance } from 'fastify';
 import type { BookApplicationService } from '../../application/book-service.js';
-import { createAuthMiddleware, SESSION_COOKIE_OPTIONS } from '../middleware/auth.js';
+import { createAuthMiddleware } from '../middleware/auth.js';
 import type { AuthApplicationService } from '../../application/auth-service.js';
+import type { BookConfig } from '../../domain/book.js';
+import { isBookInitialized } from '../../domain/book.js';
+
+function serializeConfig(config: BookConfig) {
+  return {
+    id: config.id,
+    currency: config.currency,
+    locale: config.locale,
+    format: config.format,
+    currencyLocked: config.currencyLocked,
+    mode: config.mode,
+    timeZone: config.timeZone,
+    onboardingCompletedAt: config.onboardingCompletedAt,
+    initialized: isBookInitialized(config),
+  };
+}
 
 export function registerBookRoutes(
   app: FastifyInstance,
@@ -27,13 +43,7 @@ export function registerBookRoutes(
           id: book.id,
           createdAt: book.createdAt,
         },
-        config: {
-          id: config.id,
-          currency: config.currency,
-          locale: config.locale,
-          format: config.format,
-          currencyLocked: config.currencyLocked,
-        },
+        config: serializeConfig(config),
       });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to get book';
@@ -56,29 +66,28 @@ export function registerBookRoutes(
   // PATCH /book/config — update book configuration
   app.patch('/book/config', { preHandler: requireAuth }, async (request, reply) => {
     const userId = request.userId!;
-    const { currency, locale, format } = request.body as {
+    const body = request.body as {
       currency?: string;
       locale?: string;
       format?: string;
+      mode?: 'hogar' | 'pro';
+      timeZone?: string;
+      completeOnboarding?: boolean;
     };
 
     try {
-      // Get user's book ID first
       const book = await bookService.getBook(userId, userId);
       const config = await bookService.updateConfig(userId, book.id, userId, {
-        currency,
-        locale,
-        format,
+        currency: body.currency,
+        locale: body.locale,
+        format: body.format,
+        mode: body.mode,
+        timeZone: body.timeZone,
+        completeOnboarding: body.completeOnboarding,
       });
 
       return reply.status(200).send({
-        config: {
-          id: config.id,
-          currency: config.currency,
-          locale: config.locale,
-          format: config.format,
-          currencyLocked: config.currencyLocked,
-        },
+        config: serializeConfig(config),
       });
     } catch (err) {
       const message =
@@ -89,7 +98,9 @@ export function registerBookRoutes(
         return reply.status(403).send({ error: message });
       }
       if (
-        message === 'Cannot change currency after financial activity has been recorded'
+        message === 'Cannot change currency after financial activity has been recorded' ||
+        message === 'Invalid book mode' ||
+        message === 'Invalid time zone'
       ) {
         return reply.status(400).send({ error: message });
       }

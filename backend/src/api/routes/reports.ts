@@ -9,6 +9,16 @@ import type { DashboardReportService } from '../../application/dashboard-report-
 import { createAuthMiddleware } from '../middleware/auth.js';
 import { prisma } from '../../infrastructure/database.js';
 
+/** Canonical query is `year`; `año` remains a short-lived deprecated alias. */
+function parseYearQuery(query: { year?: string; año?: string }): number {
+  const raw = query.year ?? query.año;
+  if (raw === undefined || raw === '') {
+    return new Date().getFullYear();
+  }
+  const year = parseInt(raw, 10);
+  return Number.isFinite(year) ? year : new Date().getFullYear();
+}
+
 export function registerReportRoutes(
   app: FastifyInstance,
   authService: AuthApplicationService,
@@ -25,17 +35,14 @@ export function registerReportRoutes(
     return book?.id ?? null;
   }
 
-  // ---------------------------------------------------------------------------
-  // GET /api/reports/pyg — PyG report (new contract)
-  // ---------------------------------------------------------------------------
-
   app.get(
     '/api/reports/pyg',
     { preHandler: requireAuth },
     async (request, reply) => {
       const userId = request.userId!;
-      const query = request.query as { año?: string };
-      const year = query.año ? parseInt(query.año, 10) : new Date().getFullYear();
+      const year = parseYearQuery(
+        request.query as { year?: string; año?: string },
+      );
 
       try {
         const bookId = await getBookId(userId);
@@ -43,13 +50,11 @@ export function registerReportRoutes(
           return reply.status(404).send({ error: 'Book not found' });
         }
 
-        // Use the new DashboardReportService when available; fallback to old service
         if (dashboardService) {
           const report = await dashboardService.getPyGReport(bookId, year);
           return reply.status(200).send(report);
         }
 
-        // Legacy fallback
         const report = await accountingService.getPyG(bookId, year);
         return reply.status(200).send(report);
       } catch (err) {
@@ -58,10 +63,6 @@ export function registerReportRoutes(
       }
     },
   );
-
-  // ---------------------------------------------------------------------------
-  // GET /api/reports/position — Financial position
-  // ---------------------------------------------------------------------------
 
   app.get(
     '/api/reports/position',
@@ -88,17 +89,14 @@ export function registerReportRoutes(
     },
   );
 
-  // ---------------------------------------------------------------------------
-  // GET /api/reports/balance — balance sheet
-  // ---------------------------------------------------------------------------
-
   app.get(
     '/api/reports/balance',
     { preHandler: requireAuth },
     async (request, reply) => {
       const userId = request.userId!;
-      const query = request.query as { año?: string };
-      const año = query.año ? parseInt(query.año, 10) : new Date().getFullYear();
+      const year = parseYearQuery(
+        request.query as { year?: string; año?: string },
+      );
 
       try {
         const bookId = await getBookId(userId);
@@ -106,7 +104,7 @@ export function registerReportRoutes(
           return reply.status(404).send({ error: 'Book not found' });
         }
 
-        const report = await accountingService.getBalanceSheet(bookId, año);
+        const report = await accountingService.getBalanceSheet(bookId, year);
 
         return reply.status(200).send(report);
       } catch (err) {

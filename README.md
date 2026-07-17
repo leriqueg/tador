@@ -12,9 +12,9 @@ TADOR es una aplicación web en etapa de diseño para facilitar la economía del
 
 ## Origen
 
-La idea nace de la experiencia usando **Conta Hogar**, un software sencillo que permitía registrar apuntes, organizar cuentas, revisar saldos y hacer traspasos de forma rápida. TADOR le debe mucho a esa inspiración: la velocidad de captura, el lenguaje cotidiano y la idea de que una herramienta financiera personal no debe sentirse como un ERP.
+La idea nace de la experiencia usando software de 2015, que permitía registrar apuntes, organizar cuentas, revisar saldos y hacer traspasos de forma rápida. TADOR le debe mucho a esa inspiración: la velocidad de captura, el lenguaje cotidiano y la idea de que una herramienta financiera personal no debe sentirse como un ERP.
 
-Con el tiempo aparecieron necesidades que Conta Hogar no cubría bien: tarjetas de crédito, cuentas puente, reportes por periodo, separación clara entre balance y PYG, uso profesional independiente, entidades, cuentas por cobrar/pagar y una base contable más sólida.
+Con el tiempo aparecieron necesidades que el software no cubría bien: movimientos en tarjetas de crédito, cuentas puente, reportes por periodo, separación clara entre balance y PYG, uso profesional independiente, entidades, cuentas por cobrar/pagar y una base contable más sólida.
 
 ## Visión
 
@@ -50,9 +50,6 @@ Pensado para profesionales independientes, pequeños negocios o quienes necesita
 
 **Indicadores:** ingresos cobrados y por cobrar, gastos pagados y por pagar, activos, pasivos, flujo de caja, resultado del ejercicio, desglose por cuenta.
 
-> **Hogar da paz mental; PRO da control económico.**
->
-> La diferencia no es incompleto vs completo. Cada modo resuelve una necesidad distinta sobre los mismos datos.
 
 ---
 
@@ -105,7 +102,7 @@ Las reglas contables (balance de asientos, tenant isolation, idempotencia) viven
 
 ---
 
-## Documentación
+## Documentación del MVP, concepto original.
 
 | Documento | Ubicación |
 |-----------|-----------|

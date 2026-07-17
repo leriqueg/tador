@@ -7,14 +7,15 @@
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
-    "test": "vitest run",
-    "test:watch": "vitest",
+    "test": "vitest run --config vitest.integration.config.ts",
+    "test:watch": "vitest run --config vitest.integration.config.ts --watch",
     "test:unit": "vitest run --config vitest.unit.config.ts",
     "test:integration": "vitest run --config vitest.integration.config.ts",
-    "db:migrate": "prisma migrate dev",
+    "db:migrate": "node scripts/run-with-db-url.mjs npx prisma migrate dev",
+    "db:migrate:deploy": "node scripts/run-with-db-url.mjs npx prisma migrate deploy",
     "db:generate": "prisma generate",
-    "db:studio": "prisma studio",
-    "seed:catalogos": "npx tsx prisma/seed/catalogos.ts",
+    "db:studio": "node scripts/run-with-db-url.mjs npx prisma studio",
+    "seed:catalogos": "node scripts/run-with-db-url.mjs npx tsx prisma/seed/catalogos.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -30,6 +31,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
+    "dotenv": "^16.6.1",
     "prisma": "^6.0.0",
     "tsx": "^4.19.0",
     "typescript": "^5.6.0",

@@ -19,7 +19,7 @@ async function createTestApp(): Promise<FastifyInstance> {
 }
 
 describe('US1 — Registration and first book', () => {
-  it('should register a user, create book, and deny book access before verification', async () => {
+  it('should register a user, create book, and allow book access without email verification (MVP)', async () => {
     const app = await createTestApp();
 
     // Register
@@ -36,14 +36,20 @@ describe('US1 — Registration and first book', () => {
 
     const cookies = res.cookies.map((c) => `${c.name}=${c.value}`);
 
-    // Try to access book before verification (FR-009)
+    // MVP: REQUIRE_EMAIL_VERIFICATION unset → book access allowed (FR-009 deferred)
     const bookRes = await app.inject({
       method: 'GET',
       url: '/book',
       headers: { cookie: cookies.join('; ') },
     });
 
-    expect(bookRes.statusCode).toBe(403);
+    expect(bookRes.statusCode).toBe(200);
+    const bookBody = bookRes.json();
+    expect(bookBody.book).toBeDefined();
+    expect(bookBody.config.initialized).toBe(false);
+    expect(bookBody.config.mode).toBe('hogar');
+    expect(bookBody.config.timeZone).toBe('UTC');
+    expect(bookBody.config.onboardingCompletedAt).toBeNull();
 
     await app.close();
   });
@@ -57,6 +63,48 @@ describe('US1 — Registration and first book', () => {
       payload: { email: 'book-test@test.com', password: 'password123' },
     });
     expect(res.statusCode).toBe(201);
+
+    await app.close();
+  });
+
+  it('should complete onboarding via PATCH /book/config', async () => {
+    const app = await createTestApp();
+
+    const res = await app.inject({
+      method: 'POST',
+      url: '/auth/register',
+      payload: { email: 'onboard@test.com', password: 'password123' },
+    });
+    expect(res.statusCode).toBe(201);
+    const cookies = res.cookies.map((c) => `${c.name}=${c.value}`);
+
+    const patchRes = await app.inject({
+      method: 'PATCH',
+      url: '/book/config',
+      headers: { cookie: cookies.join('; ') },
+      payload: {
+        mode: 'hogar',
+        currency: 'COP',
+        timeZone: 'America/Bogota',
+        completeOnboarding: true,
+      },
+    });
+
+    expect(patchRes.statusCode).toBe(200);
+    const { config } = patchRes.json();
+    expect(config.mode).toBe('hogar');
+    expect(config.currency).toBe('COP');
+    expect(config.timeZone).toBe('America/Bogota');
+    expect(config.initialized).toBe(true);
+    expect(config.onboardingCompletedAt).toBeTruthy();
+
+    const getRes = await app.inject({
+      method: 'GET',
+      url: '/book',
+      headers: { cookie: cookies.join('; ') },
+    });
+    expect(getRes.statusCode).toBe(200);
+    expect(getRes.json().config.initialized).toBe(true);
 
     await app.close();
   });
@@ -264,6 +312,38 @@ describe('Edge cases', () => {
 
     expect(res.statusCode).toBe(401);
     expect(res.json().error).toBe('Authentication required');
+
+    await app.close();
+  });
+
+  it('should update fullName via PATCH /auth/me', async () => {
+    const app = await createTestApp();
+
+    const reg = await app.inject({
+      method: 'POST',
+      url: '/auth/register',
+      payload: { email: 'profile-me@test.com', password: 'password123' },
+    });
+    expect(reg.statusCode).toBe(201);
+    expect(reg.json().user.fullName).toBeNull();
+    const cookies = reg.cookies.map((c) => `${c.name}=${c.value}`);
+
+    const patch = await app.inject({
+      method: 'PATCH',
+      url: '/auth/me',
+      headers: { cookie: cookies.join('; ') },
+      payload: { fullName: '  Ana Pérez  ' },
+    });
+    expect(patch.statusCode).toBe(200);
+    expect(patch.json().user.fullName).toBe('Ana Pérez');
+
+    const me = await app.inject({
+      method: 'GET',
+      url: '/auth/me',
+      headers: { cookie: cookies.join('; ') },
+    });
+    expect(me.statusCode).toBe(200);
+    expect(me.json().user.fullName).toBe('Ana Pérez');
 
     await app.close();
   });

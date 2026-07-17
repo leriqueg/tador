@@ -5,6 +5,10 @@ alwaysApply: true
 
 # TADOR Implementation Standards
 
+- Monetary amounts MUST use exact decimal arithmetic (Constitution IX): `decimal.js`
+  for domain/application math, PostgreSQL `NUMERIC` / Prisma `Decimal` for storage,
+  quantization to the book currency's ISO 4217 fraction digits (MVP: USD, 2). Do not
+  use IEEE 754 `number` for intermediate money calculations.
 - Design backend endpoints for concurrency and idempotency when they create or mutate
   financial state. Mutating operations SHOULD have a clear duplicate-request strategy.
 - Apply secure design by default: validate input, enforce authorization at boundaries,

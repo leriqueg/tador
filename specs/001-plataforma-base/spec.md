@@ -14,6 +14,11 @@
 
 - Q: ¿Debe verificarse el correo antes de acceder al libro financiero? → A: El usuario debe verificar correo antes de acceder al libro financiero.
 
+### Session 2026-07-12 (ajuste MVP)
+
+- Q: ¿La verificación de correo bloquea el libro en el MVP? → A: **No.** Regla temporal: la verificación de email queda **deshabilitada** hasta post-MVP. FR-009 permanece como requisito de producto futuro; el runtime MVP NO debe bloquear acceso al libro por `verifiedAt == null`.
+- Q: ¿Recuperación de contraseña por correo? → A: Sí es parte del producto. Requiere **configuración de proveedor de email** (SMTP/API) y plantillas. Ver § Follow-up post-MVP abajo. La UI de recuperación se planifica en Sprint 06 / plataforma; el envío real se completa cuando exista email config.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Registro y primer libro (Priority: P1)
@@ -79,7 +84,9 @@ Como titular de un libro, quiero que ningún otro usuario pueda consultar o modi
 - **FR-006**: La moneda MUST quedar bloqueada después de existir actividad financiera.
 - **FR-007**: Todo dato de libro MUST pertenecer a un usuario.
 - **FR-008**: El sistema MUST impedir lectura y escritura cruzada entre usuarios.
-- **FR-009**: El sistema MUST requerir verificación de correo antes de permitir acceso al libro financiero.
+- **FR-009**: El sistema MUST soportar verificación de correo antes de permitir acceso al libro financiero. **MVP temporal:** la verificación está **deshabilitada** (no bloquea); MUST reactivarse post-MVP vía configuración (`REQUIRE_EMAIL_VERIFICATION=true` o equivalente).
+- **FR-010**: El sistema MUST permitir recuperación de contraseña por correo cuando exista proveedor de email configurado.
+- **FR-011**: La configuración de email (SMTP u API de envío) MUST ser externa al código (env / secretos); el stub de consola es aceptable solo en desarrollo local.
 
 ### Constitution Alignment *(mandatory for TADOR)*
 
@@ -107,5 +114,16 @@ Como titular de un libro, quiero que ningún otro usuario pueda consultar o modi
 ## Assumptions
 
 - El MVP usa correo y contraseña como método inicial de autenticación.
-- La verificación de correo es obligatoria antes de acceder al libro financiero.
+- **MVP temporal:** la verificación de correo **no** bloquea el acceso al libro; post-MVP se reactiva (clarificación 2026-07-12).
 - Un usuario tiene un libro principal en el MVP.
+- El libro se crea en el registro; la **inicialización** (modo, moneda, timezone) ocurre en el onboarding del frontend (Sprint 06).
+
+## Follow-up (post-MVP / delta plataforma)
+
+Contrato de recuperación ya esbozado en rutas `POST /auth/recovery/request` y `POST /auth/recovery/reset`. Falta operación real de email y UX completa.
+
+- [ ] D1 Definir variables de entorno de email (`EMAIL_PROVIDER`, SMTP o API key, `EMAIL_FROM`, base URL de links) y documentarlas en `.env.example`
+- [ ] D2 Reemplazar stub `email-service` por adaptador real (proveedor OSS estable) sin hardcodear secretos
+- [ ] D3 Activar envío en recovery + verification (cuando `REQUIRE_EMAIL_VERIFICATION=true`)
+- [ ] D4 Reactivar gate FR-009 en `book-service` cuando la verificación vuelva a ser obligatoria
+- [ ] D5 Coordinar con Sprint 06 la página `/recovery` (request + reset con token) consumiendo los endpoints existentes

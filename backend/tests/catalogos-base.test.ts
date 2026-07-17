@@ -117,52 +117,67 @@ describe('5.2 — Guided account creation (US2)', () => {
     const globalId = chartBody.chart[0].id;
 
     // Create a bank account linked to the entity and global chart account
-    const accountRes = await app.inject({
+    // FR-004b: bank/card must go through entity provision — still allowed via
+    // entidadId only for legacy tests that pre-create entity then account;
+    // prefer POST /api/entities. Manual bank without entity flow is rejected
+    // when tipo is bank with this test updated to entity provision.
+
+    // Create bank via entity provision
+    const bankEntityRes = await app.inject({
+      method: 'POST',
+      url: '/api/entities',
+      headers: { cookie: cookies.join('; ') },
+      payload: { nombre: 'Banco del Pacífico Cuenta', tipo: 'bank' },
+    });
+    // May 409 if name collides with earlier entity — use unique name
+    expect([201, 409]).toContain(bankEntityRes.statusCode);
+
+    const uniqueBank = await app.inject({
+      method: 'POST',
+      url: '/api/entities',
+      headers: { cookie: cookies.join('; ') },
+      payload: { nombre: `Banco Checking ${Date.now()}`, tipo: 'bank' },
+    });
+    expect(uniqueBank.statusCode).toBe(201);
+    const bankBody = uniqueBank.json();
+    expect(bankBody.provisionedAccount.tipoCuenta).toBe('bank');
+    expect(bankBody.provisionedAccount.nombre).toBe(bankBody.entity.nombre);
+
+    // Manual bank create must be rejected
+    const rejectBank = await app.inject({
       method: 'POST',
       url: '/api/accounts',
       headers: { cookie: cookies.join('; ') },
-      payload: {
-        tipoCuenta: 'bank',
-        nombre: 'My Checking',
-        entidadId: entity.id,
-        globalId,
-      },
+      payload: { tipoCuenta: 'bank', nombre: 'Should Fail' },
     });
-    expect(accountRes.statusCode).toBe(201);
-    const { account } = accountRes.json();
-    expect(account.tipoCuenta).toBe('bank');
-    expect(account.nombre).toBe('My Checking');
-    expect(account.entidadId).toBe(entity.id);
-    expect(account.globalId).toBe(globalId);
-    expect(account.userId).toBeDefined();
-    expect(account.activa).toBe(true);
+    expect(rejectBank.statusCode).toBe(422);
 
-    // Create a card account with a different tipoCuenta
+    // Create a card via card_issuer entity
     const cardRes = await app.inject({
       method: 'POST',
-      url: '/api/accounts',
+      url: '/api/entities',
       headers: { cookie: cookies.join('; ') },
       payload: {
-        tipoCuenta: 'card',
-        nombre: 'Visa Platinum',
-        entidadId: entity.id,
+        nombre: `Visa Platinum ${Date.now()}`,
+        tipo: 'card_issuer',
+        metadata: { network: 'VISA', lastFour: '4242', cutoffDay: 15 },
       },
     });
     expect(cardRes.statusCode).toBe(201);
-    expect(cardRes.json().account.tipoCuenta).toBe('card');
+    expect(cardRes.json().provisionedAccount.tipoCuenta).toBe('card');
 
-    // Create a wallet account
+    // Create a wallet via wallet_platform
     const walletRes = await app.inject({
       method: 'POST',
-      url: '/api/accounts',
+      url: '/api/entities',
       headers: { cookie: cookies.join('; ') },
       payload: {
-        tipoCuenta: 'wallet',
-        nombre: 'Digital Wallet',
+        nombre: `PayPal ${Date.now()}`,
+        tipo: 'wallet_platform',
       },
     });
     expect(walletRes.statusCode).toBe(201);
-    expect(walletRes.json().account.tipoCuenta).toBe('wallet');
+    expect(walletRes.json().provisionedAccount.tipoCuenta).toBe('wallet');
 
     await app.close();
   });
@@ -425,7 +440,7 @@ describe('5.5 — Edge cases', () => {
     await app.close();
   });
 
-  it('should return 500 on account creation with non-existent entidadId', async () => {
+  it('should return 422 when manually creating bank (must use entities)', async () => {
     const app = await createTestApp();
     const cookies = await registerAndVerify(app, 'invalid-fk-55@test.com');
 
@@ -440,8 +455,8 @@ describe('5.5 — Edge cases', () => {
       },
     });
 
-    // Prisma FK constraint violation → 500 (minimal validation in MVP)
-    expect(res.statusCode).toBe(500);
+    // FR-004b: bank/card must use entity provision → 422
+    expect(res.statusCode).toBe(422);
 
     await app.close();
   });
@@ -469,6 +484,71 @@ describe('5.5 — Edge cases', () => {
     expect(dupRes.statusCode).toBe(409);
     expect(dupRes.json().error).toBe('A tag with this name already exists');
 
+    await app.close();
+  });
+});
+
+describe('FR-014 — GET /api/accounts (follow-up Sprint 06)', () => {
+  it('should list only the authenticated user accounts with Hogar projection', async () => {
+    const app = await createTestApp();
+    const cookiesA = await registerAndVerify(app, 'list-acc-a@test.com');
+    const cookiesB = await registerAndVerify(app, 'list-acc-b@test.com');
+
+    const entityRes = await app.inject({
+      method: 'POST',
+      url: '/api/entities',
+      headers: { cookie: cookiesA.join('; ') },
+      payload: { nombre: 'Banco A', tipo: 'bank' },
+    });
+    expect(entityRes.statusCode).toBe(201);
+    const { entity, provisionedAccount } = entityRes.json();
+    expect(provisionedAccount.tipoCuenta).toBe('bank');
+
+    const createB = await app.inject({
+      method: 'POST',
+      url: '/api/accounts',
+      headers: { cookie: cookiesB.join('; ') },
+      payload: { tipoCuenta: 'wallet', nombre: 'Billetera B' },
+    });
+    expect(createB.statusCode).toBe(201);
+
+    const listA = await app.inject({
+      method: 'GET',
+      url: '/api/accounts',
+      headers: { cookie: cookiesA.join('; ') },
+    });
+    expect(listA.statusCode).toBe(200);
+    const bodyA = listA.json();
+    expect(bodyA.accounts).toHaveLength(1);
+    expect(bodyA.accounts[0]).toMatchObject({
+      nombre: 'Banco A',
+      tipoCuenta: 'bank',
+      entidadId: entity.id,
+      isEntityProvisioned: true,
+      activa: true,
+    });
+    expect(bodyA.accounts[0].id).toBeDefined();
+    expect(bodyA.accounts[0]).not.toHaveProperty('userId');
+
+    const listB = await app.inject({
+      method: 'GET',
+      url: '/api/accounts',
+      headers: { cookie: cookiesB.join('; ') },
+    });
+    expect(listB.statusCode).toBe(200);
+    const bodyB = listB.json();
+    expect(bodyB.accounts).toHaveLength(1);
+    expect(bodyB.accounts[0].nombre).toBe('Billetera B');
+    expect(bodyB.accounts[0].isEntityProvisioned).toBe(false);
+    expect(bodyB.accounts[0].entidadId).toBeNull();
+
+    await app.close();
+  });
+
+  it('should return 401 without session', async () => {
+    const app = await createTestApp();
+    const res = await app.inject({ method: 'GET', url: '/api/accounts' });
+    expect(res.statusCode).toBe(401);
     await app.close();
   });
 });

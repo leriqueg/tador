@@ -38,6 +38,7 @@ export function registerAuthRoutes(
         user: {
           id: result.user.id,
           email: result.user.email,
+          fullName: result.user.fullName,
           verifiedAt: result.user.verifiedAt,
         },
         verificationToken: result.verificationToken,
@@ -72,6 +73,7 @@ export function registerAuthRoutes(
         user: {
           id: result.user.id,
           email: result.user.email,
+          fullName: result.user.fullName,
           verifiedAt: result.user.verifiedAt,
         },
       });
@@ -111,8 +113,41 @@ export function registerAuthRoutes(
       user: {
         id: user.id,
         email: user.email,
+        fullName: user.fullName,
         verifiedAt: user.verifiedAt,
       },
     });
+  });
+
+  // PATCH /auth/me — update profile (fullName only in MVP)
+  app.patch('/auth/me', { preHandler: requireAuth }, async (request, reply) => {
+    const user = await authService.getAuthenticatedUser(
+      request.cookies?.session_token ?? '',
+    );
+    if (!user) {
+      return reply.status(401).send({ error: 'Not authenticated' });
+    }
+
+    const body = request.body as { fullName?: string | null };
+    if (body.fullName !== undefined) {
+      const trimmed =
+        typeof body.fullName === 'string' ? body.fullName.trim() : '';
+      user.fullName = trimmed.length > 0 ? trimmed : null;
+    }
+
+    try {
+      const updated = await authService.updateProfile(user);
+      return reply.status(200).send({
+        user: {
+          id: updated.id,
+          email: updated.email,
+          fullName: updated.fullName,
+          verifiedAt: updated.verifiedAt,
+        },
+      });
+    } catch (err) {
+      request.log.error(err, 'Failed to update profile');
+      return reply.status(500).send({ error: 'Failed to update profile' });
+    }
   });
 }

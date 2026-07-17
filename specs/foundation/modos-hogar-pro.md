@@ -3,8 +3,8 @@
 | Campo | Valor |
 |-------|-------|
 | **Documento** | Definición de modos Hogar y PRO |
-| **Versión** | 1.0.0 |
-| **Última actualización** | 2026-07-07 |
+| **Versión** | 1.2.0 |
+| **Última actualización** | 2026-07-13 |
 | **Estado** | Aprobado |
 | **Relación** | Complementa la constitución y el documento `mvp-scope.md` |
 
@@ -42,6 +42,7 @@ Una persona o familia que solo quiere entender si vive bien financieramente. Sin
 - Saldo disponible real.
 - Gastos por categoría.
 - Deudas y tarjetas por pagar.
+- **Cuentas por cobrar / por pagar informales** (p. ej. “le presté a un amigo y me ha ido pagando / comprando cosas”): rastro del saldo con una Entidad, sin facturas ni aging.
 - Tendencia de ahorro o déficit.
 - Alertas simples sobre exceso de gasto.
 
@@ -77,6 +78,8 @@ Alguien que usa la app como apoyo a una actividad económica: profesional indepe
 
 PRO no solo quiere ver "si hubo gasto", sino qué tipo de movimiento fue. Por ejemplo, comprar una laptop no debería verse solo como pérdida del mes; puede ser un activo que se usa durante años y luego se deprecia o incluso se vende.
 
+**CxC/CxP documentales (PRO / post-MVP):** facturas a pacientes/clientes, pagos parciales aplicados a documentos viejos, aging (“¿lo que me deben es actual o muy viejo?”). Eso **no** es el alcance de Hogar; Hogar solo lleva el **saldo** con la Entidad.
+
 ---
 
 ## Diferencia fundamental
@@ -86,8 +89,11 @@ PRO no solo quiere ver "si hubo gasto", sino qué tipo de movimiento fue. Por ej
 | **Pregunta central** | ¿Estoy bien con mi dinero? | ¿Cómo está funcionando mi actividad económica y qué compromisos tengo? |
 | **Nivel de profundidad** | Decisión rápida y comprensión inmediata | Contexto operativo para no confundir rentabilidad con liquidez ni gasto con inversión |
 | **Postura** | Simplifica para que cualquiera entienda su situación | Agrega separación entre dinero, deuda, activos y resultado |
+| **Captura de apuntes** | **Template-driven quick capture**: plantillas nombradas + tres capas (frecuentes / tipo+categoría / búsqueda) + mini-form (cuenta, monto, descripción). Recognition over recall. | **EntryBuilder** (progressive disclosure / narrative form): pasos secuenciales con validez por construcción; pasos previos editables. Asiento manual como escape hatch. |
 
 > **No es una relación incompleta/completa.** Hogar no es una versión "limitada" de PRO. Cada modo resuelve una necesidad distinta. Hogar da **paz mental**; PRO da **control económico**.
+
+> **Decisión 2026-07-13**: No reutilizar EntryBuilder como UX de Hogar. Una plantilla Hogar es el mismo motor de captura con pasos pre-respondidos. Ambos modos ofrecen **“Guardar y registrar otro”** (burst entry). Detalle: `specs/006-frontend-hogar/spec.md` (US2) y `specs/007-frontend-pro-ligero/spec.md` (US2 EntryBuilder).
 
 ---
 
@@ -101,6 +107,7 @@ PRO no solo quiere ver "si hubo gasto", sino qué tipo de movimiento fue. Por ej
 | Gastos | ¿Cuánto gasté en el período? |
 | Saldo disponible | ¿Cuánto efectivo tengo ahora? |
 | Deudas | ¿Cuánto debo en tarjetas, préstamos, etc.? |
+| Por cobrar (informal) | ¿Cuánto me deben amigos / contactos tras préstamos o adelantos? |
 | Ahorro neto | ¿Gasté menos de lo que gané? |
 | Gastos por categoría | ¿En qué se me va la plata? |
 | Tendencia mensual | ¿Voy mejor o peor que meses anteriores? |
@@ -149,4 +156,6 @@ El sprint 05 entrega las APIs y consultas que ambos modos consumen. Los sprints 
 
 | Fecha | Versión | Cambio |
 |------|---------|--------|
+| 2026-07-13 | 1.2.0 | Captura: Hogar = plantillas (tres capas); PRO = EntryBuilder; motor compartido; burst entry |
+| 2026-07-12 | 1.1.0 | Hogar incluye CxC/CxP informales (saldo + Entidad); módulo documental queda en PRO |
 | 2026-07-07 | 1.0.0 | Definición inicial de modos Hogar y PRO |

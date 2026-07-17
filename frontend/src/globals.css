@@ -1,0 +1,266 @@
+@import "tailwindcss";
+
+/* ─── TADOR Design System ────────────────────────────────────── */
+/* Canonical spec: specs/foundation/mockup/stitch/DESIGN.md      */
+/* Tokens in code: src/design/tokens.ts                           */
+/* ────────────────────────────────────────────────────────────── */
+
+@theme {
+  /* ── Brand (DESIGN.md) ──────────────────────────── */
+  --color-primary: #006565;
+  --color-primary-container: #008080;
+  --color-on-primary: #ffffff;
+  --color-on-primary-container: #e3fffe;
+  --color-inverse-primary: #76d6d5;
+  --color-primary-fixed: #93f2f2;
+  --color-primary-fixed-dim: #76d6d5;
+  --color-on-primary-fixed: #002020;
+  --color-on-primary-fixed-variant: #004f4f;
+
+  --color-secondary: #8d4f11;
+  --color-secondary-container: #feac67;
+  --color-on-secondary: #ffffff;
+  --color-on-secondary-container: #773e00;
+  --color-secondary-fixed: #ffdcc3;
+  --color-secondary-fixed-dim: #ffb77d;
+  --color-on-secondary-fixed: #2f1500;
+  --color-on-secondary-fixed-variant: #6e3900;
+
+  --color-tertiary: #9e380d;
+  --color-tertiary-container: #bf5025;
+  --color-on-tertiary: #ffffff;
+  --color-on-tertiary-container: #fff8f6;
+  --color-tertiary-fixed: #ffdbcf;
+  --color-tertiary-fixed-dim: #ffb59c;
+  --color-on-tertiary-fixed: #380c00;
+  --color-on-tertiary-fixed-variant: #822800;
+
+  /* ── Surface / Background ───────────────────────── */
+  --color-surface: #fdf8f5;
+  --color-surface-dim: #ded9d6;
+  --color-surface-bright: #fdf8f5;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f8f3f0;
+  --color-surface-container: #f2edea;
+  --color-surface-container-high: #ece7e4;
+  --color-surface-container-highest: #e6e2df;
+  --color-on-surface: #1c1b1a;
+  --color-on-surface-variant: #3e4949;
+  --color-background: #fdf8f5;
+  --color-on-background: #1c1b1a;
+  --color-inverse-surface: #32302e;
+  --color-inverse-on-surface: #f5f0ed;
+  --color-surface-variant: #e6e2df;
+
+  /* ── Outline / Border ──────────────────────────── */
+  --color-outline: #6e7979;
+  --color-outline-variant: #bdc9c8;
+  --color-surface-tint: #006a6a;
+
+  /* ── Semantic ──────────────────────────────────── */
+  --color-error: #ba1a1a;
+  --color-on-error: #ffffff;
+  --color-error-container: #ffdad6;
+  --color-on-error-container: #93000a;
+  --color-success-emerald: #10b981;
+  --color-warning-amber: #f59e0b;
+  --color-expense-rose: #e11d48;
+  --color-text-muted: #7c6a68;
+  --color-text-main: #1c1b1a;
+
+  /* ── Typography ─────────────────────────────────── */
+  --font-sans: "Manrope", sans-serif;
+  --font-body: "Work Sans", sans-serif;
+
+  --text-display-lg: 3rem;
+  --text-display-lg--line-height: 3.5rem;
+  --text-display-lg--letter-spacing: -0.02em;
+  --text-display-lg--font-weight: 700;
+
+  --text-headline-xl: 2.5rem;
+  --text-headline-xl--line-height: 3rem;
+  --text-headline-xl--letter-spacing: -0.01em;
+  --text-headline-xl--font-weight: 800;
+
+  --text-headline-lg: 2rem;
+  --text-headline-lg--line-height: 2.5rem;
+  --text-headline-lg--font-weight: 600;
+
+  --text-headline-lg-mobile: 1.75rem;
+  --text-headline-lg-mobile--line-height: 2.25rem;
+  --text-headline-lg-mobile--font-weight: 600;
+
+  --text-headline-md: 1.5rem;
+  --text-headline-md--line-height: 2rem;
+  --text-headline-md--font-weight: 700;
+
+  --text-title-md: 1.25rem;
+  --text-title-md--line-height: 1.75rem;
+  --text-title-md--font-weight: 600;
+
+  --text-body-lg: 1.125rem;
+  --text-body-lg--line-height: 1.75rem;
+  --text-body-lg--font-weight: 400;
+
+  --text-body-md: 1rem;
+  --text-body-md--line-height: 1.5rem;
+  --text-body-md--font-weight: 400;
+
+  --text-label-md: 0.875rem;
+  --text-label-md--line-height: 1.25rem;
+  --text-label-md--font-weight: 500;
+  --text-label-md--letter-spacing: 0.01em;
+
+  --text-label-sm: 0.75rem;
+  --text-label-sm--line-height: 1rem;
+  --text-label-sm--font-weight: 700;
+
+  --text-caption: 0.75rem;
+  --text-caption--line-height: 1rem;
+  --text-caption--font-weight: 400;
+
+  /* ── Border Radius (DESIGN.md) ──────────────────── */
+  --radius-sm: 0.25rem;
+  --radius-default: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-full: 9999px;
+
+  /* ── Spacing (8px base, DESIGN.md) ──────────────── */
+  --spacing-base: 8px;
+  --spacing-xs: 4px;
+  --spacing-sm: 12px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 40px;
+  --spacing-gutter: 16px;
+  --spacing-margin-mobile: 20px;
+  --spacing-margin-desktop: 64px;
+  --spacing-container-max: 1200px;
+
+  /* Restore Tailwind max-width scale (spacing-* must not define layout widths). */
+  --max-width-sm: 24rem;
+  --max-width-md: 28rem;
+  --max-width-lg: 32rem;
+  --max-width-xl: 36rem;
+  --max-width-2xl: 42rem;
+  --max-width-3xl: 48rem;
+  --max-width-4xl: 56rem;
+  --max-width-container-max: 1200px;
+}
+
+/* ── Base Styles ──────────────────────────────────────────────── */
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-background);
+  color: var(--color-on-surface);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-sans);
+}
+
+.font-display,
+.font-headline {
+  font-family: var(--font-sans);
+}
+
+.font-body {
+  font-family: var(--font-body);
+}
+
+.material-symbols-outlined,
+.material-symbols-filled {
+  font-family: "Material Symbols Outlined";
+  font-style: normal;
+  font-weight: 400;
+  display: inline-block;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+}
+
+.material-symbols-outlined {
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+}
+
+.material-symbols-filled {
+  font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 24;
+}
+
+/* ── Component Utilities (DESIGN.md guidelines) ─────────────── */
+
+.squishy-btn:active,
+.squishy-button:active {
+  transform: scale(0.96);
+}
+
+.ambient-shadow {
+  box-shadow: 0 8px 30px rgba(119, 87, 74, 0.08);
+}
+
+.card-shadow {
+  box-shadow: 0 4px 20px rgba(139, 92, 71, 0.06);
+}
+
+.hero-mesh {
+  background:
+    radial-gradient(circle at 10% 20%, rgba(252, 232, 222, 0.4) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(178, 236, 236, 0.2) 0%, transparent 40%);
+}
+
+.warm-gradient {
+  background:
+    radial-gradient(circle at 0% 0%, rgba(217, 119, 6, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 100% 100%, rgba(0, 80, 77, 0.03) 0%, transparent 50%);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 10px 25px -5px rgba(0, 80, 80, 0.05);
+}
+
+.glass-header {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.register-gradient {
+  background:
+    radial-gradient(circle at top right, #ffdea5 0%, transparent 40%),
+    radial-gradient(circle at bottom left, #b2dada 0%, transparent 40%),
+    #fdf8f5;
+}
+
+.wave-container {
+  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+}
+
+.component-demo {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 4px 12px rgba(19, 78, 74, 0.05);
+}
+
+.component-label {
+  margin-bottom: 16px;
+  border-left: 4px solid var(--color-primary);
+  padding-left: 12px;
+}

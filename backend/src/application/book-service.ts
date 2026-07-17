@@ -8,12 +8,19 @@ import {
   applyBookConfigUpdate,
 } from '../domain/book.js';
 import { ensureOwnership } from '../domain/tenant.js';
-import { isUserVerified } from '../domain/user.js';
+
+/** MVP temporary: email verification does not block book access unless enabled. */
+function isEmailVerificationRequired(): boolean {
+  return process.env.REQUIRE_EMAIL_VERIFICATION === 'true';
+}
 
 export interface UpdateBookConfigInput {
   currency?: string;
   locale?: string;
   format?: string;
+  mode?: 'hogar' | 'pro';
+  timeZone?: string;
+  completeOnboarding?: boolean;
 }
 
 export interface BookApplicationService {
@@ -35,20 +42,25 @@ export function createBookApplicationService(
   bookRepo: BookRepository,
   getUserVerifiedStatus: (userId: string) => Promise<boolean>,
 ): BookApplicationService {
+  async function assertEmailVerifiedIfRequired(userId: string): Promise<void> {
+    if (!isEmailVerificationRequired()) {
+      return;
+    }
+    const isVerified = await getUserVerifiedStatus(userId);
+    if (!isVerified) {
+      throw new Error(
+        'Email verification required before accessing financial book',
+      );
+    }
+  }
+
   return {
     async getBook(
       userId: string,
       authenticatedUserId: string,
     ): Promise<Book> {
       ensureOwnership(userId, authenticatedUserId);
-
-      // FR-009: Must be verified to access financial book
-      const isVerified = await getUserVerifiedStatus(userId);
-      if (!isVerified) {
-        throw new Error(
-          'Email verification required before accessing financial book',
-        );
-      }
+      await assertEmailVerifiedIfRequired(userId);
 
       const book = await bookRepo.findByUserId(userId);
       if (!book) {
@@ -78,14 +90,7 @@ export function createBookApplicationService(
       input: UpdateBookConfigInput,
     ): Promise<BookConfig> {
       ensureOwnership(userId, authenticatedUserId);
-
-      // FR-009: Must be verified to access book
-      const isVerified = await getUserVerifiedStatus(userId);
-      if (!isVerified) {
-        throw new Error(
-          'Email verification required before accessing financial book',
-        );
-      }
+      await assertEmailVerifiedIfRequired(userId);
 
       const config = await bookRepo.getConfig(bookId);
       if (!config) {

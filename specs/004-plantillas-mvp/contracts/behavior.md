@@ -17,3 +17,9 @@ This contract describes observable behavior, not implementation details.
 - Data from one user is never exposed to another user.
 - Financial behavior never bypasses accounting integrity rules.
 - Out-of-scope MVP modules are not required for this sprint to complete.
+
+## Plantillas catalog (observable)
+
+- `GET /api/plantillas` returns a light catalog: metadata and lines **without** `availableAccounts`.
+- `GET /api/plantillas/:code` returns the same plantilla **with** `availableAccounts` resolved for the authenticated user.
+- Dev-only diagnostic: `GET/POST /api/dev/plantillas-admin*` (gate by env / non-production); not a product surface. Full admin UI is post-MVP.

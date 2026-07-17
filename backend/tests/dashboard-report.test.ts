@@ -202,7 +202,7 @@ describe('PYG Report — GET /api/reports/pyg', () => {
 
     const pygRes = await app.inject({
       method: 'GET',
-      url: '/api/reports/pyg?año=2026',
+      url: '/api/reports/pyg?year=2026',
       headers: { cookie: cookies.join('; ') },
     });
     expect(pygRes.statusCode).toBe(200);
@@ -330,7 +330,7 @@ describe('PYG Report — GET /api/reports/pyg', () => {
 
     const pygRes = await app.inject({
       method: 'GET',
-      url: '/api/reports/pyg?año=2026',
+      url: '/api/reports/pyg?year=2026',
       headers: { cookie: cookies.join('; ') },
     });
     expect(pygRes.statusCode).toBe(200);
@@ -386,15 +386,15 @@ describe('Position Report — GET /api/reports/position', () => {
     });
     createdGlobalIds.push(globalIncome.id);
 
-    // Create CuentaUsuario accounts with specific tipos
+    // Create CuentaUsuario — bank/card via entities; wallet/income via accounts
     const bankRes = await app.inject({
       method: 'POST',
-      url: '/api/accounts',
+      url: '/api/entities',
       headers: { cookie: cookies.join('; ') },
-      payload: { tipoCuenta: 'bank', nombre: 'Main Bank', globalId: globalBank.id },
+      payload: { nombre: `Main Bank ${Date.now()}`, tipo: 'bank' },
     });
     expect(bankRes.statusCode).toBe(201);
-    const bankId = bankRes.json().account.id;
+    const bankId = bankRes.json().provisionedAccount.id;
 
     const walletRes = await app.inject({
       method: 'POST',
@@ -405,23 +405,28 @@ describe('Position Report — GET /api/reports/position', () => {
     expect(walletRes.statusCode).toBe(201);
     const walletId = walletRes.json().account.id;
 
+    // Asset-like debit card: use wallet under asset-coded global (card create banned)
     const debitRes = await app.inject({
       method: 'POST',
       url: '/api/accounts',
       headers: { cookie: cookies.join('; ') },
-      payload: { tipoCuenta: 'card', nombre: 'Debit Card', globalId: globalDebitCard.id },
+      payload: {
+        tipoCuenta: 'wallet',
+        nombre: 'Debit Card',
+        globalId: globalDebitCard.id,
+      },
     });
     expect(debitRes.statusCode).toBe(201);
     const debitId = debitRes.json().account.id;
 
     const creditRes = await app.inject({
       method: 'POST',
-      url: '/api/accounts',
+      url: '/api/entities',
       headers: { cookie: cookies.join('; ') },
-      payload: { tipoCuenta: 'card', nombre: 'Credit Card', globalId: globalCreditCard.id },
+      payload: { nombre: `Credit Card ${Date.now()}`, tipo: 'card_issuer' },
     });
     expect(creditRes.statusCode).toBe(201);
-    const creditId = creditRes.json().account.id;
+    const creditId = creditRes.json().provisionedAccount.id;
 
     // Create an income account for counterparty
     const incomeRes = await app.inject({
@@ -521,7 +526,7 @@ describe('Position Report — GET /api/reports/position', () => {
     const app = await createTestApp();
     const cookies = await registerAndVerify(app, 'pos-receivable@test.com');
 
-    // Create an entity (loan to a person)
+    // Person entities auto-provision a CxC wallet under 1132xxxx
     const entityRes = await app.inject({
       method: 'POST',
       url: '/api/entities',
@@ -529,33 +534,13 @@ describe('Position Report — GET /api/reports/position', () => {
       payload: { nombre: 'Juan Perez', tipo: 'person' },
     });
     expect(entityRes.statusCode).toBe(201);
-    const entityId = entityRes.json().entity.id;
-
-    // Create a CuentaGlobal with asset codigo (1xxx)
-    const globalReceivable = await prisma.cuentaGlobal.create({
-      data: { codigo: nextCodigo('1155'), nombre: 'Loans Receivable', esPostable: true },
-    });
-    createdGlobalIds.push(globalReceivable.id);
+    const receivableId = entityRes.json().provisionedAccount.id;
+    expect(receivableId).toBeTruthy();
 
     const globalIncome = await prisma.cuentaGlobal.create({
       data: { codigo: nextCodigo('4199'), nombre: 'Loan Income', esPostable: true },
     });
     createdGlobalIds.push(globalIncome.id);
-
-    // Create a CuentaUsuario linked to the entity AND the asset global
-    const receivableRes = await app.inject({
-      method: 'POST',
-      url: '/api/accounts',
-      headers: { cookie: cookies.join('; ') },
-      payload: {
-        tipoCuenta: 'wallet',
-        nombre: 'Loan to Juan',
-        globalId: globalReceivable.id,
-        entidadId: entityId,
-      },
-    });
-    expect(receivableRes.statusCode).toBe(201);
-    const receivableId = receivableRes.json().account.id;
 
     const incomeAccRes = await app.inject({
       method: 'POST',
@@ -591,7 +576,7 @@ describe('Position Report — GET /api/reports/position', () => {
 
     expect(Number(report.totalReceivables)).toBe(400);
     expect(report.breakdown.receivables).toHaveLength(1);
-    expect(report.breakdown.receivables[0].accountName).toBe('Loan to Juan');
+    expect(report.breakdown.receivables[0].accountName).toBe('Juan Perez');
 
     await app.close();
   });
@@ -608,7 +593,7 @@ describe('Edge cases', () => {
 
     const pygRes = await app.inject({
       method: 'GET',
-      url: '/api/reports/pyg?año=2025',
+      url: '/api/reports/pyg?year=2025',
       headers: { cookie: cookies.join('; ') },
     });
     expect(pygRes.statusCode).toBe(200);
@@ -626,6 +611,14 @@ describe('Edge cases', () => {
     }
     expect(report.topIncome).toHaveLength(0);
     expect(report.topExpenses).toHaveLength(0);
+
+    const aliasRes = await app.inject({
+      method: 'GET',
+      url: '/api/reports/pyg?año=2025',
+      headers: { cookie: cookies.join('; ') },
+    });
+    expect(aliasRes.statusCode).toBe(200);
+    expect(aliasRes.json().year).toBe(2025);
 
     await app.close();
   });
@@ -683,7 +676,7 @@ describe('Edge cases', () => {
 
     const pygRes = await app.inject({
       method: 'GET',
-      url: '/api/reports/pyg?año=2026',
+      url: '/api/reports/pyg?year=2026',
       headers: { cookie: cookies.join('; ') },
     });
     expect(pygRes.statusCode).toBe(200);
@@ -725,12 +718,12 @@ describe('Edge cases', () => {
     // Expense → expenseCategory (will be 'excluded' in position)
     const assetRes = await app.inject({
       method: 'POST',
-      url: '/api/accounts',
+      url: '/api/entities',
       headers: { cookie: cookies.join('; ') },
-      payload: { tipoCuenta: 'bank', nombre: 'Asset Account', globalId: globalAsset.id },
+      payload: { nombre: `Asset Account ${Date.now()}`, tipo: 'bank' },
     });
     expect(assetRes.statusCode).toBe(201);
-    const assetId = assetRes.json().account.id;
+    const assetId = assetRes.json().provisionedAccount.id;
 
     const incomeRes = await app.inject({
       method: 'POST',
@@ -827,7 +820,7 @@ describe('Edge cases', () => {
     // User B queries PYG for 2026 — should see zeros, not User A's data
     const pygRes = await app.inject({
       method: 'GET',
-      url: '/api/reports/pyg?año=2026',
+      url: '/api/reports/pyg?year=2026',
       headers: { cookie: cookiesB.join('; ') },
     });
     expect(pygRes.statusCode).toBe(200);

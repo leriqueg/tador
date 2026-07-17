@@ -35,6 +35,10 @@ El backend expone endpoints que devuelven datos estructurados. No incluyen forma
 
 Devuelve el resultado del ejercicio PYG.
 
+**Query canónica:** `year` (inglés, alineado a constitución / naming de endpoints).
+
+**Deuda de implementación (follow-up):** el runtime en `backend/src/api/routes/reports.ts` lee hoy `query.año`. Debe aceptar `year` como parámetro primario. Se puede mantener `año` como alias deprecado durante una transición corta; los clientes nuevos (Sprint 06) MUST usar `year`.
+
 ```typescript
 // Response
 {
@@ -225,7 +229,7 @@ Devuelve la posición financiera actual a la fecha de consulta.
 
 **Acceptance**:
 1. **Given** cuentas de banco/efectivo, cuentas por cobrar y pasivos, **When** consulto el dashboard en modo PRO, **Then** veo disponible, por cobrar y por pagar como lecturas separadas con desglose por cuenta.
-2. **Given** que el modo cambia a Hogar, **Then** el panel de posición muestra solo disponible y deudas (sin por cobrar).
+2. **Given** que el modo cambia a Hogar, **Then** el panel de posición sigue mostrando disponible, por cobrar y por pagar (CxC/CxP informales), en lenguaje cotidiano.
 
 ---
 
@@ -251,7 +255,7 @@ Devuelve la posición financiera actual a la fecha de consulta.
 - Más de 10 cuentas con importes — solo se muestran las 10 más altas.
 - Usuario sin cuentas de pasivo o por cobrar — posición muestra ceros en esas categorías.
 - Movimientos que afectan balance y PYG en el mismo asiento — cada panel refleja solo su fuente.
-- Usuario en modo Hogar con cuentas por cobrar — el panel de posición no las muestra (solo disponible y deudas).
+- Usuario en modo Hogar con cuentas por cobrar — el panel de posición **sí** las muestra como “por cobrar” / “me deben” (sin aging ni facturas).
 
 ---
 
@@ -261,14 +265,14 @@ Devuelve la posición financiera actual a la fecha de consulta.
 
 | ID | Requirement | Mode |
 |----|-------------|------|
-| FR-API-001 | El sistema MUST exponer `GET /api/reports/pyg?year={year}` que devuelva ingresos, gastos, neto y serie mensual. | Ambos |
+| FR-API-001 | El sistema MUST exponer `GET /api/reports/pyg?year={year}` que devuelva ingresos, gastos, neto y serie mensual. El query param canónico es `year` (no `año`). | Ambos |
 | FR-API-002 | La serie mensual MUST incluir 12 meses, incluso los que tengan saldo cero. | Ambos |
 | FR-API-003 | El endpoint PYG MUST devolver Top 10 ingresos y Top 10 egresos ordenados por acumulado descendente. | Ambos |
 | FR-API-004 | El endpoint PYG MUST excluir cuentas puente, medios de pago y cuentas de balance de sus totales. | Ambos |
 | FR-API-005 | El sistema MUST exponer `GET /api/reports/position` que devuelva disponible, por cobrar, por pagar y desglose por cuenta. | Ambos |
 | FR-API-006 | El endpoint de posición MUST excluir cuentas de ingreso/egreso de sus totales. | Ambos |
 | FR-API-007 | Ambos endpoints MUST filtrar por usuario autenticado (tenant isolation). | Ambos |
-| FR-API-008 | Ambos endpoints MUST usar `decimal.js` (o equivalente) para cálculos, sin punto flotante JS. | Ambos |
+| FR-API-008 | Ambos endpoints MUST aplicar aritmética monetaria exacta (Constitution IX): `decimal.js` para cálculos y comparaciones; PostgreSQL `NUMERIC` en persistencia; cuantización a los minor units ISO 4217 de la moneda del libro (MVP: USD, 2 decimales). IEEE 754 `number` está prohibido en la aritmética intermedia. | Ambos |
 
 ### 5.2 Presentation requirements (Hogar)
 
@@ -277,7 +281,7 @@ Devuelve la posición financiera actual a la fecha de consulta.
 | FR-H-001 | El panel PYG MUST mostrar: total ingresos, total gastos, resultado neto. |
 | FR-H-002 | El panel PYG MUST incluir un gráfico mensual con barras verdes (ingresos), barras rojas (egresos) y línea negra (saldo). |
 | FR-H-003 | El panel PYG MUST incluir Top 10 de egresos mostrando solo nombre de cuenta (sin código). |
-| FR-H-004 | El panel de posición MUST mostrar "Disponible" y "Deudas" como lecturas simples. NO debe mostrar "Por cobrar". |
+| FR-H-004 | El panel de posición MUST mostrar "Disponible", "Por cobrar" (me deben) y "Deudas / por pagar" como lecturas simples en lenguaje cotidiano. MUST NOT exigir módulo documental (facturas, aging). |
 | FR-H-005 | Los egresos MUST mostrarse como valores positivos en el gráfico. |
 | FR-H-006 | NO se deben mostrar códigos de cuenta en ningún lugar del dashboard Hogar. |
 | FR-H-007 | El formato monetario MUST respetar la moneda configurada por el usuario. |
@@ -324,9 +328,10 @@ Devuelve la posición financiera actual a la fecha de consulta.
 - **Mode integrity**: Hogar y PRO operan sobre el mismo backend. Este sprint entrega los datos; los sprints 06 y 07 construyen la UI específica de cada modo.
 - **Tenant & Privacy**: Todos los endpoints filtran por usuario autenticado.
 - **Accounting Impact**: El dashboard solo lee datos existentes (asientos, saldos). No crea ni modifica asientos.
-- **MVP/Sprint Boundary**: Incluye panel PYG anual y panel de posición. Quedan fuera: PYG comparativo, drill-down por asiento, filtros por entidad/tag, reportes por centro de costo, ratios, exportación formal, estados de cuenta por Entidad.
-- **Hogar scope**: El panel de posición Hogar solo muestra disponible y deudas (oculta por cobrar). Esto es intencional — en Hogar la pregunta es "¿estoy bien?" no "¿qué me deben?".
-- **PRO scope**: El panel de posición PRO expone disponible, por cobrar y por pagar con desglose. Esto sienta las bases para los módulos formales de CxC/CxP post-MVP.
+- **MVP/Sprint Boundary**: Incluye panel PYG anual y panel de posición. Quedan fuera: PYG comparativo, drill-down por asiento, filtros por entidad/tag, reportes por centro de costo, ratios en contrato API, exportación formal, estados de cuenta por Entidad.
+- **Hogar UI split (006, 2026-07-16)**: La UI Hogar **no** mete el P&G completo en `/dashboard`. Hub liviano + landing `/finances` (P&G / Balance / historial). Los **contratos API** de este sprint siguen siendo la fuente; cambia solo la presentación Hogar.
+- **Hogar scope**: El panel de posición Hogar muestra disponible, por cobrar y deudas (CxC/CxP **informales** vía cuentas de balance + Entidad). No incluye facturas, aging ni aplicación de pagos a documentos.
+- **PRO scope**: Además de los mismos saldos, PRO añade (post-MVP / Sprint 07+) el módulo documental: facturas, pagos parciales aplicados a documentos viejos, aging.
 - **Testing**: Los cálculos PYG y posición deben tener tests contables que verifiquen: totales correctos, exclusión de cuentas puente en PYG, exclusión de ingreso/egreso en posición, y separación de fuentes entre paneles.
 
 ---

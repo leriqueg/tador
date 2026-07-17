@@ -119,9 +119,13 @@ TanStack Query owns server state. Zustand must not duplicate API cache data.
 
 ### Money and accounting calculations
 
-Financial values must not use JavaScript floating-point numbers. The initial
-candidate is `decimal.js` for application-level calculations, with PostgreSQL
-exact numeric/decimal columns for persistence.
+Monetary amounts MUST follow Constitution principle IX (Exact monetary arithmetic):
+
+- Persist with PostgreSQL `NUMERIC` / Prisma `Decimal`.
+- Compute and compare with `decimal.js` (`Decimal`) in application/domain code.
+- Quantize to the book currency's ISO 4217 fraction digits (MVP default: USD, 2).
+- Do not use IEEE 754 binary floating-point for intermediate money math.
+- JSON APIs MAY return JS `number` only after quantization from Decimal.
 
 The final schema must preserve accounting invariants in application/domain code:
 balanced Asientos, immutable or controlled corrections, tenant isolation, and

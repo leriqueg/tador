@@ -1,19 +1,14 @@
 <!--
 Sync Impact Report
-- Version change: 1.4.0 → 1.5.0
-- Modified principles: I (richer mode definition), V (CxC/CxP clarification)
-- Added sections: Product Vision (preamble), reference to modos-hogar-pro.md
+- Version change: 1.5.0 → 1.6.0
+- Modified principles: none renamed
+- Added sections: IX Exact monetary arithmetic
 - Removed sections: none
 - Templates requiring updates:
-  ✅ README.md (vision and two-question framing)
-  ✅ specs/foundation/mvp-scope.md
-  ✅ specs/foundation/reporte-pyg-mvp.md
-  ✅ specs/foundation/modelo-conceptual.md
-  ✅ specs/005-dashboard-pyg/spec.md
-  ✅ .specify/templates/plan-template.md (reviewed; no update required)
-  ✅ .specify/templates/spec-template.md (reviewed; no update required)
-  ✅ .specify/templates/tasks-template.md (reviewed; no update required)
-  ✅ .cursor/rules/specify-rules.mdc (reviewed; no update required)
+  ✅ specs/foundation/stack-architecture.md
+  ✅ docs/adr/0001-stack-architecture-and-library-baseline.md
+  ✅ specs/005-dashboard-pyg/spec.md (FR-API-008)
+  ✅ .cursor/rules/implementation-standards.mdc
 - Follow-up TODOs: none
 -->
 
@@ -161,6 +156,26 @@ Rationale: TADOR will mutate sensitive financial state. Idempotency, concurrency
 dependency hygiene, security, clear naming, and disciplined architecture reduce data
 corruption, supply-chain, and long-term maintenance risk.
 
+### IX. Exact monetary arithmetic
+
+All monetary amounts MUST use exact decimal representation end-to-end:
+
+1. **Persistence:** PostgreSQL `NUMERIC` / Prisma `Decimal` columns for stored amounts.
+2. **Application/domain math:** `decimal.js` (`Decimal`) for aggregation, balance
+   checks, quantization, and comparisons. Intermediate IEEE 754 binary floating-point
+   (`number`) arithmetic on money is forbidden.
+3. **Currency scale:** Quantize to the book's currency minor units (ISO 4217 fraction
+   digits) with half-up rounding before persistence and before equality checks.
+   MVP default is **USD with 2 fraction digits**. Unknown currency codes MUST default
+   to 2 digits until an explicit ISO mapping is added — so new currencies do not
+   require rewriting callers.
+4. **API boundary:** JSON responses MAY expose JS `number` only after quantization;
+   prefer deriving that number from a Decimal/string, never from unchecked float sums.
+
+Rationale: Binary floating-point cannot represent common decimal fractions exactly
+(e.g. 0.1). Accounting invariants (balanced Asientos, saldos, reports) require
+exact decimal math so multi-currency support can grow without rewriting the engine.
+
 ## Product & Domain Constraints
 
 - MVP scope is defined in `specs/foundation/mvp-scope.md`.
@@ -274,4 +289,4 @@ simpler alternative that was rejected.
 | **Double-entry (Partida doble)** | Accounting principle: every journal entry has debits and credits that MUST sum to equal amounts. |
 | **Idempotency (Idempotencia)** | Property by which the same request can be sent multiple times without creating duplicates. |
 
-**Version**: 1.5.0 | **Ratified**: 2026-06-20 | **Last Amended**: 2026-07-07
+**Version**: 1.6.0 | **Ratified**: 2026-06-20 | **Last Amended**: 2026-07-12

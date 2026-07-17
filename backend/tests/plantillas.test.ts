@@ -108,6 +108,18 @@ async function createUserAccount(
   nombre: string,
   tipoCuenta = 'wallet',
 ) {
+  if (tipoCuenta === 'bank' || tipoCuenta === 'card') {
+    const tipoEntidad = tipoCuenta === 'bank' ? 'bank' : 'card_issuer';
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/entities',
+      headers: { cookie: cookies.join('; ') },
+      payload: { nombre, tipo: tipoEntidad },
+    });
+    expect(res.statusCode).toBe(201);
+    return res.json().provisionedAccount;
+  }
+
   const global = await findGlobalByCodigo(globalCodigo);
   if (!global) {
     throw new Error(`Global account ${globalCodigo} not found`);
@@ -267,6 +279,11 @@ describe('US7 — GET /api/plantillas', () => {
     expect(res.statusCode).toBe(200);
     const body = res.json();
     expect(body.plantillas).toHaveLength(10);
+    for (const p of body.plantillas) {
+      for (const line of p.lines) {
+        expect(line.availableAccounts).toBeUndefined();
+      }
+    }
 
     await app.close();
   });
@@ -561,6 +578,67 @@ describe('US3 — Register traspasos', () => {
     expect(body.apunte.templateCode).toBe('transferencia');
     expect(Number(body.asiento.lines[0].debito)).toBe(300);
     expect(Number(body.asiento.lines[1].credito)).toBe(300);
+
+    await app.close();
+  });
+
+  it('transferencia same account origen=destino → 400 (V10)', async () => {
+    const app = await createTestApp();
+    const cookies = await registerAndVerify(app, 'us3-transfer-v10@test.com');
+    const accounts = await setupTemplateAccounts(app, cookies);
+
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/apuntes',
+      headers: { cookie: cookies.join('; ') },
+      payload: {
+        templateCode: 'transferencia',
+        date: '2026-07-01',
+        concept: 'Transferencia inválida',
+        amount: 50,
+        lines: [
+          { id: 1, accountId: accounts.bancoUserAccountId },
+          { id: 2, accountId: accounts.bancoUserAccountId },
+        ],
+      },
+    });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.json().error).toMatch(/V10/);
+
+    await app.close();
+  });
+
+  it('transferencia wallet → bank → 201 (groups include billeteras)', async () => {
+    const app = await createTestApp();
+    const cookies = await registerAndVerify(app, 'us3-transfer-wallet@test.com');
+    const accounts = await setupTemplateAccounts(app, cookies);
+
+    const walletUser = await createUserAccount(
+      app,
+      cookies,
+      '11110001',
+      'PayPal',
+      'wallet',
+    );
+
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/apuntes',
+      headers: { cookie: cookies.join('; ') },
+      payload: {
+        templateCode: 'transferencia',
+        date: '2026-07-01',
+        concept: 'Cash out',
+        amount: 80,
+        lines: [
+          { id: 1, accountId: accounts.bancoUserAccountId },
+          { id: 2, accountId: walletUser.id },
+        ],
+      },
+    });
+
+    expect(res.statusCode).toBe(201);
 
     await app.close();
   });
@@ -968,6 +1046,366 @@ describe('Direct CuentaGlobal in template apuntes', () => {
     );
     expect(totalDebito).toBe(60);
     expect(totalCredito).toBe(60);
+
+    await app.close();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Follow-up Sprint 06 ? GET /api/apuntes (SC-008)
+// ---------------------------------------------------------------------------
+
+describe('SC-008 ? GET /api/apuntes', () => {
+  it('should list only the authenticated user apuntes without journal lines', async () => {
+    const app = await createTestApp();
+    const cookiesA = await registerAndVerify(app, 'list-apuntes-a@test.com');
+    const cookiesB = await registerAndVerify(app, 'list-apuntes-b@test.com');
+
+    const energia = await findGlobalByCodigo("61120002");
+    if (!energia) throw new Error("61120002 not seeded");
+
+    async function createGasto(
+      cookies: string[],
+      concept: string,
+      amount: number,
+      date: string,
+    ) {
+      const bancoPostable = await createPostableGlobal(
+        nextCodigo("111214"),
+        `Banco ${concept}`,
+        "11120000",
+      );
+      const bancoUser = await createUserAccount(
+        app,
+        cookies,
+        bancoPostable.codigo,
+        `Banco ${concept}`,
+      );
+      const res = await app.inject({
+        method: "POST",
+        url: "/api/apuntes",
+        headers: { cookie: cookies.join("; ") },
+        payload: {
+          templateCode: "pagar_servicios",
+          date,
+          concept,
+          amount,
+          lines: [
+            { id: 1, accountId: energia.id },
+            { id: 2, accountId: bancoUser.id },
+          ],
+        },
+      });
+      expect(res.statusCode).toBe(201);
+      return res.json().apunte;
+    }
+
+    await createGasto(cookiesA, "Luz junio", 80, "2026-06-01");
+    await createGasto(cookiesA, "Luz julio", 85.5, "2026-07-05");
+    await createGasto(cookiesB, "Luz otro", 10, "2026-07-05");
+
+    const listA = await app.inject({
+      method: "GET",
+      url: "/api/apuntes",
+      headers: { cookie: cookiesA.join("; ") },
+    });
+    expect(listA.statusCode).toBe(200);
+    const bodyA = listA.json();
+    expect(bodyA.total).toBe(2);
+    expect(bodyA.apuntes).toHaveLength(2);
+    expect(bodyA.apuntes[0].concept).toBe("Luz julio");
+    expect(bodyA.apuntes[1].concept).toBe("Luz junio");
+    expect(bodyA.apuntes[0]).toMatchObject({
+      templateCode: "pagar_servicios",
+      date: "2026-07-05",
+      amount: 85.5,
+    });
+    expect(bodyA.apuntes[0].asientoId).toBeDefined();
+    expect(bodyA.apuntes[0]).not.toHaveProperty("lines");
+    expect(bodyA.apuntes[0]).not.toHaveProperty("userId");
+
+    const listB = await app.inject({
+      method: "GET",
+      url: "/api/apuntes",
+      headers: { cookie: cookiesB.join("; ") },
+    });
+    expect(listB.statusCode).toBe(200);
+    expect(listB.json().total).toBe(1);
+    expect(listB.json().apuntes[0].concept).toBe("Luz otro");
+
+    const unauth = await app.inject({ method: "GET", url: "/api/apuntes" });
+    expect(unauth.statusCode).toBe(401);
+
+    await app.close();
+  });
+
+  it("should list apuntes by createdAt desc (not movement date)", async () => {
+    const app = await createTestApp();
+    const cookies = await registerAndVerify(app, "list-apuntes-created@test.com");
+
+    const energia = await findGlobalByCodigo("61120002");
+    if (!energia) throw new Error("61120002 not seeded");
+
+    async function createGasto(concept: string, amount: number, date: string) {
+      const bancoPostable = await createPostableGlobal(
+        nextCodigo("111214"),
+        `Banco ${concept}`,
+        "11120000",
+      );
+      const bancoUser = await createUserAccount(
+        app,
+        cookies,
+        bancoPostable.codigo,
+        `Banco ${concept}`,
+      );
+      const res = await app.inject({
+        method: "POST",
+        url: "/api/apuntes",
+        headers: { cookie: cookies.join("; ") },
+        payload: {
+          templateCode: "pagar_servicios",
+          date,
+          concept,
+          amount,
+          lines: [
+            { id: 1, accountId: energia.id },
+            { id: 2, accountId: bancoUser.id },
+          ],
+        },
+      });
+      expect(res.statusCode).toBe(201);
+      return res.json().apunte;
+    }
+
+    // Newer movement date first, older movement date second (last capture wins)
+    await createGasto("Reciente en libro", 90, "2026-07-10");
+    await createGasto("Corrección antigua", 40, "2026-06-01");
+
+    const list = await app.inject({
+      method: "GET",
+      url: "/api/apuntes",
+      headers: { cookie: cookies.join("; ") },
+    });
+    expect(list.statusCode).toBe(200);
+    const body = list.json();
+    expect(body.apuntes[0].concept).toBe("Corrección antigua");
+    expect(body.apuntes[1].concept).toBe("Reciente en libro");
+
+    await app.close();
+  });
+
+  it("should filter apuntes by date range, amount, concept and accountId", async () => {
+    const app = await createTestApp();
+    const cookies = await registerAndVerify(app, "list-apuntes-filter@test.com");
+
+    const energia = await findGlobalByCodigo("61120002");
+    if (!energia) throw new Error("61120002 not seeded");
+
+    const bancoPostable = await createPostableGlobal(
+      nextCodigo("111214"),
+      "Banco filtro",
+      "11120000",
+    );
+    const bancoUser = await createUserAccount(
+      app,
+      cookies,
+      bancoPostable.codigo,
+      "Banco filtro",
+    );
+
+    async function createGasto(concept: string, amount: number, date: string) {
+      const res = await app.inject({
+        method: "POST",
+        url: "/api/apuntes",
+        headers: { cookie: cookies.join("; ") },
+        payload: {
+          templateCode: "pagar_servicios",
+          date,
+          concept,
+          amount,
+          lines: [
+            { id: 1, accountId: energia.id },
+            { id: 2, accountId: bancoUser.id },
+          ],
+        },
+      });
+      expect(res.statusCode).toBe(201);
+      return res.json().apunte;
+    }
+
+    await createGasto("Luz junio", 50, "2026-06-15");
+    await createGasto("Luz julio", 80, "2026-07-10");
+    await createGasto("Agua julio", 20, "2026-07-12");
+
+    const byConcept = await app.inject({
+      method: "GET",
+      url: "/api/apuntes?q=luz",
+      headers: { cookie: cookies.join("; ") },
+    });
+    expect(byConcept.statusCode).toBe(200);
+    expect(byConcept.json().apuntes.every((a: { concept: string }) =>
+      a.concept.toLowerCase().includes("luz"),
+    )).toBe(true);
+    expect(byConcept.json().total).toBe(2);
+
+    const byAmount = await app.inject({
+      method: "GET",
+      url: "/api/apuntes?amountMin=40&amountMax=60",
+      headers: { cookie: cookies.join("; ") },
+    });
+    expect(byAmount.statusCode).toBe(200);
+    expect(byAmount.json().apuntes).toHaveLength(1);
+    expect(byAmount.json().apuntes[0].concept).toBe("Luz junio");
+
+    const byDate = await app.inject({
+      method: "GET",
+      url: "/api/apuntes?dateFrom=2026-07-01&dateTo=2026-07-31",
+      headers: { cookie: cookies.join("; ") },
+    });
+    expect(byDate.statusCode).toBe(200);
+    expect(byDate.json().total).toBe(2);
+
+    const byAccount = await app.inject({
+      method: "GET",
+      url: `/api/apuntes?accountId=${bancoUser.id}`,
+      headers: { cookie: cookies.join("; ") },
+    });
+    expect(byAccount.statusCode).toBe(200);
+    expect(byAccount.json().total).toBe(3);
+
+    await app.close();
+  });
+
+  it("should respect limit and offset pagination", async () => {
+    const app = await createTestApp();
+    const cookies = await registerAndVerify(app, "list-apuntes-page@test.com");
+
+    const energia = await findGlobalByCodigo("61120002");
+    if (!energia) throw new Error("61120002 not seeded");
+
+    for (let i = 1; i <= 3; i++) {
+      const bancoPostable = await createPostableGlobal(
+        nextCodigo("111214"),
+        `Banco page ${i}`,
+        "11120000",
+      );
+      const bancoUser = await createUserAccount(
+        app,
+        cookies,
+        bancoPostable.codigo,
+        `Banco page ${i}`,
+      );
+      const res = await app.inject({
+        method: "POST",
+        url: "/api/apuntes",
+        headers: { cookie: cookies.join("; ") },
+        payload: {
+          templateCode: "pagar_servicios",
+          date: `2026-07-0${i}`,
+          concept: `Apunte ${i}`,
+          amount: 10 * i,
+          lines: [
+            { id: 1, accountId: energia.id },
+            { id: 2, accountId: bancoUser.id },
+          ],
+        },
+      });
+      expect(res.statusCode).toBe(201);
+    }
+
+    const page = await app.inject({
+      method: "GET",
+      url: "/api/apuntes?limit=1&offset=1",
+      headers: { cookie: cookies.join("; ") },
+    });
+    expect(page.statusCode).toBe(200);
+    const body = page.json();
+    expect(body.total).toBe(3);
+    expect(body.apuntes).toHaveLength(1);
+    expect(body.apuntes[0].concept).toBe("Apunte 2");
+
+    await app.close();
+  });
+});
+
+describe('Plantillas Admin (dev)', () => {
+  it('GET /api/dev/plantillas-admin?mode=hogar returns readiness summary', async () => {
+    const app = await createTestApp();
+    const cookies = await registerAndVerify(app, 'admin-plantillas@test.com');
+    await setupTemplateAccounts(app, cookies);
+
+    const res = await app.inject({
+      method: 'GET',
+      url: '/api/dev/plantillas-admin?mode=hogar&format=json',
+      headers: { cookie: cookies.join('; ') },
+    });
+
+    expect(res.statusCode).toBe(200);
+    const body = res.json();
+    expect(body.summary).toBeDefined();
+    expect(Array.isArray(body.summary.emptyCategories)).toBe(true);
+    expect(body.plantillas.length).toBeGreaterThanOrEqual(1);
+    expect(body.plantillas[0]).toHaveProperty('ready');
+    expect(body.plantillas[0].lines[0]).toHaveProperty('availableCount');
+
+    await app.close();
+  });
+
+  it('GET /api/dev/plantillas-admin serves interactive HTML tool for browsers', async () => {
+    const app = await createTestApp();
+    const cookies = await registerAndVerify(app, 'admin-html@test.com');
+
+    const res = await app.inject({
+      method: 'GET',
+      url: '/api/dev/plantillas-admin?mode=hogar',
+      headers: {
+        cookie: cookies.join('; '),
+        accept: 'text/html,application/xhtml+xml',
+      },
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(String(res.headers['content-type'])).toContain('text/html');
+    expect(res.body).toContain('Plantillas Admin');
+    expect(res.body).toContain('Generar mockup del asiento');
+    expect(res.body).toContain('Código fuente');
+
+    await app.close();
+  });
+
+  it('POST preview dry-runs without persisting', async () => {
+    const app = await createTestApp();
+    const cookies = await registerAndVerify(app, 'admin-preview@test.com');
+    const accounts = await setupTemplateAccounts(app, cookies);
+    const user = await prisma.user.findUnique({
+      where: { email: 'admin-preview@test.com' },
+    });
+    expect(user).toBeTruthy();
+
+    const before = await prisma.apunte.count({ where: { userId: user!.id } });
+
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/dev/plantillas-admin/pagar_servicios/preview',
+      headers: { cookie: cookies.join('; ') },
+      payload: {
+        amount: 42.5,
+        concept: 'Preview only',
+        lines: [
+          { id: 1, accountId: accounts.servicioUserAccountId },
+          { id: 2, accountId: accounts.bancoUserAccountId },
+        ],
+      },
+    });
+
+    expect(res.statusCode).toBe(200);
+    const body = res.json();
+    expect(body.persisted).toBe(false);
+    expect(body.balanced).toBe(true);
+    expect(body.lines).toHaveLength(2);
+
+    const after = await prisma.apunte.count({ where: { userId: user!.id } });
+    expect(after).toBe(before);
 
     await app.close();
   });

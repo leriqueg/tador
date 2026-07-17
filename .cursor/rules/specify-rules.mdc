@@ -3,6 +3,9 @@ alwaysApply: true
 ---
 
 <!-- SPECKIT START -->
-Current active plan: `specs/001-plataforma-base/plan.md`.
+Current active plan: none (Sprint 006 Frontend Hogar **closed** 2026-07-16).
+Last closed: `specs/006-frontend-hogar/plan.md` — Hogar US1–US3 + Vitest/Playwright E2E.
+Next candidate: `specs/007-frontend-pro-ligero/` (PRO EntryBuilder) when prioritized.
 For roadmap context, also read `specs/foundation/estrategia-incremental-sprints.md`.
+Component inventory (UI): `frontend/docs/component-inventory.md`.
 <!-- SPECKIT END -->

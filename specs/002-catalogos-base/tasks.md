@@ -58,3 +58,11 @@ Chain strategy: pending
 - [ ] 5.3 Escribir test CRUD entidad con unicidad por usuario y nombres duplicados entidad/tag independientes (FR-012/013)
 - [ ] 5.4 Escribir test aislamiento — usuario B no ve ni modifica catálogo/entidades/tags de usuario A (tenant isolation)
 - [ ] 5.5 Escribir test edge cases — cuenta bajo madre inválida, entidad duplicada, posteo contra cuenta madre rechazado
+
+## Follow-up (deuda para Sprint 06)
+
+Contrato en `contracts/api.md` (`GET /api/accounts`). Implementado en `backend/src/api/routes/accounts.ts` (GET + POST). Tests en `tests/catalogos-base.test.ts` (FR-014); correr con `vitest.integration.config.ts` y Postgres disponible.
+
+- [x] F1 Escribir test de integración: `GET /api/accounts` → 200 con cuentas del usuario A; usuario B no ve las de A (FR-014, SC-007)
+- [x] F2 Implementar `GET /api/accounts` en `backend/src/api/routes/accounts.ts` según `contracts/api.md` (id, codigo, nombre, tipoCuenta, entidadId, isEntityProvisioned, activa)
+- [x] F3 Decisión: la proyección de listado **no** incluye saldo. El frontend obtiene saldos con `GET /api/balances/:cuentaId` (ya existe en `balances.ts`) por cuenta al armar `/accounts` / `AccountGroupList`.

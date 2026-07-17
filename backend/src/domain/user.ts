@@ -7,6 +7,7 @@ export interface User {
   id: string;
   email: string;
   passwordHash: string;
+  fullName: string | null;
   verifiedAt: Date | null;
   createdAt: Date;
 }
@@ -18,9 +19,10 @@ export interface CreateUserInput {
 
 export function createUser(input: CreateUserInput): User {
   return {
-    id: '', // assigned by repository
+    id: '',
     email: input.email,
     passwordHash: input.passwordHash,
+    fullName: null,
     verifiedAt: null,
     createdAt: new Date(),
   };

@@ -2,6 +2,8 @@
 
 El MVP de TADOR debe incluir un dashboard obligatorio con dos lecturas separadas: un panel PYG por ejercicio y un panel de posición financiera a la fecha de consulta. El panel PYG ya existe conceptualmente en el proyecto legacy y se considera indispensable; el panel de posición expone la capacidad MVP de registrar deudas por cobrar/pagar como cuentas de balance vinculadas a Entidades.
 
+> **Nota UI Hogar (006, 2026-07-16):** En Modo Hogar la **presentación** separa hub (`/dashboard`, mes default) de análisis (`/finances/pyg`, `/finances/balance`). Los datos y reglas de este documento siguen siendo la fuente canónica del panel PYG y de la posición.
+
 ## Objetivo
 
 Mostrar una lectura rápida del resultado anual y, por separado, de la posición financiera actual.

@@ -10,6 +10,10 @@
 
 import Decimal from 'decimal.js';
 import { prisma } from '../infrastructure/database.js';
+import {
+  moneyToNumber,
+  toDecimal as toMoneyDecimal,
+} from '../domain/money.js';
 
 // ---------------------------------------------------------------------------
 // DTOs — API response shapes
@@ -125,8 +129,20 @@ function classifyPositionAccount(
 
   const prefix = globalCodigo ? globalCodigo.charAt(0) : '';
 
-  // Entity-linked accounts: entidadId takes precedence for proper
-  // classification of loans/credit extended to third parties.
+  // Liquid medios: bank/wallet/card from institution entities still carry
+  // entidadId (the bank/issuer), but they are Available/Payable by tipo —
+  // not counterparty receivables. Check tipoCuenta before entidadId.
+  if (tipoCuenta === 'bank') {
+    return 'available';
+  }
+
+  if (tipoCuenta === 'card') {
+    if (prefix === '1') return 'available';
+    if (prefix === '2') return 'payable';
+    return 'excluded';
+  }
+
+  // Counterparty links (person/org CxC-CxP): wallet (or other) + entidadId
   if (entidadId && prefix === '1') {
     return 'receivable';
   }
@@ -134,16 +150,8 @@ function classifyPositionAccount(
     return 'payable';
   }
 
-  // Bank and wallet are liquid assets
-  if (tipoCuenta === 'bank' || tipoCuenta === 'wallet') {
+  if (tipoCuenta === 'wallet') {
     return 'available';
-  }
-
-  // Cards: codigo determines classification
-  if (tipoCuenta === 'card') {
-    if (prefix === '1') return 'available';
-    if (prefix === '2') return 'payable';
-    return 'excluded'; // Unknown card type
   }
 
   // Asset codigo → available
@@ -164,10 +172,10 @@ function classifyPositionAccount(
 // Decimal helpers
 // ---------------------------------------------------------------------------
 
-/** Safely convert a string or number to Decimal. */
+/** Safely convert a string or number to Decimal via domain money helpers. */
 function toDecimal(value: string | number | { toString: () => string }): Decimal {
-  if (typeof value === 'number') return new Decimal(value);
-  return new Decimal(value.toString());
+  if (typeof value === 'number') return toMoneyDecimal(value);
+  return toMoneyDecimal(value.toString());
 }
 
 // ---------------------------------------------------------------------------

@@ -55,4 +55,36 @@ jobs:
       - name: Integration tests
         run: npm run test:integration
         env:
-          DATABASE_URL: postgresql://tador:tador_dev_password@localhost:5432/tador_test
+          POSTGRES_USER: tador
+          POSTGRES_PASSWORD: tador_dev_password
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: "5432"
+          POSTGRES_DB: tador_test
+
+  frontend:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Type check
+        working-directory: frontend
+        run: npm run build
+
+      - name: Unit tests
+        working-directory: frontend
+        run: npm run test:unit
+
+      - name: Integration tests
+        working-directory: frontend
+        run: npm run test:integration

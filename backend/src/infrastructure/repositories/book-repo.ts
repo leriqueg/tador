@@ -3,7 +3,7 @@
  */
 
 import { prisma } from '../database.js';
-import type { Book, BookConfig } from '../../domain/book.js';
+import type { Book, BookConfig, BookMode } from '../../domain/book.js';
 import { defaultBookConfigCreateInput } from '../../domain/book.js';
 
 export interface BookRepository {
@@ -65,6 +65,9 @@ export function createBookRepository(): BookRepository {
           locale: config.locale ?? 'en-US',
           format: config.format ?? 'symbol',
           currencyLocked: config.currencyLocked ?? false,
+          mode: config.mode ?? 'hogar',
+          timeZone: config.timeZone ?? 'UTC',
+          onboardingCompletedAt: config.onboardingCompletedAt ?? null,
         },
         update: {
           ...(config.currency !== undefined && { currency: config.currency }),
@@ -72,6 +75,11 @@ export function createBookRepository(): BookRepository {
           ...(config.format !== undefined && { format: config.format }),
           ...(config.currencyLocked !== undefined && {
             currencyLocked: config.currencyLocked,
+          }),
+          ...(config.mode !== undefined && { mode: config.mode }),
+          ...(config.timeZone !== undefined && { timeZone: config.timeZone }),
+          ...(config.onboardingCompletedAt !== undefined && {
+            onboardingCompletedAt: config.onboardingCompletedAt,
           }),
         },
       });
@@ -99,6 +107,9 @@ function mapConfig(record: {
   locale: string;
   format: string;
   currencyLocked: boolean;
+  mode: string;
+  timeZone: string;
+  onboardingCompletedAt: Date | null;
   createdAt: Date;
 }): BookConfig {
   return {
@@ -108,6 +119,9 @@ function mapConfig(record: {
     locale: record.locale,
     format: record.format,
     currencyLocked: record.currencyLocked,
+    mode: record.mode as BookMode,
+    timeZone: record.timeZone,
+    onboardingCompletedAt: record.onboardingCompletedAt,
     createdAt: record.createdAt,
   };
 }

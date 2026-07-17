@@ -1,6 +1,6 @@
 {
   "code": "transferencia",
-  "version": 1,
+  "version": 2,
   "name": "Transferir entre cuentas",
   "modes": ["hogar"],
   "amount": { "type": "money", "required": true, "label": "Monto" },
@@ -10,7 +10,7 @@
   "amountMode": "single",
   "descriptionTemplate": "Transferencia: {concept}",
   "lines": [
-    { "id": 1, "side": "debit",  "label": "Cuenta destino",  "strategy": "from_groups", "groupCodes": ["11110000","11120000"] },
-    { "id": 2, "side": "credit", "label": "Cuenta origen",    "strategy": "from_groups", "groupCodes": ["11110000","11120000"] }
+    { "id": 1, "side": "debit",  "label": "Cuenta destino",  "strategy": "from_groups", "groupCodes": ["11110000","11120000","11320000","21120000"] },
+    { "id": 2, "side": "credit", "label": "Cuenta origen",    "strategy": "from_groups", "groupCodes": ["11110000","11120000","11320000","21120000"] }
   ]
 }

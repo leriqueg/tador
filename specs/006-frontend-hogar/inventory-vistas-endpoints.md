@@ -2,7 +2,9 @@
 
 **Spec**: [spec.md](./spec.md) · **Fecha**: 2026-07-10 (actualizado)  
 **Propósito**: Mapa de rutas UI ↔ mockups ↔ APIs **antes** de implementar pantallas autenticadas.  
-**Alcance**: Modo Hogar (Sprint 06). Fuera: PRO avanzado, IA v0, Pacho interactivo.
+**Alcance**: Modo Hogar (Sprint 06). Fuera: PRO EntryBuilder (007), PRO avanzado (009), IA v0 (008 excluida MVP), Pacho interactivo.
+
+> **Namespace (007)**: Las rutas Hogar migran a `/hogar/*`; legacy `/dashboard`, `/entries`, etc. redirigen según modo.
 
 **Catálogo de componentes UI (Storybook / diseño):** vive en el codebase — [`frontend/docs/component-inventory.md`](../../frontend/docs/component-inventory.md). Este archivo **no** duplica ese catálogo.
 
@@ -31,15 +33,15 @@ Rutas en inglés (código). Copy de UI en español neutro.
 | 4 | `/faq` | Preguntas frecuentes | `preguntas_frecuentes_tador_neutro` | Marketing | **Hecho** |
 | 5 | `/contact` | Contacto | `contacto_tador_neutro` | Marketing | Pendiente — **`mailto:`** (sin API) |
 | 6 | `/onboarding` | Primer uso guiado | `onboarding_tador_mobile` + `onboarding_tador_desktop` | US1, FR-009/010 | **Hecho** — modo + moneda + TZ auto; banco/tarjeta/billetera vía entities |
-| 7 | `/dashboard` | Hub informativo (mes/año + posición + tip) | `dashboard_hogar_tador` (adaptado) | US3, FR-007 | **Hecho** — mes default; CTA a `/finances` |
-| 8 | `/entries` | Captura de apuntes | `apuntes_tador` | US2, FR-005 | **Hecho** (QuickAdd; historial filtrable no vive aquí) |
-| 8b | `/finances` | Landing Estado (P&G / Balance / apuntes) | (nuevo) | FR-007a | **Hecho** |
-| 8c | `/finances/pyg` | Estado financiero (P&G) | (charts 005) | FR-007b | **Hecho** — Top 10; mes sin serie diaria aún |
-| 8d | `/finances/balance` | Estado de Balance | (posición) | FR-007c | **Hecho** — hint endeudamiento solo UI |
-| 8e | `/finances/apuntes` | Historial filtrable | — | FR-007d | **Hecho** |
-| 9 | `/accounts` | Categorías ingreso/gasto | `cuentas_tador` | FR-004b | **Hecho** — solo income/expense; sin saldo hero |
-| 10 | `/entities` | Entidades | `entidades_tador` | FR-004 / US1c | **Hecho** — bank/card_issuer/wallet_platform/person + provisión |
-| 11 | `/settings` | Ajustes | `configuraci_n_tador` | FR-004c | **Hecho** — moneda RO; TZ + fullName editables |
+| 7 | `/hogar/dashboard` (legacy `/dashboard` → redirect) | Hub informativo (mes/año + posición + tip) | `dashboard_hogar_tador` (adaptado) | US3, FR-007 | **Hecho** — mes default; CTA a `/hogar/finances` |
+| 8 | `/hogar/entries` (legacy `/entries` → redirect) | Captura de apuntes | `apuntes_tador` | US2, FR-005 | **Hecho** (QuickAdd; historial filtrable no vive aquí) |
+| 8b | `/hogar/finances` (legacy `/finances` → redirect) | Landing Estado (P&G / Balance / apuntes) | (nuevo) | FR-007a | **Hecho** |
+| 8c | `/hogar/finances/pyg` | Estado financiero (P&G) | (charts 005) | FR-007b | **Hecho** — Top 10; mes sin serie diaria aún |
+| 8d | `/hogar/finances/balance` | Estado de Balance | (posición) | FR-007c | **Hecho** — hint endeudamiento solo UI |
+| 8e | `/hogar/finances/apuntes` | Historial filtrable | — | FR-007d | **Hecho** |
+| 9 | `/hogar/accounts` (legacy `/accounts` → redirect) | Categorías ingreso/gasto | `cuentas_tador` | FR-004b | **Hecho** — solo income/expense; sin saldo hero |
+| 10 | `/hogar/entities` (legacy `/entities` → redirect) | Entidades | `entidades_tador` | FR-004 / US1c | **Hecho** — bank/card_issuer/wallet_platform/person + provisión |
+| 11 | `/hogar/settings` (legacy `/settings` → redirect) | Ajustes | `configuraci_n_tador` | FR-004c | **Hecho** — moneda RO; TZ + fullName editables |
 | 12 | `/recovery` | Recuperar contraseña | (definir mockup / flujo) | FR-003 de 001 | Pendiente — depende email config (delta 001) |
 
 ### Onboarding (detalle)
@@ -55,19 +57,19 @@ Rutas en inglés (código). Copy de UI en español neutro.
 | Condición | Destino |
 |-----------|---------|
 | Libro no inicializado (falta modo/moneda/timezone del wizard) | `/onboarding` |
-| Libro inicializado | `/dashboard` |
+| Libro inicializado | `/hogar/dashboard` o `/pro/dashboard` según modo (legacy `/dashboard` redirige) |
 | Registro exitoso | mismo criterio (suele ser `/onboarding`) |
 
 ### Shell autenticado
 
-| Nav (ES) | Ruta |
-|----------|------|
-| Resumen | `/dashboard` |
-| Apuntes | `/entries` |
-| Estado | `/finances` |
-| Cuentas | `/accounts` |
-| Entidades | `/entities` |
-| Ajustes | `/settings` |
+| Nav (ES) | Ruta canónica (Hogar) | Legacy (redirect) |
+|----------|----------------------|-------------------|
+| Resumen | `/hogar/dashboard` | `/dashboard` |
+| Apuntes | `/hogar/entries` | `/entries` |
+| Estado | `/hogar/finances` | `/finances` |
+| Cuentas | `/hogar/accounts` | `/accounts` |
+| Entidades | `/hogar/entities` | `/entities` |
+| Ajustes | `/hogar/settings` | `/settings` |
 
 Componente objetivo: **AppShell** (ver inventario frontend). Sin avatar Pacho.
 

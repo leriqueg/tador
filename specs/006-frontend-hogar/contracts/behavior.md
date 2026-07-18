@@ -1,5 +1,7 @@
 # Contract: Sprint 06 - Frontend Hogar
 
+**Updated**: 2026-07-18
+
 This contract describes observable behavior, not implementation details.
 
 ## Inputs
@@ -50,6 +52,8 @@ This contract describes observable behavior, not implementation details.
 4. “Guardar y registrar otro” → same plantilla + account retained; amount and description cleared; focus amount.
 5. Missing required account for plantilla → everyday-language error + path to create/select account (no codes).
 6. For `transferencia` (and multi-slot account pickers with opposing sides): UI disables/rejects identical origin and destination; backend returns V10 on duplicate.
+7. Cada intento de creación genera una Idempotency-Key; reintentos reutilizan la misma clave hasta recibir éxito.
+8. Error V12 mantiene el mini-form y explica que la cuenta quedaría negativa; nunca muestra confirmación de éxito.
 
 ### Non-goals (this sprint)
 

@@ -75,19 +75,19 @@ describe('Dashboard page (integration)', () => {
   });
 
   it('loads hub summary for the current month', async () => {
-    renderWithRouter(<Dashboard />, { router: { initialEntries: ['/dashboard'] } });
+    renderWithRouter(<Dashboard />, { router: { initialEntries: ['/hogar/dashboard'] } });
 
     expect(await screen.findByRole('heading', { name: 'Resumen' })).toBeInTheDocument();
     expect(mockedPyg).toHaveBeenCalledWith(year);
     expect(mockedPosition).toHaveBeenCalled();
     expect(
       screen.getByRole('link', { name: /Ver Estado financiero y Balance/i }),
-    ).toHaveAttribute('href', '/finances');
+    ).toHaveAttribute('href', '/hogar/finances');
   });
 
   it('switches period toggle to annual view', async () => {
     const user = userEvent.setup();
-    renderWithRouter(<Dashboard />, { router: { initialEntries: ['/dashboard'] } });
+    renderWithRouter(<Dashboard />, { router: { initialEntries: ['/hogar/dashboard'] } });
 
     await screen.findByText('Cómo vas ahora — el detalle está en Estado.');
     const yearButtons = screen.getAllByRole('button', { name: 'Este año' });
@@ -99,7 +99,7 @@ describe('Dashboard page (integration)', () => {
   it('shows error when reports fail', async () => {
     mockedPyg.mockRejectedValue(new Error('Servicio no disponible'));
 
-    renderWithRouter(<Dashboard />, { router: { initialEntries: ['/dashboard'] } });
+    renderWithRouter(<Dashboard />, { router: { initialEntries: ['/hogar/dashboard'] } });
 
     expect(await screen.findByText('Servicio no disponible')).toBeInTheDocument();
   });

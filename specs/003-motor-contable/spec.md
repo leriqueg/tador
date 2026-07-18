@@ -1,7 +1,7 @@
 # Feature Specification: Sprint 03 — Motor contable
 
 **Created**: 2026-06-22
-**Updated**: 2026-07-02
+**Updated**: 2026-07-18
 **Status**: Ratified
 
 **Input**: Asiento, línea de asiento, validación de balance, anulación, saldos acumulados, periodo anual, PYG y Balance.
@@ -17,6 +17,13 @@
 - Q: ¿Anulación? → A: Se crea un asiento de tipo `reversa` con líneas invertidas, referenciando el original. El original se marca `anulado`.
 - Q: ¿Saldos materializados? → A: Calculados en tiempo real desde líneas para MVP.
 - Q: ¿Periodo se crea manual? → A: Automático al primer asiento del año.
+
+### Session 2026-07-18
+
+- Q: ¿Cómo se impide un sobregiro concurrente si el saldo no está materializado? → A: La escritura adquiere locks transaccionales por cuenta, recalcula el saldo derivado y valida el saldo natural proyectado dentro de la misma transacción.
+- Q: ¿Qué cuentas se protegen? → A: Liquidez (`1111`, `1112`), CxC personales (`1132`), CxP personales (`2112`) y tarjetas (`2120`).
+- Q: ¿Puede el usuario permitir negativos? → A: Sí, mediante una política explícita por `CuentaUsuario` o por activación usuario/cuenta global; la protección está activa por defecto.
+- Q: ¿Idempotencia cubre concurrencia? → A: Sí. El índice único decide el ganador; una carrera `P2002` relee y devuelve el asiento ganador.
 
 ### Session 2026-06-22
 
@@ -109,6 +116,9 @@ Como usuario, quiero ver mis ingresos y gastos del ejercicio (PYG) y el estado d
 - IdempotencyKey repetida (retorna existente, no duplica).
 - PYG sin asientos en el ejercicio (todo ceros).
 - Balance sin asientos (todo ceros).
+- Dos egresos concurrentes que individualmente caben pero juntos sobregiran: solo uno confirma.
+- Cobro mayor que la CxC o pago mayor que la CxP/tarjeta: rechazado por saldo natural.
+- Política de saldo desactivada explícitamente: se permite el negativo para esa cuenta.
 
 ## Requirements *(mandatory)*
 
@@ -124,11 +134,17 @@ Como usuario, quiero ver mis ingresos y gastos del ejercicio (PYG) y el estado d
 #### Idempotencia
 - **FR-006**: El endpoint de creación MUST aceptar `Idempotency-Key` opcional en header.
 - **FR-007**: Si se recibe una `Idempotency-Key` ya usada, MUST devolver el asiento existente sin duplicar.
+- **FR-007a**: Si dos solicitudes con la misma clave compiten, MUST serializarse por clave y releer el ganador antes de repetir validaciones; el índice único permanece como defensa final.
 
 #### Saldos acumulados
 - **FR-008**: El sistema MUST calcular saldo actual por cuenta desde la suma de líneas (debito − credito).
 - **FR-009**: El sistema MUST calcular acumulado mensual y anual por cuenta.
 - **FR-010**: Los saldos MUST excluir asientos anulados del cómputo.
+- **FR-026**: Las cuentas protegidas MUST mantener saldo natural proyectado mayor o igual a cero por defecto.
+- **FR-027**: La validación MUST ocurrir dentro de la misma transacción que persiste las líneas.
+- **FR-028**: Escrituras concurrentes sobre una cuenta protegida MUST serializarse por cuenta antes de leer el saldo.
+- **FR-029**: La protección MUST aplicar a `CuentaUsuario` y a uso directo de `CuentaGlobal`, con configuración por usuario.
+- **FR-030**: El usuario MAY desactivar explícitamente la protección en una cuenta; el cambio de política MUST serializarse con escrituras en curso.
 
 #### Anulación
 - **FR-011**: El sistema MUST permitir anular un asiento en periodo abierto.
@@ -196,6 +212,9 @@ Como usuario, quiero ver mis ingresos y gastos del ejercicio (PYG) y el estado d
 - **SC-005**: 100 % de ediciones en periodo abierto dejan evidencia de auditoría.
 - **SC-006**: PYG y Balance calculados desde líneas coinciden con los totales esperados en 100 % de casos.
 - **SC-007**: IdempotencyKey repetida no crea asientos duplicados.
+- **SC-008**: Dos retiros concurrentes nunca dejan negativa una cuenta protegida; uno se rechaza si el saldo agregado no alcanza.
+- **SC-009**: El saldo se mantiene derivado desde líneas; no existe columna de saldo, trigger ni vista materializada.
+- **SC-010**: El toggle por cuenta cambia V12 sin afectar la partida doble ni la auditoría.
 
 ## Assumptions
 

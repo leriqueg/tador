@@ -1,0 +1,16 @@
+{
+  "code": "cobro_prestamo",
+  "version": 1,
+  "name": "Cobrar préstamo",
+  "modes": ["hogar", "pro"],
+  "amount": { "type": "money", "required": true, "label": "Monto" },
+  "concept": { "type": "text", "required": true, "label": "Concepto" },
+  "date": { "type": "date", "default": "today", "required": true, "label": "Fecha" },
+  "entity": { "type": "entity", "required": false, "label": "Relacionado con" },
+  "amountMode": "single",
+  "descriptionTemplate": "Cobro préstamo: {concept}",
+  "lines": [
+    { "id": 1, "side": "debit",  "label": "Dónde recibes", "strategy": "from_groups", "groupCodes": ["11110000", "11120000"] },
+    { "id": 2, "side": "credit", "label": "Quién te paga", "strategy": "from_group", "groupCode": "11320000" }
+  ]
+}

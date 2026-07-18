@@ -5,9 +5,10 @@
 import type { FastifyInstance } from 'fastify';
 import type { AuthApplicationService } from '../../application/auth-service.js';
 import type { AccountingService } from '../../application/accounting-service.js';
+import type { BookApplicationService } from '../../application/book-service.js';
 import type { DashboardReportService } from '../../application/dashboard-report-service.js';
+import type { FinancialAnalysisService } from '../../application/financial-analysis-service.js';
 import { createAuthMiddleware } from '../middleware/auth.js';
-import { prisma } from '../../infrastructure/database.js';
 
 /** Canonical query is `year`; `año` remains a short-lived deprecated alias. */
 function parseYearQuery(query: { year?: string; año?: string }): number {
@@ -23,16 +24,19 @@ export function registerReportRoutes(
   app: FastifyInstance,
   authService: AuthApplicationService,
   accountingService: AccountingService,
+  bookService: BookApplicationService,
   dashboardService?: DashboardReportService,
+  financialAnalysisService?: FinancialAnalysisService,
 ): void {
   const requireAuth = createAuthMiddleware(authService);
 
   async function getBookId(userId: string): Promise<string | null> {
-    const book = await prisma.book.findFirst({
-      where: { userId },
-      select: { id: true },
-    });
-    return book?.id ?? null;
+    try {
+      const book = await bookService.getBook(userId, userId);
+      return book.id;
+    } catch {
+      return null;
+    }
   }
 
   app.get(
@@ -40,9 +44,15 @@ export function registerReportRoutes(
     { preHandler: requireAuth },
     async (request, reply) => {
       const userId = request.userId!;
-      const year = parseYearQuery(
-        request.query as { year?: string; año?: string },
-      );
+      const query = request.query as {
+        year?: string;
+        año?: string;
+        accountId?: string;
+        entityId?: string;
+      };
+      const year = parseYearQuery(query);
+      const accountId = query.accountId?.trim() || null;
+      const entityId = query.entityId?.trim() || null;
 
       try {
         const bookId = await getBookId(userId);
@@ -51,7 +61,10 @@ export function registerReportRoutes(
         }
 
         if (dashboardService) {
-          const report = await dashboardService.getPyGReport(bookId, year);
+          const report = await dashboardService.getPyGReport(bookId, year, {
+            accountId,
+            entityId,
+          });
           return reply.status(200).send(report);
         }
 
@@ -85,6 +98,67 @@ export function registerReportRoutes(
       } catch (err) {
         request.log.error(err, 'Failed to get position report');
         return reply.status(500).send({ error: 'Failed to get position report' });
+      }
+    },
+  );
+
+  app.get(
+    '/api/reports/portfolio',
+    { preHandler: requireAuth },
+    async (request, reply) => {
+      const userId = request.userId!;
+
+      try {
+        const bookId = await getBookId(userId);
+        if (!bookId) {
+          return reply.status(404).send({ error: 'Book not found' });
+        }
+
+        if (!dashboardService) {
+          return reply.status(501).send({ error: 'Portfolio report not available' });
+        }
+
+        const report = await dashboardService.getPortfolioReport(bookId);
+        return reply.status(200).send(report);
+      } catch (err) {
+        request.log.error(err, 'Failed to get portfolio report');
+        return reply.status(500).send({ error: 'Failed to get portfolio report' });
+      }
+    },
+  );
+
+  app.get(
+    '/api/reports/financial-analysis',
+    { preHandler: requireAuth },
+    async (request, reply) => {
+      const userId = request.userId!;
+      const query = request.query as { entityId?: string; year?: string; año?: string };
+      const entityId = query.entityId?.trim();
+      const year = parseYearQuery(query);
+
+      if (!entityId) {
+        return reply.status(400).send({ error: 'entityId is required' });
+      }
+
+      if (!financialAnalysisService) {
+        return reply.status(501).send({ error: 'Financial analysis not available' });
+      }
+
+      try {
+        const bookId = await getBookId(userId);
+        if (!bookId) {
+          return reply.status(404).send({ error: 'Book not found' });
+        }
+
+        const report = await financialAnalysisService.getCostYieldTotals(
+          bookId,
+          entityId,
+          year,
+        );
+        return reply.status(200).send(report);
+      } catch (err) {
+        request.log.error(err, 'Failed to get financial analysis report');
+        return reply.status(500).send({ error: 'Failed to get financial analysis report' });
       }
     },
   );

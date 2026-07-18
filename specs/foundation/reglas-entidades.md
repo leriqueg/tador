@@ -7,41 +7,64 @@ El módulo de Entidades representa objetos con nombre propio. Su propósito es e
 ```text
 Entidad = objeto con nombre propio
 Relación contable = cómo esa entidad participa en cuentas, apuntes, asientos o módulos futuros
+Capacidades = qué roles puede jugar esa Entidad en un apunte concreto
 ```
 
 Una Entidad no es automáticamente una cuenta por cobrar, una cuenta por pagar, una factura o un documento. Es el sujeto o institución al que otras capacidades pueden apuntar.
 
-## Qué puede ser Entidad
+## Tipos runtime (MVP)
 
-| Tipo candidato | Ejemplos | Uso esperado |
-|----------------|----------|--------------|
-| `financial_institution` | Banco Bolivariano, Banco Pichincha, JEP | Relacionar cuentas bancarias, inversiones o productos financieros. |
-| `card_issuer` | AMEX, Visa, Mastercard, Bankard | Relacionar tarjetas de crédito o débito. |
-| `person` | Mariuxi, Jessica, Tía Toya | Tags, préstamos informales, regalos, afectaciones. |
-| `family_member` | Mamá, hermano, pareja | Contexto personal y familiar. |
-| `dependent` | Santiago, Alekey | Gastos o informes por dependiente. |
-| `friend` | Amistades | Regalos, préstamos, aportes, tags. |
-| `client` | Cliente ABC | CxC futura, documentos futuros, informes por cliente. |
-| `supplier` | Proveedor XYZ | CxP futura, compras futuras, documentos futuros. |
-| `colleague` | Colega profesional | Contexto laboral o profesional. |
-| `government` | SRI, IESS, municipio | Impuestos, aportes, tasas, trámites. |
-| `platform` | Netflix, Spotify, Hapi | Suscripciones, inversiones, servicios frecuentes. |
-| `other` | Cualquier otro nombre propio | Evita bloquear captura cuando no haya tipo claro. |
+Tipos persistidos en `TipoEntidad` (Prisma) — alineados con el código:
 
-## Roles o capacidades
+| Tipo | Ejemplos | Uso esperado |
+|------|----------|--------------|
+| `person` | Mariuxi, Jessica, Tía Toya | Préstamos informales, regalos, afectaciones. |
+| `bank` | Banco Bolivariano, JEP | Provisión de cuenta bancaria. |
+| `card_issuer` | AMEX, Visa Bankard | Provisión de cuenta tarjeta. |
+| `wallet_platform` | PayPal, Binance | Provisión de billetera virtual. |
+| `organization` | Empleador, cliente, proveedor, empresa | Actividad económica PRO; roles vía **capacidades**. |
 
-Una Entidad puede tener un tipo principal y varias capacidades. Esto evita multiplicar tablas y permite crecer por módulos.
+> **Decisión 2026-07-16**: No existen tipos `client` / `supplier` separados. Clientes y proveedores son `organization` con capacidades. Evita categorías rígidas cuando la misma empresa puede ser empleador, luego cliente u proveedor.
+
+## Capacidades de `organization`
+
+| Capacidad | Significado | Cuándo se exige |
+|-----------|-------------|-----------------|
+| `can_be_customer` | Puede operar como cliente (cobros / CxC saldo). | Al apunte de cobro/venta a esa org. |
+| `can_be_supplier` | Puede operar como proveedor (pagos / CxP saldo). | Al apunte de compra/pago a esa org. |
+| `is_employment_dependency` | Empresa de la que el usuario depende laboralmente (empleador). | Al apunte de sueldo / ingreso por dependencia. |
+
+Reglas:
+
+- El usuario asigna capacidades; una organización puede tener varias.
+- Empleador: normalmente **1**; permitir hasta **3** (`is_employment_dependency`). Con el tiempo puede cambiar de trabajo (nueva org o quitar flag de la anterior).
+- La validación de capacidad ocurre **al registrar el apunte**, nunca de forma retroactiva sobre historial.
+- No reescribir el pasado si el usuario cambia capacidades después.
+
+## Roles o capacidades (catálogo ampliado / futuro)
 
 | Capacidad | Significado |
 |-----------|-------------|
-| `can_have_bank_accounts` | Puede estar asociada a cuentas bancarias. |
-| `can_issue_credit_cards` | Puede estar asociada a tarjetas de crédito. |
-| `can_be_tagged` | Puede usarse como afectación o referencia en apuntes. |
-| `can_be_customer` | Puede operar como cliente cuando exista CxC/documentos. |
-| `can_be_supplier` | Puede operar como proveedor cuando exista CxP/documentos. |
-| `can_have_receivables` | Puede tener cuentas por cobrar en módulos futuros. |
-| `can_have_payables` | Puede tener cuentas por pagar en módulos futuros. |
-| `can_be_report_dimension` | Puede usarse para filtrar o agrupar informes. |
+| `can_have_bank_accounts` | Asociada a cuentas bancarias (`tipo` bank). |
+| `can_issue_credit_cards` | Asociada a tarjetas (`tipo` card_issuer). |
+| `can_be_tagged` | Afectación o referencia en apuntes. |
+| `can_be_customer` | Cliente en apuntes / CxC saldo. |
+| `can_be_supplier` | Proveedor en apuntes / CxP saldo. |
+| `is_employment_dependency` | Empleador (relación de dependencia). |
+| `can_have_receivables` | Módulos documentales futuros. |
+| `can_have_payables` | Módulos documentales futuros. |
+| `can_be_report_dimension` | Filtrar o agrupar informes. |
+
+## Onboarding vs JIT (PRO)
+
+| Momento | Qué se pregunta |
+|---------|-----------------|
+| Onboarding PRO | Solo si trabaja en **relación de dependencia** → crear `organization` con `is_employment_dependency` (necesaria para el primer sueldo). |
+| Onboarding PRO | **MUST NOT** pedir clientes ni proveedores. |
+| Freelance sin clientes | Puede completar onboarding sin organizaciones cliente. |
+| EntryBuilder | Clientes/proveedores **Just-in-Time** (selección o creación inline) cuando la rama lo exige. La UI JIT MUST ser explícita y segura (nombre + capacidades mínimas). |
+
+Hogar: onboarding no pregunta perfil laboral (ver Sprint 06).
 
 ## Reglas MVP
 
@@ -49,46 +72,45 @@ Una Entidad puede tener un tipo principal y varias capacidades. Esto evita multi
 - Dos usuarios pueden tener entidades con el mismo nombre sin conflicto.
 - En un mismo usuario, el nombre debería ser único o advertir duplicados.
 - Una Entidad puede estar relacionada con cuentas del usuario.
-- Una Entidad puede usarse como tag/afectación en apuntes.
-- Una cuenta bancaria o tarjeta puede apuntar a una Entidad financiera o emisora.
-- Una persona puede usarse como referencia de regalos, préstamos informales, ingresos o deudas por cobrar/pagar vinculadas a cuentas de balance.
-- No se implementan facturas ni módulo documental formal de CxC/CxP en el MVP; sí se registran deudas por cobrar/pagar como cuentas de balance vinculadas a Entidades (tarjetas, préstamos, personas, clientes, proveedores).
+- Cuentas `bank` / `card` / billetera de plataforma: solo vía provisión de Entidad (no crear a mano en `/accounts`).
+- No se implementan facturas ni módulo documental formal de CxC/CxP en el MVP; sí se registran deudas por cobrar/pagar como cuentas de balance vinculadas a Entidades.
 
 ## Reglas para módulos futuros
 
-- Un módulo CxC debe apuntar a una Entidad, normalmente con capacidad `can_have_receivables`.
-- Un módulo CxP debe apuntar a una Entidad, normalmente con capacidad `can_have_payables`.
-- Una factura emitida debe apuntar a una Entidad cliente.
-- Una factura recibida debe apuntar a una Entidad proveedor.
-- Los vencimientos, aplicaciones de cobro/pago y reportes por tercero deben usar la Entidad como dimensión común.
+- Un módulo CxC debe apuntar a una Entidad con capacidad de cliente / receivables.
+- Un módulo CxP debe apuntar a una Entidad con capacidad de proveedor / payables.
+- Facturas emitidas/recibidas usan la Entidad como dimensión común.
 
 ## Ejemplos
 
 ```text
 Entidad: Banco Bolivariano
-Tipo: financial_institution
-Capacidades: can_have_bank_accounts, can_issue_credit_cards
-Uso: Cuenta bancaria "Bolivariano 2026"
+Tipo: bank
+Uso: Cuenta bancaria aprovisionada
+```
+
+```text
+Entidad: Acme Corp
+Tipo: organization
+Capacidades: is_employment_dependency
+Uso: Empleador; apunte de sueldo exige esta capacidad
+```
+
+```text
+Entidad: Clínica del Valle
+Tipo: organization
+Capacidades: can_be_customer
+Uso: Cliente; cobro JIT desde EntryBuilder
 ```
 
 ```text
 Entidad: Mariuxi
 Tipo: person
-Capacidades: can_be_tagged, can_be_report_dimension
-Uso: Regalos e ingresos relacionados con Mariuxi
-```
-
-```text
-Entidad: Cliente ABC
-Tipo: client
-Capacidades futuras: can_be_customer, can_have_receivables
-Uso MVP: referencia/tag si hace falta
-Uso futuro: facturas y CxC
+Uso: Préstamo informal Hogar/PRO
 ```
 
 ## Dudas pendientes
 
-- Si `Tag` será una tabla separada o una relación flexible con Entidad más etiquetas libres.
-- Si una Entidad puede cambiar de tipo principal sin afectar historial.
-- Si se permitirán alias por Entidad, por ejemplo `Bco. Bolivariano`, `Bolivariano`, `Banco Bolivariano`.
-- Si algunas Entidades serán globales sugeridas por TADOR o todas serán por usuario en el MVP.
+- Persistencia exacta de capacidades (`Json` en Entidad vs tabla de flags).
+- Si `Tag` será tabla separada o relación flexible con Entidad.
+- Alias por Entidad (`Bco. Bolivariano` vs nombre canónico).

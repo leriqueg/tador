@@ -1,151 +1,197 @@
 # Feature Specification: Sprint 07 - Frontend PRO ligero
 
-**Feature Branch**: `sdd/definiciones`
+**Feature Branch**: `sprint/007-frontend-pro-ligero`
 
 **Created**: 2026-06-22
 
-**Status**: Draft (capture UX locked 2026-07-13; implementación UI diferida a Sprint 07)
+**Updated**: 2026-07-18
+
+**Status**: Clarified (2026-07-16 — scope ligero locked; avanzado → 009)
 
 **Input**: Sprint 07: más control para usuario PRO sin convertir TADOR en ERP.
 
 ## Clarifications
 
+### Session 2026-07-18
+
+- Q: ¿EntryBuilder y asiento manual son idempotentes? → A: Sí. Cada intento conserva su Idempotency-Key hasta éxito.
+- Q: ¿Dónde se configura el control de saldo negativo? → A: En Cuentas PRO, por cuenta de usuario y por uso directo de una cuenta global protegida; activo por defecto.
+
 ### Session 2026-07-13 — Captura de apuntes PRO (vs Hogar)
 
-- Q: ¿PRO usa el mismo flujo de plantillas Hogar? → A: **No como presentación primaria.** PRO usa **EntryBuilder** (progressive disclosure / narrative form): pasos secuenciales que convierten la intención en asiento, con validez por construcción.
-- Q: ¿Formulario seco multi-campo? → A: **No** como UX primaria. El constructor mantiene pasos completados **visibles y editables** (acceso aleatorio hacia atrás). En ráfaga se comporta como formulario una vez avanzado, sin forzar clasificación abstracta de entrada.
-- Q: ¿Ejemplo de flujo? → A: Registrar → INGRESO|EGRESO|TRANSFERENCIA → subtipo/cuenta filtrada → (si aplica) Entidad con creación inline → concepto → monto.
-- Q: ¿Burst? → A: **Sí** — “Guardar y registrar otro” conserva tipo y cuenta (pasos 1–2), limpia monto/concepto.
-- Q: ¿Relación con Hogar? → A: Mismo motor/contrato de captura; Hogar pre-responde pasos vía plantilla (Sprint 06). MUST NOT reutilizar EntryBuilder como UX Hogar.
-- Q: ¿Asiento manual? → A: Sigue en alcance PRO como escape cuando ninguna rama/plantilla cubre el caso (US2 existente).
+- Q: ¿PRO usa el mismo flujo de plantillas Hogar? → A: **No como presentación primaria.** PRO usa **EntryBuilder**.
+- Q: ¿Formulario seco multi-campo? → A: **No** como UX primaria. Pasos previos visibles y editables.
+- Q: ¿Burst? → A: **Sí** — “Guardar y registrar otro” conserva tipo y cuenta.
+- Q: ¿Relación con Hogar? → A: Mismo motor de captura; Hogar = QuickAdd. MUST NOT cruzar UX.
+- Q: ¿Asiento manual? → A: Escape hatch PRO (US3).
+
+### Session 2026-07-16 — Rutas, alcance ligero, entidades, onboarding
+
+- Q: ¿Mismas rutas front que Hogar? → A: **No.** Namespaces separados: `/hogar/*` y `/pro/*` (composiciones distintas; color/shell propios). Guard redirige según `BookConfig.mode`. Backend: **mismas APIs** salvo datos realmente distintos.
+- Q: ¿EntryBuilder exige plantilla? → A: **No obligatoriamente.** Puede resolver a `POST /api/apuntes` con o sin `templateCode`, o a asiento manual. Plantillas siguen siendo el lenguaje/atajos del motor; el builder no debe forzar catálogo completo en memoria si arma líneas válidas.
+- Q: ¿P&G / Balance densificados? → A: **No en 007.** Iguales a Hogar. Análisis bancos/tarjetas/cartera → **Sprint 009**.
+- Q: ¿Árbol de cuentas? → A: Mostrar madres + hijas con códigos/saldos; crear hijas postables bajo madres permitidas. **MUST NOT** crear a mano cuentas que nacen de Entidad (bank/card/wallet_platform).
+- Q: ¿client / supplier tipos? → A: **No.** Solo `organization` + capacidades (`can_be_customer`, `can_be_supplier`, `is_employment_dependency`). Validar capacidad **al apunte**, no retroactivo.
+- Q: ¿Onboarding PRO pide clientes? → A: **No.** Solo pregunta si hay **relación de dependencia** → crear organización empleadora (hasta 3 flags; normalmente 1). Freelance sin clientes **puede** terminar onboarding.
+- Q: ¿Clientes/proveedores? → A: **Just-in-Time** en EntryBuilder (inline). La UI JIT MUST ser clara (nombre + capacidades mínimas).
+- Q: ¿IA / mockup asistente? → A: Fuera de MVP (`008` excluido).
 
 ## User Scenarios & Testing *(mandatory)*
 
-### User Story 1 - Ver estructura contable (Priority: P1)
+### User Story 0 - Namespace PRO y guard de modo (Priority: P1)
 
-Como usuario PRO, quiero ver códigos y cuentas madre para crear cuentas con mayor precisión.
+Como usuario con modo PRO (o Hogar), quiero que la app me lleve al namespace correcto sin mezclar pantallas densas en las mismas rutas.
 
-**Why this priority**: PRO necesita control del plan sin perder la base guiada.
-
-**Independent Test**: Activar Modo PRO y crear una cuenta seleccionando cuenta madre.
+**Independent Test**: Libro en PRO abre `/pro/dashboard`; visitar `/hogar/entries` redirige a `/pro/entries` (y al revés).
 
 **Acceptance Scenarios**:
 
-1. **Given** Modo PRO activo, **When** creo una cuenta, **Then** puedo ver código, cuenta madre y ubicación.
+1. **Given** `mode=pro`, **When** navego a rutas `/hogar/*`, **Then** redirijo a equivalente `/pro/*`.
+2. **Given** `mode=hogar`, **When** navego a `/pro/*`, **Then** redirijo a `/hogar/*`.
 
 ---
 
-### User Story 2 - Captura guiada EntryBuilder (Priority: P1)
+### User Story 1 - Onboarding PRO con empleador opcional (Priority: P1)
 
-Como profesional independiente / pequeño emprendimiento (≤3 clientes), quiero registrar movimientos con un **constructor secuencial** (INGRESO / EGRESO / TRANSFERENCIA → cuenta → … → monto) sin un formulario seco ni códigos en cada paso intermedio — y sin perder el contexto de pasos ya elegidos.
+Como usuario que elige PRO, quiero indicar si trabajo en dependencia para crear la organización empleadora antes del primer sueldo — sin inventar clientes.
 
-**Why this priority**: Es el flujo diario PRO; enseña el modelo y evita estados inválidos.
-
-**Independent Test**: Completar un ingreso y una transferencia (p. ej. préstamo + Entidad nueva inline); guardar; usar “Guardar y registrar otro”.
+**Independent Test**: Completar onboarding PRO: (a) dependencia → org con `is_employment_dependency`; (b) freelance → sin clientes; ambos llegan a `/pro/dashboard`.
 
 **Acceptance Scenarios**:
 
-1. **Given** Modo PRO, **When** abro registro, **Then** empiezo por tipo de operación; solo se revelan opciones compatibles con lo ya elegido.
-2. **Given** pasos completados, **When** avanzo, **Then** los pasos previos permanecen visibles y editables (no chat destructivo).
-3. **Given** rama que requiere Entidad (p. ej. préstamo), **When** el nombre no existe, **Then** puedo crearla inline sin abandonar el flujo.
-4. **Given** registro guardado, **When** elijo “Guardar y registrar otro”, **Then** se conservan tipo y cuenta; monto y concepto se limpian.
+1. **Given** onboarding modo PRO + “sí dependencia”, **When** nombro la empresa, **Then** se crea `organization` con `is_employment_dependency`.
+2. **Given** onboarding PRO freelance, **When** omito clientes, **Then** el libro queda inicializado.
+3. **Given** onboarding PRO, **When** avanzo, **Then** **MUST NOT** pedirse lista de clientes/proveedores.
 
-**Pantalla formal — EntryBuilder (PRO)**
+---
+
+### User Story 2 - Captura EntryBuilder (Priority: P1)
+
+Como profesional / pequeño emprendimiento, quiero registrar con un constructor secuencial sin formulario seco.
+
+**Independent Test**: Ingreso + transferencia/préstamo con Entidad JIT; burst.
+
+**Acceptance Scenarios**:
+
+1. **Given** `/pro/entries`, **When** abro captura, **Then** EntryBuilder (no QuickAdd).
+2. **Given** pasos completados, **When** avanzo, **Then** previos visibles/editables.
+3. **Given** rama que exige Entidad, **When** no existe, **Then** creación inline (`organization`/`person` + capacidades).
+4. **Given** guardado, **When** “Guardar y registrar otro”, **Then** conservan tipo y cuenta; limpian monto/concepto.
+5. **Given** apunte de sueldo, **When** falta org con `is_employment_dependency`, **Then** bloquear con mensaje + CTA a crear/seleccionar.
+
+**Pantalla formal — EntryBuilder**
 
 | Paso | Contenido |
 |------|-----------|
 | 1 | TipoOperacion: INGRESO \| EGRESO \| TRANSFERENCIA |
-| 2 | Subtipo / cuenta filtrada por paso 1 |
-| 3 | Entidad (solo si la rama lo exige; combobox + crear inline) |
+| 2 | Subtipo / cuenta filtrada |
+| 3 | Entidad (si aplica; combobox + JIT) |
 | 4 | Concepto |
 | 5 | Monto |
 | Acciones | Guardar \| Guardar y registrar otro |
-| Accesibilidad | Foco al paso revelado; `aria-live` en revelados; animación solo transform/opacity + `prefers-reduced-motion` |
-| Navegación | Advertir si hay pasos con datos y se abandona; estado preferible en query cuando aplique |
+| A11y | Foco al paso revelado; `aria-live`; `prefers-reduced-motion` |
+
+Ver tabla QuickAdd vs EntryBuilder en `specs/foundation/modos-hogar-pro.md`.
 
 ---
 
-### User Story 3 - Registrar asiento manual (Priority: P1)
+### User Story 3 - Asiento manual (Priority: P1)
 
-Como usuario PRO, quiero registrar un asiento manual balanceado cuando una plantilla o rama del EntryBuilder no cubre mi caso.
+Como usuario PRO, quiero un asiento manual balanceado cuando el builder no cubre el caso.
 
-**Why this priority**: Evita bloquear casos profesionales o de migración sin crear plantillas prematuras.
-
-**Independent Test**: Crear asiento manual balanceado desde UI y rechazar uno descuadrado.
+**Independent Test**: Balanceado OK; descuadrado rechazado.
 
 **Acceptance Scenarios**:
 
-1. **Given** líneas balanceadas, **When** guardo asiento manual, **Then** se registra.
-2. **Given** líneas descuadradas, **When** intento guardar, **Then** se informa el error y no se guarda.
+1. **Given** líneas balanceadas en `/pro/entries/manual` (o equivalente), **When** guardo, **Then** se registra vía API de asientos.
+2. **Given** descuadre, **When** intento guardar, **Then** error y no persiste.
 
 ---
 
-### User Story 4 - Revisar saldos con más detalle (Priority: P2)
+### User Story 4 - Árbol de cuentas PRO (Priority: P1)
 
-Como usuario PRO, quiero una vista más explícita de cuentas y saldos para revisar la estructura de mi libro.
+Como usuario PRO, quiero ver el árbol (códigos, madres, saldos) y crear hijas postables bajo madres permitidas.
 
-**Why this priority**: PRO necesita control sin depender solo de frases Hogar.
-
-**Independent Test**: Ver árbol/listado de cuentas con códigos y saldos.
+**Independent Test**: Abrir `/pro/accounts`; crear categoría/puente bajo madre; no crear bank/card a mano.
 
 **Acceptance Scenarios**:
 
-1. **Given** cuentas configuradas, **When** abro vista PRO, **Then** veo códigos, nombres, tipo y saldo.
+1. **Given** `/pro/accounts`, **When** listo, **Then** veo códigos, nombres, tipo y saldo cuando aplique.
+2. **Given** madre que admite hijos, **When** creo cuenta, **Then** queda bajo esa madre.
+3. **Given** intento crear bank/card manual, **When** POST, **Then** 422 (vía Entidad).
+
+---
+
+### User Story 5 - Finanzas base sin densificar (Priority: P2)
+
+Como usuario PRO, quiero P&G y Balance con la misma claridad que Hogar (sin análisis avanzado aún).
+
+**Independent Test**: `/pro/finances/pyg` y `/pro/finances/balance` muestran los mismos paneles conceptuales que Hogar.
+
+**Acceptance Scenarios**:
+
+1. **Given** PRO, **When** abro P&G/Balance, **Then** veo reportes base (sin filtros por entidad ni “Analizar bancos”).
 
 ### Edge Cases
 
-- Usuario Hogar intenta acceder a EntryBuilder o asiento manual → denegar / redirigir a captura Hogar.
-- Cuenta madre seleccionada no permite hijos postables.
-- Asiento manual toca periodo cerrado.
-- Asiento manual usa cuenta de otro usuario.
-- Entidad requerida omitida en rama préstamo → bloquear avance con mensaje claro.
+- Cross-namespace sin permiso de modo → redirect.
+- Madre sin hijos postables → no ofrecer crear.
+- Periodo cerrado en asiento manual → error.
+- Capacidad de org incorrecta en apunte → rechazar al guardar.
+- Entidad requerida omitida → bloquear avance.
 
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
 
-- **FR-001**: La UI PRO MUST permitir ver códigos de cuenta.
-- **FR-002**: La UI PRO MUST permitir seleccionar cuenta madre al crear cuentas.
-- **FR-003**: La UI PRO MUST permitir crear asiento manual balanceado.
-- **FR-004**: La UI PRO MUST rechazar asientos manuales descuadrados.
-- **FR-005**: La UI PRO MUST mostrar saldos y clasificación con más detalle que Hogar.
-- **FR-006**: Las funciones PRO MUST mantener las mismas reglas de tenant, periodo y cuentas postables.
-- **FR-007**: La captura diaria PRO MUST usar **EntryBuilder** (progressive disclosure): un paso a la vez, opciones filtradas (validez por construcción), pasos previos editables.
-- **FR-008**: EntryBuilder MUST ofrecer “Guardar y registrar otro” conservando tipo y cuenta.
-- **FR-009**: Cuando una rama requiera Entidad, MUST permitir selección o creación inline.
-- **FR-010**: EntryBuilder MUST NOT ser la UX de captura del Modo Hogar (ver Sprint 06).
-- **FR-011**: Sticky defaults: última cuenta usada por tipo de operación SHOULD preseleccionarse.
+- **FR-001**: UI PRO MUST usar namespace `/pro/*` (y Hogar `/hogar/*`) con guard por modo.
+- **FR-002**: Backend MUST reutilizar APIs de dominio existentes para datos compartidos.
+- **FR-003**: UI PRO MUST mostrar códigos de cuenta en el árbol / creación.
+- **FR-004**: UI PRO MUST permitir seleccionar cuenta madre al crear cuentas postables permitidas.
+- **FR-005**: UI PRO MUST NOT crear a mano cuentas aprovisionadas por Entidad (bank/card/wallet_platform).
+- **FR-006**: Captura diaria PRO MUST ser EntryBuilder; MUST NOT ser QuickAdd.
+- **FR-007**: EntryBuilder MUST permitir apunte con o sin `templateCode` (válido por construcción / balance).
+- **FR-008**: EntryBuilder MUST ofrecer burst conservando tipo y cuenta.
+- **FR-009**: Entidad requerida MUST permitir selección o JIT inline con capacidades mínimas.
+- **FR-010**: Asiento manual MUST aceptar balanceados y rechazar descuadres.
+- **FR-011**: P&G y Balance PRO MUST equivaler conceptualmente a Hogar (sin análisis 009).
+- **FR-012**: Onboarding PRO MUST preguntar dependencia laboral opcional; MUST NOT exigir clientes/proveedores.
+- **FR-013**: Organizaciones MUST usar tipo `organization` + capacidades; validación al apunte.
+- **FR-014**: Sticky defaults: última cuenta por tipo de operación SHOULD preseleccionarse.
+- **FR-015**: Funciones PRO MUST respetar tenant, periodo y postables.
 
-### Constitution Alignment *(mandatory for TADOR)*
+### Out of scope (→ 009 / 008)
 
-- **Tenant & Privacy**: PRO no amplía acceso a datos de otros usuarios.
-- **Accounting Impact**: EntryBuilder y asiento manual deben usar el motor / plantillas y validar balance; la UI no inventa asientos.
-- **MVP/Sprint Boundary**: No incluye CxC/CxP documentales, facturas, aging ni ERP completo.
-- **Testing Obligation**: Debe probar EntryBuilder (ingreso + transferencia/préstamo), burst, asiento manual balanceado y rechazo de descuadres.
-- **Exact monetary arithmetic**: Montos con aritmética decimal exacta (Constitución IX).
+- Analizar Bancos / Tarjetas / Cartera Entidades.
+- Filtros P&G por cuenta/entidad.
+- Conciliación y cierre de extractos.
+- IA v0 / mockup asistente IA.
 
-### Key Entities *(include if feature involves data)*
+### Constitution Alignment
 
-- **Vista PRO**: Interfaz con códigos y mayor detalle.
-- **EntryBuilder**: Constructor secuencial de captura (narrative form).
-- **Asiento manual**: Registro abierto con líneas explícitas (escape hatch).
-- **Árbol/listado de cuentas**: Vista estructurada del plan del usuario.
+- **Tenant & Privacy**: Sin acceso cruzado.
+- **Accounting Impact**: Solo motor / plantillas / asientos balanceados.
+- **MVP/Sprint Boundary**: Ligero; sin ERP documental ni 009.
+- **Testing Obligation**: Guard rutas, EntryBuilder (ingreso + JIT), burst, asiento manual, árbol, onboarding dependencia/freelance.
+- **Exact monetary arithmetic**: Constitución IX.
+
+### Key Entities
+
+- EntryBuilder state, Asiento manual, Árbol cuentas, Organization + capabilities, Namespace guard.
 
 ## Success Criteria *(mandatory)*
 
-### Measurable Outcomes
-
-- **SC-001**: Un usuario PRO puede crear una cuenta bajo madre elegida sin usar formularios técnicos externos.
-- **SC-002**: 100 % de asientos manuales descuadrados son rechazados.
-- **SC-003**: Un usuario PRO puede identificar código, madre y saldo de una cuenta en menos de 3 clics.
-- **SC-004**: Ninguna función PRO permite saltar reglas del motor contable.
-- **SC-005**: Un usuario PRO completa un ingreso típico por EntryBuilder en menos de 60 segundos.
-- **SC-006**: Tras “Guardar y registrar otro”, el segundo movimiento no exige reelegir tipo ni cuenta.
+- **SC-001**: Crear cuenta bajo madre en &lt; 3 clics desde `/pro/accounts`.
+- **SC-002**: 100 % descuadres de asiento manual rechazados.
+- **SC-003**: Ingreso típico EntryBuilder &lt; 60 s.
+- **SC-004**: Burst no exige reelegir tipo ni cuenta.
+- **SC-005**: Freelance completa onboarding PRO sin clientes.
+- **SC-006**: Cross-namespace siempre redirige al modo del libro.
+- **SC-007**: Ninguna función PRO salta reglas del motor.
 
 ## Assumptions
 
-- Modo PRO es configuración de uso, no plan de pago.
-- El backend de asiento manual ya existe desde Sprint 04.
-- El backend de plantillas/apuntes sirve ambos modos; la diferencia es presentación.
-- PRO sigue siendo ligero y no incorpora módulos formales fuera del MVP.
-- Mockups de referencia: `registro_pro_plantillas_tador` (flujo paso a paso); `registro_pro_asistente_ia_tador` es **post-MVP / IA**, no el EntryBuilder del Sprint 07.
+- Modo PRO = configuración de uso, no pricing.
+- APIs de asientos/apuntes/cuentas/entidades ya existen o se extienden mínimamente (capacidades).
+- Mockup EntryBuilder: `registro_pro_plantillas_tador`. IA mockup = post-MVP.
+- Detalle captura vs QuickAdd: `modos-hogar-pro.md`.

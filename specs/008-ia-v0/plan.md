@@ -1,8 +1,6 @@
 # Implementation Plan: Sprint 08 - IA v0
 
-**Branch**: `sdd/definiciones` | **Date**: 2026-06-22 | **Spec**: [spec.md](./spec.md)
-
-**Input**: Feature specification from `/specs/008-ia-v0/spec.md`
+**Status**: Excluded from MVP (2026-07-16). Plan retained; do not schedule implementation in MVP sequence.
 
 ## Summary
 

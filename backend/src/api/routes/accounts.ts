@@ -5,13 +5,19 @@
 
 import type { FastifyInstance } from 'fastify';
 import type { AuthApplicationService } from '../../application/auth-service.js';
-import { createAuthMiddleware } from '../middleware/auth.js';
-import { prisma } from '../../infrastructure/database.js';
-import { autoAsignarCodigo } from '../../application/account-codigo.js';
+import {
+  AccountNotFoundError,
+  BalancePolicyNotApplicableError,
+  EntityProvisionRequiredError,
+  ManualAccountTypeNotAllowedError,
+  UnknownParentGroupError,
+  type AccountApplicationService,
+} from '../../application/account-service.js';
 import type {
   CuentaUsuarioMetadata,
   TipoCuenta,
 } from '../../domain/cuenta-usuario.js';
+import { createAuthMiddleware } from '../middleware/auth.js';
 
 interface CreateAccountBody {
   tipoCuenta: TipoCuenta;
@@ -23,39 +29,14 @@ interface CreateAccountBody {
   metadata?: CuentaUsuarioMetadata;
 }
 
-const MANUAL_ALLOWED: TipoCuenta[] = [
-  'wallet',
-  'bridge',
-  'incomeCategory',
-  'expenseCategory',
-];
-
-function sanitizeMetadata(
-  input: CuentaUsuarioMetadata | undefined,
-): CuentaUsuarioMetadata | null {
-  if (!input || typeof input !== 'object') return null;
-  const out: CuentaUsuarioMetadata = {};
-  if (typeof input.network === 'string' && input.network.trim()) {
-    out.network = input.network.trim().toUpperCase();
-  }
-  if (typeof input.lastFour === 'string') {
-    const digits = input.lastFour.replace(/\D/g, '').slice(-4);
-    if (digits) out.lastFour = digits;
-  }
-  if (
-    typeof input.cutoffDay === 'number' &&
-    Number.isInteger(input.cutoffDay) &&
-    input.cutoffDay >= 1 &&
-    input.cutoffDay <= 31
-  ) {
-    out.cutoffDay = input.cutoffDay;
-  }
-  return Object.keys(out).length > 0 ? out : null;
+interface UpdateBalancePolicyBody {
+  enforceNonNegativeBalance: boolean;
 }
 
 export function registerAccountRoutes(
   app: FastifyInstance,
   authService: AuthApplicationService,
+  accountService: AccountApplicationService,
 ): void {
   const requireAuth = createAuthMiddleware(authService);
 
@@ -66,22 +47,7 @@ export function registerAccountRoutes(
       const userId = request.userId!;
 
       try {
-        const rows = await prisma.cuentaUsuario.findMany({
-          where: { userId },
-          orderBy: [{ tipoCuenta: 'asc' }, { nombre: 'asc' }],
-        });
-
-        const accounts = rows.map((row) => ({
-          id: row.id,
-          codigo: row.codigo,
-          nombre: row.nombre,
-          tipoCuenta: row.tipoCuenta,
-          entidadId: row.entidadId,
-          isEntityProvisioned: row.entidadId != null,
-          metadata: row.metadata,
-          activa: row.activa,
-        }));
-
+        const accounts = await accountService.list(userId);
         return reply.status(200).send({ accounts });
       } catch (err) {
         request.log.error(err, 'Failed to list accounts');
@@ -95,15 +61,8 @@ export function registerAccountRoutes(
     { preHandler: requireAuth },
     async (request, reply) => {
       const userId = request.userId!;
-      const {
-        tipoCuenta,
-        nombre,
-        globalId: bodyGlobalId,
-        parentGroupCodigo,
-        entidadId,
-        codigoPersonalizado,
-        metadata: bodyMetadata,
-      } = request.body as CreateAccountBody;
+      const body = request.body as CreateAccountBody;
+      const { tipoCuenta, nombre } = body;
 
       if (!tipoCuenta || !nombre) {
         return reply
@@ -111,80 +70,58 @@ export function registerAccountRoutes(
           .send({ error: 'tipoCuenta and nombre are required' });
       }
 
-      if (tipoCuenta === 'bank' || tipoCuenta === 'card') {
-        return reply.status(422).send({
-          error:
-            'bank and card accounts must be created via POST /api/entities (FR-004b)',
-        });
+      try {
+        const account = await accountService.create(userId, body);
+        return reply.status(201).send({ account });
+      } catch (err: unknown) {
+        if (err instanceof EntityProvisionRequiredError) {
+          return reply.status(422).send({ error: err.message });
+        }
+        if (err instanceof ManualAccountTypeNotAllowedError) {
+          return reply.status(400).send({ error: err.message });
+        }
+        if (err instanceof UnknownParentGroupError) {
+          return reply.status(400).send({ error: err.message });
+        }
+        request.log.error(err, 'Failed to create account');
+        return reply.status(500).send({ error: 'Failed to create account' });
       }
+    },
+  );
 
-      if (!MANUAL_ALLOWED.includes(tipoCuenta)) {
+  app.patch(
+    '/api/accounts/:id/balance-policy',
+    { preHandler: requireAuth },
+    async (request, reply) => {
+      const userId = request.userId!;
+      const { id } = request.params as { id: string };
+      const { enforceNonNegativeBalance } =
+        request.body as UpdateBalancePolicyBody;
+
+      if (typeof enforceNonNegativeBalance !== 'boolean') {
         return reply.status(400).send({
-          error: `tipoCuenta '${tipoCuenta}' is not allowed for manual create`,
+          error: 'enforceNonNegativeBalance must be a boolean',
         });
       }
 
       try {
-        let globalId = bodyGlobalId ?? null;
-
-        if (!globalId && parentGroupCodigo) {
-          const parent = await prisma.cuentaGlobal.findUnique({
-            where: { codigo: parentGroupCodigo },
-            select: { id: true },
-          });
-          if (!parent) {
-            return reply.status(400).send({
-              error: `Unknown parentGroupCodigo '${parentGroupCodigo}'`,
-            });
-          }
-          globalId = parent.id;
+        const account = await accountService.updateBalancePolicy(
+          userId,
+          id,
+          enforceNonNegativeBalance,
+        );
+        return reply.status(200).send({ account });
+      } catch (err: unknown) {
+        if (err instanceof AccountNotFoundError) {
+          return reply.status(404).send({ error: err.message });
         }
-
-        // Default parents for income/expense when not provided
-        if (!globalId && tipoCuenta === 'incomeCategory') {
-          const parent = await prisma.cuentaGlobal.findUnique({
-            where: { codigo: '41010000' },
-            select: { id: true },
-          });
-          globalId = parent?.id ?? null;
+        if (err instanceof BalancePolicyNotApplicableError) {
+          return reply.status(422).send({ error: err.message });
         }
-        if (!globalId && tipoCuenta === 'expenseCategory') {
-          const parent = await prisma.cuentaGlobal.findUnique({
-            where: { codigo: '61000000' },
-            select: { id: true },
-          });
-          // fallback to a common expense group if seed uses different roots
-          if (!parent) {
-            const alt = await prisma.cuentaGlobal.findFirst({
-              where: { codigo: { startsWith: '61' }, esPostable: false },
-              select: { id: true },
-            });
-            globalId = alt?.id ?? null;
-          } else {
-            globalId = parent.id;
-          }
-        }
-
-        const codigo = await autoAsignarCodigo(globalId, userId);
-        const metadata = sanitizeMetadata(bodyMetadata);
-
-        const account = await prisma.cuentaUsuario.create({
-          data: {
-            userId,
-            codigo,
-            tipoCuenta,
-            nombre: nombre.trim(),
-            globalId,
-            entidadId: entidadId ?? null,
-            codigoPersonalizado: codigoPersonalizado ?? null,
-            metadata: metadata ?? undefined,
-          },
-        });
-
-        return reply.status(201).send({ account });
-      } catch (err) {
-        request.log.error(err, 'Failed to create account');
-        return reply.status(500).send({ error: 'Failed to create account' });
+        request.log.error(err, 'Failed to update account balance policy');
+        return reply
+          .status(500)
+          .send({ error: 'Failed to update account balance policy' });
       }
     },
   );

@@ -106,13 +106,13 @@ export default function Entities() {
   }
 
   return (
-    <AppShell activePath="/entities" userLabel={user.email} onLogout={() => void logout()}>
+    <AppShell activePath="/hogar/entities" userLabel={user.email} onLogout={() => void logout()}>
       <section className="max-w-xl">
         <h1 className="text-headline-lg text-on-surface font-bold mb-xs">Entidades</h1>
         <p className="text-body-md text-on-surface-variant mb-lg">
           Bancos, tarjetas, billeteras virtuales y personas. Al crearlas, TADOR arma la cuenta
           asociada. Las categorías de ingreso/gasto viven en{' '}
-          <Link to="/accounts" className="underline text-primary">
+          <Link to="/hogar/accounts" className="underline text-primary">
             Cuentas
           </Link>
           .

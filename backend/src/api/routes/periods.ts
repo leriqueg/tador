@@ -5,27 +5,25 @@
 import type { FastifyInstance } from 'fastify';
 import type { AuthApplicationService } from '../../application/auth-service.js';
 import type { AccountingService } from '../../application/accounting-service.js';
+import type { BookApplicationService } from '../../application/book-service.js';
 import { createAuthMiddleware } from '../middleware/auth.js';
-import { prisma } from '../../infrastructure/database.js';
 
 export function registerPeriodRoutes(
   app: FastifyInstance,
   authService: AuthApplicationService,
   accountingService: AccountingService,
+  bookService: BookApplicationService,
 ): void {
   const requireAuth = createAuthMiddleware(authService);
 
   async function getBookId(userId: string): Promise<string | null> {
-    const book = await prisma.book.findFirst({
-      where: { userId },
-      select: { id: true },
-    });
-    return book?.id ?? null;
+    try {
+      const book = await bookService.getBook(userId, userId);
+      return book.id;
+    } catch {
+      return null;
+    }
   }
-
-  // ---------------------------------------------------------------------------
-  // POST /api/periods/:año/close — close period
-  // ---------------------------------------------------------------------------
 
   app.post(
     '/api/periods/:año/close',
@@ -61,10 +59,6 @@ export function registerPeriodRoutes(
       }
     },
   );
-
-  // ---------------------------------------------------------------------------
-  // POST /api/periods/:año/reopen — reopen period
-  // ---------------------------------------------------------------------------
 
   app.post(
     '/api/periods/:año/reopen',

@@ -20,6 +20,8 @@ export interface PlantillaField {
   required: boolean;
   label: string;
   default?: string;
+  /** For type='entity': the Entidad capability the selected entity must hold (Sprint 07 T006). */
+  requiresCapability?: string;
 }
 
 export interface PlantillaLine {

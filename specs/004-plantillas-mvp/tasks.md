@@ -1,5 +1,7 @@
 # Tasks: Sprint 04 — Plantillas MVP
 
+**Updated**: 2026-07-18
+
 - [x] ## T1: Plantillas JSON (10 archivos)
 
 Crear `backend/src/plantillas/` con los 10 JSON de plantillas HOME.
@@ -213,3 +215,11 @@ Historial de apuntes requerido por UI Hogar (`/entries`, dashboard recientes). C
 - [x] F7 Bump `transferencia.json` v2: groupCodes incluyen `11110000`, `11120000`, `11320000`, `21120000`
 - [x] F8 Implementar V10 en `POST /api/apuntes`: misma `accountId` en debe y haber → 400
 - [x] F9 Tests: transferencia entre bancos/billeteras válida; misma cuenta en origen/destino → 400
+
+## Follow-up (2026-07-18 — hardening de escritura)
+
+- [x] F10 Aceptar y persistir Idempotency-Key en `POST /api/apuntes`
+- [x] F11 Recuperar el Apunte ganador ante una carrera de clave única (`P2002`)
+- [x] F12 Ejecutar V12 dentro de la transacción Asiento + líneas + Apunte
+- [x] F13 Añadir pruebas de replay secuencial y por header
+- [x] F14 Añadir pruebas de sobregiro y concurrencia vía plantillas

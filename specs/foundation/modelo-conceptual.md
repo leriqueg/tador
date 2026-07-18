@@ -57,7 +57,7 @@ Usuario
 - Las Entidades dan nombre propio a bancos, personas, clientes, proveedores, plataformas y emisores; en el MVP pueden vincular cuentas de balance por cobrar o por pagar.
 - El módulo documental formal de CxC/CxP y facturas no está en el MVP, pero deberá referenciar Entidades cuando exista.
 - Las cuentas puente ayudan a separar la pregunta “dónde está/debo el dinero” de “qué ingreso/gasto ocurrió”.
-- El asistente IA v0 solo interpreta texto y sugiere plantillas; la ejecución contable siempre pasa por el backend.
+- El asistente IA v0 (Sprint 08) quedó **excluido del MVP** por tiempo; el spec se conserva para post-MVP. La ejecución contable siempre pasa por el backend.
 - El panel PYG del dashboard MVP se calcula desde cuentas de ingreso y egreso, no desde cuentas puente ni saldos de balance.
 - El panel de posición del dashboard MVP se calcula desde saldos de cuentas de balance (activo líquido, por cobrar, pasivo), no desde cuentas de ingreso/egreso.
 

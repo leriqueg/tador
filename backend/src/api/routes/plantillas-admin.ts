@@ -21,7 +21,8 @@ import {
   serializePlantillaEnriched,
 } from '../../application/plantilla-account-resolver.js';
 import { moneyToFixed, quantizeMoney, DEFAULT_CURRENCY } from '../../domain/money.js';
-import { prisma } from '../../infrastructure/database.js';
+import type { BookApplicationService } from '../../application/book-service.js';
+import type { AccountRepository } from '../../application/ports/account-repository.js';
 import { renderPlantillasAdminTool } from './plantillas-admin-ui.js';
 
 type Kind = 'gasto' | 'ingreso' | 'transferencia';
@@ -113,6 +114,8 @@ function wantsJson(query: { format?: string }, accept: string | undefined): bool
 export function registerPlantillasAdminRoutes(
   app: FastifyInstance,
   authService: AuthApplicationService,
+  bookService: BookApplicationService,
+  accounts: AccountRepository,
 ): void {
   const requireAuth = createAuthMiddleware(authService);
 
@@ -138,7 +141,7 @@ export function registerPlantillasAdminRoutes(
 
       const userId = request.userId!;
       const list = getAllPlantillas(mode);
-      const enriched = await enrichPlantillas(list, userId);
+      const enriched = await enrichPlantillas(accounts, list, userId);
 
       const plantillas = enriched.map((p) => {
         const lines = p.lines.map((line) => ({
@@ -194,7 +197,7 @@ export function registerPlantillasAdminRoutes(
         return reply.status(404).send({ error: `Plantilla '${code}' not found` });
       }
 
-      const enriched = await enrichPlantilla(plantilla, request.userId!);
+      const enriched = await enrichPlantilla(accounts, plantilla, request.userId!);
       return reply.status(200).send({
         kind: plantillaKind(code),
         category: plantillaCategory(code),
@@ -229,16 +232,18 @@ export function registerPlantillasAdminRoutes(
         return reply.status(400).send({ error: 'lines are required' });
       }
 
-      const book = await prisma.book.findFirst({
-        where: { userId: request.userId! },
-        include: { config: { select: { currency: true } } },
-      });
-      const currency = book?.config?.currency ?? DEFAULT_CURRENCY;
+      const book = await bookService.getBook(request.userId!, request.userId!);
+      const config = await bookService.getConfig(
+        request.userId!,
+        book.id,
+        request.userId!,
+      );
+      const currency = config.currency ?? DEFAULT_CURRENCY;
       const amount = quantizeMoney(body.amount, currency);
       const amountFixed = moneyToFixed(amount, currency);
 
-      const byId = await loadChartIndex();
-      const users = await loadUserAccounts(request.userId!);
+      const byId = await loadChartIndex(accounts);
+      const users = await loadUserAccounts(accounts, request.userId!);
       const nameById = new Map<string, string>();
       for (const g of byId.values()) nameById.set(g.id, g.nombre);
       for (const u of users) nameById.set(u.id, u.nombre);

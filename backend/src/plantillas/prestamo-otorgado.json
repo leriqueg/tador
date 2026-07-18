@@ -1,0 +1,16 @@
+{
+  "code": "prestamo_otorgado",
+  "version": 1,
+  "name": "Prestar dinero",
+  "modes": ["hogar", "pro"],
+  "amount": { "type": "money", "required": true, "label": "Monto" },
+  "concept": { "type": "text", "required": true, "label": "Concepto" },
+  "date": { "type": "date", "default": "today", "required": true, "label": "Fecha" },
+  "entity": { "type": "entity", "required": false, "label": "Relacionado con" },
+  "amountMode": "single",
+  "descriptionTemplate": "Préstamo a: {concept}",
+  "lines": [
+    { "id": 1, "side": "debit",  "label": "A quién prestas", "strategy": "from_group", "groupCode": "11320000" },
+    { "id": 2, "side": "credit", "label": "Desde (efectivo o banco)", "strategy": "from_groups", "groupCodes": ["11110000", "11120000"] }
+  ]
+}

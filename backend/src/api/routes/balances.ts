@@ -5,29 +5,25 @@
 import type { FastifyInstance } from 'fastify';
 import type { AuthApplicationService } from '../../application/auth-service.js';
 import type { AccountingService } from '../../application/accounting-service.js';
+import type { BookApplicationService } from '../../application/book-service.js';
 import { createAuthMiddleware } from '../middleware/auth.js';
-import { prisma } from '../../infrastructure/database.js';
 
 export function registerBalanceRoutes(
   app: FastifyInstance,
   authService: AuthApplicationService,
   accountingService: AccountingService,
+  bookService: BookApplicationService,
 ): void {
   const requireAuth = createAuthMiddleware(authService);
 
   async function getBookId(userId: string): Promise<string | null> {
-    const book = await prisma.book.findFirst({
-      where: { userId },
-      select: { id: true },
-    });
-    return book?.id ?? null;
+    try {
+      const book = await bookService.getBook(userId, userId);
+      return book.id;
+    } catch {
+      return null;
+    }
   }
-
-  // ---------------------------------------------------------------------------
-  // GET /api/balances/:cuentaId — current balance
-  // Query params:
-  //   tipo=usuario (default) | global — account type
-  // ---------------------------------------------------------------------------
 
   app.get(
     '/api/balances/:cuentaId',
@@ -53,13 +49,6 @@ export function registerBalanceRoutes(
       }
     },
   );
-
-  // ---------------------------------------------------------------------------
-  // GET /api/balances/:cuentaId/monthly — monthly balances
-  // Query params:
-  //   año — fiscal year (default: current year)
-  //   tipo=usuario (default) | global — account type
-  // ---------------------------------------------------------------------------
 
   app.get(
     '/api/balances/:cuentaId/monthly',

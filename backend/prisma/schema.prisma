@@ -136,6 +136,8 @@ model CuentaUsuario {
   /// Optional Hogar metadata (e.g. card network, lastFour, cutoffDay)
   metadata           Json?
   activa             Boolean    @default(true)
+  /// Enforce a non-negative natural balance for protected account families.
+  enforceNonNegativeBalance Boolean @default(true)
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt
 
@@ -154,11 +156,14 @@ model Entidad {
   nombre    String
   tipo      TipoEntidad
   notas     String?
+  /// Capability tokens for organization roles (e.g. can_be_customer, is_employment_dependency).
+  capabilities Json     @default("[]")
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
 
   user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   cuentasUsuario CuentaUsuario[]
+  apuntes       Apunte[]
 
   @@unique([userId, nombre])
   @@map("entidades")
@@ -182,6 +187,8 @@ model ActivacionCuentaGlobal {
   globalId       String
   activa         Boolean  @default(true)
   nombreOverride String?
+  /// Per-user override for direct postings to this global account.
+  enforceNonNegativeBalance Boolean @default(true)
   createdAt      DateTime @default(now())
 
   user   User         @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -253,8 +260,11 @@ model Apunte {
   asiento      Asiento  @relation(fields: [asientoId], references: [id])
   userId       String
   user         User     @relation(fields: [userId], references: [id])
+  entityId     String?
+  entity       Entidad? @relation(fields: [entityId], references: [id])
   createdAt    DateTime @default(now())
 
+  @@index([entityId])
   @@map("apuntes")
 }
 

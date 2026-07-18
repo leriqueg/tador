@@ -1,55 +1,49 @@
 # Implementation Plan: Sprint 07 - Frontend PRO ligero
 
-**Branch**: `sdd/definiciones` | **Date**: 2026-06-22 | **Spec**: [spec.md](./spec.md)
+**Branch**: `sprint/007-frontend-pro-ligero` | **Date**: 2026-07-16 | **Spec**: [spec.md](./spec.md)
 
 **Input**: Feature specification from `/specs/007-frontend-pro-ligero/spec.md`
 
 ## Summary
 
-Add lightweight PRO controls: account codes, parent selection, manual balanced entry and explicit balances.
+Ship **PRO ligero**: namespaces `/pro/*` (and migrate Hogar to `/hogar/*` with mode guards), EntryBuilder capture, account tree with codes, manual balanced entry, optional employer org on PRO onboarding. Keep P&G/Balance conceptually identical to Hogar. Advanced analysis → `009-frontend-pro-avanzado`. IA v0 (`008`) excluded from MVP.
 
 ## Technical Context
 
-**Language/Version**: TypeScript on Node.js (exact versions to be pinned during Sprint 01 setup)
+**Language/Version**: TypeScript — backend Node.js; frontend React 19 + Vite 8
 
-**Primary Dependencies**: Fastify, Prisma, PostgreSQL for backend; React, Vite, Mantine, Zustand and React Query for frontend when frontend sprints begin
+**Primary Dependencies**: Fastify, Prisma, PostgreSQL (backend); React, React Router, Tailwind v4 (frontend). Design-system in `frontend/src/components/` + Storybook.
 
-**Storage**: PostgreSQL via Prisma for product data; JSON files in repo for MVP template definitions until a later persistence decision
+**Storage**: PostgreSQL via Prisma; plantillas JSON under `backend/src/plantillas/`. Entidad capabilities: extend model (Json or flags) for `organization`.
 
-**Testing**: Test runner to be established in Sprint 01; backend behavior requires TDD once tooling exists
+**Testing**: Backend Vitest (unit + integration); frontend Vitest + Storybook for EntryBuilder; Playwright smoke for namespace guard + capture. **TDD** for backend capability validation and frontend builder state where practical.
 
-**Target Platform**: Linux-hosted web application, local Docker development, browser clients mobile-first plus desktop support
+**Target Platform**: Linux-hosted web app; Docker Compose; mobile-first + desktop.
 
-**Project Type**: Web application with backend API and frontend client
+**Project Type**: Web application (`backend/` + `frontend/`)
 
-**Performance Goals**: MVP user flows should feel interactive for a personal finance book; dashboard and balances should load within normal web-app expectations for pilot data
+**Performance Goals**: Typical PRO income via EntryBuilder &lt; 60s; interactive on pilot data.
 
-**Constraints**: Tenant isolation, privacy-safe logs, stable per-book currency, balanced accounting entries, no autonomous AI execution
+**Constraints**: Tenant isolation; exact decimal money; no QuickAdd as PRO primary; no 009 analysis; no IA; same domain APIs for both modes.
 
-**Scale/Scope**: MVP/pilot scale for personal and light professional use; one sprint per spec
-
+**Scale/Scope**: MVP PRO ligero only.
 
 ## Constitution Check
 
-*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
-
-- **MVP Scope & Sprint Fit**: PASS — this plan covers one sprint/capability only and keeps out-of-scope work explicit.
-- **Tenant & Privacy**: PASS — user-owned data is scoped by authenticated user whenever the sprint touches runtime data.
-- **Accounting Integrity**: PASS — any financial behavior routes through balanced Asientos or declares no accounting impact.
-- **Plantilla Discipline**: PASS — common operations are modeled through versioned Plantillas when applicable.
-- **Plan de Cuentas & Entidades**: PASS — global chart, user accounts and Entidades remain separate concepts.
-- **PYG vs Balance**: PASS — PYG reporting is separated from balance, bridge and payment accounts.
-- **TDD & Tests**: PASS — each sprint defines test obligations; Sprint 01 establishes runnable tooling.
-- **AI Safety**: PASS — IA v0 only suggests templates and never persists accounting directly.
-- **Concurrency & Idempotency**: PASS — mutating backend behavior must define duplicate-request and concurrent update handling before implementation.
-- **Secure Design & Architecture**: PASS — plans must preserve Clean Architecture boundaries, authorization, validation, privacy-safe logs, and fail-closed tenant access.
-- **Maintainability Standards**: PASS — implementation must follow SOLID/DRY with judgment, English code/endpoint naming, and rare English comments for complex procedures only.
-- **Dependency Hygiene**: PASS — package additions must use stable releases, lock exact resolved versions, avoid prerelease/untested packages, and prefer reputable OSS/framework features.
-
+- **MVP Scope & Sprint Fit**: PASS — advanced analysis and IA deferred.
+- **Tenant & Privacy**: PASS — user-scoped.
+- **Accounting Integrity**: PASS — apuntes/asientos via engine.
+- **Plantilla Discipline**: PASS — EntryBuilder may omit templateCode when lines are valid.
+- **Plan de Cuentas & Entidades**: PASS — organization + capabilities; entity-provisioned accounts unchanged.
+- **PYG vs Balance**: PASS — unchanged panels in 007.
+- **TDD & Tests**: PASS — tasks include test-first for capability validation and builder invariants.
+- **AI Safety**: PASS — IA out of MVP.
+- **Concurrency & Idempotency**: PASS — reuse apunte/entry idempotency patterns.
+- **Secure Design & Architecture**: PASS — Clean Architecture; mode guard is presentation only.
+- **Maintainability Standards**: PASS — separate page trees per namespace.
+- **Dependency Hygiene**: PASS — no new prerelease deps planned.
 
 ## Project Structure
-
-### Documentation (this feature)
 
 ```text
 specs/007-frontend-pro-ligero/
@@ -58,54 +52,20 @@ specs/007-frontend-pro-ligero/
 ├── research.md
 ├── data-model.md
 ├── quickstart.md
+├── inventory-vistas-endpoints.md
+├── tasks.md
 └── contracts/
     └── behavior.md
+
+frontend/src/pages/hogar/ …   # migrated Hogar pages
+frontend/src/pages/pro/ …     # PRO pages
+frontend/src/components/entry-builder/
 ```
 
-### Source Code (repository root)
+## Phase 0 / Phase 1
 
-```text
-backend/
-├── src/
-│   ├── domain/
-│   ├── application/
-│   ├── infrastructure/
-│   └── api/
-└── tests/
-
-frontend/
-├── src/
-│   ├── components/
-│   ├── pages/
-│   ├── services/
-│   └── state/
-└── tests/
-
-specs/
-└── foundation/
-```
-
-**Structure Decision**: Use a web application layout with separate `backend/` and `frontend/` roots when implementation begins. Foundation and sprint specs remain under `specs/`.
-
-
-## Complexity Tracking
-
-No constitution violations are currently planned. Any future violation must document why it is required and what simpler alternative was rejected.
-
-
-## Phase 0 Research
-
-See [research.md](./research.md). All planning clarifications are resolved for this draft plan.
-
-## Phase 1 Design
-
-See [data-model.md](./data-model.md), [quickstart.md](./quickstart.md), and contracts under [contracts/](./contracts/) when applicable.
+See [research.md](./research.md), [data-model.md](./data-model.md), [contracts/behavior.md](./contracts/behavior.md), [quickstart.md](./quickstart.md), [inventory-vistas-endpoints.md](./inventory-vistas-endpoints.md).
 
 ## Post-Design Constitution Check
 
-- **MVP Scope & Sprint Fit**: PASS — design artifacts remain scoped to `Sprint 07 - Frontend PRO ligero`.
-- **Tenant & Privacy**: PASS — privacy/tenant impact is documented for this sprint.
-- **Accounting Integrity**: PASS — accounting impact is either absent or routed through balanced Asientos.
-- **TDD & Tests**: PASS — test expectations are documented for planning and task generation.
-- **Concurrency & Idempotency**: PASS — implementation tasks must cover duplicate submissions and concurrent writes when mutating state.
-- **Secure Design & Architecture**: PASS — design must maintain secure boundaries and Clean Architecture separation.
+All gates remain PASS for Sprint 07 ligero scope.

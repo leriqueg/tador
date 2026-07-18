@@ -4,11 +4,18 @@
 
 **Created**: 2026-06-22
 
+**Updated**: 2026-07-18
+
 **Status**: Implemented (closed 2026-07-16) — Hogar loop US1–US3 + frontend test pyramid + Docker E2E. Deferred follow-ups: `/contact`, `/recovery`, unsaved mini-form guard, dedicated mobile QA pass.
 
 **Input**: Sprint 06: onboarding, login, configuración, creación guiada de cuentas/entidades, apuntes, saldos y dashboard para Modo Hogar.
 
 ## Clarifications
+
+### Session 2026-07-18
+
+- Q: ¿Cómo evita QuickAdd duplicados por doble clic o retry? → A: Genera una Idempotency-Key por intento, la reutiliza mientras el intento no confirme y la descarta solo después del éxito.
+- Q: ¿Qué ocurre si el apunte sobregira una cuenta protegida? → A: El backend rechaza V12 y el mini-form permanece editable mostrando el error; no se muestra éxito.
 
 ### Session 2026-07-12
 

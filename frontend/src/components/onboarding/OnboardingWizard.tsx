@@ -8,7 +8,9 @@ import {
   timeZoneLabel,
 } from '../../lib/time-zones.ts';
 
-export type OnboardingStep = 1 | 2 | 3 | 4 | 5;
+export type OnboardingStep = 1 | 2 | 3 | 4 | 5 | 6;
+
+export type OnboardingMode = 'hogar' | 'pro';
 
 export type CardNetwork = 'VISA' | 'MASTERCARD' | 'AMEX' | 'OTRO';
 
@@ -27,19 +29,24 @@ export interface OnboardingCardDraft {
   cutoffDay: string;
 }
 
+/** Organization with `is_employment_dependency` capability (PRO onboarding, T010). */
+export interface OnboardingEmployerDraft {
+  nombre: string;
+}
+
 export interface OnboardingResult {
-  mode: 'hogar';
+  mode: OnboardingMode;
   currency: string;
   timeZone: string;
   banks: OnboardingBankDraft[];
   wallets: OnboardingWalletDraft[];
   cards: OnboardingCardDraft[];
+  /** Only populated for PRO + "sí tengo empleador"; MUST NOT ask for clients/suppliers (T012). */
+  employers: OnboardingEmployerDraft[];
 }
 
 export interface OnboardingWizardProps {
   initialStep?: OnboardingStep;
-  /** MVP: only hogar is selectable; pro shown as coming soon when true */
-  showProComingSoon?: boolean;
   tipMessage?: string;
   submitting?: boolean;
   onComplete: (result: OnboardingResult) => void;
@@ -49,17 +56,17 @@ const DEFAULT_TIP =
   'Vamos a preparar tu libro juntos. Empezá simple: elegí cómo querés usar TADOR.';
 
 const MAX_EXTRA_WALLETS = 2;
+const MAX_EMPLOYERS = 3;
 
 /** Multi-step first-run wizard. No Pacho — tip callout only. */
 export default function OnboardingWizard({
   initialStep = 1,
-  showProComingSoon = true,
   tipMessage = DEFAULT_TIP,
   submitting = false,
   onComplete,
 }: OnboardingWizardProps) {
   const [step, setStep] = useState<OnboardingStep>(initialStep);
-  const [mode, setMode] = useState<'hogar' | null>(null);
+  const [mode, setMode] = useState<OnboardingMode | null>(null);
   const [currency, setCurrency] = useState('USD');
   const [timeZone, setTimeZone] = useState('UTC');
   const [extraWallets, setExtraWallets] = useState<OnboardingWalletDraft[]>([]);
@@ -71,6 +78,9 @@ export default function OnboardingWizard({
   const [cardNombre, setCardNombre] = useState('');
   const [cardLastFour, setCardLastFour] = useState('');
   const [cardCutoff, setCardCutoff] = useState('');
+  const [dependenciaLaboral, setDependenciaLaboral] = useState<boolean | null>(null);
+  const [employers, setEmployers] = useState<OnboardingEmployerDraft[]>([]);
+  const [employerName, setEmployerName] = useState('');
 
   useEffect(() => {
     setTimeZone(detectDefaultTimeZone());
@@ -129,6 +139,17 @@ export default function OnboardingWizard({
     setCards((prev) => prev.filter((_, i) => i !== index));
   }
 
+  function addEmployer() {
+    const nombre = employerName.trim();
+    if (!nombre || employers.length >= MAX_EMPLOYERS) return;
+    setEmployers((prev) => [...prev, { nombre }]);
+    setEmployerName('');
+  }
+
+  function removeEmployer(index: number) {
+    setEmployers((prev) => prev.filter((_, i) => i !== index));
+  }
+
   function finish() {
     if (!mode || submitting) return;
     onComplete({
@@ -138,20 +159,25 @@ export default function OnboardingWizard({
       banks,
       wallets: extraWallets,
       cards,
+      employers: mode === 'pro' ? employers : [],
     });
   }
+
+  const totalSteps = mode === 'pro' ? 6 : 5;
 
   const stepTip =
     step === 3
       ? 'Podés declarar tu banco y billeteras virtuales ahora, o más tarde en Entidades. La billetera del plan ya está lista sin entidad.'
       : step === 4
         ? 'Una tarjeta de crédito es una deuda. No necesitás tener cuenta en ese banco; puede ser del exterior.'
-        : tipMessage;
+        : step === 5 && mode === 'pro'
+          ? 'Solo preguntamos por tu empleador si trabajás en relación de dependencia. No pedimos clientes ni proveedores acá — eso se crea al vuelo cuando registrás un apunte.'
+          : tipMessage;
 
   return (
     <div className="flex flex-col max-w-lg mx-auto w-full px-md pb-xl pt-lg min-h-[70vh]">
       <div className="w-full flex gap-xs mb-xl justify-center items-center">
-        {[1, 2, 3, 4, 5].map((n) => (
+        {Array.from({ length: totalSteps }, (_, i) => i + 1).map((n) => (
           <div
             key={n}
             className={`h-1.5 flex-1 rounded-full ${n <= step ? 'bg-primary' : 'bg-surface-container-highest'}`}
@@ -191,19 +217,31 @@ export default function OnboardingWizard({
                 complicaciones.
               </p>
             </button>
-            {showProComingSoon && (
-              <div className="text-left p-md bg-surface-container-low rounded-xl border border-outline-variant/40 opacity-70">
-                <h3 className="text-headline-md text-on-surface mb-base font-semibold">Modo PRO</h3>
-                <p className="text-label-md text-on-surface-variant">
-                  Reportes avanzados y control técnico. Próximamente.
-                </p>
+            <button
+              type="button"
+              onClick={() => setMode('pro')}
+              className={`text-left p-md bg-surface-container-lowest rounded-xl border-2 transition-all shadow-sm ${
+                mode === 'pro' ? 'border-primary shadow-md' : 'border-transparent'
+              }`}
+            >
+              <div className="flex justify-between items-start mb-sm">
+                <div className="w-12 h-12 bg-secondary-container text-on-secondary-container rounded-lg flex items-center justify-center">
+                  <Icon name="business_center" className="text-2xl" />
+                </div>
               </div>
-            )}
+              <h3 className="text-headline-md text-on-surface mb-base font-semibold">Modo PRO</h3>
+              <p className="text-label-md text-on-surface-variant">
+                Más control técnico: árbol de cuentas, captura guiada y asiento manual para tu
+                actividad económica.
+              </p>
+            </button>
           </section>
           <Button fullWidth size="lg" className="rounded-xl" disabled={!mode} onClick={continueFromStep1} iconRight="arrow_forward">
             Continuar
           </Button>
-          <p className="text-center mt-sm text-label-sm text-outline">Paso 1 de 5</p>
+          <p className="text-center mt-sm text-label-sm text-outline">
+            Paso 1 de {mode === 'pro' ? 6 : 5}
+          </p>
         </>
       )}
 
@@ -258,7 +296,7 @@ export default function OnboardingWizard({
               Continuar
             </Button>
           </div>
-          <p className="text-center mt-sm text-label-sm text-outline">Paso 2 de 5</p>
+          <p className="text-center mt-sm text-label-sm text-outline">Paso 2 de {totalSteps}</p>
         </>
       )}
 
@@ -378,7 +416,7 @@ export default function OnboardingWizard({
               Continuar
             </Button>
           </div>
-          <p className="text-center mt-sm text-label-sm text-outline">Paso 3 de 5 · opcional</p>
+          <p className="text-center mt-sm text-label-sm text-outline">Paso 3 de {totalSteps} · opcional</p>
         </>
       )}
 
@@ -479,22 +517,130 @@ export default function OnboardingWizard({
               Continuar
             </Button>
           </div>
-          <p className="text-center mt-sm text-label-sm text-outline">Paso 4 de 5 · opcional</p>
+          <p className="text-center mt-sm text-label-sm text-outline">Paso 4 de {totalSteps} · opcional</p>
         </>
       )}
 
-      {step === 5 && (
+      {step === 5 && mode === 'pro' && (
+        <>
+          <section className="mb-lg">
+            <h1 className="text-headline-lg-mobile text-on-surface mb-xs font-bold">
+              ¿Relación de dependencia?
+            </h1>
+            <p className="text-body-md text-on-surface-variant">
+              Si trabajás para un empleador, creamos la organización para tus apuntes de sueldo. Si
+              sos freelance, podés omitir este paso — no vas a tener que declarar clientes ni
+              proveedores acá.
+            </p>
+          </section>
+
+          <div className="grid grid-cols-2 gap-md mb-lg">
+            <button
+              type="button"
+              onClick={() => setDependenciaLaboral(true)}
+              className={`text-center p-md rounded-xl border-2 transition-all text-label-md font-semibold ${
+                dependenciaLaboral === true
+                  ? 'border-primary bg-primary/5 text-primary'
+                  : 'border-outline-variant/40 text-on-surface-variant'
+              }`}
+            >
+              Sí, tengo empleador
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setDependenciaLaboral(false);
+                setEmployers([]);
+              }}
+              className={`text-center p-md rounded-xl border-2 transition-all text-label-md font-semibold ${
+                dependenciaLaboral === false
+                  ? 'border-primary bg-primary/5 text-primary'
+                  : 'border-outline-variant/40 text-on-surface-variant'
+              }`}
+            >
+              No, soy freelance
+            </button>
+          </div>
+
+          {dependenciaLaboral && (
+            <>
+              {employers.length > 0 && (
+                <ul className="mb-md space-y-xs">
+                  {employers.map((e, i) => (
+                    <li
+                      key={`${e.nombre}-${i}`}
+                      className="flex items-center justify-between gap-md p-md rounded-lg bg-surface-container-low"
+                    >
+                      <span className="text-body-md text-on-surface">Empleador · {e.nombre}</span>
+                      <button
+                        type="button"
+                        className="text-label-sm text-error cursor-pointer"
+                        onClick={() => removeEmployer(i)}
+                      >
+                        Quitar
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              {employers.length < MAX_EMPLOYERS && (
+                <div className="mb-lg space-y-sm">
+                  <TextInput
+                    label="Nombre del empleador"
+                    id="employer-name"
+                    name="employer-name"
+                    value={employerName}
+                    onChange={(e) => setEmployerName(e.target.value)}
+                    placeholder="Ej. Acme Corp"
+                    autoComplete="off"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    fullWidth
+                    className="rounded-xl"
+                    disabled={!employerName.trim()}
+                    onClick={addEmployer}
+                  >
+                    Agregar empleador
+                  </Button>
+                </div>
+              )}
+            </>
+          )}
+
+          <div className="flex gap-md">
+            <Button variant="outline" fullWidth size="lg" className="rounded-xl" onClick={() => setStep(4)}>
+              Atrás
+            </Button>
+            <Button
+              fullWidth
+              size="lg"
+              className="rounded-xl"
+              disabled={dependenciaLaboral === true && employers.length === 0}
+              onClick={() => setStep(6)}
+              iconRight="arrow_forward"
+            >
+              Continuar
+            </Button>
+          </div>
+          <p className="text-center mt-sm text-label-sm text-outline">Paso 5 de 6 · opcional</p>
+        </>
+      )}
+
+      {((step === 5 && mode === 'hogar') || (step === 6 && mode === 'pro')) && (
         <>
           <section className="mb-lg">
             <h1 className="text-headline-lg-mobile text-on-surface mb-xs font-bold">Listo para empezar</h1>
             <p className="text-body-md text-on-surface-variant">
-              Vas a poder registrar gastos y, cuando haga falta, crear bancos u otras cuentas sin ver
-              códigos contables.
+              Vas a poder registrar {mode === 'pro' ? 'apuntes' : 'gastos'} y, cuando haga falta, crear
+              bancos u otras cuentas sin ver códigos contables.
             </p>
           </section>
           <div className="mb-xl p-md rounded-xl bg-surface-container-lowest border border-outline-variant/30 space-y-xs">
             <p className="text-label-md text-on-surface-variant">
-              Modo: <span className="font-semibold text-primary">Hogar</span>
+              Modo: <span className="font-semibold text-primary">{mode === 'pro' ? 'PRO' : 'Hogar'}</span>
             </p>
             <p className="text-label-md text-on-surface-variant">
               Moneda: <span className="font-semibold text-primary">{currency}</span>
@@ -521,6 +667,14 @@ export default function OnboardingWizard({
                 {cards.length === 0 ? 'ninguna' : cards.map((c) => c.nombre).join(', ')}
               </span>
             </p>
+            {mode === 'pro' && (
+              <p className="text-label-md text-on-surface-variant">
+                Empleador:{' '}
+                <span className="font-semibold text-primary">
+                  {employers.length === 0 ? 'ninguno (freelance)' : employers.map((e) => e.nombre).join(', ')}
+                </span>
+              </p>
+            )}
           </div>
           <div className="flex gap-md">
             <Button
@@ -529,7 +683,7 @@ export default function OnboardingWizard({
               size="lg"
               className="rounded-xl"
               disabled={submitting}
-              onClick={() => setStep(4)}
+              onClick={() => setStep(mode === 'pro' ? 5 : 4)}
             >
               Atrás
             </Button>
@@ -537,7 +691,9 @@ export default function OnboardingWizard({
               {submitting ? 'Guardando…' : 'Empezar'}
             </Button>
           </div>
-          <p className="text-center mt-sm text-label-sm text-outline">Paso 5 de 5</p>
+          <p className="text-center mt-sm text-label-sm text-outline">
+            Paso {totalSteps} de {totalSteps}
+          </p>
         </>
       )}
     </div>

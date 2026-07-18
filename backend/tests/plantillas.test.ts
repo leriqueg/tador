@@ -117,7 +117,15 @@ async function createUserAccount(
       payload: { nombre, tipo: tipoEntidad },
     });
     expect(res.statusCode).toBe(201);
-    return res.json().provisionedAccount;
+    const account = res.json().provisionedAccount;
+    const policy = await app.inject({
+      method: 'PATCH',
+      url: `/api/accounts/${account.id}/balance-policy`,
+      headers: { cookie: cookies.join('; ') },
+      payload: { enforceNonNegativeBalance: false },
+    });
+    expect(policy.statusCode).toBe(200);
+    return account;
   }
 
   const global = await findGlobalByCodigo(globalCodigo);
@@ -135,7 +143,23 @@ async function createUserAccount(
     },
   });
   expect(res.statusCode).toBe(201);
-  return res.json().account;
+  const account = res.json().account;
+  if (
+    globalCodigo.startsWith('1111') ||
+    globalCodigo.startsWith('1112') ||
+    globalCodigo.startsWith('1132') ||
+    globalCodigo.startsWith('2112') ||
+    globalCodigo.startsWith('2120')
+  ) {
+    const policy = await app.inject({
+      method: 'PATCH',
+      url: `/api/accounts/${account.id}/balance-policy`,
+      headers: { cookie: cookies.join('; ') },
+      payload: { enforceNonNegativeBalance: false },
+    });
+    expect(policy.statusCode).toBe(200);
+  }
+  return account;
 }
 
 /**
@@ -204,9 +228,9 @@ describe('Plantilla loader', () => {
     resetPlantillaCache();
   });
 
-  it('should load 10 plantillas', () => {
+  it('should load 16 plantillas', () => {
     const all = loadPlantillas();
-    expect(all).toHaveLength(10);
+    expect(all).toHaveLength(16);
   });
 
   it('should have required fields on each plantilla', () => {
@@ -266,7 +290,7 @@ describe('Plantilla loader', () => {
 // ---------------------------------------------------------------------------
 
 describe('US7 — GET /api/plantillas', () => {
-  it('should return 10 plantillas', async () => {
+  it('should return 16 plantillas', async () => {
     const app = await createTestApp();
     const cookies = await registerAndVerify(app, 'us7-list@test.com');
 
@@ -278,7 +302,7 @@ describe('US7 — GET /api/plantillas', () => {
 
     expect(res.statusCode).toBe(200);
     const body = res.json();
-    expect(body.plantillas).toHaveLength(10);
+    expect(body.plantillas).toHaveLength(16);
     for (const p of body.plantillas) {
       for (const line of p.lines) {
         expect(line.availableAccounts).toBeUndefined();
@@ -454,6 +478,84 @@ describe('US2 — Register ingreso with plantilla', () => {
     expect(creditLine).toBeDefined();
     expect(Number(debitLine.debito)).toBe(1500);
     expect(Number(creditLine.credito)).toBe(1500);
+
+    await app.close();
+  });
+
+  it('should reject registrar_sueldo when the selected org lacks is_employment_dependency (T006)', async () => {
+    const app = await createTestApp();
+    const cookies = await registerAndVerify(app, 'us2-sueldo-no-cap@test.com');
+    const accounts = await setupTemplateAccounts(app, cookies);
+
+    const orgRes = await app.inject({
+      method: 'POST',
+      url: '/api/entities',
+      headers: { cookie: cookies.join('; ') },
+      payload: { nombre: 'Cliente SA', tipo: 'organization', capabilities: ['can_be_customer'] },
+    });
+    expect(orgRes.statusCode).toBe(201);
+    const { entity: org } = orgRes.json();
+
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/apuntes',
+      headers: { cookie: cookies.join('; ') },
+      payload: {
+        templateCode: 'registrar_sueldo',
+        date: '2026-07-01',
+        concept: 'Sueldo julio',
+        amount: 1500,
+        entityId: org.id,
+        lines: [
+          { id: 1, accountId: accounts.bancoUserAccountId },
+          { id: 2, accountId: accounts.ingresoUserAccountId },
+        ],
+      },
+    });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.json().error).toContain('is_employment_dependency');
+
+    await app.close();
+  });
+
+  it('should accept registrar_sueldo when the selected org has is_employment_dependency (T006)', async () => {
+    const app = await createTestApp();
+    const cookies = await registerAndVerify(app, 'us2-sueldo-with-cap@test.com');
+    const accounts = await setupTemplateAccounts(app, cookies);
+
+    const orgRes = await app.inject({
+      method: 'POST',
+      url: '/api/entities',
+      headers: { cookie: cookies.join('; ') },
+      payload: {
+        nombre: 'Empleador SA',
+        tipo: 'organization',
+        capabilities: ['is_employment_dependency'],
+      },
+    });
+    expect(orgRes.statusCode).toBe(201);
+    const { entity: org } = orgRes.json();
+
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/apuntes',
+      headers: { cookie: cookies.join('; ') },
+      payload: {
+        templateCode: 'registrar_sueldo',
+        date: '2026-07-01',
+        concept: 'Sueldo julio',
+        amount: 1500,
+        entityId: org.id,
+        lines: [
+          { id: 1, accountId: accounts.bancoUserAccountId },
+          { id: 2, accountId: accounts.ingresoUserAccountId },
+        ],
+      },
+    });
+
+    expect(res.statusCode).toBe(201);
+    expect(res.json().apunte.templateCode).toBe('registrar_sueldo');
 
     await app.close();
   });
@@ -691,6 +793,102 @@ describe('US4 — Register pago_tarjeta', () => {
     expect(creditLine).toBeDefined();
     expect(Number(debitLine.debito)).toBe(400);
     expect(Number(creditLine.credito)).toBe(400);
+
+    await app.close();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Informal loans (CxC personales) — prestar / cobrar
+// ---------------------------------------------------------------------------
+
+describe('Prestar / cobrar préstamo', () => {
+  it('prestamo_otorgado → 201, debit person CxC / credit bank', async () => {
+    const app = await createTestApp();
+    const cookies = await registerAndVerify(app, 'loan-out@test.com');
+    const accounts = await setupTemplateAccounts(app, cookies);
+
+    const personRes = await app.inject({
+      method: 'POST',
+      url: '/api/entities',
+      headers: { cookie: cookies.join('; ') },
+      payload: { nombre: 'Amigo Juan', tipo: 'person' },
+    });
+    expect(personRes.statusCode).toBe(201);
+    const personAccount = personRes.json().provisionedAccount as { id: string };
+
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/apuntes',
+      headers: { cookie: cookies.join('; ') },
+      payload: {
+        templateCode: 'prestamo_otorgado',
+        date: '2026-07-15',
+        concept: 'Préstamo a Juan',
+        amount: 100,
+        lines: [
+          { id: 1, accountId: personAccount.id },
+          { id: 2, accountId: accounts.bancoUserAccountId },
+        ],
+      },
+    });
+
+    expect(res.statusCode).toBe(201);
+    expect(res.json().apunte.templateCode).toBe('prestamo_otorgado');
+    expect(res.json().apunte.entityId).toBeNull();
+
+    await app.close();
+  });
+
+  it('cobro_prestamo → 201, debit bank / credit person CxC', async () => {
+    const app = await createTestApp();
+    const cookies = await registerAndVerify(app, 'loan-collect@test.com');
+    const accounts = await setupTemplateAccounts(app, cookies);
+
+    const personRes = await app.inject({
+      method: 'POST',
+      url: '/api/entities',
+      headers: { cookie: cookies.join('; ') },
+      payload: { nombre: 'Amiga Ana', tipo: 'person' },
+    });
+    expect(personRes.statusCode).toBe(201);
+    const personAccount = personRes.json().provisionedAccount as { id: string };
+
+    const loan = await app.inject({
+      method: 'POST',
+      url: '/api/apuntes',
+      headers: { cookie: cookies.join('; ') },
+      payload: {
+        templateCode: 'prestamo_otorgado',
+        date: '2026-07-15',
+        concept: 'Préstamo previo a Ana',
+        amount: 100,
+        lines: [
+          { id: 1, accountId: personAccount.id },
+          { id: 2, accountId: accounts.bancoUserAccountId },
+        ],
+      },
+    });
+    expect(loan.statusCode).toBe(201);
+
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/apuntes',
+      headers: { cookie: cookies.join('; ') },
+      payload: {
+        templateCode: 'cobro_prestamo',
+        date: '2026-07-16',
+        concept: 'Devolución Ana',
+        amount: 40,
+        lines: [
+          { id: 1, accountId: accounts.bancoUserAccountId },
+          { id: 2, accountId: personAccount.id },
+        ],
+      },
+    });
+
+    expect(res.statusCode).toBe(201);
+    expect(res.json().apunte.templateCode).toBe('cobro_prestamo');
 
     await app.close();
   });

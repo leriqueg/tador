@@ -30,7 +30,7 @@ export const ValidationMessages: StoryObj = {
 
 export const Shell: StoryObj = {
   render: () => (
-    <AppShell activePath="/dashboard" userLabel="diego@tador.app">
+    <AppShell activePath="/hogar/dashboard" userLabel="diego@tador.app">
       <p className="text-body-md text-on-surface-variant">Contenido del resumen (placeholder).</p>
     </AppShell>
   ),

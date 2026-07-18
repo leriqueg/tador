@@ -34,7 +34,7 @@ describe('resolvePostAuthDestination', () => {
     await expect(resolvePostAuthDestination()).resolves.toBe('/onboarding');
   });
 
-  it('sends initialized users to dashboard', async () => {
+  it('sends initialized hogar users to /hogar/dashboard', async () => {
     mockedGet.mockResolvedValue({
       book: { id: 'b1', createdAt: '2026-01-01' },
       config: {
@@ -50,6 +50,25 @@ describe('resolvePostAuthDestination', () => {
       },
     });
 
-    await expect(resolvePostAuthDestination()).resolves.toBe('/dashboard');
+    await expect(resolvePostAuthDestination()).resolves.toBe('/hogar/dashboard');
+  });
+
+  it('sends initialized pro users to /pro/dashboard', async () => {
+    mockedGet.mockResolvedValue({
+      book: { id: 'b1', createdAt: '2026-01-01' },
+      config: {
+        id: 'c1',
+        currency: 'USD',
+        locale: 'en-US',
+        format: 'symbol',
+        currencyLocked: false,
+        mode: 'pro',
+        timeZone: 'UTC',
+        onboardingCompletedAt: '2026-01-02T00:00:00.000Z',
+        initialized: true,
+      },
+    });
+
+    await expect(resolvePostAuthDestination()).resolves.toBe('/pro/dashboard');
   });
 });

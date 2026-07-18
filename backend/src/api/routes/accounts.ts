@@ -13,6 +13,10 @@ import type {
   CuentaUsuarioMetadata,
   TipoCuenta,
 } from '../../domain/cuenta-usuario.js';
+import {
+  isBalanceProtectedCode,
+  lockBalancePolicyChange,
+} from '../../application/account-balance-policy.js';
 
 interface CreateAccountBody {
   tipoCuenta: TipoCuenta;
@@ -22,6 +26,10 @@ interface CreateAccountBody {
   entidadId?: string;
   codigoPersonalizado?: string;
   metadata?: CuentaUsuarioMetadata;
+}
+
+interface UpdateBalancePolicyBody {
+  enforceNonNegativeBalance: boolean;
 }
 
 const MANUAL_ALLOWED: TipoCuenta[] = [
@@ -81,6 +89,7 @@ export function registerAccountRoutes(
           isEntityProvisioned: row.entidadId != null,
           metadata: row.metadata,
           activa: row.activa,
+          enforceNonNegativeBalance: row.enforceNonNegativeBalance,
         }));
 
         return reply.status(200).send({ accounts });
@@ -188,6 +197,62 @@ export function registerAccountRoutes(
       } catch (err) {
         request.log.error(err, 'Failed to create account');
         return reply.status(500).send({ error: 'Failed to create account' });
+      }
+    },
+  );
+
+  app.patch(
+    '/api/accounts/:id/balance-policy',
+    { preHandler: requireAuth },
+    async (request, reply) => {
+      const userId = request.userId!;
+      const { id } = request.params as { id: string };
+      const { enforceNonNegativeBalance } =
+        request.body as UpdateBalancePolicyBody;
+
+      if (typeof enforceNonNegativeBalance !== 'boolean') {
+        return reply.status(400).send({
+          error: 'enforceNonNegativeBalance must be a boolean',
+        });
+      }
+
+      try {
+        const [account, book] = await Promise.all([
+          prisma.cuentaUsuario.findFirst({
+            where: { id, userId },
+            select: {
+              id: true,
+              global: { select: { codigo: true } },
+            },
+          }),
+          prisma.book.findFirst({
+            where: { userId },
+            select: { id: true },
+          }),
+        ]);
+        if (!account || !book) {
+          return reply.status(404).send({ error: 'Account not found' });
+        }
+        if (!isBalanceProtectedCode(account.global?.codigo ?? null)) {
+          return reply.status(422).send({
+            error: 'Balance policy only applies to liquidity and debt accounts',
+          });
+        }
+
+        const updated = await prisma.$transaction(async (tx) => {
+          await lockBalancePolicyChange(tx, book.id, 'user', id);
+          return tx.cuentaUsuario.update({
+            where: { id },
+            data: { enforceNonNegativeBalance },
+          });
+        });
+
+        return reply.status(200).send({ account: updated });
+      } catch (err) {
+        request.log.error(err, 'Failed to update account balance policy');
+        return reply
+          .status(500)
+          .send({ error: 'Failed to update account balance policy' });
       }
     },
   );

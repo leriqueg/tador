@@ -4,13 +4,9 @@
 
 import { prisma } from '../database.js';
 import type { User, CreateUserInput } from '../../domain/user.js';
+import type { UserRepository } from '../../application/ports/user-repository.js';
 
-export interface UserRepository {
-  findById(id: string): Promise<User | null>;
-  findByEmail(email: string): Promise<User | null>;
-  create(input: CreateUserInput): Promise<User>;
-  update(user: User): Promise<User>;
-}
+export type { UserRepository };
 
 export function createUserRepository(): UserRepository {
   return {

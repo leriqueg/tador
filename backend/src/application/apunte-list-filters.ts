@@ -1,5 +1,5 @@
 /**
- * Pure helpers for apunte list filters (unit-tested; used by route).
+ * Pure helpers for apunte list filters (unit-tested; adapter maps to persistence).
  */
 
 export interface ApunteListQuery {
@@ -11,58 +11,65 @@ export interface ApunteListQuery {
   accountId?: string;
 }
 
-export function buildApunteListWhere(
+export interface ApunteListFilter {
+  userId: string;
+  dateGte?: Date;
+  dateLte?: Date;
+  amountGte?: string;
+  amountLte?: string;
+  conceptContains?: string;
+  accountId?: string;
+}
+
+export function buildApunteListFilter(
   userId: string,
   query: ApunteListQuery,
-): Record<string, unknown> {
-  const where: Record<string, unknown> = { userId };
+): ApunteListFilter {
+  const filter: ApunteListFilter = { userId };
 
   if (query.dateFrom || query.dateTo) {
-    const dateFilter: { gte?: Date; lte?: Date } = {};
     if (query.dateFrom) {
       const d = new Date(query.dateFrom);
-      if (!Number.isNaN(d.getTime())) dateFilter.gte = d;
+      if (!Number.isNaN(d.getTime())) filter.dateGte = d;
     }
     if (query.dateTo) {
       const d = new Date(query.dateTo);
       if (!Number.isNaN(d.getTime())) {
         d.setUTCHours(23, 59, 59, 999);
-        dateFilter.lte = d;
+        filter.dateLte = d;
       }
     }
-    if (Object.keys(dateFilter).length > 0) where.date = dateFilter;
   }
 
-  if (query.amountMin || query.amountMax) {
-    const amountFilter: { gte?: number; lte?: number } = {};
-    if (query.amountMin) {
-      const n = Number(query.amountMin);
-      if (Number.isFinite(n)) amountFilter.gte = n;
-    }
-    if (query.amountMax) {
-      const n = Number(query.amountMax);
-      if (Number.isFinite(n)) amountFilter.lte = n;
-    }
-    if (Object.keys(amountFilter).length > 0) where.amount = amountFilter;
+  if (query.amountMin?.trim()) {
+    const n = Number(query.amountMin);
+    if (Number.isFinite(n)) filter.amountGte = query.amountMin.trim();
+  }
+  if (query.amountMax?.trim()) {
+    const n = Number(query.amountMax);
+    if (Number.isFinite(n)) filter.amountLte = query.amountMax.trim();
   }
 
   if (query.q?.trim()) {
-    where.concept = {
-      contains: query.q.trim(),
-      mode: 'insensitive',
-    };
+    filter.conceptContains = query.q.trim();
   }
 
   if (query.accountId?.trim()) {
-    const accountId = query.accountId.trim();
-    where.asiento = {
-      lineas: {
-        some: {
-          OR: [{ cuentaId: accountId }, { cuentaGlobalId: accountId }],
-        },
-      },
-    };
+    filter.accountId = query.accountId.trim();
   }
 
-  return where;
+  return filter;
+}
+
+export function parseApunteListPagination(query: {
+  limit?: string;
+  offset?: string;
+}): { limit: number; offset: number } {
+  const limitRaw = query.limit ? parseInt(query.limit, 10) : 20;
+  const offsetRaw = query.offset ? parseInt(query.offset, 10) : 0;
+  const limit = Number.isFinite(limitRaw)
+    ? Math.min(Math.max(limitRaw, 1), 100)
+    : 20;
+  const offset = Number.isFinite(offsetRaw) ? Math.max(offsetRaw, 0) : 0;
+  return { limit, offset };
 }

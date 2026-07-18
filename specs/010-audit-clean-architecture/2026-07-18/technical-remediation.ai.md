@@ -137,3 +137,6 @@ Each step is independently shippable and test-verifiable. Keep public HTTP contr
 - Keep identifiers, filenames, and route paths in English (Constitution VIII); comments rare + English.
 - Preserve tenant isolation (`userId` scoping) exactly as today; it must remain enforced at the application boundary.
 - Ship in small vertical slices (Constitution VII); run tests after each slice.
+
+# Fecha de Revision 
+2026-07-18

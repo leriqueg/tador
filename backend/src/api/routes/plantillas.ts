@@ -14,10 +14,12 @@ import {
   serializePlantillaEnriched,
   serializePlantillaLight,
 } from '../../application/plantilla-account-resolver.js';
+import type { AccountRepository } from '../../application/ports/account-repository.js';
 
 export function registerPlantillaRoutes(
   app: FastifyInstance,
   authService: AuthApplicationService,
+  accounts: AccountRepository,
 ): void {
   const requireAuth = createAuthMiddleware(authService);
 
@@ -47,7 +49,7 @@ export function registerPlantillaRoutes(
       }
 
       const userId = request.userId!;
-      const enriched = await enrichPlantilla(plantilla, userId);
+      const enriched = await enrichPlantilla(accounts, plantilla, userId);
 
       return reply.status(200).send({
         plantilla: serializePlantillaEnriched(enriched),

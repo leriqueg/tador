@@ -5,10 +5,10 @@
 import type { FastifyInstance } from 'fastify';
 import type { AuthApplicationService } from '../../application/auth-service.js';
 import type { AccountingService } from '../../application/accounting-service.js';
+import type { BookApplicationService } from '../../application/book-service.js';
 import type { DashboardReportService } from '../../application/dashboard-report-service.js';
 import type { FinancialAnalysisService } from '../../application/financial-analysis-service.js';
 import { createAuthMiddleware } from '../middleware/auth.js';
-import { prisma } from '../../infrastructure/database.js';
 
 /** Canonical query is `year`; `año` remains a short-lived deprecated alias. */
 function parseYearQuery(query: { year?: string; año?: string }): number {
@@ -24,17 +24,19 @@ export function registerReportRoutes(
   app: FastifyInstance,
   authService: AuthApplicationService,
   accountingService: AccountingService,
+  bookService: BookApplicationService,
   dashboardService?: DashboardReportService,
   financialAnalysisService?: FinancialAnalysisService,
 ): void {
   const requireAuth = createAuthMiddleware(authService);
 
   async function getBookId(userId: string): Promise<string | null> {
-    const book = await prisma.book.findFirst({
-      where: { userId },
-      select: { id: true },
-    });
-    return book?.id ?? null;
+    try {
+      const book = await bookService.getBook(userId, userId);
+      return book.id;
+    } catch {
+      return null;
+    }
   }
 
   app.get(

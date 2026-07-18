@@ -64,3 +64,6 @@ las respuestas de la API, ejecutando las pruebas después de cada cambio.
 Es una mejora de **mantenibilidad y orden**, no un cambio de funcionalidad. El
 objetivo es que el proyecto respete la arquitectura que ya definió su propia
 constitución, para que crezca sin volverse frágil.
+
+# Fecha de Revision 
+2026-07-18

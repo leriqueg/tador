@@ -5,8 +5,8 @@
 import type { FastifyInstance } from 'fastify';
 import type { AuthApplicationService } from '../../application/auth-service.js';
 import type { AccountingService } from '../../application/accounting-service.js';
+import type { BookApplicationService } from '../../application/book-service.js';
 import { createAuthMiddleware } from '../middleware/auth.js';
-import { prisma } from '../../infrastructure/database.js';
 import { NegativeBalanceError } from '../../application/account-balance-policy.js';
 
 interface CreateEntryLineBody {
@@ -33,6 +33,7 @@ export function registerEntryRoutes(
   app: FastifyInstance,
   authService: AuthApplicationService,
   accountingService: AccountingService,
+  bookService: BookApplicationService,
 ): void {
   const requireAuth = createAuthMiddleware(authService);
 
@@ -41,11 +42,12 @@ export function registerEntryRoutes(
   // ---------------------------------------------------------------------------
 
   async function getBookId(userId: string): Promise<string | null> {
-    const book = await prisma.book.findFirst({
-      where: { userId },
-      select: { id: true },
-    });
-    return book?.id ?? null;
+    try {
+      const book = await bookService.getBook(userId, userId);
+      return book.id;
+    } catch {
+      return null;
+    }
   }
 
   function normalizeLines(

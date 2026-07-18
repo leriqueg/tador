@@ -79,10 +79,13 @@ build:                    ## Compila TypeScript (backend)
 #
 # E2E runs inside the compose network (frontend / backend DNS), not localhost.
 # That mirrors CI: stack + runner containers on one network.
+#
+# Integration targets regenerate Prisma Client in the same container run so the
+# anonymous /app/node_modules volume cannot serve a client older than schema.prisma.
 
 .PHONY: test
 test: db-up               ## Tests de integración (Postgres + Fastify)
-	$(RUN_BACKEND) npm run test:integration
+	$(RUN_BACKEND) sh -c 'npx prisma generate && npm run test:integration'
 
 .PHONY: test-unit
 test-unit:                ## Tests unitarios de dominio (sin DB)
@@ -90,7 +93,7 @@ test-unit:                ## Tests unitarios de dominio (sin DB)
 
 .PHONY: test-watch
 test-watch: db-up         ## Tests de integración en modo watch
-	$(RUN_BACKEND) npm run test:integration -- --watch
+	$(RUN_BACKEND) sh -c 'npx prisma generate && npm run test:integration -- --watch'
 
 .PHONY: test-frontend
 test-frontend:            ## Vitest unit + integration (contenedor frontend)

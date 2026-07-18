@@ -4,20 +4,12 @@
 
 import { prisma } from '../database.js';
 import { generateSessionToken, tokenExpiresAt } from '../../domain/auth.js';
+import type {
+  SessionData,
+  SessionService,
+} from '../../application/ports/session-service.js';
 
-export interface SessionData {
-  id: string;
-  userId: string;
-  token: string;
-  expiresAt: Date;
-}
-
-export interface SessionService {
-  create(userId: string): Promise<SessionData>;
-  findByToken(token: string): Promise<SessionData | null>;
-  delete(token: string): Promise<void>;
-  deleteAllForUser(userId: string): Promise<void>;
-}
+export type { SessionData, SessionService };
 
 export function createSessionService(): SessionService {
   return {

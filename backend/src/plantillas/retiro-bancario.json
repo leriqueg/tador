@@ -1,8 +1,8 @@
 {
   "code": "retiro_bancario",
-  "version": 1,
-  "name": "Retirar efectivo del banco",
-  "modes": ["hogar"],
+  "version": 2,
+  "name": "Retirar",
+  "modes": ["hogar", "pro"],
   "amount": { "type": "money", "required": true, "label": "Monto" },
   "concept": { "type": "text", "required": true, "label": "Concepto" },
   "date": { "type": "date", "default": "today", "required": true, "label": "Fecha" },
@@ -10,7 +10,7 @@
   "amountMode": "single",
   "descriptionTemplate": "Retiro: {concept}",
   "lines": [
-    { "id": 1, "side": "debit",  "label": "Destino (efectivo)", "strategy": "from_group",   "groupCode": "11110000" },
-    { "id": 2, "side": "credit", "label": "Desde (banco)",       "strategy": "from_group",   "groupCode": "11120000" }
+    { "id": 1, "side": "debit",  "label": "Destino (billetera)", "strategy": "from_group", "groupCode": "11110000" },
+    { "id": 2, "side": "credit", "label": "Desde (banco)", "strategy": "from_group", "groupCode": "11120000" }
   ]
 }

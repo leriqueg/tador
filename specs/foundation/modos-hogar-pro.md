@@ -3,8 +3,8 @@
 | Campo | Valor |
 |-------|-------|
 | **Documento** | Definición de modos Hogar y PRO |
-| **Versión** | 1.2.0 |
-| **Última actualización** | 2026-07-13 |
+| **Versión** | 1.3.0 |
+| **Última actualización** | 2026-07-16 |
 | **Estado** | Aprobado |
 | **Relación** | Complementa la constitución y el documento `mvp-scope.md` |
 
@@ -78,7 +78,27 @@ Alguien que usa la app como apoyo a una actividad económica: profesional indepe
 
 PRO no solo quiere ver "si hubo gasto", sino qué tipo de movimiento fue. Por ejemplo, comprar una laptop no debería verse solo como pérdida del mes; puede ser un activo que se usa durante años y luego se deprecia o incluso se vende.
 
-**CxC/CxP documentales (PRO / post-MVP):** facturas a pacientes/clientes, pagos parciales aplicados a documentos viejos, aging (“¿lo que me deben es actual o muy viejo?”). Eso **no** es el alcance de Hogar; Hogar solo lleva el **saldo** con la Entidad.
+**CxC/CxP documentales (post-MVP):** facturas a pacientes/clientes, pagos parciales aplicados a documentos viejos, aging (“¿lo que me deben es actual o muy viejo?”). Eso **no** es el alcance de Hogar; Hogar solo lleva el **saldo** con la Entidad. Análisis PRO avanzado (bancos, tarjetas, cartera) vive en `specs/009-frontend-pro-avanzado/`.
+
+---
+
+## QuickAdd vs EntryBuilder
+
+| | **QuickAdd (Hogar)** | **EntryBuilder (PRO)** |
+|--|----------------------|-------------------------|
+| Pregunta mental | “¿Qué hice?” → reconozco un nombre | “¿Qué tipo de movimiento?” → clasifico y armo |
+| Entrada | Plantilla nombrada (tile / categoría / búsqueda) | Pasos: INGRESO \| EGRESO \| TRANSFERENCIA → … |
+| Formulario | Mini: cuenta, monto, concepto | Secuencia; pasos previos visibles y editables |
+| Complejidad visible | Oculta códigos y líneas | Más control; sin ERP |
+| Validez | La plantilla ya es válida | Validez por construcción al avanzar |
+| Burst | Conserva plantilla + cuenta | Conserva tipo + cuenta |
+| Escape | — | Asiento manual |
+| Backend típico | `POST /api/apuntes` + `templateCode` | Apunte con o sin plantilla, o asiento manual (`/api/entries`) |
+| Rutas UI (decisión 2026-07-16) | Namespace `/hogar/*` | Namespace `/pro/*` |
+
+> Analogía: QuickAdd es **elegir una receta**; EntryBuilder es **cocinar con la misma cocina**, paso a paso (a veces sin receta con nombre).
+
+> **Decisión 2026-07-13 / 2026-07-16**: No reutilizar EntryBuilder como UX de Hogar ni QuickAdd como UX primaria de PRO. Ambos modos ofrecen **“Guardar y registrar otro”** (burst entry). Detalle: `specs/006-frontend-hogar/spec.md` (US2) y `specs/007-frontend-pro-ligero/spec.md` (US2 EntryBuilder).
 
 ---
 
@@ -89,11 +109,11 @@ PRO no solo quiere ver "si hubo gasto", sino qué tipo de movimiento fue. Por ej
 | **Pregunta central** | ¿Estoy bien con mi dinero? | ¿Cómo está funcionando mi actividad económica y qué compromisos tengo? |
 | **Nivel de profundidad** | Decisión rápida y comprensión inmediata | Contexto operativo para no confundir rentabilidad con liquidez ni gasto con inversión |
 | **Postura** | Simplifica para que cualquiera entienda su situación | Agrega separación entre dinero, deuda, activos y resultado |
-| **Captura de apuntes** | **Template-driven quick capture**: plantillas nombradas + tres capas (frecuentes / tipo+categoría / búsqueda) + mini-form (cuenta, monto, descripción). Recognition over recall. | **EntryBuilder** (progressive disclosure / narrative form): pasos secuenciales con validez por construcción; pasos previos editables. Asiento manual como escape hatch. |
+| **Captura de apuntes** | **QuickAdd** (template-driven) | **EntryBuilder** + asiento manual como escape |
+| **Rutas frontend** | `/hogar/...` | `/pro/...` |
+| **API backend** | Mismas APIs de dominio | Mismas APIs de dominio |
 
 > **No es una relación incompleta/completa.** Hogar no es una versión "limitada" de PRO. Cada modo resuelve una necesidad distinta. Hogar da **paz mental**; PRO da **control económico**.
-
-> **Decisión 2026-07-13**: No reutilizar EntryBuilder como UX de Hogar. Una plantilla Hogar es el mismo motor de captura con pasos pre-respondidos. Ambos modos ofrecen **“Guardar y registrar otro”** (burst entry). Detalle: `specs/006-frontend-hogar/spec.md` (US2) y `specs/007-frontend-pro-ligero/spec.md` (US2 EntryBuilder).
 
 ---
 
@@ -113,29 +133,35 @@ PRO no solo quiere ver "si hubo gasto", sino qué tipo de movimiento fue. Por ej
 | Tendencia mensual | ¿Voy mejor o peor que meses anteriores? |
 | Alerta de exceso | ¿Estoy gastando más de lo que ingresa? |
 
-### PRO
+### PRO (MVP ligero — Sprint 07)
 
 | Indicador | ¿Qué responde? |
 |-----------|----------------|
-| Ingresos cobrados | ¿Cuánto ingresó efectivamente? |
-| Ingresos por cobrar | ¿Cuánto me deben? |
-| Gastos pagados | ¿Cuánto salió efectivamente? |
-| Gastos por pagar | ¿Cuánto debo pagar? |
-| Activos | ¿Qué tengo (efectivo + cuentas por cobrar)? |
-| Pasivos | ¿Qué debo (total deudas)? |
-| Resultado del ejercicio | ¿Gané o perdí en el período? |
-| Flujo de caja | ¿Entró más de lo que salió? |
-| Gastos por categoría | Desglose con separación gasto real vs inversión |
-| Rentabilidad | Relación entre ingresos y gastos |
-| Liquidez | Capacidad de pago inmediato |
+| Misma base Hogar | P&G y posición/balance **sin densificar** en Sprint 07 |
+| Árbol de cuentas | Códigos, madres, saldos; crear hijas postables (no las de Entidad) |
+| Captura | EntryBuilder + asiento manual |
+| Empleador (si aplica) | Organización con capacidad `is_employment_dependency` para sueldo |
+
+### PRO (avanzado — Sprint 009, post 007)
+
+| Indicador | ¿Qué responde? |
+|-----------|----------------|
+| Analizar bancos | Saldos mensuales, costos operativos |
+| Analizar tarjetas | Cargos del mes, intereses/multas |
+| Analizar cartera | CxC vs CxP por Entidad |
+| Conciliación / cierre | Post-MVP |
 
 ---
 
 ## Relación con el modelo de datos
 
-Ambos modos operan sobre el **mismo modelo de datos**. No existe un modelo "Hogar" y otro "PRO". La diferencia es exclusivamente de presentación y densidad de información.
+Ambos modos operan sobre el **mismo modelo de datos**. No existe un modelo "Hogar" y otro "PRO". La diferencia es de **presentación, rutas UI y densidad**.
 
-El backend expone APIs que sirven ambos modos. La UI decide qué mostrar y cómo mostrarlo según el modo activo del usuario.
+El backend expone APIs que sirven ambos modos. El frontend usa namespaces separados (`/hogar/*`, `/pro/*`) con guard de redirección según `BookConfig.mode`. Componentes atómicos pueden compartirse; las páginas/composiciones no deben ramificar por modo dentro de la misma ruta.
+
+### Organizaciones (clientes, proveedores, empleador)
+
+No se usan tipos `client` / `supplier` separados. Se usa **`organization`** con **capacidades** que el usuario asigna (`can_be_customer`, `can_be_supplier`, `is_employment_dependency`). Una misma organización puede ser empleador hoy y cliente/proveedor después. La capacidad requerida se **valida al registrar el apunte**, no de forma retroactiva. Ver `reglas-entidades.md` y specs 007 / 009.
 
 ---
 
@@ -143,12 +169,11 @@ El backend expone APIs que sirven ambos modos. La UI decide qué mostrar y cómo
 
 | Sprint | Capacidad | Relación con modos |
 |--------|-----------|-------------------|
-| 05 — Dashboard PYG | Reporte único obligatorio | Define los datos que ambos modos consumen (API + data contracts) |
-| 06 — Frontend Hogar | UI mobile-first | Implementa la experiencia HOGAR sobre los mismos datos |
-| 07 — Frontend PRO ligero | UI con mayor control | Implementa la experiencia PRO sobre los mismos datos |
-| 08 — IA v0 | Asistente local | Sugiere plantillas en Modo Hogar |
-
-El sprint 05 entrega las APIs y consultas que ambos modos consumen. Los sprints 06 y 07 construyen las experiencias de cada modo sobre esa misma base.
+| 05 — Dashboard PYG | Reporte obligatorio | Datos que ambos modos consumen |
+| 06 — Frontend Hogar | UI mobile-first QuickAdd | Experiencia HOGAR (`/hogar/*`) |
+| 07 — Frontend PRO ligero | EntryBuilder, árbol, asiento manual | Experiencia PRO mínima (`/pro/*`) |
+| 09 — Frontend PRO avanzado | Análisis bancos/tarjetas/cartera | Densidad analítica PRO |
+| 08 — IA v0 | **Fuera del MVP** (tiempo) | Spec conservado; no bloquea cierre MVP |
 
 ---
 
@@ -156,6 +181,7 @@ El sprint 05 entrega las APIs y consultas que ambos modos consumen. Los sprints 
 
 | Fecha | Versión | Cambio |
 |------|---------|--------|
-| 2026-07-13 | 1.2.0 | Captura: Hogar = plantillas (tres capas); PRO = EntryBuilder; motor compartido; burst entry |
-| 2026-07-12 | 1.1.0 | Hogar incluye CxC/CxP informales (saldo + Entidad); módulo documental queda en PRO |
+| 2026-07-16 | 1.3.0 | QuickAdd vs EntryBuilder; namespaces `/hogar` `/pro`; organization+capacidades; 008 IA fuera MVP; 009 avanzado |
+| 2026-07-13 | 1.2.0 | Captura: Hogar = plantillas; PRO = EntryBuilder; motor compartido; burst entry |
+| 2026-07-12 | 1.1.0 | Hogar incluye CxC/CxP informales; módulo documental post-MVP |
 | 2026-07-07 | 1.0.0 | Definición inicial de modos Hogar y PRO |

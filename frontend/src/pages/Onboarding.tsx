@@ -71,7 +71,15 @@ export default function Onboarding() {
         });
       }
 
-      navigate('/dashboard', { replace: true });
+      for (const employer of result.employers) {
+        await entities.create({
+          nombre: employer.nombre,
+          tipo: 'organization',
+          capabilities: ['is_employment_dependency'],
+        });
+      }
+
+      navigate(`/${result.mode}/dashboard`, { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No se pudo guardar la configuración');
     } finally {

@@ -163,6 +163,8 @@ export interface AccountSummary {
   isEntityProvisioned: boolean;
   metadata?: AccountMetadata | null;
   activa: boolean;
+  /** Missing on legacy fixtures is interpreted as the secure default: true. */
+  enforceNonNegativeBalance?: boolean;
 }
 
 export interface AccountMetadata {
@@ -171,8 +173,14 @@ export interface AccountMetadata {
   cutoffDay?: number;
 }
 
+export type TipoCuentaManualCreate =
+  | 'wallet'
+  | 'bridge'
+  | 'incomeCategory'
+  | 'expenseCategory';
+
 export interface CreateAccountInput {
-  tipoCuenta: 'bank' | 'card' | 'wallet' | 'bridge' | 'incomeCategory' | 'expenseCategory';
+  tipoCuenta: TipoCuentaManualCreate | 'bank' | 'card';
   nombre: string;
   globalId?: string;
   parentGroupCodigo?: string;
@@ -193,13 +201,71 @@ export const accounts = {
       input,
     );
   },
+
+  updateBalancePolicy(id: string, enforceNonNegativeBalance: boolean) {
+    return request<{ account: AccountSummary }>(
+      'PATCH',
+      `/api/accounts/${id}/balance-policy`,
+      { enforceNonNegativeBalance },
+    );
+  },
 };
+
+export interface ChartGlobalNode {
+  id: string;
+  parentId: string | null;
+  codigo: string;
+  nombre: string;
+  esPostable: boolean;
+}
+
+export interface ChartActivation {
+  id: string;
+  userId: string;
+  globalId: string;
+  activa: boolean;
+  nombreOverride: string | null;
+  enforceNonNegativeBalance: boolean;
+}
+
+export const chart = {
+  list() {
+    return request<{ chart: ChartGlobalNode[]; activations: ChartActivation[] }>('GET', '/api/chart');
+  },
+
+  updateBalancePolicy(id: string, enforceNonNegativeBalance: boolean) {
+    return request<{ activation: ChartActivation }>(
+      'PATCH',
+      `/api/chart/${id}/balance-policy`,
+      { enforceNonNegativeBalance },
+    );
+  },
+};
+
+export const balances = {
+  get(cuentaId: string) {
+    return request<{ cuentaId: string; saldo: number }>('GET', `/api/balances/${cuentaId}`);
+  },
+
+  monthly(cuentaId: string, year: number) {
+    return request<{ cuentaId: string; año: number; mensual: MonthlyBalancePoint[] }>(
+      'GET',
+      `/api/balances/${cuentaId}/monthly?año=${year}`,
+    );
+  },
+};
+
+export interface MonthlyBalancePoint {
+  mes: number;
+  saldo: number;
+}
 
 export interface EntitySummary {
   id: string;
   nombre: string;
   tipo: string;
   notas: string | null;
+  capabilities?: string[];
   provisionedAccountId?: string | null;
 }
 
@@ -224,6 +290,7 @@ export const entities = {
     nombre: string;
     tipo: EntityTipo;
     notas?: string;
+    capabilities?: string[];
     metadata?: AccountMetadata;
   }) {
     return request<EntityCreateResponse>('POST', '/api/entities', input);
@@ -285,15 +352,22 @@ export const plantillas = {
 export interface ApunteLineInput {
   id: number;
   accountId: string;
+  /** Only required when no templateCode (PRO EntryBuilder free-form entries) */
+  side?: 'debit' | 'credit';
+  /** Only required when no templateCode (PRO EntryBuilder free-form entries) */
+  amount?: number;
 }
 
 export interface CreateApunteInput {
-  templateCode: string;
+  /** Omit for PRO EntryBuilder free-form entries (FR-007: apunte con o sin templateCode) */
+  templateCode?: string;
   date: string;
   concept: string;
-  amount: number;
+  amount?: number;
   lines: ApunteLineInput[];
   entityId?: string | null;
+  /** Duplicate-request guard (Constitution IX): safe retry / double-submit. */
+  idempotencyKey?: string;
 }
 
 export interface ApunteSummary {
@@ -319,6 +393,14 @@ export interface ApunteListParams {
 
 export interface ApunteDetail extends ApunteSummary {
   lines: ApunteLineInput[];
+}
+
+/** Stable-per-attempt key so retries/double-submits collapse to one apunte. */
+export function newIdempotencyKey(): string {
+  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+    return crypto.randomUUID();
+  }
+  return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
 export const apuntes = {
@@ -349,6 +431,40 @@ export const apuntes = {
 
   update(id: string, input: CreateApunteInput) {
     return request<{ apunte: ApunteSummary }>('PATCH', `/api/apuntes/${id}`, input);
+  },
+};
+
+// ─── Manual entries (asientos) ─────────────────────────────────────
+
+export interface CreateEntryLineInput {
+  cuentaId?: string;
+  cuentaGlobalId?: string;
+  debito?: number;
+  credito?: number;
+}
+
+export interface CreateEntryInput {
+  fecha: string;
+  concepto: string;
+  lineas: CreateEntryLineInput[];
+  idempotencyKey?: string;
+}
+
+export interface EntrySummary {
+  id: string;
+  concepto: string;
+  fecha: string;
+  tipo: string;
+  anulado: boolean;
+}
+
+export const entries = {
+  create(input: CreateEntryInput) {
+    return request<{ entry: EntrySummary; lineas: CreateEntryLineInput[] }>(
+      'POST',
+      '/api/entries',
+      input,
+    );
   },
 };
 
@@ -397,12 +513,55 @@ export interface PositionReport {
   };
 }
 
+export interface PortfolioEntityEntry {
+  entityId: string;
+  entityName: string;
+  receivables: number;
+  payables: number;
+  net: number;
+}
+
+export interface PortfolioReport {
+  entities: PortfolioEntityEntry[];
+}
+
+export interface CostYieldTotals {
+  year: number;
+  entityId: string;
+  costs: {
+    comisiones: number;
+    intereses: number;
+    multas: number;
+  };
+  investmentYield: number;
+}
+
+export interface PyGReportFilters {
+  accountId?: string;
+  entityId?: string;
+}
+
 export const reports = {
-  pyg(year: number) {
-    return request<PyGReport>('GET', `/api/reports/pyg?year=${year}`);
+  pyg(year: number, filters?: PyGReportFilters) {
+    const search = new URLSearchParams({ year: String(year) });
+    if (filters?.accountId) search.set('accountId', filters.accountId);
+    if (filters?.entityId) search.set('entityId', filters.entityId);
+    return request<PyGReport>('GET', `/api/reports/pyg?${search.toString()}`);
   },
 
   position() {
     return request<PositionReport>('GET', '/api/reports/position');
+  },
+
+  portfolio() {
+    return request<PortfolioReport>('GET', '/api/reports/portfolio');
+  },
+
+  costYield(entityId: string, year: number) {
+    const search = new URLSearchParams({
+      entityId,
+      year: String(year),
+    });
+    return request<CostYieldTotals>('GET', `/api/reports/financial-analysis?${search.toString()}`);
   },
 };

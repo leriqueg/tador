@@ -64,13 +64,35 @@ export interface PositionReportDTO {
   breakdown: PositionBreakdown;
 }
 
+export interface PyGReportFilters {
+  accountId?: string | null;
+  entityId?: string | null;
+}
+
+export interface PortfolioEntityEntry {
+  entityId: string;
+  entityName: string;
+  receivables: number;
+  payables: number;
+  net: number;
+}
+
+export interface PortfolioReportDTO {
+  entities: PortfolioEntityEntry[];
+}
+
 // ---------------------------------------------------------------------------
 // Service interface
 // ---------------------------------------------------------------------------
 
 export interface DashboardReportService {
-  getPyGReport(bookId: string, year: number): Promise<PyGReportDTO>;
+  getPyGReport(
+    bookId: string,
+    year: number,
+    filters?: PyGReportFilters,
+  ): Promise<PyGReportDTO>;
   getPositionReport(bookId: string): Promise<PositionReportDTO>;
+  getPortfolioReport(bookId: string): Promise<PortfolioReportDTO>;
 }
 
 // ---------------------------------------------------------------------------
@@ -187,7 +209,14 @@ export function createDashboardReportService(): DashboardReportService {
     // -----------------------------------------------------------------------
     // getPyGReport
     // -----------------------------------------------------------------------
-    async getPyGReport(bookId: string, year: number): Promise<PyGReportDTO> {
+    async getPyGReport(
+      bookId: string,
+      year: number,
+      filters: PyGReportFilters = {},
+    ): Promise<PyGReportDTO> {
+      const accountId = filters.accountId ?? null;
+      const entityId = filters.entityId ?? null;
+
       // 1. Monthly series — 12 months via generate_series LEFT JOIN
       const monthlyRows: MonthlySeriesRow[] = await prisma.$queryRaw`
         WITH line_details AS (
@@ -203,12 +232,18 @@ export function createDashboardReportService(): DashboardReportService {
           LEFT JOIN cuentas_globales cg_via_cu ON cg_via_cu.id = cu."globalId"
           WHERE a."bookId" = ${bookId}
             AND a.anulado = false
+            AND a."asientoOriginalId" IS NULL
             AND EXTRACT(YEAR FROM a.fecha) = ${year}
             AND (cu."tipoCuenta" IS DISTINCT FROM 'bridge')
             AND (
               COALESCE(cg_dir.codigo, cg_via_cu.codigo) LIKE '4%'
               OR COALESCE(cg_dir.codigo, cg_via_cu.codigo) LIKE '6%'
             )
+            AND (${accountId}::text IS NULL OR l."cuentaId" = ${accountId} OR l."cuentaGlobalId" = ${accountId})
+            AND (${entityId}::text IS NULL OR EXISTS (
+              SELECT 1 FROM apuntes ap
+              WHERE ap."asientoId" = a.id AND ap."entityId" = ${entityId}
+            ))
         ),
         monthly_agg AS (
           SELECT
@@ -242,9 +277,15 @@ export function createDashboardReportService(): DashboardReportService {
         LEFT JOIN cuentas_globales cg_via_cu ON cg_via_cu.id = cu."globalId"
         WHERE a."bookId" = ${bookId}
           AND a.anulado = false
+          AND a."asientoOriginalId" IS NULL
           AND EXTRACT(YEAR FROM a.fecha) = ${year}
           AND (cu."tipoCuenta" IS DISTINCT FROM 'bridge')
           AND COALESCE(cg_dir.codigo, cg_via_cu.codigo) LIKE '4%'
+          AND (${accountId}::text IS NULL OR l."cuentaId" = ${accountId} OR l."cuentaGlobalId" = ${accountId})
+          AND (${entityId}::text IS NULL OR EXISTS (
+            SELECT 1 FROM apuntes ap
+            WHERE ap."asientoId" = a.id AND ap."entityId" = ${entityId}
+          ))
         GROUP BY
           COALESCE(l."cuentaId", l."cuentaGlobalId"),
           COALESCE(cg_dir.codigo, cg_via_cu.codigo),
@@ -268,9 +309,15 @@ export function createDashboardReportService(): DashboardReportService {
         LEFT JOIN cuentas_globales cg_via_cu ON cg_via_cu.id = cu."globalId"
         WHERE a."bookId" = ${bookId}
           AND a.anulado = false
+          AND a."asientoOriginalId" IS NULL
           AND EXTRACT(YEAR FROM a.fecha) = ${year}
           AND (cu."tipoCuenta" IS DISTINCT FROM 'bridge')
           AND COALESCE(cg_dir.codigo, cg_via_cu.codigo) LIKE '6%'
+          AND (${accountId}::text IS NULL OR l."cuentaId" = ${accountId} OR l."cuentaGlobalId" = ${accountId})
+          AND (${entityId}::text IS NULL OR EXISTS (
+            SELECT 1 FROM apuntes ap
+            WHERE ap."asientoId" = a.id AND ap."entityId" = ${entityId}
+          ))
         GROUP BY
           COALESCE(l."cuentaId", l."cuentaGlobalId"),
           COALESCE(cg_dir.codigo, cg_via_cu.codigo),
@@ -333,6 +380,7 @@ export function createDashboardReportService(): DashboardReportService {
           INNER JOIN asientos a ON a.id = l."asientoId"
           WHERE a."bookId" = ${bookId}
             AND a.anulado = false
+            AND a."asientoOriginalId" IS NULL
         )
         SELECT
           cu.id AS account_id,
@@ -435,6 +483,67 @@ export function createDashboardReportService(): DashboardReportService {
           payables,
         },
       };
+    },
+
+    async getPortfolioReport(bookId: string): Promise<PortfolioReportDTO> {
+      const position = await this.getPositionReport(bookId);
+      const entityMap = new Map<
+        string,
+        { entityName: string; receivables: Decimal; payables: Decimal }
+      >();
+
+      const accountIds = [
+        ...position.breakdown.receivables.map((e) => e.accountId),
+        ...position.breakdown.payables.map((e) => e.accountId),
+      ];
+      const accounts =
+        accountIds.length === 0
+          ? []
+          : await prisma.cuentaUsuario.findMany({
+              where: { id: { in: accountIds } },
+              select: {
+                id: true,
+                entidadId: true,
+                entidad: { select: { nombre: true } },
+              },
+            });
+      const accountById = new Map(accounts.map((a) => [a.id, a]));
+
+      for (const entry of position.breakdown.receivables) {
+        const account = accountById.get(entry.accountId);
+        if (!account?.entidadId) continue;
+        const current = entityMap.get(account.entidadId) ?? {
+          entityName: account.entidad?.nombre ?? 'Unknown',
+          receivables: new Decimal(0),
+          payables: new Decimal(0),
+        };
+        current.receivables = current.receivables.plus(toDecimal(entry.balance));
+        entityMap.set(account.entidadId, current);
+      }
+
+      for (const entry of position.breakdown.payables) {
+        const account = accountById.get(entry.accountId);
+        if (!account?.entidadId) continue;
+        const current = entityMap.get(account.entidadId) ?? {
+          entityName: account.entidad?.nombre ?? 'Unknown',
+          receivables: new Decimal(0),
+          payables: new Decimal(0),
+        };
+        current.payables = current.payables.plus(toDecimal(entry.balance));
+        entityMap.set(account.entidadId, current);
+      }
+
+      const entities: PortfolioEntityEntry[] = [...entityMap.entries()]
+        .map(([entityId, data]) => ({
+          entityId,
+          entityName: data.entityName,
+          receivables: data.receivables.toNumber(),
+          payables: data.payables.toNumber(),
+          net: data.receivables.minus(data.payables).toNumber(),
+        }))
+        .sort((a, b) => a.entityName.localeCompare(b.entityName));
+
+      return { entities };
     },
   };
 }

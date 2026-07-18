@@ -1,8 +1,8 @@
 {
   "code": "pago_tarjeta",
-  "version": 1,
-  "name": "Pagar tarjeta de crédito",
-  "modes": ["hogar"],
+  "version": 2,
+  "name": "Pagar deuda de tarjeta",
+  "modes": ["hogar", "pro"],
   "amount": { "type": "money", "required": true, "label": "Monto" },
   "concept": { "type": "text", "required": true, "label": "Concepto" },
   "date": { "type": "date", "default": "today", "required": true, "label": "Fecha" },
@@ -10,7 +10,7 @@
   "amountMode": "single",
   "descriptionTemplate": "Pago tarjeta: {concept}",
   "lines": [
-    { "id": 1, "side": "debit",  "label": "Tarjeta a pagar",  "strategy": "from_group",   "groupCode": "21200000" },
-    { "id": 2, "side": "credit", "label": "Desde (banco)",     "strategy": "from_group",   "groupCode": "11120000" }
+    { "id": 1, "side": "debit",  "label": "Tarjeta a pagar", "strategy": "from_group", "groupCode": "21200000" },
+    { "id": 2, "side": "credit", "label": "Pagas con", "strategy": "from_groups", "groupCodes": ["11110000", "11120000"] }
   ]
 }

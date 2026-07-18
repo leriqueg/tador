@@ -9,6 +9,7 @@
 import type { FastifyInstance } from 'fastify';
 import type { AuthApplicationService } from '../../application/auth-service.js';
 import type { AccountingService } from '../../application/accounting-service.js';
+import { Prisma } from '@prisma/client';
 import { createAuthMiddleware } from '../middleware/auth.js';
 import { prisma } from '../../infrastructure/database.js';
 import { getPlantilla } from '../../plantillas/index.js';
@@ -26,6 +27,16 @@ import {
   sumMoney,
 } from '../../domain/money.js';
 import { buildApunteListWhere } from '../../application/apunte-list-filters.js';
+import {
+  loadLineAccountMetaForEntityResolution,
+  resolveApunteEntityId,
+} from '../../application/resolve-apunte-entity-id.js';
+import {
+  assertProjectedBalances,
+  NegativeBalanceError,
+} from '../../application/account-balance-policy.js';
+import { lockTransactionKey } from '../../application/transaction-locks.js';
+import { assertEntityCapability, EntityCapabilityError } from '../../domain/entity-capability-rule.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -49,6 +60,52 @@ interface CreateApunteBody {
   amountMode?: 'single' | 'per_line';
   entityId?: string | null;
   lines: ApunteLineInput[];
+  /** Duplicate-request guard (Constitution IX): safe retry / double-submit. */
+  idempotencyKey?: string;
+}
+
+/** Shared response shape for freshly created and idempotent-replayed apuntes. */
+function serializeApunteResult(
+  apunte: {
+    id: string;
+    templateCode: string | null;
+    date: Date;
+    concept: string;
+    amount: { toString: () => string };
+    asientoId: string;
+    entityId: string | null;
+  },
+  asiento: { id: string; fecha: Date; concepto: string },
+  lineas: Array<{
+    cuentaId: string | null;
+    cuentaGlobalId: string | null;
+    debito: { toString: () => string };
+    credito: { toString: () => string };
+  }>,
+  currency: string,
+) {
+  return {
+    apunte: {
+      id: apunte.id,
+      templateCode: apunte.templateCode,
+      date: apunte.date.toISOString(),
+      concept: apunte.concept,
+      amount: moneyToNumber(apunte.amount.toString(), currency),
+      asientoId: apunte.asientoId,
+      entityId: apunte.entityId,
+    },
+    asiento: {
+      id: asiento.id,
+      fecha: asiento.fecha.toISOString(),
+      descripcion: asiento.concepto,
+      lines: lineas.map((l) => ({
+        cuentaId: l.cuentaId,
+        cuentaGlobalId: l.cuentaGlobalId,
+        debito: moneyToNumber(l.debito.toString(), currency),
+        credito: moneyToNumber(l.credito.toString(), currency),
+      })),
+    },
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -150,6 +207,35 @@ async function validateLineAgainstTemplate(
         );
       }
     }
+  }
+}
+
+/**
+ * Resolve an entityId and assert it holds the required capability (V11).
+ * Never validates retroactively — only the entity selected for this apunte.
+ */
+async function requireEntityCapability(
+  entityId: string,
+  userId: string,
+  requiredCapability: string,
+): Promise<void> {
+  const entity = await prisma.entidad.findFirst({
+    where: { id: entityId, userId },
+    select: { tipo: true, capabilities: true },
+  });
+  if (!entity) {
+    throw new ValidationError(`Entity ${entityId} not found (V11)`, 404);
+  }
+  try {
+    assertEntityCapability(
+      { tipo: entity.tipo, capabilities: entity.capabilities as string[] },
+      requiredCapability,
+    );
+  } catch (err) {
+    if (err instanceof EntityCapabilityError) {
+      throw new ValidationError(`${err.message} (V11)`, 400);
+    }
+    throw err;
   }
 }
 
@@ -329,6 +415,11 @@ export function registerApunteRoutes(
     async (request, reply) => {
       const userId = request.userId!;
       const body = request.body as CreateApunteBody;
+      // Hoisted so the catch block can replay on a concurrent P2002.
+      const idempotencyKey =
+        body.idempotencyKey ??
+        (request.headers['idempotency-key'] as string | undefined);
+      let currency = DEFAULT_CURRENCY;
 
       try {
         // ---------------------------------------------------------------
@@ -348,8 +439,31 @@ export function registerApunteRoutes(
           where: { bookId },
           select: { currency: true },
         });
-        const currency = bookConfig?.currency ?? DEFAULT_CURRENCY;
+        currency = bookConfig?.currency ?? DEFAULT_CURRENCY;
         const amountD = quantizeMoney(body.amount ?? 0, currency);
+
+        // ---------------------------------------------------------------
+        // Idempotency (Constitution IX): replay returns the first result
+        // ---------------------------------------------------------------
+        if (idempotencyKey) {
+          const existingAsiento = await prisma.asiento.findUnique({
+            where: { idempotencyKey },
+            include: { lineas: true, apuntes: true },
+          });
+          const existingApunte = existingAsiento?.apuntes[0];
+          if (existingAsiento && existingApunte) {
+            return reply
+              .status(200)
+              .send(
+                serializeApunteResult(
+                  existingApunte,
+                  existingAsiento,
+                  existingAsiento.lineas,
+                  currency,
+                ),
+              );
+          }
+        }
 
         // ---------------------------------------------------------------
         // Template-based (HOME) or free-form (PRO)
@@ -385,6 +499,51 @@ export function registerApunteRoutes(
                 .send({ error: 'amount is required when template has amountMode single (V5)' });
             }
             amount = moneyToNumber(quantizeMoney(body.amount, currency), currency);
+          }
+
+          // V11: When a template requires an entity capability (e.g. salary →
+          // is_employment_dependency) and an entity was selected, it must hold it.
+          // (Resolved entityId is validated after line resolution below.)
+        }
+
+        // ---------------------------------------------------------------
+        // Resolve entityId (FR-009): explicit body or auto from bank/card
+        // ---------------------------------------------------------------
+        const lineAccountIds = body.lines.map((l) => l.accountId);
+        const lineAccountMeta = await loadLineAccountMetaForEntityResolution(
+          lineAccountIds,
+          userId,
+          prisma,
+        );
+        const entityResolution = resolveApunteEntityId({
+          templateCode: body.templateCode ?? null,
+          explicitEntityId: body.entityId ?? null,
+          lineAccounts: lineAccountMeta,
+          skipBankAutoFill: Boolean(template?.entity?.requiresCapability),
+        });
+        if (!entityResolution.ok) {
+          return reply
+            .status(entityResolution.statusCode)
+            .send({ error: entityResolution.error });
+        }
+        const resolvedEntityId = entityResolution.entityId;
+
+        if (resolvedEntityId) {
+          const entity = await prisma.entidad.findFirst({
+            where: { id: resolvedEntityId, userId },
+            select: { id: true },
+          });
+          if (!entity) {
+            return reply
+              .status(404)
+              .send({ error: `Entity ${resolvedEntityId} not found (V11)` });
+          }
+          if (template?.entity?.requiresCapability) {
+            await requireEntityCapability(
+              resolvedEntityId,
+              userId,
+              template.entity.requiresCapability,
+            );
           }
         }
 
@@ -506,6 +665,28 @@ export function registerApunteRoutes(
         // Create Asiento + Lineas + Apunte in a transaction
         // ---------------------------------------------------------------
         const result = await prisma.$transaction(async (tx) => {
+          if (idempotencyKey) {
+            await lockTransactionKey(tx, `idempotency:${idempotencyKey}`);
+            const replay = await tx.asiento.findUnique({
+              where: { idempotencyKey },
+              include: { lineas: true, apuntes: true },
+            });
+            if (replay?.apuntes[0]) {
+              return {
+                asiento: replay,
+                lineas: replay.lineas,
+                apunte: replay.apuntes[0],
+                replayed: true,
+              };
+            }
+          }
+
+          await assertProjectedBalances(tx, {
+            bookId,
+            userId,
+            lines: entryLines,
+          });
+
           // Create the asiento (journal entry)
           const asiento = await tx.asiento.create({
             data: {
@@ -513,6 +694,7 @@ export function registerApunteRoutes(
               fecha,
               concepto: body.concept,
               tipo: 'manual',
+              ...(idempotencyKey && { idempotencyKey }),
             },
           });
 
@@ -540,36 +722,46 @@ export function registerApunteRoutes(
               amount: quantizeMoney(amount, currency).toFixed(),
               asientoId: asiento.id,
               userId,
+              entityId: resolvedEntityId,
             },
           });
 
-          return { asiento, lineas, apunte };
+          return { asiento, lineas, apunte, replayed: false };
         });
 
-        return reply.status(201).send({
-          apunte: {
-            id: result.apunte.id,
-            templateCode: result.apunte.templateCode,
-            date: result.apunte.date.toISOString(),
-            concept: result.apunte.concept,
-            amount: moneyToNumber(result.apunte.amount.toString(), currency),
-            asientoId: result.apunte.asientoId,
-          },
-          asiento: {
-            id: result.asiento.id,
-            fecha: result.asiento.fecha.toISOString(),
-            descripcion: result.asiento.concepto,
-            lines: result.lineas.map((l) => ({
-              cuentaId: l.cuentaId,
-              cuentaGlobalId: l.cuentaGlobalId,
-              debito: moneyToNumber(l.debito.toString(), currency),
-              credito: moneyToNumber(l.credito.toString(), currency),
-            })),
-          },
-        });
+        return reply
+          .status(result.replayed ? 200 : 201)
+          .send(serializeApunteResult(result.apunte, result.asiento, result.lineas, currency));
       } catch (err) {
         if (err instanceof ValidationError) {
           return reply.status(err.statusCode).send({ error: err.message });
+        }
+        if (err instanceof NegativeBalanceError) {
+          return reply.status(400).send({ error: err.message, code: err.code });
+        }
+        // Concurrent duplicate on idempotencyKey: replay the winning apunte.
+        if (
+          idempotencyKey &&
+          err instanceof Prisma.PrismaClientKnownRequestError &&
+          err.code === 'P2002'
+        ) {
+          const existingAsiento = await prisma.asiento.findUnique({
+            where: { idempotencyKey },
+            include: { lineas: true, apuntes: true },
+          });
+          const existingApunte = existingAsiento?.apuntes[0];
+          if (existingAsiento && existingApunte) {
+            return reply
+              .status(200)
+              .send(
+                serializeApunteResult(
+                  existingApunte,
+                  existingAsiento,
+                  existingAsiento.lineas,
+                  currency,
+                ),
+              );
+          }
         }
         request.log.error(err, 'Failed to create apunte');
         return reply.status(500).send({ error: 'Failed to create apunte' });
@@ -752,6 +944,9 @@ export function registerApunteRoutes(
       } catch (err) {
         if (err instanceof ValidationError) {
           return reply.status(err.statusCode).send({ error: err.message });
+        }
+        if (err instanceof NegativeBalanceError) {
+          return reply.status(400).send({ error: err.message, code: err.code });
         }
         const message = err instanceof Error ? err.message : 'Failed to update apunte';
         if (message.includes('closed') || message.includes('voided')) {

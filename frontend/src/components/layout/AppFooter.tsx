@@ -21,7 +21,7 @@ export default function AppFooter({
         <div className="flex flex-col items-center md:items-start gap-xs">
           {showLogo && (
             <div className="flex items-center gap-base">
-              <span className="material-symbols-filled text-primary text-2xl">poodle</span>
+              <span className="material-symbols-filled text-primary text-2xl"></span>
               <span className="text-headline-md font-extrabold text-primary tracking-tight">TADOR</span>
             </div>
           )}

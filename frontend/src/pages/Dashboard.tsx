@@ -9,11 +9,18 @@ import { reports, type PyGReport, type PositionReport } from '../lib/api.ts';
 import { useAuth } from '../lib/auth.tsx';
 import { useBookGate } from '../lib/use-book-gate.ts';
 import { formatMoney, monthFromSeries, MONTH_LABELS } from '../lib/finance.ts';
+import { namespacePaths, type AppNamespace } from '../lib/namespace-paths.ts';
 
 type HubPeriod = 'month' | 'year';
 
+export interface DashboardProps {
+  namespace?: AppNamespace;
+}
+
 /** Hub informativo — mes default; no es el P&G completo (FR-007). */
-export default function Dashboard() {
+export default function Dashboard({ namespace = 'hogar' }: DashboardProps) {
+  const paths = namespacePaths(namespace);
+  const title = namespace === 'pro' ? 'Resumen PRO' : 'Resumen';
   const { user, loading: authLoading, logout } = useAuth();
   const gate = useBookGate();
   const now = new Date();
@@ -66,11 +73,16 @@ export default function Dashboard() {
   const fmt = (n: number) => formatMoney(n, currency);
 
   return (
-    <AppShell activePath="/dashboard" userLabel={user.email} onLogout={() => void logout()}>
+    <AppShell
+      mode={namespace}
+      activePath={paths.dashboard}
+      userLabel={user.email}
+      onLogout={() => void logout()}
+    >
       <div className="max-w-2xl mx-auto space-y-lg">
         <header className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-md">
           <div>
-            <h1 className="text-headline-lg text-on-surface font-bold mb-xs">Resumen</h1>
+            <h1 className="text-headline-lg text-on-surface font-bold mb-xs">{title}</h1>
             <p className="text-body-md text-on-surface-variant">
               Cómo vas ahora — el detalle está en Estado.
             </p>
@@ -119,7 +131,7 @@ export default function Dashboard() {
                 {monthPoint.income === 0 && monthPoint.expenses === 0 && (
                   <p className="text-body-md text-on-surface-variant">
                     Todavía no hay movimientos este mes.{' '}
-                    <Link to="/entries" className="text-primary underline font-semibold">
+                    <Link to={paths.entries} className="text-primary underline font-semibold">
                       Registrar un apunte
                     </Link>
                   </p>
@@ -159,7 +171,7 @@ export default function Dashboard() {
           </section>
         )}
 
-        <Button to="/finances" fullWidth size="lg" className="rounded-xl" variant="outline">
+        <Button to={paths.finances} fullWidth size="lg" className="rounded-xl" variant="outline">
           Ver Estado financiero y Balance
         </Button>
       </div>

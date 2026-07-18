@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, Navigate, useSearchParams } from 'react-router-dom';
 import AppShell from '../components/layout/AppShell.tsx';
 import FrequentTemplatesGrid from '../components/entries/FrequentTemplatesGrid.tsx';
@@ -11,7 +11,7 @@ import ApunteMiniForm, {
 import ApunteSuccessPanel from '../components/entries/ApunteSuccessPanel.tsx';
 import RecentEntriesList from '../components/entries/RecentEntriesList.tsx';
 import ValidationMessage from '../components/ui/ValidationMessage.tsx';
-import { apuntes, plantillas, type PlantillaView, type PlantillaDetail, type ApunteSummary } from '../lib/api.ts';
+import { apuntes, newIdempotencyKey, plantillas, type PlantillaView, type PlantillaDetail, type ApunteSummary } from '../lib/api.ts';
 import { useAuth } from '../lib/auth.tsx';
 import { useBookGate } from '../lib/use-book-gate.ts';
 import {
@@ -56,6 +56,9 @@ export default function Entries() {
   const [editInitial, setEditInitial] = useState<ApunteMiniFormInitialValues | null>(null);
   const [successMode, setSuccessMode] = useState<'create' | 'edit'>('create');
   const [loadingEdit, setLoadingEdit] = useState(false);
+
+  // One idempotency key per in-progress create; retries reuse it, success clears it.
+  const idempotencyKeyRef = useRef<string | null>(null);
 
   const refreshRecent = useCallback(async () => {
     const res = await apuntes.list({ limit: 10 });
@@ -247,13 +250,18 @@ export default function Entries() {
         setEditingApunteId(null);
         setEditInitial(null);
       } else {
+        if (!idempotencyKeyRef.current) {
+          idempotencyKeyRef.current = newIdempotencyKey();
+        }
         await apuntes.create({
           templateCode: values.templateCode,
           date: values.date,
           concept: values.concept,
           amount: values.amount,
           lines: values.lines,
+          idempotencyKey: idempotencyKeyRef.current,
         });
+        idempotencyKeyRef.current = null;
         bumpPlantillaUsage(values.templateCode);
         setSuccessMode('create');
       }
@@ -281,7 +289,7 @@ export default function Entries() {
   if (gate.redirectTo) return <Navigate to={gate.redirectTo} replace />;
 
   return (
-    <AppShell activePath="/entries" userLabel={user.email} onLogout={() => void logout()}>
+    <AppShell activePath="/hogar/entries" userLabel={user.email} onLogout={() => void logout()}>
       <div className="max-w-lg mx-auto">
         <header className="mb-lg">
           <h1 className="text-headline-lg text-on-surface font-bold mb-xs">
@@ -412,7 +420,7 @@ export default function Entries() {
         <section className="mt-xl">
           <div className="flex items-center justify-between mb-sm">
             <h2 className="text-headline-md font-semibold text-on-surface">Recientes</h2>
-            <Link to="/entries" className="text-label-sm text-secondary no-underline">
+            <Link to="/hogar/entries" className="text-label-sm text-secondary no-underline">
               Actualizar
             </Link>
           </div>

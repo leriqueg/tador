@@ -11,6 +11,8 @@ import { autoAsignarCodigo } from '../../application/account-codigo.js';
 import {
   ENTITY_PROVISION_MAP,
   isProvisionableTipo,
+  validateCapabilities,
+  InvalidCapabilityError,
   type TipoEntidad,
 } from '../../domain/entidad.js';
 import type { CuentaUsuarioMetadata } from '../../domain/cuenta-usuario.js';
@@ -19,6 +21,7 @@ interface CreateEntityBody {
   nombre: string;
   tipo: TipoEntidad;
   notas?: string;
+  capabilities?: string[];
   /** Optional card metadata when tipo=card_issuer */
   metadata?: CuentaUsuarioMetadata;
 }
@@ -27,6 +30,7 @@ interface UpdateEntityBody {
   nombre?: string;
   tipo?: TipoEntidad;
   notas?: string;
+  capabilities?: string[];
 }
 
 const VALID_TIPOS: TipoEntidad[] = [
@@ -92,6 +96,7 @@ export function registerEntityRoutes(
             nombre: row.nombre,
             tipo: row.tipo,
             notas: row.notas,
+            capabilities: row.capabilities,
             createdAt: row.createdAt,
             provisionedAccountId: account?.id ?? null,
             provisionedAccount: account
@@ -118,7 +123,7 @@ export function registerEntityRoutes(
     { preHandler: requireAuth },
     async (request, reply) => {
       const userId = request.userId!;
-      const { nombre, tipo, notas, metadata: bodyMeta } =
+      const { nombre, tipo, notas, capabilities: bodyCapabilities, metadata: bodyMeta } =
         request.body as CreateEntityBody;
 
       if (!nombre?.trim() || !tipo) {
@@ -130,6 +135,16 @@ export function registerEntityRoutes(
         return reply.status(400).send({ error: `Invalid tipo '${tipo}'` });
       }
 
+      let capabilities: string[];
+      try {
+        capabilities = validateCapabilities(bodyCapabilities);
+      } catch (err) {
+        if (err instanceof InvalidCapabilityError) {
+          return reply.status(400).send({ error: err.message });
+        }
+        throw err;
+      }
+
       try {
         if (!isProvisionableTipo(tipo)) {
           const entity = await prisma.entidad.create({
@@ -138,6 +153,7 @@ export function registerEntityRoutes(
               nombre: nombre.trim(),
               tipo,
               notas: notas ?? null,
+              capabilities,
             },
           });
           return reply.status(201).send({ entity, provisionedAccount: null });
@@ -165,6 +181,7 @@ export function registerEntityRoutes(
               nombre: nombre.trim(),
               tipo,
               notas: notas ?? null,
+              capabilities,
             },
           });
 
@@ -211,7 +228,21 @@ export function registerEntityRoutes(
     async (request, reply) => {
       const userId = request.userId!;
       const { id } = request.params as { id: string };
-      const { nombre, tipo, notas } = request.body as UpdateEntityBody;
+      const { nombre, tipo, notas, capabilities: bodyCapabilities } =
+        request.body as UpdateEntityBody;
+
+      let capabilities: string[] | undefined;
+      try {
+        capabilities =
+          bodyCapabilities !== undefined
+            ? validateCapabilities(bodyCapabilities)
+            : undefined;
+      } catch (err) {
+        if (err instanceof InvalidCapabilityError) {
+          return reply.status(400).send({ error: err.message });
+        }
+        throw err;
+      }
 
       try {
         const existing = await prisma.entidad.findFirst({
@@ -228,6 +259,7 @@ export function registerEntityRoutes(
               ...(nombre !== undefined && { nombre: nombre.trim() }),
               ...(tipo !== undefined && { tipo }),
               ...(notas !== undefined && { notas }),
+              ...(capabilities !== undefined && { capabilities }),
             },
           });
 

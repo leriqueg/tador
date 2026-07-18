@@ -136,6 +136,8 @@ model CuentaUsuario {
   /// Optional Hogar metadata (e.g. card network, lastFour, cutoffDay)
   metadata           Json?
   activa             Boolean    @default(true)
+  /// Enforce a non-negative natural balance for protected account families.
+  enforceNonNegativeBalance Boolean @default(true)
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt
 
@@ -185,6 +187,8 @@ model ActivacionCuentaGlobal {
   globalId       String
   activa         Boolean  @default(true)
   nombreOverride String?
+  /// Per-user override for direct postings to this global account.
+  enforceNonNegativeBalance Boolean @default(true)
   createdAt      DateTime @default(now())
 
   user   User         @relation(fields: [userId], references: [id], onDelete: Cascade)

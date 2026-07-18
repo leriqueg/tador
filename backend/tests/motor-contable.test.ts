@@ -386,6 +386,40 @@ describe('Idempotency', () => {
 
     await app.close();
   });
+
+  it('should collapse concurrent requests with the same Idempotency-Key', async () => {
+    const app = await createTestApp();
+    const cookies = await registerAndVerify(app, 'idem-race@test.com');
+    const accounts = await setupTestAccounts(app, cookies);
+    const request = () =>
+      app.inject({
+        method: 'POST',
+        url: '/api/entries',
+        headers: {
+          cookie: cookies.join('; '),
+          'idempotency-key': 'idem-key-race-003',
+        },
+        payload: {
+          fecha: '2026-06-01T00:00:00.000Z',
+          concepto: 'Concurrent idempotent entry',
+          lineas: [
+            { cuentaId: accounts.expenseAccountId, debito: 100, credito: 0 },
+            { cuentaId: accounts.incomeAccountId, debito: 0, credito: 100 },
+          ],
+        },
+      });
+
+    const [first, second] = await Promise.all([request(), request()]);
+    expect(first.statusCode).toBe(201);
+    expect(second.statusCode).toBe(201);
+    expect(first.json().entry.id).toBe(second.json().entry.id);
+
+    const count = await prisma.asiento.count({
+      where: { idempotencyKey: 'idem-key-race-003' },
+    });
+    expect(count).toBe(1);
+    await app.close();
+  });
 });
 
 describe('US3 — Void entry', () => {
@@ -527,18 +561,15 @@ describe('US3 — Void entry', () => {
     });
     expect(voidRes.statusCode).toBe(200);
 
-    // After void: the original entry is excluded (anulado=true).
-    // Only the reversal lines contribute to the balance.
-    // Reversal for expense: 0 debit - 100 credit = -100
-    // Reversal for income: 100 debit - 0 credit = 100
-    // Combined P&L effect: expense -100 + income 100 = 0
+    // After void: original and audit reversal are both excluded from effective
+    // balances, so each account returns to its prior balance.
     const balExpenseAfter = await app.inject({
       method: 'GET',
       url: `/api/balances/${accounts.expenseAccountId}`,
       headers: { cookie: cookies.join('; ') },
     });
     expect(balExpenseAfter.statusCode).toBe(200);
-    expect(Number(balExpenseAfter.json().saldo)).toBe(-100);
+    expect(Number(balExpenseAfter.json().saldo)).toBe(0);
 
     const balIncomeAfter = await app.inject({
       method: 'GET',
@@ -546,7 +577,7 @@ describe('US3 — Void entry', () => {
       headers: { cookie: cookies.join('; ') },
     });
     expect(balIncomeAfter.statusCode).toBe(200);
-    expect(Number(balIncomeAfter.json().saldo)).toBe(100);
+    expect(Number(balIncomeAfter.json().saldo)).toBe(0);
 
     await app.close();
   });

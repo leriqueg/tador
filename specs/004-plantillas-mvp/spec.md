@@ -2,6 +2,7 @@
 
 **Branch**: `sprint/004-plantillas`  
 **Created**: 2026-07-05  
+**Updated**: 2026-07-18
 **Status**: Draft → Final
 
 ## 1. Purpose
@@ -458,6 +459,8 @@ El endpoint `POST /api/apuntes` también acepta apuntes sin `templateCode`. En e
 | V8 | El asiento generado está balanceado (sum débitos = sum créditos) | 400 |
 | V9 | Tenant isolation: usuario A no usa cuentas de usuario B | 403 |
 | V10 | Si hay al menos una línea debe y una haber con `accountId`, no pueden referir la misma cuenta (origen ≠ destino) | 400 |
+| V11 | Si la plantilla reserva una capacidad de Entidad, la Entidad explícita debe cumplirla | 400 |
+| V12 | El saldo natural proyectado de una cuenta protegida no puede ser negativo mientras su política esté activa | 400 |
 
 ### 6.2 Sin plantilla (PRO wizard)
 
@@ -468,6 +471,15 @@ El endpoint `POST /api/apuntes` también acepta apuntes sin `templateCode`. En e
 | V7 | Cuentas activas |
 | V8 | Asiento balanceado (sum débitos = sum créditos) |
 | V9 | Tenant isolation |
+| V12 | Saldo natural proyectado no negativo en cuentas protegidas |
+
+### 6.3 Idempotencia y atomicidad del Apunte
+
+- `POST /api/apuntes` acepta `idempotencyKey` en body o `Idempotency-Key` en header.
+- La clave se persiste en el `Asiento` subyacente; una repetición retorna el mismo Apunte.
+- Una carrera por la misma clave recupera el ganador del índice único.
+- Asiento, líneas y Apunte se crean en una única transacción.
+- La validación V12 y sus locks se ejecutan dentro de esa transacción.
 
 ## 7. Backend: modelo de datos
 
@@ -539,11 +551,13 @@ Cada plantilla referencia grupos del plan de cuentas. Tabla de referencia:
 - **SC-002**: GET /api/plantillas devuelve las 10 plantillas en catálogo liviano; GET /api/plantillas/:code resuelve `availableAccounts`.
 - **SC-003**: POST /api/apuntes con `templateCode` válido crea asiento balanceado.
 - **SC-004**: POST /api/apuntes sin `templateCode` (PRO wizard) crea asiento balanceado.
-- **SC-005**: Validaciones V1-V10 rechazan apuntes inválidos con mensajes claros.
+- **SC-005**: Validaciones V1-V12 rechazan apuntes inválidos con mensajes claros.
 - **SC-006**: Apunte queda registrado y vinculado al Asiento generado.
 - **SC-007**: POST /api/apuntes con `amountMode: "single"` replica el monto en todas las líneas.
 - **SC-008**: GET /api/apuntes devuelve solo apuntes del usuario autenticado, ordenados por fecha desc, sin líneas contables.
 - **SC-009**: GET /api/plantillas (listado) no realiza N+1 de ancestros; enrichment solo en `:code`.
+- **SC-010**: Repetir o enviar concurrentemente el mismo `idempotencyKey` crea un solo Asiento/Apunte.
+- **SC-011**: Una plantilla no puede sobregirar una cuenta protegida salvo bypass explícito de esa cuenta.
 
 ## 11. Fuera de scope (sprint actual)
 

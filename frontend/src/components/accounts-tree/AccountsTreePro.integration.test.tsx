@@ -26,6 +26,13 @@ const CHART: ChartGlobalNode[] = [
     nombre: 'Ingresos',
     esPostable: false,
   },
+  {
+    id: 'g-wallet',
+    parentId: null,
+    codigo: '11110001',
+    nombre: 'Efectivo',
+    esPostable: true,
+  },
 ];
 
 const ACCOUNTS: AccountSummary[] = [
@@ -46,6 +53,7 @@ const ACCOUNTS: AccountSummary[] = [
     entidadId: 'ent-1',
     isEntityProvisioned: true,
     activa: true,
+    enforceNonNegativeBalance: true,
   },
 ];
 
@@ -67,6 +75,41 @@ describe('AccountsTreePro — tree display (US4, T022)', () => {
     expect(screen.getByText('Servicios')).toBeInTheDocument();
     expect(screen.getByText(/\$120\.50|120,50/)).toBeInTheDocument();
     expect(screen.getByText('11120001')).toBeInTheDocument();
+  });
+
+  it('toggles balance protection for user and global accounts', async () => {
+    const user = userEvent.setup();
+    const onToggleAccountBalancePolicy = vi.fn().mockResolvedValue(undefined);
+    const onToggleGlobalBalancePolicy = vi.fn().mockResolvedValue(undefined);
+    render(
+      <AccountsTreePro
+        chart={CHART}
+        accounts={ACCOUNTS}
+        balances={{}}
+        activations={[]}
+        onCreateAccount={vi.fn()}
+        onToggleAccountBalancePolicy={onToggleAccountBalancePolicy}
+        onToggleGlobalBalancePolicy={onToggleGlobalBalancePolicy}
+      />,
+    );
+
+    const bankRow = screen.getByText('Banco Pichincha').closest('li');
+    expect(bankRow).not.toBeNull();
+    await user.click(
+      within(bankRow as HTMLElement).getByRole('checkbox', {
+        name: 'Impedir saldo negativo',
+      }),
+    );
+    expect(onToggleAccountBalancePolicy).toHaveBeenCalledWith('bank-1', false);
+
+    const walletRow = screen.getByText('Efectivo').closest('li');
+    expect(walletRow).not.toBeNull();
+    await user.click(
+      within(walletRow as HTMLElement).getByRole('checkbox', {
+        name: 'Impedir negativo',
+      }),
+    );
+    expect(onToggleGlobalBalancePolicy).toHaveBeenCalledWith('g-wallet', false);
   });
 });
 

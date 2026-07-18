@@ -1,5 +1,7 @@
 # Contract: Sprint 07 - Frontend PRO ligero
 
+**Updated**: 2026-07-18
+
 Observable behavior (not implementation).
 
 ## Inputs
@@ -37,17 +39,21 @@ Observable behavior (not implementation).
 2. Burst keeps type + account.
 3. JIT entity: name + minimal capabilities.
 4. Salary without employer capability → block + CTA.
+5. Un intento reutiliza su Idempotency-Key tras error y la descarta solo al confirmar éxito.
 
 ## US3 — Manual entry
 
 1. Balanced → 201/200 persist.
 2. Unbalanced → 4xx, no persist.
+3. Envío/retry usa Idempotency-Key estable por intento.
 
 ## US4 — Accounts tree
 
 1. Codes visible.
 2. Create under allowed parent.
 3. bank/card manual → 422.
+4. Cuentas protegidas muestran “Impedir saldo negativo”; activo por defecto.
+5. Cambiar la política actualiza `CuentaUsuario` o la activación per-user de una `CuentaGlobal`.
 
 ## US5 — Finances
 

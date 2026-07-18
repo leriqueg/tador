@@ -28,11 +28,11 @@ export const CATEGORY_LABELS: Record<PlantillaCategory, string> = {
 /** Curated frequent tiles for new users (FR-005a). */
 export const CURATED_FREQUENT_CODES = [
   'pagar_supermercado',
-  'pagar_servicios',
   'registrar_sueldo',
   'transferencia',
   'deposito_bancario',
-  'pagar_taxi',
+  'retiro_bancario',
+  'pago_tarjeta',
 ] as const;
 
 const CATEGORY_BY_CODE: Record<string, PlantillaCategory> = {
@@ -41,11 +41,13 @@ const CATEGORY_BY_CODE: Record<string, PlantillaCategory> = {
   pagar_servicios: 'hogar',
   pagar_taxi: 'transporte',
   pagar_cita_medica: 'salud',
-  pago_tarjeta: 'otros',
+  pago_tarjeta: 'movimientos',
   registrar_sueldo: 'ingresos',
   transferencia: 'movimientos',
   deposito_bancario: 'movimientos',
   retiro_bancario: 'movimientos',
+  prestamo_otorgado: 'movimientos',
+  cobro_prestamo: 'movimientos',
   comision_bancaria: 'otros',
   interes_tarjeta: 'otros',
   multa_financiera: 'otros',
@@ -56,6 +58,9 @@ export function plantillaKind(code: string): PlantillaKind {
   if (code.startsWith('registrar_') || code === 'ganancia_inversion') return 'ingreso';
   if (
     code === 'transferencia' ||
+    code === 'pago_tarjeta' ||
+    code === 'prestamo_otorgado' ||
+    code === 'cobro_prestamo' ||
     code.startsWith('deposito_') ||
     code.startsWith('retiro_')
   ) {
@@ -77,6 +82,42 @@ export function categoriesForKind(kind: PlantillaKind): PlantillaCategory[] {
   if (kind === 'ingreso') return ['ingresos'];
   if (kind === 'transferencia') return ['movimientos'];
   return ['compras', 'comida', 'hogar', 'transporte', 'salud', 'otros'];
+}
+
+/** Efectivo / billeteras chart group (11110000 and children). */
+export function isWalletChartCodigo(codigo: string | null | undefined): boolean {
+  return typeof codigo === 'string' && codigo.startsWith('1111');
+}
+
+/**
+ * Preferred default account per plantilla line (Hogar shortcuts).
+ * Sticky last-used still wins when present on that line.
+ */
+export function preferredAccountIdForLine(
+  plantillaCode: string,
+  lineId: number,
+  available: Array<{ id: string; codigo: string | null; tipo: string }>,
+  used: Set<string>,
+): string | null {
+  const open = available.filter((a) => !used.has(a.id));
+  if (open.length === 0) return null;
+
+  const wantWallet =
+    (plantillaCode === 'deposito_bancario' && lineId === 2) ||
+    (plantillaCode === 'retiro_bancario' && lineId === 1);
+
+  if (wantWallet) {
+    const wallet =
+      open.find((a) => a.tipo === 'usuario' && isWalletChartCodigo(a.codigo)) ??
+      open.find((a) => isWalletChartCodigo(a.codigo));
+    if (wallet) return wallet.id;
+  }
+
+  return (
+    open.find((a) => a.tipo === 'usuario')?.id ??
+    open[0]?.id ??
+    null
+  );
 }
 
 const USAGE_KEY = 'tador.hogar.plantillaUsage';

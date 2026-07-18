@@ -1,5 +1,7 @@
 # Tasks: Sprint 07 - Frontend PRO ligero
 
+**Updated**: 2026-07-18
+
 **Input**: Design documents from `/specs/007-frontend-pro-ligero/`  
 **Prerequisites**: Sprint 06 Hogar closed.
 
@@ -79,3 +81,11 @@
 5. E2E quickstart.
 
 **Out of sprint**: 009 analysis, 008 IA, conciliación.
+
+## Follow-up (2026-07-18 — hardening PRO)
+
+- [x] T030 Mantener Idempotency-Key estable por intento en EntryBuilder
+- [x] T031 Mantener Idempotency-Key estable por intento en asiento manual
+- [x] T032 Exponer toggle “Impedir saldo negativo” en árbol de cuentas PRO
+- [x] T033 Configurar políticas tenant-safe para cuentas de usuario y globales
+- [x] T034 Probar interacción de toggles de política

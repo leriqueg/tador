@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import AppShell from '../../components/layout/AppShell.tsx';
 import EntryBuilder from '../../components/entry-builder/EntryBuilder.tsx';
@@ -7,6 +7,7 @@ import {
   accounts,
   apuntes,
   entities,
+  newIdempotencyKey,
   type AccountSummary,
   type EntitySummary,
 } from '../../lib/api.ts';
@@ -25,6 +26,7 @@ export default function ProEntries() {
   const [entityList, setEntityList] = useState<EntitySummary[]>([]);
   const [loadingData, setLoadingData] = useState(true);
   const [loadError, setLoadError] = useState('');
+  const idempotencyKeyRef = useRef<string | null>(null);
   const [hasDraft, setHasDraft] = useState(false);
 
   useAbandonGuard(hasDraft);
@@ -50,6 +52,9 @@ export default function ProEntries() {
   }, [loadData]);
 
   async function handleSubmit(payload: ApunteSubmitPayload) {
+    if (!idempotencyKeyRef.current) {
+      idempotencyKeyRef.current = newIdempotencyKey();
+    }
     await apuntes.create({
       templateCode: payload.templateCode,
       date: payload.date,
@@ -57,7 +62,9 @@ export default function ProEntries() {
       amount: payload.amount,
       lines: payload.lines,
       entityId: payload.entityId ?? null,
+      idempotencyKey: idempotencyKeyRef.current,
     });
+    idempotencyKeyRef.current = null;
   }
 
   async function handleCreateEntity(values: EntityJitFormValues): Promise<EntitySummary> {

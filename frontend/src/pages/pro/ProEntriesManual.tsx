@@ -1,9 +1,14 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import AppShell from '../../components/layout/AppShell.tsx';
 import ManualEntryForm from '../../components/manual-entry/ManualEntryForm.tsx';
 import ValidationMessage from '../../components/ui/ValidationMessage.tsx';
-import { accounts, entries, type AccountSummary } from '../../lib/api.ts';
+import {
+  accounts,
+  entries,
+  newIdempotencyKey,
+  type AccountSummary,
+} from '../../lib/api.ts';
 import { useAuth } from '../../lib/auth.tsx';
 import { useBookGate } from '../../lib/use-book-gate.ts';
 import type { CreateEntryPayload } from '../../components/manual-entry/manual-entry-state.ts';
@@ -19,6 +24,7 @@ export default function ProEntriesManual() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const [success, setSuccess] = useState('');
+  const idempotencyKeyRef = useRef<string | null>(null);
 
   const loadData = useCallback(async () => {
     setLoadingData(true);
@@ -42,7 +48,14 @@ export default function ProEntriesManual() {
     setSubmitError('');
     setSuccess('');
     try {
-      await entries.create(payload);
+      if (!idempotencyKeyRef.current) {
+        idempotencyKeyRef.current = newIdempotencyKey();
+      }
+      await entries.create({
+        ...payload,
+        idempotencyKey: idempotencyKeyRef.current,
+      });
+      idempotencyKeyRef.current = null;
       setSuccess('Asiento guardado correctamente.');
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : 'No se pudo guardar el asiento');

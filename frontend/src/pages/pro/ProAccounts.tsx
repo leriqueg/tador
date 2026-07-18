@@ -3,7 +3,14 @@ import { Link, Navigate } from 'react-router-dom';
 import AppShell from '../../components/layout/AppShell.tsx';
 import AccountsTreePro from '../../components/accounts-tree/AccountsTreePro.tsx';
 import ValidationMessage from '../../components/ui/ValidationMessage.tsx';
-import { accounts, balances, chart, type AccountSummary, type CreateAccountInput } from '../../lib/api.ts';
+import {
+  accounts,
+  balances,
+  chart,
+  type AccountSummary,
+  type ChartActivation,
+  type CreateAccountInput,
+} from '../../lib/api.ts';
 import { useAuth } from '../../lib/auth.tsx';
 import { useBookGate } from '../../lib/use-book-gate.ts';
 
@@ -14,6 +21,7 @@ export default function ProAccounts() {
 
   const [accountList, setAccountList] = useState<AccountSummary[]>([]);
   const [chartNodes, setChartNodes] = useState<Awaited<ReturnType<typeof chart.list>>['chart']>([]);
+  const [activations, setActivations] = useState<ChartActivation[]>([]);
   const [balanceMap, setBalanceMap] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -25,6 +33,7 @@ export default function ProAccounts() {
       const [accountsRes, chartRes] = await Promise.all([accounts.list(), chart.list()]);
       setAccountList(accountsRes.accounts);
       setChartNodes(chartRes.chart);
+      setActivations(chartRes.activations);
 
       const saldoEntries = await Promise.all(
         accountsRes.accounts.map(async (acc) => {
@@ -55,6 +64,25 @@ export default function ProAccounts() {
   async function handleCreateAccount(input: CreateAccountInput) {
     await accounts.create(input);
     await load();
+  }
+
+  async function handleToggleAccountBalancePolicy(id: string, enforce: boolean) {
+    await accounts.updateBalancePolicy(id, enforce);
+    setAccountList((current) =>
+      current.map((account) =>
+        account.id === id
+          ? { ...account, enforceNonNegativeBalance: enforce }
+          : account,
+      ),
+    );
+  }
+
+  async function handleToggleGlobalBalancePolicy(id: string, enforce: boolean) {
+    const { activation } = await chart.updateBalancePolicy(id, enforce);
+    setActivations((current) => [
+      ...current.filter((item) => item.globalId !== id),
+      activation,
+    ]);
   }
 
   if (authLoading || gate.loading) {
@@ -93,7 +121,10 @@ export default function ProAccounts() {
             chart={chartNodes}
             accounts={accountList}
             balances={balanceMap}
+            activations={activations}
             onCreateAccount={handleCreateAccount}
+            onToggleAccountBalancePolicy={handleToggleAccountBalancePolicy}
+            onToggleGlobalBalancePolicy={handleToggleGlobalBalancePolicy}
           />
         )}
       </section>

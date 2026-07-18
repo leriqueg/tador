@@ -204,8 +204,15 @@ describe('GET /api/reports/pyg filters (T008)', () => {
       payload: { nombre: 'Banco Filter', tipo: 'bank' },
     });
     const bank = bankRes.json().provisionedAccount;
+    const policy = await app.inject({
+      method: 'PATCH',
+      url: `/api/accounts/${bank.id}/balance-policy`,
+      headers: { cookie: cookies.join('; ') },
+      payload: { enforceNonNegativeBalance: false },
+    });
+    expect(policy.statusCode).toBe(200);
 
-    await app.inject({
+    const commission = await app.inject({
       method: 'POST',
       url: '/api/apuntes',
       headers: { cookie: cookies.join('; ') },
@@ -220,6 +227,7 @@ describe('GET /api/reports/pyg filters (T008)', () => {
         ],
       },
     });
+    expect(commission.statusCode).toBe(201);
 
     const full = await app.inject({
       method: 'GET',

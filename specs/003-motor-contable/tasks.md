@@ -1,5 +1,7 @@
 # Tareas: Sprint 03 — Motor contable
 
+**Updated**: 2026-07-18
+
 ## Revisión de Carga de Trabajo
 
 | Campo | Valor |
@@ -83,3 +85,14 @@ Chain strategy: pending
 - [ ] 5.16 Escribir test Balance del ejercicio (US5, FR-023/024/025)
 - [ ] 5.17 Escribir test PYG/Balance sin asientos retorna todo ceros (edge case)
 - [ ] 5.18 Escribir test aislamiento — usuario B no ve asientos/saldos de usuario A (tenant isolation)
+
+## Fase 6: Hardening transaccional (2026-07-18)
+
+- [x] 6.1 Hacer concurrente la idempotencia de `createEntry`: recuperar el ganador tras `P2002`
+- [x] 6.2 Agregar política `enforceNonNegativeBalance` a `CuentaUsuario` y `ActivacionCuentaGlobal`
+- [x] 6.3 Implementar V12 con saldo natural, decimal exacto y locks advisory transaccionales por cuenta
+- [x] 6.4 Aplicar V12 a creación, edición y anulación/reversa del motor
+- [x] 6.5 Serializar cambios de política con la misma clave de lock usada por escritores
+- [x] 6.6 Exponer endpoints tenant-safe para configurar política en cuentas de usuario y globales
+- [x] 6.7 Probar sobregiro, bypass explícito, cuenta global, CxC y dos retiros concurrentes
+- [x] 6.8 Documentar ADR de idempotencia/concurrencia y ADR de saldos derivados/V12

@@ -78,6 +78,21 @@ describe('resolveApunteEntityId', () => {
     expect(result).toEqual({ ok: true, entityId: null });
   });
 
+  it('does not auto-assign for prestamo_otorgado / cobro_prestamo / pago_tarjeta', () => {
+    for (const templateCode of ['prestamo_otorgado', 'cobro_prestamo', 'pago_tarjeta'] as const) {
+      const result = resolveApunteEntityId(
+        input({
+          templateCode,
+          lineAccounts: [
+            { accountId: 'bank', tipoCuenta: 'bank', entidadId: 'ent-banco' },
+            { accountId: 'cxc', tipoCuenta: 'wallet', entidadId: 'ent-persona' },
+          ],
+        }),
+      );
+      expect(result).toEqual({ ok: true, entityId: null });
+    }
+  });
+
   it('returns 400 when two distinct bank/card entidadIds without explicit entityId', () => {
     const result = resolveApunteEntityId(
       input({
@@ -92,5 +107,33 @@ describe('resolveApunteEntityId', () => {
       statusCode: 400,
       error: 'Ambiguous entityId: multiple bank/card entities on lines',
     });
+  });
+
+  it('does not auto-assign from bank when template reserves entityId for a capability (sueldo)', () => {
+    const result = resolveApunteEntityId(
+      input({
+        templateCode: 'registrar_sueldo',
+        skipBankAutoFill: true,
+        lineAccounts: [
+          { accountId: 'bank', tipoCuenta: 'bank', entidadId: 'ent-banco' },
+          { accountId: 'income', tipoCuenta: null, entidadId: null },
+        ],
+      }),
+    );
+    expect(result).toEqual({ ok: true, entityId: null });
+  });
+
+  it('still honors explicit entityId when skipBankAutoFill is true', () => {
+    const result = resolveApunteEntityId(
+      input({
+        templateCode: 'registrar_sueldo',
+        skipBankAutoFill: true,
+        explicitEntityId: 'ent-empleador',
+        lineAccounts: [
+          { accountId: 'bank', tipoCuenta: 'bank', entidadId: 'ent-banco' },
+        ],
+      }),
+    );
+    expect(result).toEqual({ ok: true, entityId: 'ent-empleador' });
   });
 });

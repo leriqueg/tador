@@ -5,7 +5,7 @@ import Icon from '../ui/Icon.tsx';
 import TextInput from '../ui/TextInput.tsx';
 import ValidationMessage from '../ui/ValidationMessage.tsx';
 import type { PlantillaDetail } from '../../lib/api.ts';
-import { readLastAccount, writeLastAccount } from '../../lib/plantilla-meta.ts';
+import { readLastAccount, writeLastAccount, preferredAccountIdForLine } from '../../lib/plantilla-meta.ts';
 
 export interface ApunteMiniFormValues {
   templateCode: string;
@@ -72,13 +72,10 @@ export default function ApunteMiniForm({
         used.add(sticky);
         continue;
       }
-      const pick =
-        available.find((a) => a.tipo === 'usuario' && !used.has(a.id)) ??
-        available.find((a) => !used.has(a.id)) ??
-        available[0];
+      const pick = preferredAccountIdForLine(plantilla.code, line.id, available, used);
       if (pick) {
-        map[line.id] = pick.id;
-        used.add(pick.id);
+        map[line.id] = pick;
+        used.add(pick);
       }
     }
     return map;

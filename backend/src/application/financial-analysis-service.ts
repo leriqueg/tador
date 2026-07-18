@@ -111,6 +111,7 @@ export function createFinancialAnalysisService(): FinancialAnalysisService {
         LEFT JOIN cuentas_globales cg_via_cu ON cg_via_cu.id = cu."globalId"
         WHERE a."bookId" = ${bookId}
           AND a.anulado = false
+          AND a."asientoOriginalId" IS NULL
           AND ap."entityId" = ${entityId}
           AND EXTRACT(YEAR FROM ap.date) = ${year}
           AND COALESCE(cg_dir.codigo, cg_via_cu.codigo) IN (

@@ -3,7 +3,12 @@ import Button from '../ui/Button.tsx';
 import TextInput from '../ui/TextInput.tsx';
 import ValidationMessage from '../ui/ValidationMessage.tsx';
 import { formatMoney } from '../../lib/finance.ts';
-import type { AccountSummary, ChartGlobalNode, CreateAccountInput } from '../../lib/api.ts';
+import type {
+  AccountSummary,
+  ChartActivation,
+  ChartGlobalNode,
+  CreateAccountInput,
+} from '../../lib/api.ts';
 import {
   buildAccountsTree,
   friendlyAccountCreateError,
@@ -17,6 +22,9 @@ export interface AccountsTreeProProps {
   accounts: AccountSummary[];
   balances: Record<string, number>;
   onCreateAccount: (input: CreateAccountInput) => Promise<void>;
+  activations?: ChartActivation[];
+  onToggleAccountBalancePolicy?: (id: string, enforce: boolean) => Promise<void>;
+  onToggleGlobalBalancePolicy?: (id: string, enforce: boolean) => Promise<void>;
   currency?: string;
 }
 
@@ -29,14 +37,28 @@ const TIPO_LABEL: Record<string, string> = {
   card: 'Tarjeta',
 };
 
+function isProtectedCode(code: string | null): boolean {
+  return (
+    code?.startsWith('1111') === true ||
+    code?.startsWith('1112') === true ||
+    code?.startsWith('1132') === true ||
+    code?.startsWith('2112') === true ||
+    code?.startsWith('2120') === true
+  );
+}
+
 function GroupSection({
   group,
   depth,
   currency,
+  savingPolicyId,
+  onToggleAccountBalancePolicy,
 }: {
   group: AccountsTreeGroup;
   depth: number;
   currency: string;
+  savingPolicyId: string | null;
+  onToggleAccountBalancePolicy?: (id: string, enforce: boolean) => Promise<void>;
 }) {
   const hasContent = group.accounts.length > 0 || group.children.length > 0;
   if (!hasContent && group.id !== '__orphan__') return null;
@@ -72,13 +94,36 @@ function GroupSection({
                   {formatMoney(acc.saldo, currency)}
                 </span>
               )}
+              {onToggleAccountBalancePolicy && isProtectedCode(acc.codigo) && (
+                <label className="flex items-center gap-xs text-label-sm text-on-surface-variant">
+                  <input
+                    type="checkbox"
+                    checked={acc.enforceNonNegativeBalance !== false}
+                    disabled={savingPolicyId === acc.id}
+                    onChange={(event) =>
+                      void onToggleAccountBalancePolicy(
+                        acc.id,
+                        event.target.checked,
+                      )
+                    }
+                  />
+                  Impedir saldo negativo
+                </label>
+              )}
             </li>
           ))}
         </ul>
       )}
 
       {group.children.map((child) => (
-        <GroupSection key={child.id} group={child} depth={depth + 1} currency={currency} />
+        <GroupSection
+          key={child.id}
+          group={child}
+          depth={depth + 1}
+          currency={currency}
+          savingPolicyId={savingPolicyId}
+          onToggleAccountBalancePolicy={onToggleAccountBalancePolicy}
+        />
       ))}
     </section>
   );
@@ -89,6 +134,9 @@ export default function AccountsTreePro({
   accounts,
   balances,
   onCreateAccount,
+  activations = [],
+  onToggleAccountBalancePolicy,
+  onToggleGlobalBalancePolicy,
   currency = 'USD',
 }: AccountsTreeProProps) {
   const tree = buildAccountsTree(chart, accounts, balances);
@@ -100,6 +148,32 @@ export default function AccountsTreePro({
   const [nombre, setNombre] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [savingPolicyId, setSavingPolicyId] = useState<string | null>(null);
+  const activationByGlobal = new Map(
+    activations.map((activation) => [activation.globalId, activation]),
+  );
+  const protectedGlobals = chart.filter(
+    (node) => node.esPostable && isProtectedCode(node.codigo),
+  );
+
+  async function togglePolicy(
+    id: string,
+    enforce: boolean,
+    handler?: (id: string, enforce: boolean) => Promise<void>,
+  ) {
+    if (!handler) return;
+    setError('');
+    setSavingPolicyId(id);
+    try {
+      await handler(id, enforce);
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : 'No se pudo actualizar la política de saldo',
+      );
+    } finally {
+      setSavingPolicyId(null);
+    }
+  }
 
   async function handleCreate() {
     const name = nombre.trim();
@@ -127,7 +201,16 @@ export default function AccountsTreePro({
 
       <div className="space-y-md">
         {tree.map((group) => (
-          <GroupSection key={group.id} group={group} depth={0} currency={currency} />
+          <GroupSection
+            key={group.id}
+            group={group}
+            depth={0}
+            currency={currency}
+            savingPolicyId={savingPolicyId}
+            onToggleAccountBalancePolicy={(id, enforce) =>
+              togglePolicy(id, enforce, onToggleAccountBalancePolicy)
+            }
+          />
         ))}
         {tree.every(
           (g) => g.accounts.length === 0 && g.children.every((c) => c.accounts.length === 0),
@@ -137,6 +220,53 @@ export default function AccountsTreePro({
           </p>
         )}
       </div>
+
+      {onToggleGlobalBalancePolicy && protectedGlobals.length > 0 && (
+        <section className="p-md rounded-xl border border-outline-variant/30 bg-surface-container-lowest space-y-sm">
+          <div>
+            <h2 className="text-label-md font-semibold text-on-surface">
+              Control de saldo en cuentas globales
+            </h2>
+            <p className="text-label-sm text-on-surface-variant">
+              La protección está activa por defecto. Desactivala solo para corregir
+              desfases contables conscientes.
+            </p>
+          </div>
+          <ul className="space-y-xs">
+            {protectedGlobals.map((node) => {
+              const activation = activationByGlobal.get(node.id);
+              const enforce =
+                activation?.enforceNonNegativeBalance ?? true;
+              return (
+                <li
+                  key={node.id}
+                  className="flex items-center justify-between gap-md py-xs"
+                >
+                  <span className="text-body-sm">
+                    <span className="font-mono text-label-sm mr-xs">{node.codigo}</span>
+                    {node.nombre}
+                  </span>
+                  <label className="flex items-center gap-xs text-label-sm text-on-surface-variant">
+                    <input
+                      type="checkbox"
+                      checked={enforce}
+                      disabled={savingPolicyId === node.id}
+                      onChange={(event) =>
+                        void togglePolicy(
+                          node.id,
+                          event.target.checked,
+                          onToggleGlobalBalancePolicy,
+                        )
+                      }
+                    />
+                    Impedir negativo
+                  </label>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
 
       <div className="p-md rounded-xl border border-outline-variant/30 bg-surface-container-lowest space-y-sm">
         <p className="text-label-md font-semibold text-on-surface">Nueva cuenta bajo madre</p>

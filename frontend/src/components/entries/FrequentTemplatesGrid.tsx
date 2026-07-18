@@ -22,6 +22,8 @@ const ICON_BY_CODE: Record<string, string> = {
   pagar_cine: 'movie',
   pago_tarjeta: 'credit_card',
   retiro_bancario: 'atm',
+  prestamo_otorgado: 'handshake',
+  cobro_prestamo: 'request_quote',
 };
 
 /** 4–6 frequent plantilla tiles (FR-005a). */

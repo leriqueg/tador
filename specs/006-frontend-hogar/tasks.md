@@ -1,5 +1,7 @@
 # Tasks: Sprint 06 - Frontend Hogar
 
+**Updated**: 2026-07-18
+
 **Input**: Design documents from `/specs/006-frontend-hogar/`
 
 **Prerequisites**: plan.md, spec.md, research.md, data-model.md, contracts/behavior.md, inventory-vistas-endpoints.md
@@ -212,3 +214,9 @@ T018c FrequentTemplatesGrid || T018d KindSegment+CategoryChips || T018e Template
 ## Suggested MVP slice
 
 T001–T016 + T032–T038 + T018–T020 (onboarding delta + frequent-plantilla apunte path + burst) before full category/search polish and entities/dashboard.
+
+## Follow-up (2026-07-18 — retries seguros)
+
+- [x] T039 Generar una Idempotency-Key por intento de QuickAdd
+- [x] T040 Reutilizar la clave tras error/retry y limpiarla únicamente al confirmar éxito
+- [x] T041 Mantener el formulario visible ante V12 y no avanzar al panel de éxito

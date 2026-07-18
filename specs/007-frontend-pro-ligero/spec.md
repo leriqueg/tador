@@ -4,11 +4,18 @@
 
 **Created**: 2026-06-22
 
+**Updated**: 2026-07-18
+
 **Status**: Clarified (2026-07-16 — scope ligero locked; avanzado → 009)
 
 **Input**: Sprint 07: más control para usuario PRO sin convertir TADOR en ERP.
 
 ## Clarifications
+
+### Session 2026-07-18
+
+- Q: ¿EntryBuilder y asiento manual son idempotentes? → A: Sí. Cada intento conserva su Idempotency-Key hasta éxito.
+- Q: ¿Dónde se configura el control de saldo negativo? → A: En Cuentas PRO, por cuenta de usuario y por uso directo de una cuenta global protegida; activo por defecto.
 
 ### Session 2026-07-13 — Captura de apuntes PRO (vs Hogar)
 

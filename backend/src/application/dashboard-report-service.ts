@@ -232,6 +232,7 @@ export function createDashboardReportService(): DashboardReportService {
           LEFT JOIN cuentas_globales cg_via_cu ON cg_via_cu.id = cu."globalId"
           WHERE a."bookId" = ${bookId}
             AND a.anulado = false
+            AND a."asientoOriginalId" IS NULL
             AND EXTRACT(YEAR FROM a.fecha) = ${year}
             AND (cu."tipoCuenta" IS DISTINCT FROM 'bridge')
             AND (
@@ -276,6 +277,7 @@ export function createDashboardReportService(): DashboardReportService {
         LEFT JOIN cuentas_globales cg_via_cu ON cg_via_cu.id = cu."globalId"
         WHERE a."bookId" = ${bookId}
           AND a.anulado = false
+          AND a."asientoOriginalId" IS NULL
           AND EXTRACT(YEAR FROM a.fecha) = ${year}
           AND (cu."tipoCuenta" IS DISTINCT FROM 'bridge')
           AND COALESCE(cg_dir.codigo, cg_via_cu.codigo) LIKE '4%'
@@ -307,6 +309,7 @@ export function createDashboardReportService(): DashboardReportService {
         LEFT JOIN cuentas_globales cg_via_cu ON cg_via_cu.id = cu."globalId"
         WHERE a."bookId" = ${bookId}
           AND a.anulado = false
+          AND a."asientoOriginalId" IS NULL
           AND EXTRACT(YEAR FROM a.fecha) = ${year}
           AND (cu."tipoCuenta" IS DISTINCT FROM 'bridge')
           AND COALESCE(cg_dir.codigo, cg_via_cu.codigo) LIKE '6%'
@@ -377,6 +380,7 @@ export function createDashboardReportService(): DashboardReportService {
           INNER JOIN asientos a ON a.id = l."asientoId"
           WHERE a."bookId" = ${bookId}
             AND a.anulado = false
+            AND a."asientoOriginalId" IS NULL
         )
         SELECT
           cu.id AS account_id,

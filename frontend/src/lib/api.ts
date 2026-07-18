@@ -163,6 +163,8 @@ export interface AccountSummary {
   isEntityProvisioned: boolean;
   metadata?: AccountMetadata | null;
   activa: boolean;
+  /** Missing on legacy fixtures is interpreted as the secure default: true. */
+  enforceNonNegativeBalance?: boolean;
 }
 
 export interface AccountMetadata {
@@ -199,6 +201,14 @@ export const accounts = {
       input,
     );
   },
+
+  updateBalancePolicy(id: string, enforceNonNegativeBalance: boolean) {
+    return request<{ account: AccountSummary }>(
+      'PATCH',
+      `/api/accounts/${id}/balance-policy`,
+      { enforceNonNegativeBalance },
+    );
+  },
 };
 
 export interface ChartGlobalNode {
@@ -209,9 +219,26 @@ export interface ChartGlobalNode {
   esPostable: boolean;
 }
 
+export interface ChartActivation {
+  id: string;
+  userId: string;
+  globalId: string;
+  activa: boolean;
+  nombreOverride: string | null;
+  enforceNonNegativeBalance: boolean;
+}
+
 export const chart = {
   list() {
-    return request<{ chart: ChartGlobalNode[]; activations: unknown[] }>('GET', '/api/chart');
+    return request<{ chart: ChartGlobalNode[]; activations: ChartActivation[] }>('GET', '/api/chart');
+  },
+
+  updateBalancePolicy(id: string, enforceNonNegativeBalance: boolean) {
+    return request<{ activation: ChartActivation }>(
+      'PATCH',
+      `/api/chart/${id}/balance-policy`,
+      { enforceNonNegativeBalance },
+    );
   },
 };
 
@@ -339,6 +366,8 @@ export interface CreateApunteInput {
   amount?: number;
   lines: ApunteLineInput[];
   entityId?: string | null;
+  /** Duplicate-request guard (Constitution IX): safe retry / double-submit. */
+  idempotencyKey?: string;
 }
 
 export interface ApunteSummary {
@@ -364,6 +393,14 @@ export interface ApunteListParams {
 
 export interface ApunteDetail extends ApunteSummary {
   lines: ApunteLineInput[];
+}
+
+/** Stable-per-attempt key so retries/double-submits collapse to one apunte. */
+export function newIdempotencyKey(): string {
+  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+    return crypto.randomUUID();
+  }
+  return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
 export const apuntes = {
@@ -410,6 +447,7 @@ export interface CreateEntryInput {
   fecha: string;
   concepto: string;
   lineas: CreateEntryLineInput[];
+  idempotencyKey?: string;
 }
 
 export interface EntrySummary {

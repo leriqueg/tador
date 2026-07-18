@@ -7,6 +7,7 @@ import type { AuthApplicationService } from '../../application/auth-service.js';
 import type { AccountingService } from '../../application/accounting-service.js';
 import { createAuthMiddleware } from '../middleware/auth.js';
 import { prisma } from '../../infrastructure/database.js';
+import { NegativeBalanceError } from '../../application/account-balance-policy.js';
 
 interface CreateEntryLineBody {
   cuentaId?: string;
@@ -95,6 +96,9 @@ export function registerEntryRoutes(
         return reply.status(201).send(result);
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to create entry';
+        if (err instanceof NegativeBalanceError) {
+          return reply.status(400).send({ error: message, code: err.code });
+        }
         if (message.startsWith('Invalid line') || message.includes('balanced') || message.includes('at least two')) {
           return reply.status(400).send({ error: message });
         }
@@ -203,6 +207,9 @@ export function registerEntryRoutes(
         return reply.status(200).send(result);
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to update entry';
+        if (err instanceof NegativeBalanceError) {
+          return reply.status(400).send({ error: message, code: err.code });
+        }
         if (message.includes('closed')) {
           return reply.status(400).send({ error: message });
         }
@@ -243,6 +250,9 @@ export function registerEntryRoutes(
         return reply.status(200).send(result);
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to void entry';
+        if (err instanceof NegativeBalanceError) {
+          return reply.status(400).send({ error: message, code: err.code });
+        }
         if (message.includes('already voided')) {
           return reply.status(400).send({ error: message });
         }

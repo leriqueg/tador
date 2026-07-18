@@ -6,6 +6,7 @@
  */
 
 import { prisma } from '../infrastructure/database.js';
+import { Prisma } from '@prisma/client';
 import type { Asiento, AsientoTipo } from '../domain/asiento.js';
 import type { LineaAsiento } from '../domain/linea-asiento.js';
 import {
@@ -22,6 +23,8 @@ import {
 } from '../domain/money.js';
 import type { AsientoVersion } from '../domain/asiento-version.js';
 import type { PeriodoContable } from '../domain/periodo-contable.js';
+import { assertProjectedBalances } from './account-balance-policy.js';
+import { lockTransactionKey } from './transaction-locks.js';
 
 // ---------------------------------------------------------------------------
 // Input / Output types
@@ -305,15 +308,17 @@ async function ensurePeriodExists(
   bookId: string,
   año: number,
 ): Promise<PeriodoContable> {
-  const existing = await prisma.periodoContable.findUnique({
+  await prisma.periodoContable.createMany({
+    data: [{ bookId, año, abierto: true }],
+    skipDuplicates: true,
+  });
+  const period = await prisma.periodoContable.findUnique({
     where: { bookId_año: { bookId, año } },
   });
-  if (existing) return mapPeriod(existing);
-
-  const created = await prisma.periodoContable.create({
-    data: { bookId, año, abierto: true },
-  });
-  return mapPeriod(created);
+  if (!period) {
+    throw new Error(`Failed to ensure period ${año} for book ${bookId}`);
+  }
+  return mapPeriod(period);
 }
 
 // ---------------------------------------------------------------------------
@@ -468,36 +473,83 @@ export function createAccountingService(): AccountingService {
       await validatePeriodOpen(params.bookId, año);
 
       // 7. Create asiento + lines in a transaction
-      const result = await prisma.$transaction(async (tx) => {
-        const entry = await tx.asiento.create({
-          data: {
-            bookId: params.bookId,
-            fecha: params.fecha,
-            concepto: params.concepto,
-            tipo: 'manual',
-            ...(params.idempotencyKey && {
-              idempotencyKey: params.idempotencyKey,
-            }),
-          },
-        });
-
-        const lineas = await Promise.all(
-          quantizedLines.map((l) => {
-            const { cuentaId, cuentaGlobalId } = normalizeLineAccount(l);
-            return tx.lineaAsiento.create({
-              data: {
-                asientoId: entry.id,
-                cuentaId,
-                cuentaGlobalId,
-                debito: quantizeMoney(l.debito, currency).toFixed(),
-                credito: quantizeMoney(l.credito, currency).toFixed(),
-              },
+      let result;
+      try {
+        result = await prisma.$transaction(async (tx) => {
+          if (params.idempotencyKey) {
+            await lockTransactionKey(
+              tx,
+              `idempotency:${params.idempotencyKey}`,
+            );
+            const replay = await tx.asiento.findUnique({
+              where: { idempotencyKey: params.idempotencyKey },
+              include: { lineas: true },
             });
-          }),
-        );
+            if (replay) {
+              return { entry: replay, lineas: replay.lineas };
+            }
+          }
 
-        return { entry, lineas };
-      });
+          const book = await tx.book.findUnique({
+            where: { id: params.bookId },
+            select: { userId: true },
+          });
+          if (!book) throw new Error(`Book not found: ${params.bookId}`);
+
+          await assertProjectedBalances(tx, {
+            bookId: params.bookId,
+            userId: book.userId,
+            lines: quantizedLines,
+          });
+
+          const entry = await tx.asiento.create({
+            data: {
+              bookId: params.bookId,
+              fecha: params.fecha,
+              concepto: params.concepto,
+              tipo: 'manual',
+              ...(params.idempotencyKey && {
+                idempotencyKey: params.idempotencyKey,
+              }),
+            },
+          });
+
+          const lineas = await Promise.all(
+            quantizedLines.map((l) => {
+              const { cuentaId, cuentaGlobalId } = normalizeLineAccount(l);
+              return tx.lineaAsiento.create({
+                data: {
+                  asientoId: entry.id,
+                  cuentaId,
+                  cuentaGlobalId,
+                  debito: quantizeMoney(l.debito, currency).toFixed(),
+                  credito: quantizeMoney(l.credito, currency).toFixed(),
+                },
+              });
+            }),
+          );
+
+          return { entry, lineas };
+        });
+      } catch (err) {
+        if (
+          params.idempotencyKey &&
+          err instanceof Prisma.PrismaClientKnownRequestError &&
+          err.code === 'P2002'
+        ) {
+          const existing = await prisma.asiento.findUnique({
+            where: { idempotencyKey: params.idempotencyKey },
+            include: { lineas: true },
+          });
+          if (existing) {
+            return {
+              entry: mapAsiento(existing),
+              lineas: existing.lineas.map(mapLinea),
+            };
+          }
+        }
+        throw err;
+      }
 
       return {
         entry: mapAsiento(result.entry),
@@ -605,6 +657,13 @@ export function createAccountingService(): AccountingService {
       const concepto = params.concepto ?? existing.concepto;
 
       const result = await prisma.$transaction(async (tx) => {
+        await assertProjectedBalances(tx, {
+          bookId,
+          userId,
+          lines: quantizedLineas,
+          replacingAsientoId: id,
+        });
+
         // Find current max version
         const maxVer = await tx.asientoVersion.findFirst({
           where: { asientoId: id },
@@ -708,6 +767,25 @@ export function createAccountingService(): AccountingService {
       );
 
       const result = await prisma.$transaction(async (tx) => {
+        const book = await tx.book.findUnique({
+          where: { id: bookId },
+          select: { userId: true },
+        });
+        if (!book) throw new Error(`Book not found: ${bookId}`);
+        await assertProjectedBalances(tx, {
+          bookId,
+          userId: book.userId,
+          // Voiding removes the original from effective balances. Reversal
+          // rows are audit evidence and are excluded from balance/report reads.
+          lines: existing.lineas.map((line) => ({
+            cuentaId: line.cuentaId,
+            cuentaGlobalId: line.cuentaGlobalId,
+            debito: 0,
+            credito: 0,
+          })),
+          replacingAsientoId: id,
+        });
+
         // Create reversal asiento
         const reversa = await tx.asiento.create({
           data: {
@@ -833,6 +911,7 @@ export function createAccountingService(): AccountingService {
             asiento: {
               bookId,
               anulado: false,
+              asientoOriginalId: null,
             },
           },
           _sum: {
@@ -853,6 +932,7 @@ export function createAccountingService(): AccountingService {
           asiento: {
             bookId,
             anulado: false,
+            asientoOriginalId: null,
           },
         },
         _sum: {
@@ -882,6 +962,7 @@ export function createAccountingService(): AccountingService {
             WHERE l."cuentaGlobalId" = ${cuentaId}
               AND a."bookId" = ${bookId}
               AND a.anulado = false
+              AND a."asientoOriginalId" IS NULL
               AND EXTRACT(YEAR FROM a.fecha) = ${año}::int
             GROUP BY EXTRACT(MONTH FROM a.fecha)
             ORDER BY mes
@@ -905,6 +986,7 @@ export function createAccountingService(): AccountingService {
           WHERE l."cuentaId" = ${cuentaId}
             AND a."bookId" = ${bookId}
             AND a.anulado = false
+            AND a."asientoOriginalId" IS NULL
             AND EXTRACT(YEAR FROM a.fecha) = ${año}::int
           GROUP BY EXTRACT(MONTH FROM a.fecha)
           ORDER BY mes
@@ -925,6 +1007,7 @@ export function createAccountingService(): AccountingService {
         where: {
           bookId,
           anulado: false,
+          asientoOriginalId: null,
           fecha: {
             gte: new Date(año, 0, 1),
             lt: new Date(año + 1, 0, 1),
@@ -1018,6 +1101,7 @@ export function createAccountingService(): AccountingService {
         where: {
           bookId,
           anulado: false,
+          asientoOriginalId: null,
           fecha: {
             gte: new Date(año, 0, 1),
             lt: new Date(año + 1, 0, 1),

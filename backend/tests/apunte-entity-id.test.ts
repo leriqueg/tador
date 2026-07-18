@@ -76,7 +76,18 @@ async function createBankAccount(app: FastifyInstance, cookies: string[], nombre
     payload: { nombre, tipo: 'bank' },
   });
   expect(res.statusCode).toBe(201);
-  return res.json().provisionedAccount as { id: string; entidadId: string };
+  const account = res.json().provisionedAccount as {
+    id: string;
+    entidadId: string;
+  };
+  const policy = await app.inject({
+    method: 'PATCH',
+    url: `/api/accounts/${account.id}/balance-policy`,
+    headers: { cookie: cookies.join('; ') },
+    payload: { enforceNonNegativeBalance: false },
+  });
+  expect(policy.statusCode).toBe(200);
+  return account;
 }
 
 describe('POST /api/apuntes — auto entityId (T006)', () => {
@@ -169,6 +180,124 @@ describe('POST /api/apuntes — auto entityId (T006)', () => {
 
     expect(res.statusCode).toBe(400);
     expect(res.json().error).toContain('Ambiguous entityId');
+
+    await app.close();
+  });
+
+  it('does not auto-set bank entityId on registrar_sueldo (capability-reserved entity slot)', async () => {
+    const app = await createTestApp();
+    const cookies = await registerAndVerify(app, 't006-sueldo-bank@test.com');
+
+    const incomeGlobal = await createPostableGlobal(
+      nextCodigo('410101'),
+      'Sueldo test',
+      '41010000',
+    );
+    const bank = await createBankAccount(app, cookies, 'Banco Sueldo');
+
+    const res = await app.inject({
+      method: 'POST',
+      url: '/api/apuntes',
+      headers: { cookie: cookies.join('; ') },
+      payload: {
+        templateCode: 'registrar_sueldo',
+        date: '2026-07-10',
+        concept: 'Sueldo / Salario',
+        amount: 1000,
+        lines: [
+          { id: 1, accountId: bank.id },
+          { id: 2, accountId: incomeGlobal.id },
+        ],
+      },
+    });
+
+    expect(res.statusCode).toBe(201);
+    expect(res.json().apunte.entityId).toBeNull();
+    expect(res.json().error).toBeUndefined();
+
+    await app.close();
+  });
+});
+
+describe('POST /api/apuntes — idempotency (Constitution IX)', () => {
+  it('replays the same apunte for a repeated idempotencyKey', async () => {
+    const app = await createTestApp();
+    const cookies = await registerAndVerify(app, 'idem-apunte@test.com');
+
+    const comisionGlobal = await createPostableGlobal(
+      nextCodigo('620101'),
+      'Comisiones idem',
+      '62010001',
+    );
+    const bank = await createBankAccount(app, cookies, 'Banco Idem');
+
+    const payload = {
+      templateCode: 'comision_bancaria',
+      date: '2026-07-10',
+      concept: 'Comision idempotente',
+      amount: 3.25,
+      idempotencyKey: 'fixed-key-123',
+      lines: [
+        { id: 1, accountId: comisionGlobal.id },
+        { id: 2, accountId: bank.id },
+      ],
+    };
+
+    const first = await app.inject({
+      method: 'POST',
+      url: '/api/apuntes',
+      headers: { cookie: cookies.join('; ') },
+      payload,
+    });
+    expect(first.statusCode).toBe(201);
+    const firstId = first.json().apunte.id;
+
+    const second = await app.inject({
+      method: 'POST',
+      url: '/api/apuntes',
+      headers: { cookie: cookies.join('; ') },
+      payload,
+    });
+    expect(second.statusCode).toBe(200);
+    expect(second.json().apunte.id).toBe(firstId);
+
+    const count = await prisma.apunte.count({ where: { concept: 'Comision idempotente' } });
+    expect(count).toBe(1);
+
+    await app.close();
+  });
+
+  it('accepts the idempotency key via header', async () => {
+    const app = await createTestApp();
+    const cookies = await registerAndVerify(app, 'idem-header@test.com');
+
+    const comisionGlobal = await createPostableGlobal(
+      nextCodigo('620101'),
+      'Comisiones header',
+      '62010001',
+    );
+    const bank = await createBankAccount(app, cookies, 'Banco Header');
+
+    const payload = {
+      templateCode: 'comision_bancaria',
+      date: '2026-07-11',
+      concept: 'Comision header',
+      amount: 1.5,
+      lines: [
+        { id: 1, accountId: comisionGlobal.id },
+        { id: 2, accountId: bank.id },
+      ],
+    };
+    const headers = {
+      cookie: cookies.join('; '),
+      'idempotency-key': 'header-key-999',
+    };
+
+    const first = await app.inject({ method: 'POST', url: '/api/apuntes', headers, payload });
+    expect(first.statusCode).toBe(201);
+    const second = await app.inject({ method: 'POST', url: '/api/apuntes', headers, payload });
+    expect(second.statusCode).toBe(200);
+    expect(second.json().apunte.id).toBe(first.json().apunte.id);
 
     await app.close();
   });

@@ -1,5 +1,7 @@
 # Contract: Sprint 04 - Plantillas MVP
 
+**Updated**: 2026-07-18
+
 This contract describes observable behavior, not implementation details.
 
 ## Inputs
@@ -16,6 +18,9 @@ This contract describes observable behavior, not implementation details.
 
 - Data from one user is never exposed to another user.
 - Financial behavior never bypasses accounting integrity rules.
+- `POST /api/apuntes` crea Asiento + líneas + Apunte atómicamente.
+- Una Idempotency-Key repetida o concurrente retorna el Apunte existente sin duplicar.
+- Las plantillas heredan V12 del motor: no confirman saldos naturales negativos en cuentas protegidas salvo política explícitamente desactivada.
 - Out-of-scope MVP modules are not required for this sprint to complete.
 
 ## Plantillas catalog (observable)

@@ -3,11 +3,11 @@
  * Orchestrates registration, login, verification, and recovery.
  */
 
-import * as argon2 from 'argon2';
-import type { UserRepository } from '../infrastructure/repositories/user-repo.js';
-import type { BookRepository } from '../infrastructure/repositories/book-repo.js';
-import type { SessionService } from '../infrastructure/services/session-service.js';
-import type { EmailService } from '../infrastructure/services/email-service.js';
+import type { UserRepository } from './ports/user-repository.js';
+import type { BookRepository } from './ports/book-repository.js';
+import type { SessionService } from './ports/session-service.js';
+import type { EmailService } from './ports/email-service.js';
+import type { PasswordHasher } from './ports/password-hasher.js';
 import type { User } from '../domain/user.js';
 import { isUserVerified } from '../domain/user.js';
 import {
@@ -48,6 +48,7 @@ export function createAuthApplicationService(
   bookRepo: BookRepository,
   sessionService: SessionService,
   emailService: EmailService,
+  passwordHasher: PasswordHasher,
 ): AuthApplicationService {
   // Simple in-memory token stores (replace with DB in production)
   const verificationTokens = new Map<string, { userId: string; expiresAt: Date }>();
@@ -62,7 +63,7 @@ export function createAuthApplicationService(
       }
 
       // Hash password
-      const passwordHash = await argon2.hash(input.password);
+      const passwordHash = await passwordHasher.hash(input.password);
 
       // Create user
       const user = await userRepo.create({
@@ -99,7 +100,7 @@ export function createAuthApplicationService(
         throw new Error('Invalid email or password');
       }
 
-      const isValid = await argon2.verify(user.passwordHash, input.password);
+      const isValid = await passwordHasher.verify(user.passwordHash, input.password);
       if (!isValid) {
         throw new Error('Invalid email or password');
       }
@@ -190,7 +191,7 @@ export function createAuthApplicationService(
         throw new Error('User not found');
       }
 
-      user.passwordHash = await argon2.hash(newPassword);
+      user.passwordHash = await passwordHasher.hash(newPassword);
       const updated = await userRepo.update(user);
       recoveryTokens.delete(token);
 

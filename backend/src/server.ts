@@ -9,11 +9,24 @@ import { createUserRepository } from './infrastructure/repositories/user-repo.js
 import { createBookRepository } from './infrastructure/repositories/book-repo.js';
 import { createEmailService } from './infrastructure/services/email-service.js';
 import { createSessionService } from './infrastructure/services/session-service.js';
+import { createArgon2PasswordHasher } from './infrastructure/services/argon2-password-hasher.js';
+import { createTagRepository } from './infrastructure/repositories/tag-repo.js';
+import { createAccountRepository } from './infrastructure/repositories/account-repo.js';
+import { createEntidadRepository } from './infrastructure/repositories/entidad-repo.js';
 import { createAuthApplicationService } from './application/auth-service.js';
 import { createBookApplicationService } from './application/book-service.js';
+import { createTagApplicationService } from './application/tag-service.js';
+import { createChartApplicationService } from './application/chart-service.js';
+import { createAccountApplicationService } from './application/account-service.js';
+import { createEntityApplicationService } from './application/entity-service.js';
+import { createJournalStore } from './infrastructure/repositories/journal-store.js';
 import { createAccountingService } from './application/accounting-service.js';
 import { createDashboardReportService } from './application/dashboard-report-service.js';
 import { createFinancialAnalysisService } from './application/financial-analysis-service.js';
+import { createDashboardReadRepository } from './infrastructure/repositories/dashboard-read-repo.js';
+import { createFinancialAnalysisReadRepository } from './infrastructure/repositories/financial-analysis-read-repo.js';
+import { createApunteRepository } from './infrastructure/repositories/apunte-repo.js';
+import { createApunteApplicationService } from './application/apunte-service.js';
 import { registerAuthRoutes } from './api/routes/auth.js';
 import { registerVerificationRoutes } from './api/routes/verification.js';
 import { registerRecoveryRoutes } from './api/routes/recovery.js';
@@ -67,12 +80,14 @@ export async function buildApp(opts?: { logger?: boolean | object }) {
   const bookRepo = createBookRepository();
   const emailService = createEmailService();
   const sessionService = createSessionService();
+  const passwordHasher = createArgon2PasswordHasher();
 
   const authService = createAuthApplicationService(
     userRepo,
     bookRepo,
     sessionService,
     emailService,
+    passwordHasher,
   );
 
   const bookService = createBookApplicationService(bookRepo, async (userId: string) => {
@@ -80,32 +95,51 @@ export async function buildApp(opts?: { logger?: boolean | object }) {
     return user !== null && user !== undefined && user.verifiedAt !== null;
   });
 
-  const accountingService = createAccountingService();
-  const dashboardReportService = createDashboardReportService();
-  const financialAnalysisService = createFinancialAnalysisService();
+  const dashboardReportService = createDashboardReportService(
+    createDashboardReadRepository(),
+  );
+  const financialAnalysisService = createFinancialAnalysisService(
+    createFinancialAnalysisReadRepository(),
+  );
+  const tagService = createTagApplicationService(createTagRepository());
+  const accountRepo = createAccountRepository();
+  const entidadRepo = createEntidadRepository();
+  const chartService = createChartApplicationService(accountRepo, bookRepo);
+  const accountService = createAccountApplicationService(accountRepo, bookRepo);
+  const entityService = createEntityApplicationService(entidadRepo, accountRepo);
+  const journalStore = createJournalStore();
+  const accountingService = createAccountingService(journalStore);
+  const apunteService = createApunteApplicationService({
+    apuntes: createApunteRepository(),
+    accounts: accountRepo,
+    books: bookRepo,
+    journalStore,
+    accountingService,
+  });
 
   // Routes
   registerAuthRoutes(app, authService);
   registerVerificationRoutes(app, authService);
   registerRecoveryRoutes(app, authService);
   registerBookRoutes(app, authService, bookService);
-  registerChartRoutes(app, authService);
-  registerAccountRoutes(app, authService);
-  registerEntityRoutes(app, authService);
-  registerTagRoutes(app, authService);
-  registerEntryRoutes(app, authService, accountingService);
-  registerBalanceRoutes(app, authService, accountingService);
+  registerChartRoutes(app, authService, chartService);
+  registerAccountRoutes(app, authService, accountService);
+  registerEntityRoutes(app, authService, entityService);
+  registerTagRoutes(app, authService, tagService);
+  registerEntryRoutes(app, authService, accountingService, bookService);
+  registerBalanceRoutes(app, authService, accountingService, bookService);
   registerReportRoutes(
     app,
     authService,
     accountingService,
+    bookService,
     dashboardReportService,
     financialAnalysisService,
   );
-  registerPeriodRoutes(app, authService, accountingService);
-  registerPlantillaRoutes(app, authService);
-  registerApunteRoutes(app, authService, accountingService);
-  registerPlantillasAdminRoutes(app, authService);
+  registerPeriodRoutes(app, authService, accountingService, bookService);
+  registerPlantillaRoutes(app, authService, accountRepo);
+  registerApunteRoutes(app, authService, apunteService);
+  registerPlantillasAdminRoutes(app, authService, bookService, accountRepo);
 
   // Eagerly load plantillas into memory
   loadPlantillas();

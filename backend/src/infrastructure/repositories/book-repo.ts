@@ -5,17 +5,9 @@
 import { prisma } from '../database.js';
 import type { Book, BookConfig, BookMode } from '../../domain/book.js';
 import { defaultBookConfigCreateInput } from '../../domain/book.js';
+import type { BookRepository } from '../../application/ports/book-repository.js';
 
-export interface BookRepository {
-  findById(id: string): Promise<Book | null>;
-  findByUserId(userId: string): Promise<Book | null>;
-  create(userId: string): Promise<Book>;
-  getConfig(bookId: string): Promise<BookConfig | null>;
-  upsertConfig(
-    bookId: string,
-    config: Partial<BookConfig>,
-  ): Promise<BookConfig>;
-}
+export type { BookRepository };
 
 export function createBookRepository(): BookRepository {
   return {

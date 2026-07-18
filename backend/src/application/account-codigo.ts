@@ -3,36 +3,30 @@
  * Pattern [A][BBB][1][DDD] (8 digits).
  */
 
-import { prisma } from '../infrastructure/database.js';
+import type { AccountRepository } from './ports/account-repository.js';
 
 export async function autoAsignarCodigo(
+  accounts: AccountRepository,
   globalId: string | null,
   userId: string,
 ): Promise<string | null> {
   if (!globalId) return null;
 
-  const parent = await prisma.cuentaGlobal.findUnique({
-    where: { id: globalId },
-    select: { codigo: true },
-  });
-  if (!parent) return null;
+  const parentCodigo = await accounts.findGlobalCodigo(globalId);
+  if (!parentCodigo) return null;
 
-  const n1 = parent.codigo[0];
-  const n2 = parent.codigo.substring(1, 4);
+  const n1 = parentCodigo[0];
+  const n2 = parentCodigo.substring(1, 4);
   const base = `${n1}${n2}1`;
 
-  const existing = await prisma.cuentaUsuario.findFirst({
-    where: {
-      codigo: { startsWith: base },
-      userId,
-    },
-    orderBy: { codigo: 'desc' },
-    select: { codigo: true },
-  });
+  const existingCodigo = await accounts.findLatestUserCodigoWithPrefix(
+    userId,
+    base,
+  );
 
   let nextN4 = 1;
-  if (existing?.codigo) {
-    const lastN4 = parseInt(existing.codigo.substring(7), 10);
+  if (existingCodigo) {
+    const lastN4 = parseInt(existingCodigo.substring(7), 10);
     nextN4 = lastN4 + 1;
   }
 

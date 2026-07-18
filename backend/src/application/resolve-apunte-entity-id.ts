@@ -9,6 +9,8 @@
  * bank is not mistaken for the employer and V11 does not reject the apunte.
  */
 
+import type { AccountRepository } from './ports/account-repository.js';
+
 export interface ApunteLineAccountMeta {
   accountId: string;
   tipoCuenta: string | null;
@@ -52,7 +54,8 @@ export function resolveApunteEntityId(
 
   if (
     input.skipBankAutoFill ||
-    (input.templateCode != null && TRANSFER_LIKE_TEMPLATE_CODES.has(input.templateCode))
+    (input.templateCode != null &&
+      TRANSFER_LIKE_TEMPLATE_CODES.has(input.templateCode))
   ) {
     return { ok: true, entityId: null };
   }
@@ -81,28 +84,16 @@ export function resolveApunteEntityId(
 }
 
 /**
- * Load bank/card metadata for apunte line account ids (route adapter).
+ * Load bank/card metadata for apunte line account ids via AccountRepository.
  */
 export async function loadLineAccountMetaForEntityResolution(
+  accounts: AccountRepository,
   accountIds: string[],
   userId: string,
-  prisma: {
-    cuentaUsuario: {
-      findMany: (args: {
-        where: { id: { in: string[] }; userId: string };
-        select: { id: true; tipoCuenta: true; entidadId: true };
-      }) => Promise<
-        Array<{ id: string; tipoCuenta: string; entidadId: string | null }>
-      >;
-    };
-  },
 ): Promise<ApunteLineAccountMeta[]> {
   if (accountIds.length === 0) return [];
 
-  const rows = await prisma.cuentaUsuario.findMany({
-    where: { id: { in: accountIds }, userId },
-    select: { id: true, tipoCuenta: true, entidadId: true },
-  });
+  const rows = await accounts.findUserAccountLineMeta(userId, accountIds);
   const byId = new Map(rows.map((r) => [r.id, r]));
 
   return accountIds.map((accountId) => {

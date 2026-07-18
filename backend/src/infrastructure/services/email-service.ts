@@ -3,10 +3,9 @@
  * Logs emails to console instead of sending them.
  */
 
-export interface EmailService {
-  sendVerificationEmail(to: string, token: string): Promise<void>;
-  sendRecoveryEmail(to: string, token: string): Promise<void>;
-}
+import type { EmailService } from '../../application/ports/email-service.js';
+
+export type { EmailService };
 
 export function createEmailService(): EmailService {
   return {

@@ -5,7 +5,11 @@
  * (avoids N+1 findUnique per account/level that made GET /api/plantillas slow).
  */
 
-import { prisma } from '../infrastructure/database.js';
+import type {
+  AccountRepository,
+  GlobalAccountNode,
+  UserAccountSummary,
+} from './ports/account-repository.js';
 import type { Plantilla, PlantillaLine } from '../plantillas/index.js';
 
 const MAX_DEPTH = 10;
@@ -26,13 +30,7 @@ export type PlantillaEnriched = Omit<Plantilla, 'lines'> & {
   lines: PlantillaLineEnriched[];
 };
 
-interface GlobalNode {
-  id: string;
-  codigo: string;
-  nombre: string;
-  parentId: string | null;
-  esPostable: boolean;
-}
+export type GlobalNode = GlobalAccountNode;
 
 export interface ChartIndex {
   byId: Map<string, GlobalNode>;
@@ -74,16 +72,10 @@ export function matchesGroups(
   return ancestorCodesOf(byId, cuentaGlobalId).some((c) => set.has(c));
 }
 
-export async function loadChartIndex(): Promise<Map<string, GlobalNode>> {
-  const rows = await prisma.cuentaGlobal.findMany({
-    select: {
-      id: true,
-      codigo: true,
-      nombre: true,
-      parentId: true,
-      esPostable: true,
-    },
-  });
+export async function loadChartIndex(
+  accounts: AccountRepository,
+): Promise<Map<string, GlobalNode>> {
+  const rows = await accounts.listGlobalChartNodes();
   const byId = new Map<string, GlobalNode>();
   for (const row of rows) {
     byId.set(row.id, row);
@@ -97,12 +89,7 @@ export async function loadChartIndex(): Promise<Map<string, GlobalNode>> {
 export function resolveLineAccounts(
   line: PlantillaLine,
   byId: Map<string, GlobalNode>,
-  userAccounts: Array<{
-    id: string;
-    nombre: string;
-    codigo: string | null;
-    globalId: string | null;
-  }>,
+  userAccounts: UserAccountSummary[],
 ): AvailableAccount[] {
   const groupCodes: string[] =
     line.strategy === 'from_group' && line.groupCode
@@ -142,24 +129,25 @@ export function resolveLineAccounts(
   return accounts;
 }
 
-export async function loadUserAccounts(userId: string) {
-  return prisma.cuentaUsuario.findMany({
-    where: { userId, activa: true, globalId: { not: null } },
-    select: { id: true, nombre: true, codigo: true, globalId: true },
-  });
+export async function loadUserAccounts(
+  accounts: AccountRepository,
+  userId: string,
+): Promise<UserAccountSummary[]> {
+  return accounts.listActiveUserAccountsWithGlobal(userId);
 }
 
 /**
  * Enrich one plantilla with availableAccounts (2 DB round-trips shared across all lines).
  */
 export async function enrichPlantilla(
+  accounts: AccountRepository,
   plantilla: Plantilla,
   userId: string,
   charts?: Map<string, GlobalNode>,
-  userAccounts?: Awaited<ReturnType<typeof loadUserAccounts>>,
+  userAccounts?: UserAccountSummary[],
 ): Promise<PlantillaEnriched> {
-  const byId = charts ?? (await loadChartIndex());
-  const users = userAccounts ?? (await loadUserAccounts(userId));
+  const byId = charts ?? (await loadChartIndex(accounts));
+  const users = userAccounts ?? (await loadUserAccounts(accounts, userId));
 
   return {
     ...plantilla,
@@ -174,13 +162,14 @@ export async function enrichPlantilla(
  * Enrich many plantillas sharing one chart load + one user-accounts load.
  */
 export async function enrichPlantillas(
+  accounts: AccountRepository,
   plantillas: Plantilla[],
   userId: string,
 ): Promise<PlantillaEnriched[]> {
-  const byId = await loadChartIndex();
-  const users = await loadUserAccounts(userId);
+  const byId = await loadChartIndex(accounts);
+  const users = await loadUserAccounts(accounts, userId);
   return Promise.all(
-    plantillas.map((p) => enrichPlantilla(p, userId, byId, users)),
+    plantillas.map((p) => enrichPlantilla(accounts, p, userId, byId, users)),
   );
 }
 

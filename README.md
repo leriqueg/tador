@@ -8,7 +8,7 @@
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?logo=postgresql&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
 
-TADOR es una aplicación web en etapa de diseño para facilitar la economía del hogar y permitir que una persona crezca hacia un control financiero profesional ligero, sin tener que cambiar de herramienta.
+TADOR es una aplicación web en desarrollo para facilitar la economía del hogar y permitir que una persona crezca hacia un control financiero profesional ligero, sin tener que cambiar de herramienta.
 
 ## Origen
 
@@ -53,7 +53,7 @@ Pensado para profesionales independientes, pequeños negocios o quienes necesita
 
 ---
 
-## Estado actual — Sprint 05 completado ✅
+## Estado actual
 
 | Sprint | Nombre | Estado |
 |--------|--------|--------|
@@ -61,18 +61,15 @@ Pensado para profesionales independientes, pequeños negocios o quienes necesita
 | 01 | Plataforma base | ✅ Completado |
 | 02 | Catálogos base | ✅ Completado |
 | 03 | Motor contable | ✅ Completado |
-| 04 | Plantillas MVP | 🔄 Pendiente |
-| **05** | **Dashboard PYG** | **✅ Completado** |
-| 06 | Frontend Hogar | ⏳ Pendiente |
-| 07 | Frontend PRO ligero | ⏳ Pendiente |
-| 08 | IA v0 | ⏳ Pendiente |
+| 04 | Plantillas MVP | ✅ Completado |
+| 05 | Dashboard PYG | ✅ Completado |
+| 06 | Frontend Hogar | ✅ Completado |
+| 07 | Frontend PRO ligero | ✅ Completado |
+| **09** | **Frontend PRO avanzado** | **🔄 Activo** |
 
-El **Sprint 05** entrega el dashboard obligatorio del MVP con dos paneles:
+La IA v0 (`specs/008-ia-v0/`) está excluida del MVP por ADR 0002. El backend contable y sus reportes se mantienen compartidos por los modos Hogar y PRO.
 
-- **Panel PYG**: ingresos, gastos, resultado neto, evolución mensual (12 meses con gráfico), Top 10 de ingresos y egresos.
-- **Panel de posición**: disponible (efectivo, bancos), por cobrar, por pagar, posición neta y desglose por cuenta individual.
-
-Ambos paneles se sirven desde una API común (`GET /api/reports/pyg`, `GET /api/reports/position`) que alimenta tanto la vista Hogar como la vista PRO. Las diferencias de presentación entre modos se resuelven en el frontend.
+En julio de 2026 se completó la remediación de Clean Architecture del backend: las capas de aplicación y API ya no dependen directamente de Prisma, SQL, Argon2 ni detalles de infraestructura. La validación de cierre cubre 95 tests unitarios y 111 tests de integración.
 
 ---
 
@@ -82,27 +79,54 @@ Ambos paneles se sirven desde una API común (`GET /api/reports/pyg`, `GET /api/
 |------|------------|
 | Backend | Node.js + TypeScript + Fastify + Prisma + PostgreSQL |
 | Frontend | React + TypeScript + Vite + Mantine + Zustand + React Query |
-| Infraestructura | Docker |
-| IA local | Modelo local pequeño (sugerencia de plantillas en Modo Hogar) |
+| Infraestructura | Docker + PostgreSQL 18.4 |
 | Cálculos financieros | decimal.js |
 
 ---
 
 ## Arquitectura
 
-Clean Architecture con dependencias dirigidas hacia el dominio:
+El backend aplica Clean Architecture con dependencias dirigidas hacia el dominio:
 
 ```
 api/ → application/ → domain/
- ↑          ↑
+         ↑
 infrastructure/
 ```
 
-Las reglas contables (balance de asientos, tenant isolation, idempotencia) viven en `domain/`. Los casos de uso viven en `application/`. La infraestructura (Prisma, Fastify) implementa interfaces definidas en dominio/aplicación.
+Responsabilidades:
+
+- `domain/`: entidades, value objects y reglas contables puras.
+- `application/`: casos de uso y puertos; no conoce Prisma, Fastify ni Argon2.
+- `infrastructure/`: repositorios Prisma, SQL y servicios que implementan los puertos de aplicación.
+- `api/`: adaptadores HTTP delgados; autentican, validan, invocan casos de uso y traducen respuestas.
+- `server.ts`: composition root donde se conectan puertos, adaptadores y rutas.
+
+El aislamiento por tenant, la idempotencia, las transacciones, los advisory locks y el control de periodos se preservan en los límites de aplicación e infraestructura. Los importes usan aritmética decimal exacta.
+
+La dirección de dependencias se protege con tests de arquitectura en `backend/tests/unit/architecture-boundaries.test.ts`.
 
 ---
 
-## Documentación del MVP, concepto original.
+## Desarrollo y verificación
+
+Los comandos de backend se ejecutan en Docker:
+
+```bash
+make up          # levanta la aplicación
+make typecheck   # verifica TypeScript
+make test-unit   # tests unitarios
+make test        # tests de integración con PostgreSQL
+make check       # typecheck + integración
+```
+
+`make test` regenera Prisma Client dentro del mismo contenedor antes de ejecutar la suite, evitando desalineaciones con `schema.prisma`. Los tests de integración operan exclusivamente sobre `tador_test`.
+
+El pipeline de GitHub Actions ejecuta typecheck, tests unitarios e integración con PostgreSQL 18.4.
+
+---
+
+## Documentación
 
 | Documento | Ubicación |
 |-----------|-----------|
@@ -110,7 +134,8 @@ Las reglas contables (balance de asientos, tenant isolation, idempotencia) viven
 | Definición de modos Hogar y PRO | `specs/foundation/modos-hogar-pro.md` |
 | Alcance MVP | `specs/foundation/mvp-scope.md` |
 | Specs por sprint | `specs/{sprint}-*/spec.md` |
-| Diseño y tareas | `openspec/changes/{sprint}-*/` |
+| Arquitectura y stack | `specs/foundation/stack-architecture.md` |
+| Remediación de Clean Architecture | `specs/010-audit-clean-architecture/2026-07-18/` |
 
 ---
 

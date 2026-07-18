@@ -6,7 +6,7 @@
  */
 
 import Decimal from 'decimal.js';
-import { prisma } from '../infrastructure/database.js';
+import type { FinancialAnalysisReadRepository } from './ports/financial-analysis-read-repository.js';
 import { toDecimal as toMoneyDecimal } from '../domain/money.js';
 
 export const FINANCIAL_COST_CODES = {
@@ -87,47 +87,24 @@ export interface FinancialAnalysisService {
   ): Promise<CostYieldTotalsDTO>;
 }
 
-interface CostYieldSqlRow {
-  codigo: string;
-  signed_amount: string;
-}
-
-export function createFinancialAnalysisService(): FinancialAnalysisService {
+export function createFinancialAnalysisService(
+  reads: FinancialAnalysisReadRepository,
+): FinancialAnalysisService {
   return {
     async getCostYieldTotals(bookId, entityId, year) {
-      const rows: CostYieldSqlRow[] = await prisma.$queryRaw`
-        SELECT
-          COALESCE(cg_dir.codigo, cg_via_cu.codigo) AS codigo,
-          CASE
-            WHEN COALESCE(cg_dir.codigo, cg_via_cu.codigo) LIKE '6%'
-              THEN (l.debito - l.credito)::numeric
-            ELSE (l.credito - l.debito)::numeric
-          END AS signed_amount
-        FROM apuntes ap
-        INNER JOIN asientos a ON a.id = ap."asientoId"
-        INNER JOIN lineas_asiento l ON l."asientoId" = a.id
-        LEFT JOIN cuentas_usuario cu ON cu.id = l."cuentaId"
-        LEFT JOIN cuentas_globales cg_dir ON cg_dir.id = l."cuentaGlobalId"
-        LEFT JOIN cuentas_globales cg_via_cu ON cg_via_cu.id = cu."globalId"
-        WHERE a."bookId" = ${bookId}
-          AND a.anulado = false
-          AND a."asientoOriginalId" IS NULL
-          AND ap."entityId" = ${entityId}
-          AND EXTRACT(YEAR FROM ap.date) = ${year}
-          AND COALESCE(cg_dir.codigo, cg_via_cu.codigo) IN (
-            ${FINANCIAL_COST_CODES.comisiones},
-            ${FINANCIAL_COST_CODES.intereses},
-            ${FINANCIAL_COST_CODES.multas},
-            ${INVESTMENT_YIELD_CODE}
-          )
-      `;
-
-      const aggregated = aggregateCostYieldTotals(
-        rows.map((r) => ({
-          codigo: r.codigo,
-          signedAmount: r.signed_amount,
-        })),
+      const rows = await reads.listCostYieldRows(
+        bookId,
+        entityId,
+        year,
+        [
+          FINANCIAL_COST_CODES.comisiones,
+          FINANCIAL_COST_CODES.intereses,
+          FINANCIAL_COST_CODES.multas,
+        ],
+        INVESTMENT_YIELD_CODE,
       );
+
+      const aggregated = aggregateCostYieldTotals(rows);
 
       return {
         year,

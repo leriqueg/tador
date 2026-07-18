@@ -4,8 +4,12 @@
 
 import type { FastifyInstance } from 'fastify';
 import type { AuthApplicationService } from '../../application/auth-service.js';
+import {
+  TagNotFoundError,
+  type TagApplicationService,
+} from '../../application/tag-service.js';
+import { TagConflictError } from '../../application/ports/tag-repository.js';
 import { createAuthMiddleware } from '../middleware/auth.js';
-import { prisma } from '../../infrastructure/database.js';
 
 interface CreateTagBody {
   nombre: string;
@@ -18,19 +22,15 @@ interface UpdateTagBody {
 export function registerTagRoutes(
   app: FastifyInstance,
   authService: AuthApplicationService,
+  tagService: TagApplicationService,
 ): void {
   const requireAuth = createAuthMiddleware(authService);
 
-  // GET /api/tags — list user's tags
   app.get('/api/tags', { preHandler: requireAuth }, async (request, reply) => {
     const userId = request.userId!;
 
     try {
-      const tags = await prisma.tag.findMany({
-        where: { userId },
-        orderBy: { nombre: 'asc' },
-      });
-
+      const tags = await tagService.list(userId);
       return reply.status(200).send({ tags });
     } catch (err) {
       request.log.error(err, 'Failed to fetch tags');
@@ -38,7 +38,6 @@ export function registerTagRoutes(
     }
   });
 
-  // POST /api/tags — create tag
   app.post(
     '/api/tags',
     { preHandler: requireAuth },
@@ -51,20 +50,11 @@ export function registerTagRoutes(
       }
 
       try {
-        const tag = await prisma.tag.create({
-          data: { userId, nombre },
-        });
-
+        const tag = await tagService.create(userId, nombre);
         return reply.status(201).send({ tag });
       } catch (err: unknown) {
-        if (
-          err instanceof Error &&
-          'code' in err &&
-          (err as { code: string }).code === 'P2002'
-        ) {
-          return reply
-            .status(409)
-            .send({ error: 'A tag with this name already exists' });
+        if (err instanceof TagConflictError) {
+          return reply.status(409).send({ error: err.message });
         }
         request.log.error(err, 'Failed to create tag');
         return reply.status(500).send({ error: 'Failed to create tag' });
@@ -72,7 +62,6 @@ export function registerTagRoutes(
     },
   );
 
-  // PUT /api/tags/:id — update tag
   app.put(
     '/api/tags/:id',
     { preHandler: requireAuth },
@@ -86,29 +75,14 @@ export function registerTagRoutes(
       }
 
       try {
-        const existing = await prisma.tag.findFirst({
-          where: { id, userId },
-        });
-
-        if (!existing) {
-          return reply.status(404).send({ error: 'Tag not found' });
-        }
-
-        const tag = await prisma.tag.update({
-          where: { id },
-          data: { nombre },
-        });
-
+        const tag = await tagService.update(userId, id, nombre);
         return reply.status(200).send({ tag });
       } catch (err: unknown) {
-        if (
-          err instanceof Error &&
-          'code' in err &&
-          (err as { code: string }).code === 'P2002'
-        ) {
-          return reply
-            .status(409)
-            .send({ error: 'A tag with this name already exists' });
+        if (err instanceof TagNotFoundError) {
+          return reply.status(404).send({ error: err.message });
+        }
+        if (err instanceof TagConflictError) {
+          return reply.status(409).send({ error: err.message });
         }
         request.log.error(err, 'Failed to update tag');
         return reply.status(500).send({ error: 'Failed to update tag' });
@@ -116,7 +90,6 @@ export function registerTagRoutes(
     },
   );
 
-  // DELETE /api/tags/:id — delete tag
   app.delete(
     '/api/tags/:id',
     { preHandler: requireAuth },
@@ -125,18 +98,12 @@ export function registerTagRoutes(
       const { id } = request.params as { id: string };
 
       try {
-        const existing = await prisma.tag.findFirst({
-          where: { id, userId },
-        });
-
-        if (!existing) {
-          return reply.status(404).send({ error: 'Tag not found' });
-        }
-
-        await prisma.tag.delete({ where: { id } });
-
+        await tagService.delete(userId, id);
         return reply.status(204).send();
-      } catch (err) {
+      } catch (err: unknown) {
+        if (err instanceof TagNotFoundError) {
+          return reply.status(404).send({ error: err.message });
+        }
         request.log.error(err, 'Failed to delete tag');
         return reply.status(500).send({ error: 'Failed to delete tag' });
       }

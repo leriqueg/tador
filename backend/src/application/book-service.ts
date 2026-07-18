@@ -2,7 +2,7 @@
  * Application service for book operations.
  */
 
-import type { BookRepository } from '../infrastructure/repositories/book-repo.js';
+import type { BookRepository } from './ports/book-repository.js';
 import type { Book, BookConfig } from '../domain/book.js';
 import {
   applyBookConfigUpdate,

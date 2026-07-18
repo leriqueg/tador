@@ -1,17 +1,15 @@
 /**
  * Dashboard Report Service — read-only queries for PYG and Position dashboards.
  *
- * Uses raw SQL via Prisma for complex aggregations (window functions, LEFT JOIN
- * generate_series) and decimal.js for precise monetary computation.
+ * Uses decimal.js for precise monetary computation.
  * Converts to `number` only at the API boundary.
  *
  * Follows the same factory pattern as accounting-service.ts.
  */
 
 import Decimal from 'decimal.js';
-import { prisma } from '../infrastructure/database.js';
+import type { DashboardReadRepository } from './ports/dashboard-read-repository.js';
 import {
-  moneyToNumber,
   toDecimal as toMoneyDecimal,
 } from '../domain/money.js';
 
@@ -96,35 +94,6 @@ export interface DashboardReportService {
 }
 
 // ---------------------------------------------------------------------------
-// Raw SQL row types
-// ---------------------------------------------------------------------------
-
-interface MonthlySeriesRow {
-  mes: number;
-  income: string;
-  expenses: string;
-  balance: string;
-}
-
-interface TopAccountRow {
-  account_id: string;
-  account_code: string;
-  account_name: string;
-  accumulated: string;
-}
-
-interface AccountBalanceRow {
-  account_id: string;
-  account_name: string;
-  account_codigo: string | null;
-  tipo_cuenta: string;
-  entidad_id: string | null;
-  global_codigo: string | null;
-  total_debito: string;
-  total_credito: string;
-}
-
-// ---------------------------------------------------------------------------
 // Account classification helpers
 // ---------------------------------------------------------------------------
 
@@ -204,7 +173,9 @@ function toDecimal(value: string | number | { toString: () => string }): Decimal
 // Factory
 // ---------------------------------------------------------------------------
 
-export function createDashboardReportService(): DashboardReportService {
+export function createDashboardReportService(
+  reads: DashboardReadRepository,
+): DashboardReportService {
   return {
     // -----------------------------------------------------------------------
     // getPyGReport
@@ -217,117 +188,12 @@ export function createDashboardReportService(): DashboardReportService {
       const accountId = filters.accountId ?? null;
       const entityId = filters.entityId ?? null;
 
-      // 1. Monthly series — 12 months via generate_series LEFT JOIN
-      const monthlyRows: MonthlySeriesRow[] = await prisma.$queryRaw`
-        WITH line_details AS (
-          SELECT
-            l.debito,
-            l.credito,
-            EXTRACT(MONTH FROM a.fecha)::int AS mes,
-            COALESCE(cg_dir.codigo, cg_via_cu.codigo) AS codigo
-          FROM lineas_asiento l
-          INNER JOIN asientos a ON a.id = l."asientoId"
-          LEFT JOIN cuentas_usuario cu ON cu.id = l."cuentaId"
-          LEFT JOIN cuentas_globales cg_dir ON cg_dir.id = l."cuentaGlobalId"
-          LEFT JOIN cuentas_globales cg_via_cu ON cg_via_cu.id = cu."globalId"
-          WHERE a."bookId" = ${bookId}
-            AND a.anulado = false
-            AND a."asientoOriginalId" IS NULL
-            AND EXTRACT(YEAR FROM a.fecha) = ${year}
-            AND (cu."tipoCuenta" IS DISTINCT FROM 'bridge')
-            AND (
-              COALESCE(cg_dir.codigo, cg_via_cu.codigo) LIKE '4%'
-              OR COALESCE(cg_dir.codigo, cg_via_cu.codigo) LIKE '6%'
-            )
-            AND (${accountId}::text IS NULL OR l."cuentaId" = ${accountId} OR l."cuentaGlobalId" = ${accountId})
-            AND (${entityId}::text IS NULL OR EXISTS (
-              SELECT 1 FROM apuntes ap
-              WHERE ap."asientoId" = a.id AND ap."entityId" = ${entityId}
-            ))
-        ),
-        monthly_agg AS (
-          SELECT
-            mes,
-            COALESCE(SUM(CASE WHEN codigo LIKE '4%' THEN credito - debito ELSE 0 END), 0) AS income_amount,
-            COALESCE(SUM(CASE WHEN codigo LIKE '6%' THEN debito - credito ELSE 0 END), 0) AS expense_amount
-          FROM line_details
-          GROUP BY mes
-        )
-        SELECT
-          m.mes,
-          COALESCE(ma.income_amount, 0)::numeric AS income,
-          COALESCE(ma.expense_amount, 0)::numeric AS expenses,
-          (COALESCE(ma.income_amount, 0) - COALESCE(ma.expense_amount, 0))::numeric AS balance
-        FROM generate_series(1, 12) AS m(mes)
-        LEFT JOIN monthly_agg ma ON ma.mes = m.mes
-        ORDER BY m.mes
-      `;
+      const [monthlyRows, topIncomeRows, topExpenseRows] = await Promise.all([
+        reads.listPyGMonthlySeries(bookId, year, accountId, entityId),
+        reads.listPyGTopIncome(bookId, year, accountId, entityId),
+        reads.listPyGTopExpenses(bookId, year, accountId, entityId),
+      ]);
 
-      // 2. Top 10 income — codigo LIKE '4%', credit-natural (credito - debito)
-      const topIncomeRows: TopAccountRow[] = await prisma.$queryRaw`
-        SELECT
-          COALESCE(l."cuentaId", l."cuentaGlobalId") AS account_id,
-          COALESCE(cg_dir.codigo, cg_via_cu.codigo) AS account_code,
-          COALESCE(cg_dir.nombre, cg_via_cu.nombre, cu.nombre) AS account_name,
-          SUM(l.credito - l.debito)::numeric AS accumulated
-        FROM lineas_asiento l
-        INNER JOIN asientos a ON a.id = l."asientoId"
-        LEFT JOIN cuentas_usuario cu ON cu.id = l."cuentaId"
-        LEFT JOIN cuentas_globales cg_dir ON cg_dir.id = l."cuentaGlobalId"
-        LEFT JOIN cuentas_globales cg_via_cu ON cg_via_cu.id = cu."globalId"
-        WHERE a."bookId" = ${bookId}
-          AND a.anulado = false
-          AND a."asientoOriginalId" IS NULL
-          AND EXTRACT(YEAR FROM a.fecha) = ${year}
-          AND (cu."tipoCuenta" IS DISTINCT FROM 'bridge')
-          AND COALESCE(cg_dir.codigo, cg_via_cu.codigo) LIKE '4%'
-          AND (${accountId}::text IS NULL OR l."cuentaId" = ${accountId} OR l."cuentaGlobalId" = ${accountId})
-          AND (${entityId}::text IS NULL OR EXISTS (
-            SELECT 1 FROM apuntes ap
-            WHERE ap."asientoId" = a.id AND ap."entityId" = ${entityId}
-          ))
-        GROUP BY
-          COALESCE(l."cuentaId", l."cuentaGlobalId"),
-          COALESCE(cg_dir.codigo, cg_via_cu.codigo),
-          COALESCE(cg_dir.nombre, cg_via_cu.nombre, cu.nombre)
-        HAVING SUM(l.credito - l.debito) > 0
-        ORDER BY accumulated DESC, account_name ASC
-        LIMIT 10
-      `;
-
-      // 3. Top 10 expenses — codigo LIKE '6%', debit-natural (debito - credito)
-      const topExpenseRows: TopAccountRow[] = await prisma.$queryRaw`
-        SELECT
-          COALESCE(l."cuentaId", l."cuentaGlobalId") AS account_id,
-          COALESCE(cg_dir.codigo, cg_via_cu.codigo) AS account_code,
-          COALESCE(cg_dir.nombre, cg_via_cu.nombre, cu.nombre) AS account_name,
-          SUM(l.debito - l.credito)::numeric AS accumulated
-        FROM lineas_asiento l
-        INNER JOIN asientos a ON a.id = l."asientoId"
-        LEFT JOIN cuentas_usuario cu ON cu.id = l."cuentaId"
-        LEFT JOIN cuentas_globales cg_dir ON cg_dir.id = l."cuentaGlobalId"
-        LEFT JOIN cuentas_globales cg_via_cu ON cg_via_cu.id = cu."globalId"
-        WHERE a."bookId" = ${bookId}
-          AND a.anulado = false
-          AND a."asientoOriginalId" IS NULL
-          AND EXTRACT(YEAR FROM a.fecha) = ${year}
-          AND (cu."tipoCuenta" IS DISTINCT FROM 'bridge')
-          AND COALESCE(cg_dir.codigo, cg_via_cu.codigo) LIKE '6%'
-          AND (${accountId}::text IS NULL OR l."cuentaId" = ${accountId} OR l."cuentaGlobalId" = ${accountId})
-          AND (${entityId}::text IS NULL OR EXISTS (
-            SELECT 1 FROM apuntes ap
-            WHERE ap."asientoId" = a.id AND ap."entityId" = ${entityId}
-          ))
-        GROUP BY
-          COALESCE(l."cuentaId", l."cuentaGlobalId"),
-          COALESCE(cg_dir.codigo, cg_via_cu.codigo),
-          COALESCE(cg_dir.nombre, cg_via_cu.nombre, cu.nombre)
-        HAVING SUM(l.debito - l.credito) > 0
-        ORDER BY accumulated DESC, account_name ASC
-        LIMIT 10
-      `;
-
-      // 4. Compute totals with Decimal.js
       const totalIncomeD = monthlyRows.reduce(
         (acc, row) => acc.plus(toDecimal(row.income)),
         new Decimal(0),
@@ -338,7 +204,6 @@ export function createDashboardReportService(): DashboardReportService {
       );
       const netResultD = totalIncomeD.minus(totalExpensesD);
 
-      // Build response — convert Decimal to number at API boundary
       return {
         year,
         totalIncome: totalIncomeD.toNumber(),
@@ -369,43 +234,8 @@ export function createDashboardReportService(): DashboardReportService {
     // getPositionReport
     // -----------------------------------------------------------------------
     async getPositionReport(bookId: string): Promise<PositionReportDTO> {
-      // Get all CuentaUsuario accounts with their aggregated balances
-      const accountRows: AccountBalanceRow[] = await prisma.$queryRaw`
-        WITH book_lines AS (
-          SELECT
-            l."cuentaId",
-            l.debito,
-            l.credito
-          FROM lineas_asiento l
-          INNER JOIN asientos a ON a.id = l."asientoId"
-          WHERE a."bookId" = ${bookId}
-            AND a.anulado = false
-            AND a."asientoOriginalId" IS NULL
-        )
-        SELECT
-          cu.id AS account_id,
-          cu.nombre AS account_name,
-          cu.codigo AS account_codigo,
-          cu."tipoCuenta"::text AS tipo_cuenta,
-          cu."entidadId" AS entidad_id,
-          cg.codigo AS global_codigo,
-          COALESCE(SUM(bl.debito), 0)::numeric AS total_debito,
-          COALESCE(SUM(bl.credito), 0)::numeric AS total_credito
-        FROM cuentas_usuario cu
-        LEFT JOIN cuentas_globales cg ON cg.id = cu."globalId"
-        LEFT JOIN book_lines bl ON bl."cuentaId" = cu.id
-        WHERE cu."userId" = (SELECT "userId" FROM "books" WHERE id = ${bookId})
-          AND cu.activa = true
-        GROUP BY
-          cu.id,
-          cu.nombre,
-          cu.codigo,
-          cu."tipoCuenta",
-          cu."entidadId",
-          cg.codigo
-      `;
+      const accountRows = await reads.listPositionAccountBalances(bookId);
 
-      // Classify each account and compute balances
       const available: PositionBreakdownEntry[] = [];
       const receivables: PositionBreakdownEntry[] = [];
       const payables: PositionBreakdownEntry[] = [];
@@ -422,16 +252,12 @@ export function createDashboardReportService(): DashboardReportService {
         const debitoD = toDecimal(row.total_debito);
         const creditoD = toDecimal(row.total_credito);
 
-        // For asset-type accounts (1xxx): balance = debito - credito
-        // For liability-type accounts (2xxx): balance = credito - debito
         const prefix = row.global_codigo ? row.global_codigo.charAt(0) : '';
         let balance: Decimal;
 
         if (prefix === '2') {
-          // Liability credit-natural
           balance = creditoD.minus(debitoD);
         } else {
-          // Asset debit-natural
           balance = debitoD.minus(creditoD);
         }
 
@@ -455,7 +281,6 @@ export function createDashboardReportService(): DashboardReportService {
         }
       }
 
-      // Compute totals with Decimal.js
       const totalAvailableD = available.reduce(
         (acc, e) => acc.plus(toDecimal(e.balance)),
         new Decimal(0),
@@ -496,24 +321,14 @@ export function createDashboardReportService(): DashboardReportService {
         ...position.breakdown.receivables.map((e) => e.accountId),
         ...position.breakdown.payables.map((e) => e.accountId),
       ];
-      const accounts =
-        accountIds.length === 0
-          ? []
-          : await prisma.cuentaUsuario.findMany({
-              where: { id: { in: accountIds } },
-              select: {
-                id: true,
-                entidadId: true,
-                entidad: { select: { nombre: true } },
-              },
-            });
+      const accounts = await reads.findAccountsWithEntity(accountIds);
       const accountById = new Map(accounts.map((a) => [a.id, a]));
 
       for (const entry of position.breakdown.receivables) {
         const account = accountById.get(entry.accountId);
         if (!account?.entidadId) continue;
         const current = entityMap.get(account.entidadId) ?? {
-          entityName: account.entidad?.nombre ?? 'Unknown',
+          entityName: account.entidadNombre ?? 'Unknown',
           receivables: new Decimal(0),
           payables: new Decimal(0),
         };
@@ -525,7 +340,7 @@ export function createDashboardReportService(): DashboardReportService {
         const account = accountById.get(entry.accountId);
         if (!account?.entidadId) continue;
         const current = entityMap.get(account.entidadId) ?? {
-          entityName: account.entidad?.nombre ?? 'Unknown',
+          entityName: account.entidadNombre ?? 'Unknown',
           receivables: new Decimal(0),
           payables: new Decimal(0),
         };

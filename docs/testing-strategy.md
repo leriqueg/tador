@@ -40,7 +40,7 @@ Ejecución real (Docker, sin Make en Windows):
 2. `should classify entity-linked asset accounts as Receivable` — `breakdown.receivables` length 2 vs 1  
 3. `should exclude income/expense accounts from Position totals` — `totalAvailable` esperado 700, recibido 0  
 
-Hasta que se corrijan, el badge del README usa **162 passing / 165 cases** (55+83+19+5 E2E asumidos). Tras el fix: volver a correr suites y aplicar [`update-procedure.md`](../specs/010-seguridad-calidad-y-tests/update-procedure.md).
+Hasta que se corrijan, el badge del README usa **162 passing / 165 cases** (55+83+19+5 E2E asumidos). Tras el fix: volver a correr suites y aplicar [`update-procedure.md`](../specs/011-seguridad-calidad-y-tests/update-procedure.md).
 
 > **Lectura honesta de la pirámide.** El objetivo pedagógico es 70/20/10. Hoy la
 > distribución está invertida hacia integración (56 %) porque el **motor contable**

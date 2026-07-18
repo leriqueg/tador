@@ -7,9 +7,9 @@ se configuran, y las herramientas **recomendadas** para cerrar brechas. La segur
 se documenta aparte en [`docs/security.md`](./security.md).
 
 > **Cómo implementar cada brecha (paso a paso):**  
-> [`specs/010-seguridad-calidad-y-tests/close-quality-gaps.md`](../specs/010-seguridad-calidad-y-tests/close-quality-gaps.md)  
+> [`specs/010-seguridad-calidad-y-tests/close-quality-gaps.md`](../specs/011-seguridad-calidad-y-tests/close-quality-gaps.md)  
 > **Cómo refrescar conteos y badges:**  
-> [`specs/010-seguridad-calidad-y-tests/update-procedure.md`](../specs/010-seguridad-calidad-y-tests/update-procedure.md)
+> [`specs/010-seguridad-calidad-y-tests/update-procedure.md`](../specs/011-seguridad-calidad-y-tests/update-procedure.md)
 
 ---
 
@@ -63,7 +63,7 @@ Priorizadas por impacto/esfuerzo. Ninguna está aplicada aún.
 > ESLint por separado.
 >
 > Pasos de implementación (Q1–Q8, S0–S4):  
-> [`specs/010-seguridad-calidad-y-tests/close-quality-gaps.md`](../specs/010-seguridad-calidad-y-tests/close-quality-gaps.md)
+> [`specs/010-seguridad-calidad-y-tests/close-quality-gaps.md`](../specs/011-seguridad-calidad-y-tests/close-quality-gaps.md)
 
 ---
 

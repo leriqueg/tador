@@ -2,7 +2,7 @@
 
 **Fecha de corte:** 2026-07-18
 
-**Última actualización:** 2026-07-18
+**Última actualización:** 2026-07-19
 
 **Última verificación de suites:** 2026-07-18
 
@@ -43,7 +43,7 @@ Ejecución real (Docker Compose). Informe consolidado:
 
 **Fallos abiertos:** ninguno (368/368).
 
-> **Lectura honesta de la pirámide.** El objetivo pedagógico es 70/20/10. Hoy la
+> **Distribución observada.** La referencia adoptada es 70/20/10. Hoy la
 > distribución está inclinada hacia integración (48.9 %) porque el **motor contable**
 > y las **plantillas** —el corazón del dominio financiero— se validan
 > deliberadamente contra Postgres real (asientos balanceados, aislamiento por
@@ -173,9 +173,9 @@ entorno de Playwright) está en `frontend/docs/testing-strategy.md`.
 ## Backlog de pruebas (deuda técnica reconocida)
 
 1. **Subir cobertura unitaria** de casos de uso de application y frontend hacia
-   el objetivo pedagógico 70 % (gate FE ya en ≥45 %).
+   la referencia del 70 % (gate FE ya en ≥45 %).
 2. **Elevar gradualmente el umbral de cobertura backend** en CI (hoy existe un
-   gate anti-regresión de 15/15/15/12, todavía lejos del objetivo pedagógico).
+   gate anti-regresión de 15/15/15/12, todavía lejos de la referencia).
 3. **E2E en CI** con el perfil Docker (`make test-e2e`) como job opcional/nightly.
 4. **Snapshot/visual testing** de componentes vía Storybook cuando el catálogo de
    UI se estabilice.

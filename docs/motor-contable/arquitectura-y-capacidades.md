@@ -1,7 +1,7 @@
 # Motor contable: arquitectura y capacidades
 
 **Fecha**: 2026-07-18  
-**Última actualización**: 2026-07-18
+**Última actualización**: 2026-07-19
 
 ## Qué hace
 
@@ -9,7 +9,7 @@ El motor recibe hechos económicos, valida sus invariantes y persiste un ledger
 auditable. Apunte es la intención del usuario; Asiento es el hecho contable.
 Una plantilla prepara líneas, pero nunca sustituye las validaciones del motor.
 
-## Relevancia académica del dominio
+## Modelo de dominio e invariantes
 
 El motor se modela como un **dominio rico en invariantes**, no como operaciones
 CRUD sobre tablas. La validez de un registro depende de reglas combinadas:
@@ -46,8 +46,8 @@ invariante que necesita pruebas independientes.
 
 ## Límites del dominio implementado
 
-| Tema | Estado actual | Implicación académica |
-|------|---------------|-----------------------|
+| Tema | Estado actual | Implicación técnica |
+|------|---------------|---------------------|
 | Invariantes en DB | No hay `CHECK` de balance | La integridad depende de los servicios de aplicación |
 | Decimal end-to-end | Persistencia y V12/balance de creación usan Decimal; reportes/agregados mixtos | Hablar de “exactitud crítica”, no de exactitud universal |
 | Atomicidad | Creación/edición/void de Asiento atómicos; update de Apunte no | Mostrar el contrato real del endpoint |

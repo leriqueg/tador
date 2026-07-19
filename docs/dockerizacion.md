@@ -1,14 +1,14 @@
 # Dockerización y reproducibilidad de TADOR
 
 **Fecha:** 2026-07-18  
-**Última actualización:** 2026-07-18
+**Última actualización:** 2026-07-19
 
 TADOR usa Docker y Docker Compose para reproducir el entorno de desarrollo y
 aislar las pruebas que requieren infraestructura real. La contenerización
 actual cubre PostgreSQL, backend, frontend y Playwright E2E; no debe confundirse
 con una plataforma de producción completamente definida.
 
-## Resumen para sustentación
+## Síntesis
 
 | Objetivo | Implementación |
 |----------|----------------|
@@ -21,7 +21,7 @@ con una plataforma de producción completamente definida.
 | Pruebas aisladas | `compose.e2e.yaml` dirige backend a `tador_test` |
 | Automatización | Makefile como interfaz estable de comandos |
 
-## 1. Fundamento académico
+## 1. Portabilidad y reproducibilidad
 
 La portabilidad no significa que un contenedor se comporte idénticamente en
 cualquier infraestructura. La contribución de Docker es encapsular runtime,
@@ -182,9 +182,8 @@ limitación explícita, no una cobertura inexistente.
 
 ## Conclusión
 
-La dockerización de TADOR es sólida como entorno reproducible de desarrollo y
+La dockerización de TADOR proporciona un entorno reproducible de desarrollo y
 pruebas: fija runtimes, coordina dependencias saludables y separa bases de
-datos. Su presentación académica debe distinguir esta evidencia de una
-afirmación más amplia de “producción lista”. El siguiente nivel no es añadir
-más contenedores, sino diseñar operación segura: despliegue, secretos,
+datos. No constituye por sí sola una plataforma lista para producción. La
+operación productiva todavía requiere despliegue, gestión de secretos,
 observabilidad, backups y recuperación.

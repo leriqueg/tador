@@ -2,7 +2,7 @@
 
 **Fecha de corte:** 2026-07-18
 
-**Última actualización:** 2026-07-18
+**Última actualización:** 2026-07-19
 
 ![GitHub last commit](https://img.shields.io/github/last-commit/leriqueg/tador)
 ![GitHub repo size](https://img.shields.io/github/repo-size/leriqueg/tador)
@@ -37,13 +37,12 @@ TADOR busca conservar la sencillez de los apuntes rápidos, pero con un motor in
 
 ---
 
-## Documentación para la sustentación
+## Documentación del proyecto
 
-La [guía documental](docs/README.md) organiza la evidencia académica del
-proyecto en siete ejes:
+La [guía documental](docs/README.md) organiza el proyecto en siete ejes:
 
 - [arquitectura de software](docs/arquitectura-software.md);
-- [Spec-Driven Development](docs/spec-driven-development.md);
+- [metodología con GitHub Spec-Kit, Gentleman.AI y TDD](docs/spec-driven-development.md);
 - [diseño visual: de Stitch a Storybook](docs/diseno-visual-y-storybook.md);
 - [dominio y motor contable](docs/motor-contable/README.md);
 - [calidad de software](docs/software-quality-report.md);

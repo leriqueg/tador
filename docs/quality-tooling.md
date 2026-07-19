@@ -2,7 +2,7 @@
 
 **Fecha de corte:** 2026-07-18
 
-**Última actualización:** 2026-07-18
+**Última actualización:** 2026-07-19
 
 Inventario de las herramientas de calidad **aplicadas hoy** en el repositorio, dónde
 se configuran, y las herramientas **recomendadas** para cerrar brechas. La seguridad
@@ -21,13 +21,12 @@ se documenta aparte en [`docs/security.md`](./security.md).
 
 ## Aplicadas actualmente
 
-Desde una perspectiva académica, estas herramientas forman controles
-complementarios: el compilador detecta inconsistencias de tipos, el linter
-señala defectos y convenciones, las pruebas aportan evidencia de comportamiento
-y la cobertura identifica código no ejercitado. Ninguna métrica aislada
-equivale a calidad; el criterio se aproxima con evidencia diversa y riesgos
-residuales explícitos, en línea con mantenibilidad, fiabilidad y seguridad de
-ISO/IEC 25010.
+Estas herramientas forman controles complementarios: el compilador detecta
+inconsistencias de tipos, el linter señala defectos y convenciones, las pruebas
+aportan evidencia de comportamiento y la cobertura identifica código no
+ejercitado. Ninguna métrica aislada equivale a calidad; el criterio se aproxima
+con evidencia diversa y riesgos residuales explícitos, en línea con
+mantenibilidad, fiabilidad y seguridad de ISO/IEC 25010.
 
 | Herramienta | Ámbito | Dónde | Qué garantiza |
 |-------------|--------|-------|---------------|
@@ -64,7 +63,7 @@ Los E2E de Playwright **no** corren en CI todavía; se ejecutan localmente con
 | Prioridad | Herramienta | Motivo | Acción sugerida |
 |-----------|-------------|--------|-----------------|
 | **Alta** | **Prettier o Biome (format)** | No hay formateo automático consistente | Adoptar Biome o Prettier; verificar en CI |
-| **Media** | **Subir cobertura unitaria BE/FE** | FE ~49 % lines; BE domain+app ~19 % lines (unit); objetivo pedagógico 70 % | Más tests unitarios; subir umbrales gradualmente |
+| **Media** | **Subir cobertura unitaria BE/FE** | FE ~49 % lines; BE domain+app ~19 % lines (unit); referencia objetivo 70 % | Más tests unitarios; subir umbrales gradualmente |
 | **Media** | **Husky + lint-staged** | Nada bloquea commits con errores de lint/format | Pre-commit solo sobre staged |
 | **Media** | **E2E en CI (nightly/opcional)** | Playwright solo corre local | Job con perfil Docker `make test-e2e` |
 | **Baja** | **Codecov / badge de cobertura** | Visibilidad en PR | Subir `lcov` |

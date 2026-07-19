@@ -1,31 +1,37 @@
-# Spec-Driven Development en TADOR
+# Metodología de desarrollo: Spec-Kit, Gentleman.AI y TDD
 
 **Fecha:** 2026-07-18  
-**Última actualización:** 2026-07-18
+**Última actualización:** 2026-07-19
 
-TADOR utiliza Spec-Driven Development (SDD) para convertir necesidades de
-producto en artefactos verificables antes de escribir código. Cada incremento
-relevante se expresa como una capacidad acotada con especificación, plan,
-tareas, criterios de aceptación y evidencia de pruebas.
+TADOR se desarrolló mediante Spec-Driven Development (SDD) con
+[GitHub Spec-Kit](https://github.com/github/spec-kit) para estructurar la
+definición de capacidades, y el ecosistema Gentleman.AI para ejecutar la
+implementación asistida bajo una disciplina Test-Driven Development (TDD).
 
-## Resumen para sustentación
+Cada incremento se formuló como una capacidad acotada con requisitos,
+escenarios de aceptación, plan técnico, tareas ordenadas, pruebas y evidencia
+de verificación. La especificación gobierna el trabajo; el agente de
+implementación no sustituye los requisitos ni decide por fuera de sus límites.
+
+## Flujo de desarrollo
 
 ```mermaid
 flowchart LR
-    C[Constitución] --> S[spec.md]
-    S --> P[plan.md]
-    P --> D[Diseño y contratos]
-    D --> T[tasks.md]
-    T --> I[Implementación TDD]
-    I --> V[Verificación]
-    V --> A[ADR / documentación]
+    N[Necesidad de producto] --> C[Constitución]
+    C --> S[Spec-Kit: specify y clarify]
+    S --> P[Spec-Kit: plan]
+    P --> D[Diseño, investigación y contratos]
+    D --> T[Spec-Kit: tasks]
+    T --> G[Gentleman.AI: implementación TDD]
+    G --> V[Tests, lint, typecheck y CI]
+    V --> A[ADRs y documentación]
 ```
 
-El valor académico del proceso es la **trazabilidad**: una decisión puede
-seguirse desde el principio rector y el requisito, hasta la tarea, el código y
+La propiedad central del proceso es la **trazabilidad**: una decisión puede
+seguirse desde el principio rector y el requisito hasta la tarea, el código y
 la prueba que aporta evidencia.
 
-## 1. Qué se entiende por SDD
+## 1. Spec-Driven Development
 
 SDD desplaza parte de la validación hacia el inicio del ciclo. La especificación
 describe **qué comportamiento y resultado se necesita**; el plan decide **cómo
@@ -33,16 +39,36 @@ se integrará técnicamente**; las tareas convierten el diseño en unidades
 ejecutables. Así se reduce el riesgo de implementar una solución técnicamente
 correcta para un problema mal definido.
 
-En TADOR no reemplaza TDD. Ambos operan en niveles complementarios:
+En TADOR, SDD y TDD operan en niveles complementarios:
 
 | Disciplina | Pregunta principal | Evidencia |
 |------------|--------------------|----------|
-| SDD | ¿Estamos construyendo la capacidad correcta? | escenarios, requisitos y criterios de éxito |
+| SDD con Spec-Kit | ¿Estamos construyendo la capacidad correcta? | escenarios, requisitos y criterios de éxito |
 | Diseño/ADRs | ¿Por qué se eligió este enfoque? | alternativas, consecuencias y decisiones |
-| TDD | ¿El código cumple el comportamiento acordado? | prueba que falla, implementación y regresión |
+| TDD con Gentleman.AI | ¿El código cumple el comportamiento acordado? | prueba que falla, implementación mínima y regresión |
 | CI/calidad | ¿La integración conserva los acuerdos? | typecheck, lint, cobertura y suites |
 
-## 2. Jerarquía de artefactos
+## 2. GitHub Spec-Kit en el repositorio
+
+El repositorio fue inicializado con Spec-Kit `0.9.6.dev0` y la integración
+`cursor-agent`, registradas en `.specify/init-options.json` y
+`.specify/integration.json`. La integración instaló skills especializadas para
+constitución, especificación, clarificación, planificación, tareas,
+implementación, checklists y análisis de consistencia.
+
+El workflow `.specify/workflows/speckit/workflow.yml` formaliza el ciclo:
+
+```text
+specify → revisión de spec → plan → revisión de plan → tasks → implement
+```
+
+Los gates entre especificación y plan impiden avanzar automáticamente con un
+artefacto no revisado. Las extensiones de Git crean la rama de feature antes de
+especificar y ofrecen puntos de commit antes y después de cada fase. La
+extensión `agent-context` actualiza el contexto del agente después de
+especificar y planificar, manteniendo disponibles las restricciones activas.
+
+## 3. Jerarquía de artefactos
 
 ### Constitución
 
@@ -93,7 +119,58 @@ producción.
 justificación debe sobrevivir al sprint. Por ejemplo, idempotencia concurrente,
 saldos derivados y el aplazamiento de IA v0.
 
-## 3. Ejemplo de trazabilidad: motor contable
+## 4. Implementación con Gentleman.AI y TDD
+
+Sobre los artefactos producidos por Spec-Kit, el ecosistema Gentleman.AI se
+utilizó para ejecutar tareas de implementación, revisión y verificación dentro
+de Cursor. Las reglas persistentes del proyecto trasladan al agente las
+restricciones de arquitectura, seguridad, exactitud monetaria y estilo; las
+skills especializadas aportan procedimientos repetibles para implementar y
+analizar cada incremento.
+
+La unidad de trabajo no fue un prompt aislado, sino una tarea trazable de
+`tasks.md`. Para comportamiento de negocio, el ciclo aplicado fue:
+
+```mermaid
+flowchart LR
+    T[Tarea + requisito] --> R[Red: prueba que falla]
+    R --> G[Green: implementación mínima]
+    G --> F[Refactor: mejorar diseño]
+    F --> Q[Quality gates]
+    Q -->|falla| R
+    Q -->|pasa| N[Siguiente tarea]
+```
+
+### Red
+
+Se expresa el comportamiento esperado en una prueba unitaria o de integración.
+En el motor contable esto incluye balance de asientos, dinero decimal,
+aislamiento por tenant, periodos, idempotencia y carreras concurrentes.
+
+### Green
+
+El agente implementa el cambio mínimo que satisface el escenario, respetando
+los puertos de aplicación y evitando introducir reglas de dominio en rutas,
+repositorios o componentes visuales.
+
+### Refactor
+
+Con las pruebas en verde se ajustan nombres, responsabilidades y duplicación sin
+cambiar el contrato observable. Los tests de arquitectura protegen la dirección
+de dependencias durante esta fase.
+
+### Verificación
+
+TypeScript, oxlint, Vitest, PostgreSQL de integración y, según el alcance,
+Playwright validan el incremento. El resultado se contrasta con los criterios
+`SC-*` y las tareas marcadas; una ejecución histórica siempre queda ligada a su
+fecha y commit.
+
+La asistencia por agentes acelera la producción y revisión de código, pero no
+constituye evidencia por sí misma. La evidencia es el artefacto versionado, la
+prueba reproducible y el cumplimiento observable del requisito.
+
+## 5. Ejemplo de trazabilidad: motor contable
 
 | Nivel | Evidencia |
 |-------|----------|
@@ -109,7 +186,7 @@ saldos derivados y el aplazamiento de IA v0.
 Esta cadena es más fuerte que afirmar “el sistema funciona”: permite mostrar qué
 significa funcionar y dónde se prueba.
 
-## 4. Incrementos y estado
+## 6. Incrementos y estado
 
 El proyecto sigue el principio “un sprint = una spec = una capacidad
 verificable”. La secuencia cubre plataforma, catálogos, motor contable,
@@ -117,16 +194,16 @@ plantillas, reportes y las interfaces Hogar/PRO.
 
 La numeración expresa identidad histórica, no necesariamente orden de entrega.
 El directorio `008-ia-v0` se conserva, pero la capacidad fue excluida del cierre
-del MVP por ADR 0002. `009-frontend-pro-avanzado` pasó a ser el incremento
-activo. Esta decisión muestra una propiedad importante de SDD: cambiar alcance
-de forma explícita sin borrar la historia.
+del MVP por ADR 0002. `009-frontend-pro-avanzado` fue implementado después de
+007 sin renumerar los directorios. Esta decisión muestra una propiedad
+importante de SDD: cambiar alcance de forma explícita sin borrar la historia.
 
 > La constitución aún contiene una referencia histórica a IA v0 dentro de los
 > criterios de cierre. Para el alcance vigente, ADR 0002 y los documentos de
 > roadmap posteriores son la decisión aplicable. Esta divergencia se documenta
-> como deuda de gobernanza y no debe ocultarse en la presentación.
+> como deuda de gobernanza.
 
-## 5. Controles de calidad del proceso
+## 7. Controles de calidad del proceso
 
 - **Clarificación antes del diseño:** preguntas y respuestas quedan en la spec.
 - **Criterios verificables:** los requisitos usan resultados observables y
@@ -141,12 +218,12 @@ de forma explícita sin borrar la historia.
 - **Documentación viva:** specs y docs se actualizan cuando una decisión cambia
   semántica o alcance.
 
-## 6. Beneficios y límites
+## 8. Beneficios y límites
 
 | Aspecto | Beneficio observado | Riesgo o límite |
 |---------|---------------------|-----------------|
 | Alcance incremental | Reduce el tamaño de cada decisión | Puede fragmentar la visión si no existe documentación fundacional |
-| Trazabilidad | Facilita auditoría y sustentación | Requiere mantener sincronizados artefactos y código |
+| Trazabilidad | Facilita auditoría y revisión | Requiere mantener sincronizados artefactos y código |
 | Diseño anticipado | Expone riesgos contables y de seguridad | Un plan excesivo puede quedar obsoleto |
 | TDD desde requisitos | Conecta pruebas con valor de negocio | Tener muchas pruebas no garantiza buenas aserciones |
 | ADRs | Conservan el “por qué” | Las decisiones posteriores deben marcar qué texto anterior reemplazan |
@@ -155,17 +232,11 @@ SDD tampoco demuestra causalmente que cada acierto provenga del proceso. Su
 aporte verificable es reducir ambigüedad, hacer visibles los compromisos y
 permitir revisar coherencia entre intención e implementación.
 
-## 7. Cómo presentar el proceso
-
-1. Mostrar la constitución y explicar dos o tres principios no negociables.
-2. Elegir una historia del motor contable en `spec.md`.
-3. Seguirla hasta requisito y criterio de éxito.
-4. Enseñar el Constitution Check y una decisión en ADR.
-5. Mostrar la tarea de prueba y el test correspondiente.
-6. Cerrar con la evidencia de CI y una limitación reconocida.
-
 ## Referencias internas
 
+- [Configuración de integración Spec-Kit](../.specify/integration.json)
+- [Workflow SDD](../.specify/workflows/speckit/workflow.yml)
+- [Extensiones y hooks](../.specify/extensions.yml)
 - [Constitución](../.specify/memory/constitution.md)
 - [Especificación del motor contable](../specs/003-motor-contable/spec.md)
 - [Plan del motor contable](../specs/003-motor-contable/plan.md)

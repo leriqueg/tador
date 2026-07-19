@@ -1,14 +1,14 @@
 # Arquitectura de software de TADOR
 
 **Fecha:** 2026-07-18  
-**Última actualización:** 2026-07-18
+**Última actualización:** 2026-07-19
 
 TADOR adopta una arquitectura web modular orientada al dominio. Su decisión
 central es separar las reglas financieras de los frameworks y de la
 persistencia: Fastify, Prisma, PostgreSQL y React son mecanismos reemplazables;
 las invariantes contables son el núcleo estable del sistema.
 
-## Resumen para sustentación
+## Síntesis
 
 | Pregunta | Respuesta |
 |----------|-----------|
@@ -19,7 +19,7 @@ las invariantes contables son el núcleo estable del sistema.
 | ¿Cómo se verifica? | Tests de arquitectura, unitarios, integración y E2E |
 | ¿Qué decisión guía la UI? | Dos modos —Hogar y PRO— sobre un único motor y modelo de datos |
 
-## 1. Fundamento académico
+## 1. Fundamentos y atributos de calidad
 
 Clean Architecture organiza el software alrededor de reglas de negocio y
 establece una **regla de dependencia**: el código de las capas internas no debe
@@ -144,7 +144,7 @@ Las propiedades relevantes son:
 | Toda mutación es atómica | Creación/edición/anulación de Asiento sí; `PATCH` de Apunte documenta no-atomicidad |
 | Idempotencia total | Solo aplica si el cliente envía clave; unicidad actual es global |
 | SOLID completo | Hay puertos, DIP y SRP parcial; no hay métrica de cumplimiento total |
-| Suite siempre verde | El informe de calidad es evidencia histórica de un commit; revalidar antes de la defensa |
+| Suite siempre verde | El informe de calidad es evidencia histórica asociada a un commit, no una propiedad permanente |
 
 El detalle está en
 [`motor-contable/flujo-escritura-concurrencia.md`](motor-contable/flujo-escritura-concurrencia.md).
@@ -189,7 +189,7 @@ Véase [`dockerizacion.md`](dockerizacion.md).
 | Dos modos, un motor | Sin migración al pasar de Hogar a PRO | La UI debe evitar duplicar semántica |
 | Contenedores de desarrollo | Reproducibilidad | No equivalen por sí solos a un despliegue productivo |
 
-## 8. Evidencia para evaluación
+## 8. Referencias y evidencia
 
 - Constitución: [`.specify/memory/constitution.md`](../.specify/memory/constitution.md).
 - Decisión base: [`adr/0001-stack-architecture-and-library-baseline.md`](adr/0001-stack-architecture-and-library-baseline.md).

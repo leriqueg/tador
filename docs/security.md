@@ -2,7 +2,7 @@
 
 **Fecha:** 2026-07-18
 
-**Última actualización:** 2026-07-18
+**Última actualización:** 2026-07-19
 
 Estado de la seguridad del proyecto. El **2026-07-18** se ejecutó el perfil base
 (SCA, gitleaks, Semgrep y revisión manual) y el perfil extendido con DAST
@@ -11,7 +11,7 @@ Estado de la seguridad del proyecto. El **2026-07-18** se ejecutó el perfil bas
 
 ---
 
-## Enfoque académico
+## Modelo de seguridad
 
 TADOR aplica **defensa en profundidad**: ningún control aislado se considera
 suficiente. La validación reduce entradas inválidas; autenticación y
@@ -72,8 +72,9 @@ proyecto:
    `sameSite=lax`, CORS allowlist y frontend/backend same-site.
 5. **Cabeceras del frontend estático.** Helmet protege la API; las advertencias
    de ZAP sobre Vite deben resolverse en el reverse proxy/CDN productivo.
-6. **Automatización de seguridad.** gitleaks, Semgrep y ZAP se ejecutaron en la
-   evaluación, pero no todos son gates del workflow de CI.
+6. **Automatización de seguridad.** `npm audit`, gitleaks, Semgrep y ZAP se
+   ejecutaron en el corte documentado, pero todavía no son gates del workflow de CI.
+   Dependabot/Renovate y CodeQL tampoco están configurados.
 7. **Configuración productiva fail-closed.** Los defaults locales de
    `SESSION_SECRET` y la ausencia de un compose productivo no deben presentarse
    como endurecimiento de producción.
@@ -84,15 +85,17 @@ proyecto:
 
 ---
 
-## Plan de auditoría OWASP
+## Auditoría OWASP y estado de herramientas
 
-**Cuándo:** al cerrar la implementación del sprint.
+La auditoría de cierre se ejecutó el **2026-07-18**. El procedimiento queda
+disponible para repetirla antes de una entrega o release.
 
-**Cómo:** perfil base con `npm audit`, gitleaks y Semgrep; perfil extendido con
-OWASP ZAP Baseline; revisión manual de autenticación, sesiones, autorización por
-tenant, validación, consultas, errores y configuración.
+**Perfil ejecutado:** base con `npm audit`, gitleaks, Semgrep y revisión manual;
+extendido con OWASP ZAP Baseline. La revisión manual cubrió autenticación,
+sesiones, autorización por tenant, validación, consultas, errores y
+configuración.
 
-**Qué documentar tras la ejecución:**
+**Evidencia que debe conservar cada ejecución:**
 
 - Hallazgos por severidad (crítico / alto / medio / bajo).
 - Cuáles se corrigieron y el commit/PR asociado.
@@ -105,20 +108,41 @@ El procedimiento completo y la plantilla de resultados están en:
 - [`specs/011-seguridad-calidad-y-tests/update-procedure.md`](../specs/011-seguridad-calidad-y-tests/update-procedure.md)
 - [`docs/software-quality-report.md`](./software-quality-report.md)
 
-### Herramientas de seguridad recomendadas
+### Controles implementados en la aplicación
 
-| Herramienta | Propósito |
-|-------------|-----------|
-| `npm audit` + **Dependabot/Renovate** | Vulnerabilidades en dependencias |
-| **CodeQL** (GitHub Advanced Security) | SAST en la CI |
-| **gitleaks** | Escaneo de secretos en commits |
-| **@fastify/helmet** | Cabeceras de seguridad HTTP |
-| **@fastify/rate-limit** | Limitación de intentos en auth |
-| **OWASP ZAP** (DAST) | Escaneo dinámico opcional pre-release |
+| Control | Estado | Propósito / evidencia |
+|---------|--------|-----------------------|
+| `@fastify/helmet` | **Implementado** | Cabeceras HTTP del API en `backend/src/server.ts` |
+| `@fastify/rate-limit` | **Implementado** | Límite global y límite estricto en auth/recovery |
+| `@fastify/cors` | **Implementado** | Allowlist `CORS_ORIGIN` con credenciales |
+| `AuthToken` persistido | **Implementado** | Tokens verify/recovery hasheados y consumibles una sola vez |
+
+### Herramientas ejecutadas en el corte documentado
+
+| Herramienta | Estado | Alcance |
+|-------------|--------|---------|
+| `npm audit` | **Ejecutado manualmente** | Backend y frontend; 0 vulnerabilidades |
+| gitleaks | **Ejecutado manualmente** | Historial Git; 0 secretos reales, 1 falso positivo |
+| Semgrep | **Ejecutado manualmente** | SAST de backend/frontend; 0 hallazgos |
+| OWASP ZAP Baseline | **Ejecutado manualmente** | DAST sobre Vite SPA; 0 FAIL, 8 WARN aceptados |
+
+Estas ejecuciones produjeron la línea base aprobada, pero todavía no constituyen
+controles recurrentes en CI.
+
+### Automatización pendiente (no implementada)
+
+| Herramienta / control | Propósito previsto |
+|-----------------------|--------------------|
+| Dependabot o Renovate | Alertas y actualizaciones automáticas de dependencias |
+| CodeQL | SAST recurrente en GitHub Actions |
+| `npm audit` en CI | Bloquear vulnerabilidades altas/críticas en cada cambio |
+| gitleaks en CI o pre-commit | Detectar secretos antes de integrar cambios |
+| Semgrep en CI | Repetir reglas OWASP en cada cambio |
+| OWASP ZAP pre-release | Repetir DAST antes de releases, no en cada PR |
 
 ---
 
-## Resultados de la evaluación OWASP
+## Resultados del análisis OWASP
 
 > Ejecutada el **2026-07-18** (perfil base + extendido). Cierre **APROBADO**.
 > Detalle: [`software-quality-report.md`](./software-quality-report.md).

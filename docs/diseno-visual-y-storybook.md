@@ -2,7 +2,7 @@
 
 **Fecha:** 2026-07-18
 
-**Última actualización:** 2026-07-18
+**Última actualización:** 2026-07-19
 
 El frontend de TADOR no se diseñó directamente dentro de las pantallas
 productivas. Primero se definieron requisitos de experiencia, luego se crearon
@@ -15,7 +15,7 @@ Este proceso permitió separar tres preguntas:
 2. **¿Qué patrones son reutilizables?** — sistema de diseño y componentes.
 3. **¿Cómo se conecta con el negocio real?** — páginas, rutas, API y estado.
 
-## Resumen para sustentación
+## Flujo de diseño e implementación
 
 ```mermaid
 flowchart LR
@@ -56,8 +56,8 @@ Stitch produjo artefactos versionados bajo
   entidades, configuración y flujos PRO.
 
 Versionar estos artefactos en el repositorio conserva la trazabilidad entre
-intención visual e implementación. También evita depender de que la herramienta
-externa siga disponible durante la evaluación.
+intención visual e implementación y evita que el conocimiento del diseño
+dependa exclusivamente de una herramienta externa.
 
 ## 2. Normalización del sistema de diseño
 
@@ -73,9 +73,9 @@ se identificaron reglas comunes y se normalizaron como tokens:
 | Bordes redondeados y sombras suaves | mockups + `DESIGN.md` | utilidades Tailwind y componentes |
 | Español neutro y tono cercano | guía de marca | textos de interfaz |
 
-Académicamente, esta etapa convierte ejemplos concretos en un vocabulario
-visual reusable. Los tokens reducen valores arbitrarios, facilitan consistencia
-y permiten cambiar la identidad visual sin editar cada pantalla por separado.
+Esta etapa convierte ejemplos concretos en un vocabulario visual reutilizable.
+Los tokens reducen valores arbitrarios, facilitan consistencia y permiten
+cambiar la identidad visual sin editar cada pantalla por separado.
 
 ## 3. Inventario y extracción de componentes
 

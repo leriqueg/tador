@@ -1,16 +1,16 @@
 # Índice de documentación TADOR
 
 **Fecha**: 2026-07-18  
-**Última actualización**: 2026-07-18
+**Última actualización**: 2026-07-19
 
 Este índice apunta a la documentación operativa y a las decisiones de
 arquitectura vigentes. La descripción general, estado del producto y comandos
 principales parten del [`README.md` del proyecto](../README.md).
 
-## Ruta de lectura para la sustentación
+## Documentación principal
 
 1. [Arquitectura de software](arquitectura-software.md)
-2. [Spec-Driven Development](spec-driven-development.md)
+2. [Metodología: GitHub Spec-Kit, Gentleman.AI y TDD](spec-driven-development.md)
 3. [Diseño visual: de Stitch a Storybook](diseno-visual-y-storybook.md)
 4. [Dominio y motor contable](motor-contable/README.md)
 5. [Calidad de software](software-quality-report.md)
@@ -21,15 +21,15 @@ Esta secuencia conecta problema, método de desarrollo, solución técnica y
 evidencia. Cada documento distingue capacidades implementadas, decisiones y
 limitaciones para evitar presentar objetivos futuros como resultados actuales.
 
-> **Criterio de honestidad académica.** El stack efectivo del frontend es React +
-> Vite + Tailwind. Zod aparece como dependencia, pero no valida aún el borde
-> HTTP. El informe de calidad documenta un cierre histórico (2026-07-18); antes
-> de la defensa conviene reejecutar suites sobre el commit presentado.
+> **Alcance de la evidencia.** El stack efectivo del frontend es React + Vite +
+> Tailwind. Zod aparece como dependencia, pero no valida aún el borde HTTP. El
+> informe de calidad documenta una ejecución histórica del 2026-07-18 asociada
+> a un commit concreto.
 
 ## Arquitectura y proceso
 
 - [Arquitectura de software](arquitectura-software.md)
-- [Spec-Driven Development](spec-driven-development.md)
+- [Metodología: GitHub Spec-Kit, Gentleman.AI y TDD](spec-driven-development.md)
 - [Diseño visual: de mockups de Stitch a biblioteca Storybook](diseno-visual-y-storybook.md)
 - [Dockerización y reproducibilidad](dockerizacion.md)
 
@@ -60,7 +60,7 @@ limitaciones para evitar presentar objetivos futuros como resultados actuales.
 
 - [Archivos de entorno](environment-files.md)
 
-## Entrega académica
+## Entrega
 
 - [Checklist de entrega](delivery-checklist.md)
 - [README principal del proyecto](../README.md)

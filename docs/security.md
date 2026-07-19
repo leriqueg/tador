@@ -1,28 +1,55 @@
 # Seguridad — TADOR
 
+**Fecha:** 2026-07-18
+
 **Última actualización:** 2026-07-18
 
 Estado de la seguridad del proyecto. El **2026-07-18** se ejecutó el perfil base
-(SCA, gitleaks, Semgrep y revisión manual). DAST (OWASP ZAP) permanece en el
-perfil extendido. Detalle consolidado:
+(SCA, gitleaks, Semgrep y revisión manual) y el perfil extendido con DAST
+(OWASP ZAP). Detalle consolidado:
 [`docs/software-quality-report.md`](./software-quality-report.md).
+
+---
+
+## Enfoque académico
+
+TADOR aplica **defensa en profundidad**: ningún control aislado se considera
+suficiente. La validación reduce entradas inválidas; autenticación y
+autorización controlan identidad y alcance; cookies y tokens protegen sesiones;
+rate limiting reduce abuso; aislamiento por tenant limita impacto; SAST, SCA,
+secret scanning y DAST aportan detección independiente.
+
+El análisis toma como referencias OWASP Top 10, OWASP API Security Top 10 y
+OWASP ASVS nivel 1. Un resultado limpio de herramientas no prueba ausencia de
+vulnerabilidades: demuestra únicamente que no se detectaron hallazgos dentro
+del alcance, reglas y fecha documentados.
+
+### Activos y límites de confianza
+
+| Activo | Amenaza principal | Control relevante |
+|--------|-------------------|-------------------|
+| Credenciales y sesiones | robo, fuerza bruta, fijación | Argon2, cookie segura, tokens opacos, rate limit |
+| Datos financieros | acceso cruzado o manipulación | autorización y filtros fail-closed por tenant |
+| Integridad contable | duplicación o carrera | transacciones, idempotencia y locks |
+| Secretos de infraestructura | exposición en repo o navegador | `.env` ignorado, allowlist `VITE_*`, gitleaks |
+| Disponibilidad del API | abuso de endpoints | rate limiting y límites del framework |
 
 ---
 
 ## Prácticas de seguridad por diseño (ya presentes en el código)
 
-Aunque no hay tooling de seguridad, el código sí aplica *secure-by-default* según
-la Constitución del proyecto:
+El código y el tooling aplican *secure-by-default* según la Constitución del
+proyecto:
 
 | Área | Práctica | Dónde |
 |------|----------|-------|
-| **Hash de contraseñas** | `argon2` (no IEEE/MD5/SHA a mano) | `backend/src/application/auth-service.ts` |
+| **Hash de contraseñas** | `argon2` (sin criptografía de contraseñas propia) | adaptador de infraestructura de contraseñas |
 | **Sesiones por cookie** | `httpOnly`, `sameSite=lax`, `secure` en producción, `maxAge` 7d | `backend/src/api/middleware/auth.ts` |
 | **Longitud mínima de contraseña** | ≥ 8 caracteres | `backend/src/api/routes/auth.ts` |
 | **No enumeración de usuarios** | Recuperación/reenvío no revelan si el email existe | `auth-service.ts` (`requestRecovery`, `resendVerification`) |
 | **Autorización en el borde** | `requireAuth` en rutas protegidas | `backend/src/api/middleware/auth.ts` |
 | **Aislamiento por tenant** | Reglas de dominio *fail-closed* en el motor contable | `backend/src/domain/**` + tests de integración |
-| **Validación de entrada** | `zod` para esquemas | dependencia `zod` en backend |
+| **Validación de entrada** | Controles parciales en rutas y dominio; Zod está declarado pero **no se usa** todavía en `backend/src` | rutas Fastify + reglas de dominio |
 | **Cabeceras HTTP** | `@fastify/helmet` (CSP desactivada en API JSON) | `backend/src/server.ts` |
 | **Rate limiting** | Global suave + override estricto en auth/recovery (20/min) | `server.ts`, `api/auth-rate-limit.ts` |
 | **Secretos fuera del frontend** | Solo variables `VITE_*` llegan al navegador | `docs/environment-files.md` |
@@ -30,17 +57,30 @@ la Constitución del proyecto:
 
 ---
 
-## Hallazgos candidatos a validar
+## Riesgos residuales y controles pendientes
 
-1. **Tokens en memoria.** Los tokens de verificación y recuperación se guardan en
-   `Map` en memoria (`auth-service.ts`), marcado en el código como *"replace with
-   DB in production"*. No sobreviven a reinicios ni escalan horizontalmente.
-2. **CORS/CSRF.** Revisar política CORS y protección CSRF para cookies de sesión.
-3. **Escaneo de secretos en CI.** gitleaks se ejecutó en la evaluación; falta
-   automatizarlo en el workflow.
+1. **Idempotency-Key global.** La unicidad de `Asiento.idempotencyKey` no está
+   tipada por `bookId`; un replay debe comprobar siempre pertenencia al tenant
+   antes de devolver el asiento. Mitigación recomendada: índice compuesto
+   `(bookId, idempotencyKey)` y recheck scoped.
+2. **Validación HTTP runtime incompleta.** No hay schemas Zod/JSON Schema
+   sistemáticos en el borde; parte de la validación ocurre más adentro o por
+   tipado TypeScript, que no protege en runtime.
+3. **Tokens y correo en entornos no productivos.** El stub de email y posibles
+   respuestas de desarrollo no deben filtrarse a un despliegue público.
+4. **CSRF en una futura topología cross-site.** El MVP usa cookie
+   `sameSite=lax`, CORS allowlist y frontend/backend same-site.
+5. **Cabeceras del frontend estático.** Helmet protege la API; las advertencias
+   de ZAP sobre Vite deben resolverse en el reverse proxy/CDN productivo.
+6. **Automatización de seguridad.** gitleaks, Semgrep y ZAP se ejecutaron en la
+   evaluación, pero no todos son gates del workflow de CI.
+7. **Configuración productiva fail-closed.** Los defaults locales de
+   `SESSION_SECRET` y la ausencia de un compose productivo no deben presentarse
+   como endurecimiento de producción.
 
-> Rate-limit y helmet se cerraron el **2026-07-18**. El audit de toolchain Vitest
-> se cerró al subir backend a Vitest 4 (`npm audit` = 0).
+> Rate-limit, helmet y tokens persistidos en base de datos se cerraron el
+> **2026-07-18**. El audit de toolchain se cerró al subir backend a Vitest 4
+> (`npm audit` = 0).
 
 ---
 

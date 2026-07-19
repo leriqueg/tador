@@ -1,5 +1,9 @@
 # TADOR
 
+**Fecha de corte:** 2026-07-18
+
+**Última actualización:** 2026-07-18
+
 ![GitHub last commit](https://img.shields.io/github/last-commit/leriqueg/tador)
 ![GitHub repo size](https://img.shields.io/github/repo-size/leriqueg/tador)
 ![GitHub](https://img.shields.io/github/license/leriqueg/tador)
@@ -30,6 +34,21 @@ Con el tiempo aparecieron necesidades que el software no cubría bien: movimient
 ## Visión
 
 TADOR busca conservar la sencillez de los apuntes rápidos, pero con un motor interno basado en asientos contables balanceados. El usuario Hogar debería poder registrar cosas como “gasté dinero”, “recibí dinero” o “compré con tarjeta” sin pensar en contabilidad; el usuario PRO podrá ver y controlar más detalle cuando lo necesite.
+
+---
+
+## Documentación para la sustentación
+
+La [guía documental](docs/README.md) organiza la evidencia académica del
+proyecto en siete ejes:
+
+- [arquitectura de software](docs/arquitectura-software.md);
+- [Spec-Driven Development](docs/spec-driven-development.md);
+- [diseño visual: de Stitch a Storybook](docs/diseno-visual-y-storybook.md);
+- [dominio y motor contable](docs/motor-contable/README.md);
+- [calidad de software](docs/software-quality-report.md);
+- [seguridad](docs/security.md);
+- [Dockerización y reproducibilidad](docs/dockerizacion.md).
 
 ---
 
@@ -76,11 +95,12 @@ Pensado para profesionales independientes, pequeños negocios o quienes necesita
 | 05 | Dashboard PYG | ✅ Completado |
 | 06 | Frontend Hogar | ✅ Completado |
 | 07 | Frontend PRO ligero | ✅ Completado |
-| **09** | **Frontend PRO avanzado** | **🔄 Activo** |
+| 09 | Frontend PRO avanzado | ✅ Completado |
+| 010 / 011 | Clean Architecture + calidad/seguridad | ✅ Completado |
 
 La IA v0 (`specs/008-ia-v0/`) está excluida del MVP por ADR 0002. El backend contable y sus reportes se mantienen compartidos por los modos Hogar y PRO.
 
-En julio de 2026 se completó la remediación de Clean Architecture del backend: las capas de aplicación y API ya no dependen directamente de Prisma, SQL, Argon2 ni detalles de infraestructura. La validación de cierre cubre 95 tests unitarios y 111 tests de integración.
+En julio de 2026 se completó la remediación de Clean Architecture del backend: las capas de aplicación y API ya no dependen directamente de Prisma, SQL, Argon2 ni detalles de infraestructura. La evidencia histórica de cierre reporta 96 unitarios y 112 de integración (véase `docs/software-quality-report.md`); cualquier re-ejecución debe contrastarse con el commit actual.
 
 ---
 
@@ -88,10 +108,10 @@ En julio de 2026 se completó la remediación de Clean Architecture del backend:
 
 | Capa | Tecnología |
 |------|------------|
-| Backend | Node.js + TypeScript + Fastify + Prisma + PostgreSQL |
-| Frontend | React + TypeScript + Vite + Mantine + Zustand + React Query |
-| Infraestructura | Docker + PostgreSQL 18.4 |
-| Cálculos financieros | decimal.js |
+| Backend | Node.js 22 + TypeScript + Fastify + Prisma + PostgreSQL |
+| Frontend | React + TypeScript + Vite + Tailwind CSS |
+| Infraestructura | Docker Compose + PostgreSQL 18.4 |
+| Cálculos financieros | `decimal.js` en validaciones críticas; persistencia `NUMERIC` / Prisma `Decimal` |
 
 ---
 
@@ -137,6 +157,39 @@ El pipeline de GitHub Actions ejecuta typecheck, tests unitarios e integración 
 
 ---
 
+## Inicio rápido con Docker
+
+**Requisitos:** Docker con Compose y `make`.
+
+```bash
+cp .env.example .env
+make db-setup
+make up
+```
+
+Después del arranque:
+
+- frontend: `http://localhost:5173`;
+- API: `http://localhost:3000`;
+- health check: `http://localhost:3000/health`.
+
+La configuración local, de pruebas y de un futuro despliegue se explica en
+[`docs/environment-files.md`](docs/environment-files.md). Los valores de ejemplo
+son exclusivos de desarrollo y no deben reutilizarse en producción.
+
+## Estructura del repositorio
+
+```text
+backend/       API, aplicación, dominio, infraestructura, Prisma y pruebas
+frontend/      SPA React, componentes, páginas y pruebas
+specs/         especificaciones, planes, contratos y tareas por capacidad
+docs/          arquitectura, ADRs, calidad, seguridad y motor contable
+docker/        inicialización de servicios de infraestructura
+.github/       integración continua
+```
+
+---
+
 ## Calidad, seguridad y pruebas
 
 TADOR se desarrolla con **TDD** y una pirámide de pruebas 70/20/10. Estado actual:
@@ -172,4 +225,5 @@ Para **recontar tests / actualizar badges** o **cerrar brechas de tooling**, ver
 
 ## Licencia
 
-[MIT](LICENSE)
+MIT. El archivo `LICENSE` todavía debe incorporarse al repositorio antes de la
+publicación final.

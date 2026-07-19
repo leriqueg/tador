@@ -1,5 +1,7 @@
 # Environment files — which one when
 
+**Fecha:** 2026-07-14
+
 **Última actualización:** 2026-07-16
 
 Config is split so Docker, local Node, Vitest, and future deploys never share the wrong database or leak secrets into the frontend.

@@ -9,6 +9,51 @@ El motor recibe hechos económicos, valida sus invariantes y persiste un ledger
 auditable. Apunte es la intención del usuario; Asiento es el hecho contable.
 Una plantilla prepara líneas, pero nunca sustituye las validaciones del motor.
 
+## Relevancia académica del dominio
+
+El motor se modela como un **dominio rico en invariantes**, no como operaciones
+CRUD sobre tablas. La validez de un registro depende de reglas combinadas:
+partida doble, postabilidad, pertenencia al libro, periodo abierto, escala
+monetaria, idempotencia y saldo natural proyectado.
+
+Esta concentración de reglas en dominio/aplicación aporta:
+
+- **alta cohesión:** la semántica financiera cambia en un lugar reconocible;
+- **bajo acoplamiento:** API, UI y Prisma no redefinen la contabilidad;
+- **integridad temporal:** una edición deja versión y una anulación conserva
+  original y reversa;
+- **corrección concurrente:** la invariante se evalúa dentro de la transacción,
+  no únicamente antes de iniciarla;
+- **auditabilidad:** saldos y reportes pueden reconstruirse desde el ledger.
+
+El diseño aplica SOLID con criterio: `Money` encapsula exactitud; el servicio
+contable coordina el caso de uso; las políticas y repositorios separan contratos
+de mecanismos; los adaptadores implementan esos puertos. No se crean
+abstracciones para cada clase: se introducen donde existe una frontera o una
+invariante que necesita pruebas independientes.
+
+## Catálogo de invariantes
+
+| Código conceptual | Invariante | Defensa principal |
+|-------------------|------------|-------------------|
+| V1–V4 | líneas válidas y asiento balanceado | dominio + aritmética decimal |
+| Tenant | cuentas y libro pertenecen al usuario | aplicación/repositorio fail-closed |
+| Periodo | no mutar un ejercicio cerrado | caso de uso + transacción |
+| Idempotencia | una clave produce como máximo un asiento | lock, recheck e índice `UNIQUE` |
+| Atomicidad | cabecera, líneas y Apunte se confirman juntos | transacción PostgreSQL |
+| V12 | saldo natural protegido no cruza cero | lock por cuenta + saldo proyectado |
+| Auditoría | correcciones no borran historia | versiones y reversas |
+
+## Límites del dominio implementado
+
+| Tema | Estado actual | Implicación académica |
+|------|---------------|-----------------------|
+| Invariantes en DB | No hay `CHECK` de balance | La integridad depende de los servicios de aplicación |
+| Decimal end-to-end | Persistencia y V12/balance de creación usan Decimal; reportes/agregados mixtos | Hablar de “exactitud crítica”, no de exactitud universal |
+| Atomicidad | Creación/edición/void de Asiento atómicos; update de Apunte no | Mostrar el contrato real del endpoint |
+| Idempotencia | Opcional y con clave global | Debe acompañarse de aislamiento por libro/usuario |
+| Concurrencia | V12 y clave serializadas; cierre/anulación tienen huecos | Presentar mecanismos implementados y residuales |
+
 ## Capacidades actuales
 
 | Capacidad | Garantía |

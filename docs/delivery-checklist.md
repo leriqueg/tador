@@ -1,6 +1,8 @@
 # Checklist de entrega del proyecto
 
-**Última actualización:** 2026-07-16
+**Fecha de corte:** 2026-07-18
+
+**Última actualización:** 2026-07-18
 
 Seguimiento de los entregables exigidos para la revisión y calificación del
 proyecto. Este documento es la **lista de control operativa**; el contenido
@@ -16,13 +18,13 @@ descriptivo vive en el `README.md` y en `docs/`.
 |------|--------|-------------------|
 | a. Descripción general del proyecto | ✅ | README — Origen, Visión, Modos Hogar/PRO |
 | b. Stack tecnológico | ✅ | README — sección Stack (+ badges) |
-| c. Instalación y ejecución | ⚠️ Parcial | Falta sección clara “Quick start” (Docker / `make up`, migraciones, puertos). Ver `docs/environment-files.md` y Makefile; **hay que consolidar en README** |
-| d. Estructura del proyecto | ⚠️ Parcial | Hay Arquitectura Clean; falta árbol de carpetas (`backend/`, `frontend/`, `specs/`, `docs/`) |
+| c. Instalación y ejecución | ✅ | README — “Inicio rápido con Docker”, migraciones y puertos |
+| d. Estructura del proyecto | ✅ | README — estructura de `backend/`, `frontend/`, `specs/`, `docs/`, Docker y CI |
 | e. Funcionalidades principales | ✅ | README — paneles PYG/posición, modos, sprints |
 | f. Usuario y contraseña de prueba | ❌ Pendiente | Añadir en README cuando exista usuario seed o credenciales de demo estables |
 
-**Acción pendiente:** ampliar README con Quick start, estructura de directorios y
-credenciales de demo (sin secretos de producción).
+**Acción pendiente:** añadir credenciales de demo cuando exista un usuario seed
+estable (sin reutilizar secretos de producción).
 
 ---
 
@@ -107,7 +109,7 @@ Completar al enviar (copiar desde aquí al formulario):
 ## Orden de cierre recomendado
 
 ```text
-1. Completar gaps del README (quick start, estructura, credenciales demo)
+1. Completar el gap restante del README (credenciales demo)
 2. Despliegue + URL
 3. Slides + URL
 4. Vídeo (pantalla) + URL

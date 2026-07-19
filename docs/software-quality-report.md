@@ -173,7 +173,7 @@ el reverse proxy / hosting estático — aceptado para MVP.
 - [x] Autenticación y recuperación — `argon2`; tokens persistidos y consumidos en DB.
 - [x] Cookies / CSRF MVP — `httpOnly` + `sameSite=lax`; same-origin vía proxy Vite.
 - [x] Autorización tenant — tests de integración del motor.
-- [x] Validación de entrada — Zod en backend.
+- [~] Validación de entrada — parcial en dominio/rutas; Zod declarado pero no cableado en `backend/src` (deuda abierta).
 - [x] Inyección SQL/Prisma — Semgrep 0; Prisma.
 - [x] Rate limiting — auth/recovery 20/min (techo alto bajo `VITEST`).
 - [x] CORS — allowlist `CORS_ORIGIN` + credentials.

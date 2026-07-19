@@ -1,15 +1,19 @@
 # Herramientas de calidad — TADOR
 
-**Última actualización:** 2026-07-16
+**Última actualización:** 2026-07-18
 
 Inventario de las herramientas de calidad **aplicadas hoy** en el repositorio, dónde
 se configuran, y las herramientas **recomendadas** para cerrar brechas. La seguridad
 se documenta aparte en [`docs/security.md`](./security.md).
 
-> **Cómo implementar cada brecha (paso a paso):**  
-> [`specs/010-seguridad-calidad-y-tests/close-quality-gaps.md`](../specs/011-seguridad-calidad-y-tests/close-quality-gaps.md)  
-> **Cómo refrescar conteos y badges:**  
-> [`specs/010-seguridad-calidad-y-tests/update-procedure.md`](../specs/011-seguridad-calidad-y-tests/update-procedure.md)
+> **Cómo implementar cada brecha (paso a paso):**
+> [`specs/011-seguridad-calidad-y-tests/close-quality-gaps.md`](../specs/011-seguridad-calidad-y-tests/close-quality-gaps.md)
+>
+> **Cómo refrescar conteos y badges:**
+> [`specs/011-seguridad-calidad-y-tests/update-procedure.md`](../specs/011-seguridad-calidad-y-tests/update-procedure.md)
+>
+> **Informe consolidado:**
+> [`docs/software-quality-report.md`](./software-quality-report.md)
 
 ---
 
@@ -19,13 +23,15 @@ se documenta aparte en [`docs/security.md`](./security.md).
 |-------------|--------|-------|---------------|
 | **TypeScript strict (`tsc --noEmit`)** | Backend | `make typecheck`, CI job `test` | Tipado estático sin emitir; contrato de tipos correcto |
 | **TypeScript build (`tsc -b`)** | Frontend | `npm run build`, CI job `frontend` | Typecheck de proyecto + build de producción |
-| **oxlint** | Frontend | `npm run lint`, `frontend/.oxlintrc.json` | Linter Rust ultrarrápido; reglas React (`rules-of-hooks`), TypeScript y `oxc` |
+| **oxlint** | Backend + Frontend | `npm run lint`, `.oxlintrc.json`, CI | Linter rápido; TS/oxc (backend) y React hooks (frontend) |
 | **Vitest** | Backend + Frontend | `vitest.*.config.ts` | Unit + integración (ver `docs/testing-strategy.md`) |
-| **@vitest/coverage-v8** | Frontend | `npm run test:coverage` | Cobertura de `lib/`, `pages/`, `components/` |
-| **Playwright** | Frontend/E2E | `playwright.config.ts` | Recorridos de usuario en Chromium |
+| **@vitest/coverage-v8** | Backend + Frontend | `npm run test:coverage` | BE: `domain/` + `application/`; FE: `lib/`, `pages/`, `components/` |
+| **Umbrales de cobertura FE** | Frontend | `frontend/vitest.config.ts` | Gate anti-regresión: lines/statements ≥ 45 %, functions/branches ≥ 40 % |
+| **Umbrales de cobertura BE** | Backend | `backend/vitest.unit.config.ts` | Gate anti-regresión domain+app: ≥15/15/15/12 |
+| **Playwright** | Frontend/E2E | `playwright.config.ts` | Recorridos de usuario en Chromium (`make test-e2e` → 9 passed al cierre) |
 | **Storybook** | Frontend | `npm run storybook` | Documentación y aislamiento visual de componentes |
-| **GitHub Actions CI** | Repo | `.github/workflows/ci.yml` | Typecheck + unit + integración en cada PR a `main` |
-| **Docker Compose** | Repo | `compose.yaml`, `compose.e2e.yaml` | Entorno reproducible; DB de test aislada (`tador_test`) |
+| **GitHub Actions CI** | Repo | `.github/workflows/ci.yml` | Typecheck + lint + unit + coverage + integración |
+| **Docker Compose** | Repo | `compose.yaml`, `compose.e2e.yaml` | Entorno reproducible; volúmenes nombrados de `node_modules` |
 | **Prisma migrate** | Backend | `make db-migrate` | Integridad de esquema y migraciones versionadas |
 | **decimal.js** | Backend | dominio/aplicación | Aritmética monetaria exacta (Constitución IX) |
 
@@ -33,9 +39,10 @@ se documenta aparte en [`docs/security.md`](./security.md).
 
 `.github/workflows/ci.yml` corre en `push`/`pull_request` a `main`, con Node 22:
 
-- **Job `test` (backend)**: `npm ci` → `prisma generate` → `typecheck` → `test:unit`
-  → `test:integration` (contra un servicio Postgres 16 con `tador_test`).
-- **Job `frontend`**: `npm ci` → `build` (typecheck) → `test:unit` → `test:integration`.
+- **Job `test` (backend)**: `npm ci` → `prisma generate` → `typecheck` → `lint`
+  → `test:unit` → `test:coverage` → `test:integration` (Postgres `tador_test`).
+- **Job `frontend`**: `npm ci` → `build` → `lint` → `test:unit` → `test:integration`
+  → `test:coverage` (con umbrales).
 
 Los E2E de Playwright **no** corren en CI todavía; se ejecutan localmente con
 `make test-e2e`.
@@ -44,26 +51,18 @@ Los E2E de Playwright **no** corren en CI todavía; se ejecutan localmente con
 
 ## Brechas y herramientas recomendadas
 
-Priorizadas por impacto/esfuerzo. Ninguna está aplicada aún.
-
 | Prioridad | Herramienta | Motivo | Acción sugerida |
 |-----------|-------------|--------|-----------------|
-| **Alta** | **oxlint en backend** | El backend no tiene linter; solo typecheck | Añadir `oxlint` + `.oxlintrc.json` al backend y a la CI |
-| **Alta** | **Prettier o Biome (format)** | No hay formateo automático consistente | Adoptar Biome (formatea + lint) o Prettier; verificar en CI |
-| **Alta** | **Umbrales de cobertura** | Cobertura existe pero no se exige | `coverage.thresholds` en Vitest + reporte en CI |
-| **Media** | **Cobertura de backend** | Backend no reporta cobertura | Añadir `@vitest/coverage-v8` al backend |
-| **Media** | **Husky + lint-staged** | Nada bloquea commits con errores de lint/format | Pre-commit: typecheck + lint + format sobre staged |
+| **Alta** | **Prettier o Biome (format)** | No hay formateo automático consistente | Adoptar Biome o Prettier; verificar en CI |
+| **Media** | **Subir cobertura unitaria BE/FE** | FE ~49 % lines; BE domain+app ~19 % lines (unit); objetivo pedagógico 70 % | Más tests unitarios; subir umbrales gradualmente |
+| **Media** | **Husky + lint-staged** | Nada bloquea commits con errores de lint/format | Pre-commit solo sobre staged |
 | **Media** | **E2E en CI (nightly/opcional)** | Playwright solo corre local | Job con perfil Docker `make test-e2e` |
-| **Baja** | **Codecov / badge de cobertura** | No hay visibilidad de cobertura en PR | Subir `lcov` a Codecov y añadir badge |
-| **Baja** | **Chromatic / snapshot visual** | Storybook sin regresión visual | Regresión visual cuando el catálogo UI se estabilice |
+| **Baja** | **Codecov / badge de cobertura** | Visibilidad en PR | Subir `lcov` |
+| **Baja** | **Chromatic / snapshot visual** | Storybook sin regresión visual | Cuando el catálogo UI se estabilice |
+| **Baja** | **Headers estáticos en prod** | ZAP WARN en Vite SPA | CSP / XFO / etc. en reverse proxy |
 
-> **Sugerencia de consolidación:** adoptar **Biome** cubriría a la vez *lint* +
-> *format* en backend y frontend con una sola herramienta y una sola config, y es
-> combinable con `oxlint` o puede reemplazarlo. Evaluar antes de sumar Prettier +
-> ESLint por separado.
->
-> Pasos de implementación (Q1–Q8, S0–S4):  
-> [`specs/010-seguridad-calidad-y-tests/close-quality-gaps.md`](../specs/011-seguridad-calidad-y-tests/close-quality-gaps.md)
+> Pasos restantes (Q2, Q5–Q8, S1–S4):
+> [`specs/011-seguridad-calidad-y-tests/close-quality-gaps.md`](../specs/011-seguridad-calidad-y-tests/close-quality-gaps.md)
 
 ---
 
@@ -72,11 +71,12 @@ Priorizadas por impacto/esfuerzo. Ninguna está aplicada aún.
 ```bash
 # Backend
 make typecheck          # tsc --noEmit
+make lint-backend       # oxlint
+make coverage-backend   # cobertura unitaria domain + application
 make check              # typecheck + tests de integración
 
 # Frontend
-cd frontend
-npm run lint            # oxlint
-npm run build           # tsc -b + vite build (typecheck)
-npm run test:coverage   # cobertura V8
+make lint-frontend
+make test-frontend
+docker compose run --rm --no-deps frontend npm run test:coverage
 ```

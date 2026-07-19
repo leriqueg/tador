@@ -1,7 +1,7 @@
 # Estrategia de pruebas — TADOR (70 / 20 / 10)
 
-**Última actualización:** 2026-07-16  
-**Última verificación de suites:** 2026-07-16
+**Última actualización:** 2026-07-18
+**Última verificación de suites:** 2026-07-18
 
 TADOR se ha construido con **TDD** y una **pirámide de pruebas** clásica: una base
 amplia de tests unitarios rápidos y aislados, una capa intermedia de tests de
@@ -18,29 +18,27 @@ Este documento describe qué se prueba en cada capa, con qué herramientas, y el
 
 | Capa | Objetivo 70/20/10 | Casos reales | Cuota real | Herramientas |
 |------|-------------------|--------------|------------|--------------|
-| **Unitarias** | ~70 % | **68** | 41 % | Vitest (node + jsdom) |
-| **Integración** | ~20 % | **92** | 56 % | Vitest + Prisma/Fastify · Testing Library |
-| **E2E** | ~10 % | **5** | 3 % | Playwright (Chromium) |
-| **Total** | 100 % | **165** | 100 % | — |
+| **Unitarias** | ~70 % | **179** | 48.6 % | Vitest (node + jsdom) |
+| **Integración** | ~20 % | **180** | 48.9 % | Vitest + Prisma/Fastify · Testing Library |
+| **E2E** | ~10 % | **9** | 2.4 % | Playwright (Chromium) |
+| **Total** | 100 % | **368** | 100 % | — |
 
-### Verificación 2026-07-16
+### Verificación 2026-07-18 (cierre)
 
-Ejecución real (Docker, sin Make en Windows):
+Ejecución real (Docker Compose). Informe consolidado:
+[`docs/software-quality-report.md`](./software-quality-report.md) — **APROBADO**.
 
 | Suite | Resultado |
 |-------|-----------|
-| Backend unit (`npm run test:unit`) | **55 passed** |
-| Backend integration (`npm run test:integration`) | **83 passed / 3 failed** (86) |
-| Frontend Vitest (`npm run test`) | **19 passed** |
-| E2E Playwright | no re-ejecutado en esta verificación (conteo estático: 5) |
+| Backend unit (`make test-unit`) | **96 passed** (Vitest 4) |
+| Backend integration (`make test`) | **112 passed** |
+| Frontend unit (`npm run test:unit`) | **83 passed** |
+| Frontend integration (`npm run test:integration`) | **68 passed** |
+| Frontend coverage (`npm run test:coverage`) | Lines **48.98 %** / Branches **47.24 %** |
+| Backend coverage (`npm run test:coverage`) | Lines **19.05 %** (domain+application) |
+| E2E Playwright (`make test-e2e`) | **9 passed** |
 
-**Fallos abiertos** (todos en `backend/tests/dashboard-report.test.ts`, Position):
-
-1. `should classify bank/wallet as Available, card 1xxx as Available, card 2xxx as Payable` — `totalAvailable` esperado 1800, recibido 800  
-2. `should classify entity-linked asset accounts as Receivable` — `breakdown.receivables` length 2 vs 1  
-3. `should exclude income/expense accounts from Position totals` — `totalAvailable` esperado 700, recibido 0  
-
-Hasta que se corrijan, el badge del README usa **162 passing / 165 cases** (55+83+19+5 E2E asumidos). Tras el fix: volver a correr suites y aplicar [`update-procedure.md`](../specs/011-seguridad-calidad-y-tests/update-procedure.md).
+**Fallos abiertos:** ninguno (368/368).
 
 > **Lectura honesta de la pirámide.** El objetivo pedagógico es 70/20/10. Hoy la
 > distribución está invertida hacia integración (56 %) porque el **motor contable**
@@ -55,7 +53,11 @@ Hasta que se corrijan, el badge del README usa **162 passing / 165 cases** (55+8
 
 ## Conteo detallado por archivo
 
-### Backend — Unitarias (55) · `backend/tests/unit/**` · sin DB
+> Los totales del resumen ejecutivo (verificación 2026-07-18) son la fuente de
+> verdad. Las tablas por archivo siguientes pueden quedar temporalmente
+> desfasadas respecto al total hasta el próximo refresh archivo a archivo.
+
+### Backend — Unitarias (95 en 2026-07-18) · `backend/tests/unit/**` · sin DB
 
 | Archivo | Casos | Qué cubre |
 |---------|-------|-----------|
@@ -99,7 +101,7 @@ Hasta que se corrijan, el badge del README usa **162 passing / 165 cases** (55+8
 | `pages/Dashboard.integration.test.tsx` | 3 | Página Resumen con `useAuth`/`useBookGate`/`reports` mockeados |
 | `pages/Finances.integration.test.tsx` | 3 | Drill-down Estado → P&G / Balance |
 
-### E2E (5) · `frontend/e2e/**/*.spec.ts` · Playwright + Vite + backend real
+### E2E (9) · `frontend/e2e/**/*.spec.ts` · Playwright + Vite + backend real
 
 | Archivo | Casos | Qué cubre |
 |---------|-------|-----------|
@@ -165,10 +167,9 @@ entorno de Playwright) está en `frontend/docs/testing-strategy.md`.
 
 ## Backlog de pruebas (deuda técnica reconocida)
 
-1. **Subir cobertura unitaria** de casos de uso de aplicación para acercar la
-   distribución al 70/20/10.
-2. **Umbrales de cobertura** en CI (backend aún no reporta cobertura; frontend
-   tiene `@vitest/coverage-v8` disponible pero sin umbral obligatorio).
+1. **Subir cobertura unitaria** de casos de uso de application y frontend hacia
+   el objetivo pedagógico 70 % (gate FE ya en ≥45 %).
+2. **Umbral de cobertura backend** gradual en CI (hoy se mide, sin fail threshold).
 3. **E2E en CI** con el perfil Docker (`make test-e2e`) como job opcional/nightly.
 4. **Snapshot/visual testing** de componentes vía Storybook cuando el catálogo de
    UI se estabilice.

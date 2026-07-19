@@ -47,6 +47,7 @@ model User {
 
   books            Book[]
   sessions         Session[]
+  authTokens       AuthToken[]
   cuentasUsuario   CuentaUsuario[]
   entidades        Entidad[]
   tags             Tag[]
@@ -101,6 +102,30 @@ model Session {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("sessions")
+}
+
+enum AuthTokenPurpose {
+  EMAIL_VERIFICATION
+  PASSWORD_RECOVERY
+
+  @@map("auth_token_purpose")
+}
+
+/// One-time auth tokens (email verify / password recovery). Store only hashes.
+model AuthToken {
+  id         String           @id @default(cuid())
+  userId     String
+  purpose    AuthTokenPurpose
+  tokenHash  String           @unique
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, purpose])
+  @@index([expiresAt])
+  @@map("auth_tokens")
 }
 
 model CuentaGlobal {

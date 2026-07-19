@@ -4,6 +4,9 @@
 
 import Fastify, { type FastifyInstance } from 'fastify';
 import fastifyCookie from '@fastify/cookie';
+import fastifyCors from '@fastify/cors';
+import fastifyHelmet from '@fastify/helmet';
+import fastifyRateLimit from '@fastify/rate-limit';
 
 import { createUserRepository } from './infrastructure/repositories/user-repo.js';
 import { createBookRepository } from './infrastructure/repositories/book-repo.js';
@@ -13,6 +16,7 @@ import { createArgon2PasswordHasher } from './infrastructure/services/argon2-pas
 import { createTagRepository } from './infrastructure/repositories/tag-repo.js';
 import { createAccountRepository } from './infrastructure/repositories/account-repo.js';
 import { createEntidadRepository } from './infrastructure/repositories/entidad-repo.js';
+import { createAuthTokenRepository } from './infrastructure/repositories/auth-token-repo.js';
 import { createAuthApplicationService } from './application/auth-service.js';
 import { createBookApplicationService } from './application/book-service.js';
 import { createTagApplicationService } from './application/tag-service.js';
@@ -70,8 +74,43 @@ export async function buildApp(opts?: { logger?: boolean | object }) {
     secret: SESSION_SECRET,
   });
 
-  // Health check
-  app.get('/health', async () => {
+  // CORS allowlist (OWASP A05). SPA uses Vite same-origin proxy in MVP;
+  // allow explicit browser origins when FE/BE are split.
+  const corsOrigins = (process.env.CORS_ORIGIN ?? 'http://localhost:5173')
+    .split(',')
+    .map((o) => o.trim())
+    .filter(Boolean);
+  await app.register(fastifyCors, {
+    origin: (origin, cb) => {
+      // Non-browser / same-origin / inject clients omit Origin.
+      if (!origin) {
+        cb(null, true);
+        return;
+      }
+      cb(null, corsOrigins.includes(origin));
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  });
+
+  // Security headers (OWASP A05) — API JSON; CSP disabled to avoid breaking clients.
+  await app.register(fastifyHelmet, {
+    contentSecurityPolicy: false,
+  });
+
+  // Global soft limit; auth routes apply a stricter override (see auth/recovery).
+  // Integration suites create many users from one client — raise max under VITEST.
+  const isTest = process.env.VITEST === 'true';
+  await app.register(fastifyRateLimit, {
+    global: true,
+    max: isTest ? 10_000 : 200,
+    timeWindow: '1 minute',
+  });
+
+  // Health check (no rate-limit noise in probes)
+  app.get('/health', {
+    config: { rateLimit: false },
+  }, async () => {
     return { status: 'ok', timestamp: new Date().toISOString() };
   });
 
@@ -81,6 +120,7 @@ export async function buildApp(opts?: { logger?: boolean | object }) {
   const emailService = createEmailService();
   const sessionService = createSessionService();
   const passwordHasher = createArgon2PasswordHasher();
+  const authTokenRepo = createAuthTokenRepository();
 
   const authService = createAuthApplicationService(
     userRepo,
@@ -88,6 +128,7 @@ export async function buildApp(opts?: { logger?: boolean | object }) {
     sessionService,
     emailService,
     passwordHasher,
+    authTokenRepo,
   );
 
   const bookService = createBookApplicationService(bookRepo, async (userId: string) => {

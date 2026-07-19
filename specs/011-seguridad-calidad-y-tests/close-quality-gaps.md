@@ -1,6 +1,6 @@
 # Cierre de brechas — calidad y seguridad
 
-**Última actualización:** 2026-07-16
+**Última actualización:** 2026-07-18
 
 Instrucciones concretas para implementar más adelante las herramientas listadas
 como brechas en [`docs/quality-tooling.md`](../../docs/quality-tooling.md) y
@@ -17,38 +17,15 @@ correspondiente, la marca de tiempo, y (si aplica) badges del README — siguien
 1. **Una herramienta por problema.** No instalar Biome + Prettier + ESLint a la vez.
 2. Preferir **Biome** si se quiere unificar format + lint en monorepo.
 3. Mantener **oxlint** en frontend si ya está y funciona; no migrar “por moda”.
-4. Seguridad: primero **JudgmentDay**, luego tooling automático según hallazgos.
+4. Seguridad: primero establecer una línea base automatizada y OWASP; después
+   remediar hallazgos validados.
 
 ---
 
-## Q1 — oxlint en backend (prioridad alta)
+## Q1 — oxlint en backend (prioridad alta) — **CERRADO 2026-07-18**
 
-**Problema:** el backend solo tiene `tsc --noEmit`; no hay linter de estilo/bugs.
-
-**Pasos:**
-
-1. En `backend/`:
-   ```bash
-   npm install -D oxlint
-   ```
-2. Crear `backend/.oxlintrc.json` (plugins `typescript`, `oxc`; ignore `dist`, `node_modules`).
-3. Añadir script en `backend/package.json`:
-   ```json
-   "lint": "oxlint"
-   ```
-4. Añadir target en Makefile (opcional):
-   ```make
-   lint-backend:
-   	$(RUN_BACKEND) npm run lint
-   ```
-5. En `.github/workflows/ci.yml`, job `test`, después de `typecheck`:
-   ```yaml
-   - name: Lint
-     run: npm run lint
-   ```
-6. Actualizar `docs/quality-tooling.md` (mover fila de brecha → aplicadas).
-
-**No tocar:** frontend oxlint ya existente.
+Implementado: `backend/.oxlintrc.json`, script `lint`, `make lint-backend`, paso
+CI, 0 warnings/0 errors.
 
 ---
 
@@ -70,43 +47,19 @@ correspondiente, la marca de tiempo, y (si aplica) badges del README — siguien
 
 ---
 
-## Q3 — Umbrales de cobertura frontend (prioridad alta)
+## Q3 — Umbrales de cobertura frontend (prioridad alta) — **CERRADO 2026-07-18**
 
-**Problema:** existe `npm run test:coverage` pero no hay umbral que falle CI.
-
-**Pasos:**
-
-1. En `frontend/vitest.config.ts`, dentro de `test.coverage`:
-   ```ts
-   thresholds: {
-     lines: 50,      // subir gradualmente
-     functions: 50,
-     branches: 40,
-     statements: 50,
-   },
-   ```
-2. Añadir paso en CI job `frontend`:
-   ```yaml
-   - name: Coverage
-     working-directory: frontend
-     run: npm run test:coverage
-   ```
-3. Documentar umbrales en `docs/quality-tooling.md`.
-4. (Opcional Q7) Subir `coverage/` / lcov a Codecov y badge.
-
-**No tocar:** umbrales agresivos (80%+) en el primer PR; subir de forma incremental.
+Implementado: thresholds lines/statements 45, functions/branches 40 + paso CI
+`Coverage`. Objetivo pedagógico 70 % sigue como meta de mejora.
 
 ---
 
-## Q4 — Cobertura de backend (prioridad media)
+## Q4 — Cobertura de backend (prioridad media) — **CERRADO 2026-07-18**
 
-**Pasos:**
-
-1. `npm install -D @vitest/coverage-v8` en `backend`.
-2. Añadir `coverage` a `vitest.unit.config.ts` (empezar por unitarias; integración es más lenta).
-3. Script `"test:coverage": "vitest run --config vitest.unit.config.ts --coverage"`.
-4. CI opcional en job `test`.
-5. Actualizar `docs/quality-tooling.md` + `docs/testing-strategy.md` (backlog).
+Implementado: `@vitest/coverage-v8@4.1.10`, `test:coverage` sobre `domain` +
+`application`, `make coverage-backend`, paso CI. Gate anti-regresión
+lines/statements/functions/branches ≥15/15/15/12. Medido al cierre:
+lines 19.05 %, statements 18.53 %, functions 17.24 %, branches 15.96 %.
 
 ---
 
@@ -151,13 +104,15 @@ Documentar en `docs/quality-tooling.md`; no mezclar con PRs de lógica financier
 
 ## Seguridad — orden post-implementación
 
-### S0 — JudgmentDay (obligatorio primero)
+### S0 — Evaluación OWASP reproducible (obligatorio primero)
 
 1. Al cerrar implementación del branch `sprint/010-seguridad-calidad-y-tests`.
-2. Ejecutar JudgmentDay (gentleman-ia): revisión ciega dual → fixes → re-juicio.
-3. Rellenar `docs/security.md` → sección **Resultados de JudgmentDay**.
-4. Actualizar badge README según tabla del update-procedure.
-5. No declarar “pass” si quedan críticos abiertos.
+2. Ejecutar el perfil base: `npm audit`, gitleaks, Semgrep y revisión manual.
+3. Ejecutar el perfil extendido (E2E + OWASP ZAP Baseline) para la entrega final.
+4. Rellenar `docs/software-quality-report.md` y la sección de resultados de
+   `docs/security.md`.
+5. Actualizar badge README según el estado real.
+6. No declarar “pass” si quedan críticos abiertos.
 
 ### S1 — Dependencias
 
@@ -169,18 +124,14 @@ Documentar en `docs/quality-tooling.md`; no mezclar con PRs de lógica financier
 - Añadir `gitleaks` en CI (o pre-commit).
 - Verificar que `.env` sigue en `.gitignore`.
 
-### S3 — Hardening Fastify (según JudgmentDay)
+### S3 — Hardening Fastify (según evaluación OWASP)
 
-Candidatos típicos (implementar solo si el juicio lo confirma o prioriza):
-
-| Paquete / cambio | Motivo |
-|------------------|--------|
-| `@fastify/helmet` | Cabeceras HTTP |
-| `@fastify/rate-limit` | Fuerza bruta en `/auth/*` |
-| Persistencia de tokens verify/recovery | Hoy viven en `Map` en memoria |
-| Revisión CORS + CSRF con cookies | Sesión `httpOnly` |
-
-Cada cambio: tests de integración mínimos + nota en `docs/security.md`.
+| Paquete / cambio | Estado 2026-07-18 |
+|------------------|-------------------|
+| `@fastify/helmet` | **Hecho** en `server.ts` |
+| `@fastify/rate-limit` | **Hecho** (global + auth/recovery 20/min) |
+| Persistencia de tokens verify/recovery | **Hecho** (`AuthToken` + hash SHA-256) |
+| Revisión CORS + CSRF con cookies | **Hecho** (MVP: CORS allowlist + `sameSite=lax`) |
 
 ### S4 — SAST / DAST (opcional)
 
@@ -198,7 +149,7 @@ PR3  Q3 thresholds frontend coverage
 PR4  Q4 backend coverage
 PR5  Q5 husky (después de lint/format estables)
 PR6  Q6 e2e CI (opcional/nightly)
-———  S0 JudgmentDay (puede ser PR de docs + fixes)
+———  S0 Evaluación OWASP (puede ser PR de docs + fixes)
 PR7  S1–S3 según hallazgos
 ```
 

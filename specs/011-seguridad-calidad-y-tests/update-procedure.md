@@ -1,276 +1,319 @@
-# Procedimiento de actualización — calidad, seguridad y pruebas
+# Procedimiento reproducible de calidad y seguridad
 
-**Última actualización del procedimiento:** 2026-07-16
+**Última actualización:** 2026-07-18
 
-Usa este documento cuando cambien tests, herramientas de calidad, resultados de
-seguridad, o los badges del README. El objetivo es **actualizar solo lo
-necesario**, con conteos verificados por ejecución real.
+Este procedimiento produce las evidencias que alimentan
+[`docs/software-quality-report.md`](../../docs/software-quality-report.md). Está
+pensado para una evaluación académica defendible, repetible y proporcionada al
+tamaño de TADOR.
 
----
+El informe toma como marco los atributos aplicables de ISO/IEC 25010
+(adecuación funcional, fiabilidad, mantenibilidad y seguridad) y usa OWASP para
+operacionalizar la evaluación de seguridad.
 
-## Regla de oro
+## Resultado esperado
 
-| Hacer | No hacer |
-|-------|----------|
-| Editar los 3 docs canónicos en `docs/` + badges/sección en `README.md` | Crear un cuarto documento “resumen de calidad” paralelo |
-| Actualizar la marca de tiempo `Última actualización` del doc tocado | Reescribir secciones históricas sin necesidad |
-| Recalcular conteos **después** de ejecutar las suites | Inventar números o copiar conteos de un commit viejo |
-| Actualizar solo las celdas/tablas que cambien | Reordenar o renombrar archivos de `docs/` sin motivo |
-| Seguir `close-quality-gaps.md` para implementar tooling nuevo | Meter ESLint + Prettier + Biome a la vez sin decidir |
+Al terminar deben quedar documentados:
 
-**Archivos permitidos a modificar en un refresh de documentación:**
+1. Estado de compilación, tipado y lint.
+2. Pruebas aprobadas, fallidas y distribución por nivel.
+3. Cobertura de líneas, sentencias, funciones y ramas para backend y frontend.
+4. Hallazgos de dependencias, secretos y análisis estático de seguridad.
+5. Resultado E2E y DAST, cuando se ejecute el perfil extendido.
+6. Limitaciones de la medición y riesgos aceptados.
 
-```
-docs/testing-strategy.md
-docs/quality-tooling.md
-docs/security.md
-docs/delivery-checklist.md   # solo si cambia el estado de entrega
-README.md                    # badges + sección "Calidad, seguridad y pruebas"
-specs/010-seguridad-calidad-y-tests/*   # solo si cambia el procedimiento
-```
+La distribución 70/20/10 describe la **pirámide de pruebas**. No es cobertura de
+código ni una calificación de calidad.
 
-**No tocar** (salvo que la tarea lo pida explícitamente): specs 000–008,
-`frontend/docs/testing-strategy.md` (detalle operativo frontend; sí puedes
-enlazarlo), constitución, ADR, código de producto.
+## Perfiles de ejecución
 
----
+| Perfil | Contenido | Cuándo |
+|--------|-----------|--------|
+| **Base obligatorio** | typecheck/build, lint disponible, unitarias, integración, cobertura, `npm audit`, gitleaks y Semgrep | Antes de entregar y al actualizar el reporte |
+| **Extendido** | E2E y OWASP ZAP baseline | Antes de release o entrega final |
+| **Opcional** | mutation testing o plataforma Sonar | Solo si el tiempo permite profundizar |
 
-## Paso 0 — Marca de tiempo
+El perfil base es suficiente para el informe principal. Las herramientas
+opcionales no deben bloquear la entrega.
 
-Al editar cualquier doc en `docs/`, actualiza la línea del encabezado:
+## Prerrequisitos
 
-```markdown
-**Última actualización:** YYYY-MM-DD
-```
+- Docker Engine con Compose.
+- Node.js 22 si se ejecutan comandos desde el host.
+- Dependencias instaladas mediante `npm ci`.
+- `gitleaks` y `semgrep` instalados localmente o disponibles como imágenes Docker.
+- Para ZAP: aplicación levantada en un entorno de prueba, nunca contra producción.
 
-Si solo cambias conteos, actualiza **fecha + tablas de números**. No reescribas
-la narrativa completa.
+### Brechas que deben cerrarse antes de medir cobertura completa
 
----
+Estado al 2026-07-18:
 
-## Paso 1 — Ejecutar las suites (fuente de verdad del “N passing”)
+- Frontend: `@vitest/coverage-v8` + umbrales anti-regresión en CI.
+- Backend: oxlint + `@vitest/coverage-v8` (alcance unitario `domain` + `application`).
+- Tras cambios de dependencias en Docker: `docker compose run --rm backend npm ci`
+  (volúmenes nombrados `backend_node_modules` / `frontend_node_modules`).
 
-Desde la raíz del repo (`c:\dev\personal\tador`), con Docker disponible.
+## Ruta rápida
 
-> **Windows / PowerShell:** si `make` no está en el PATH, usa los equivalentes
-> Docker indicados bajo cada comando.
-
-### 1.1 Backend — typecheck + unitarias + integración
+Desde la raíz:
 
 ```bash
-# Typecheck + integración (incluye db-up)
-make check
-
-# Unitarias de dominio (sin DB) — obligatorio para el conteo unitario
+# Calidad funcional
 make test-unit
+make check
+make test-frontend
+
+# Calidad estática disponible
+docker compose run --rm backend npm run typecheck
+docker compose run --rm --no-deps frontend npm run lint
+docker compose run --rm --no-deps frontend npm run build
+
+# Cobertura disponible hoy
+docker compose run --rm --no-deps frontend npm run test:coverage
+
+# Seguridad de dependencias
+docker compose run --rm backend npm audit --audit-level=high
+docker compose run --rm --no-deps frontend npm audit --audit-level=high
 ```
 
-Equivalentes sin Make:
-
-```powershell
-docker compose run --rm backend npx tsc --noEmit
-docker compose run --rm backend npm run test:unit
-docker compose up -d postgres
-docker compose run --rm backend npm run test:integration
-```
-
-`make check` = `typecheck` + `test` (integración). **No** incluye unitarias:
-por eso hay que correr `make test-unit` (o `npm run test:unit`) aparte.
-
-### 1.2 Frontend — Vitest unit + integration
+Después de habilitar cobertura backend:
 
 ```bash
-make test-frontend
+docker compose run --rm backend npm run test:coverage
 ```
 
-Equivalente:
-
-```powershell
-docker compose run --rm --no-deps frontend npm run test
-# o en host:
-cd frontend; npm run test:unit; npm run test:integration
-```
-
-### 1.3 E2E (opcional en cada refresh; obligatorio si cambió Playwright)
+Perfil extendido:
 
 ```bash
 make test-e2e
 ```
 
-Si solo cambió backend/docs y no hay cambios en `frontend/e2e/`, puedes omitir
-E2E y **mantener** el conteo E2E anterior, anotando en el commit/PR:
-“E2E no re-ejecutado; conteo E2E sin cambios”.
+Registra fecha, commit (`git rev-parse HEAD`), versión de herramientas y resultados
+en el reporte. Un comando que termina con código distinto de cero se registra como
+fallo aunque parte de la suite haya pasado.
 
-### 1.4 Qué mirar en la salida
+## 1. Compilación, tipado y lint
 
-Al final de Vitest/Playwright aparece algo como:
-
-```text
-Tests  XX passed (XX)
-```
-
-Suma:
-
-| Suite | Comando | Capa |
-|-------|---------|------|
-| Backend unit | `make test-unit` | Unitarias |
-| Backend integration | `make test` / parte de `make check` | Integración |
-| Frontend unit | `npm run test:unit` / parte de `make test-frontend` | Unitarias |
-| Frontend integration | `npm run test:integration` | Integración |
-| E2E | `make test-e2e` | E2E |
-
-**Total** = unitarias + integración + E2E.
-
-Si alguna suite falla, el badge del README debe reflejar **passed / total**
-(p. ej. `162%20passing%20%2F%20165-yellow`), no afirmar `N passing` en verde.
-Documentar los fallos en la sección de verificación de
-`docs/testing-strategy.md`.
-
-> Alternativa de conteo estático (si Vitest no arranca): buscar
-> `^\s*(it|test)\(` en
-> `backend/tests/unit/**`, `backend/tests/*.test.ts` (excl. unit),
-> `frontend/src/**/*.test.ts`, `frontend/src/**/*.integration.test.tsx`,
-> `frontend/e2e/**/*.spec.ts` (excluir `auth.setup.ts`). Preferir siempre la
-> salida de Vitest cuando esté disponible.
-
----
-
-## Paso 2 — Actualizar `docs/testing-strategy.md`
-
-Editar **solo**:
-
-1. Línea `**Última actualización:** …`
-2. Tabla **Resumen ejecutivo** (casos reales, cuota %, total)
-3. Tablas **Conteo detallado por archivo** si se añadieron/quitaron archivos o casos
-4. Sección **Backlog de pruebas** si se cerró o abrió un ítem
-
-Fórmula de cuota:
-
-```text
-cuota_% = round(casos_capa / total * 100)
-```
-
-No inventes la distribución 70/20/10: documenta la **cuota real** y deja el
-objetivo pedagógico en la columna “Objetivo”.
-
----
-
-## Paso 3 — Actualizar `docs/quality-tooling.md`
-
-Solo si cambió tooling (nueva herramienta, CI, lint, cobertura):
-
-1. Marca de tiempo
-2. Tabla **Aplicadas actualmente** (añadir fila o marcar estado)
-3. Tabla **Brechas** (mover ítem a “aplicadas” o tachar)
-4. Comandos al final si hay un nuevo `make` target
-
-Si solo cambió el número de tests y no el tooling → **no edites** este archivo.
-
-Detalle de *cómo* implementar cada brecha: ver
-[`close-quality-gaps.md`](./close-quality-gaps.md).
-
----
-
-## Paso 4 — Actualizar `docs/security.md`
-
-Solo cuando:
-
-- Termine JudgmentDay, o
-- Se añada tooling de seguridad (`helmet`, `rate-limit`, CodeQL, etc.)
-
-Entonces:
-
-1. Marca de tiempo
-2. Rellenar **Resultados de JudgmentDay** (tabla + veredicto + fecha)
-3. Mover hallazgos resueltos fuera de “candidatos”
-4. Actualizar badge de seguridad en README (ver paso 5)
-
-Si JudgmentDay sigue pendiente → **no cambies** el badge ni inventes resultados.
-
----
-
-## Paso 5 — Sincronizar `README.md`
-
-Tocar **únicamente**:
-
-1. Badges del bloque `<!-- Calidad, seguridad y pruebas -->`
-2. Tabla de la sección `## Calidad, seguridad y pruebas`
-
-### Plantillas de badges (Shields.io)
-
-Sustituye `UNIT`, `INT`, `E2E`, `TOTAL` por los números del paso 1:
-
-```markdown
-[![Tests](https://img.shields.io/badge/tests-TOTAL%20passing-brightgreen)](docs/testing-strategy.md)
-[![Test pyramid](https://img.shields.io/badge/70%2F20%2F10-UNIT%20unit%20%7C%20INT%20int%20%7C%20E2E%20e2e-informational)](docs/testing-strategy.md)
-```
-
-Ejemplo con los números de 2026-07-16:
-
-```text
-TOTAL=165  UNIT=68  INT=92  E2E=5
-→ tests-165%20passing
-→ 70%2F20%2F10-68%20unit%20%7C%2092%20int%20%7C%205%20e2e
-```
-
-Badge de seguridad (elige uno):
-
-| Estado | Badge |
-|--------|-------|
-| Pendiente JudgmentDay | `security-JudgmentDay%20pending-orange` |
-| Pasó con hallazgos aceptados | `security-JudgmentDay%20reviewed-yellow` |
-| Pasó limpio / hallazgos críticos cerrados | `security-JudgmentDay%20pass-brightgreen` |
-
-El badge de CI (`actions/workflows/ci.yml/badge.svg`) **no se edita a mano**.
-
----
-
-## Paso 6 — Checklist de entrega (opcional)
-
-Si avanzó despliegue, slides, vídeo o README de instalación, actualiza el estado
-en [`docs/delivery-checklist.md`](../../docs/delivery-checklist.md) (casillas y
-URLs). No dupliques ese checklist en el README: el README **enlaza** y contiene
-el contenido de producto.
-
----
-
-## Paso 7 — Verificación final
-
-Antes de commit/PR:
-
-- [ ] Suites del paso 1 ejecutadas (o E2E omitido con nota explícita)
-- [ ] Números en `testing-strategy.md` = suma de salidas Vitest/Playwright
-- [ ] Badges README = mismos números (URL encoding correcto: espacio → `%20`, `|` → `%7C`, `/` → `%2F`)
-- [ ] Marca de tiempo actualizada en cada doc tocado
-- [ ] No se crearon archivos nuevos fuera de la lista “permitidos”
-- [ ] `docs/security.md` no inventó resultados de JudgmentDay
-
----
-
-## Comando rápido de “refresh de conteos”
+Ejecuta:
 
 ```bash
-# 1) Ejecutar (Linux/macOS / Git Bash con Make)
+docker compose run --rm backend npm run typecheck
+docker compose run --rm --no-deps frontend npm run build
+docker compose run --rm --no-deps frontend npm run lint
+```
+
+Registra por componente:
+
+- resultado `PASS`, `FAIL` o `N/A`;
+- número de errores;
+- número de advertencias;
+- herramienta y versión.
+
+La tasa de éxito del quality gate se calcula solo con controles aplicables:
+
+```text
+quality_gate_% = controles_aprobados / controles_ejecutados * 100
+```
+
+No debe presentarse este porcentaje aislado: acompáñalo con la lista de controles.
+
+## 2. Pruebas y tasa de éxito
+
+```bash
 make test-unit
 make check
 make test-frontend
-# make test-e2e   # si aplica
 ```
 
-```powershell
-# 1) Ejecutar (Windows PowerShell sin Make)
-docker compose run --rm backend npm run test:unit
-docker compose up -d postgres
-docker compose run --rm backend npx tsc --noEmit
-docker compose run --rm backend npm run test:integration
-docker compose run --rm --no-deps frontend npm run test
-# docker compose -f compose.yaml -f compose.e2e.yaml --profile e2e run --rm --build e2e
+Para la entrega final:
+
+```bash
+make test-e2e
 ```
+
+Registra por suite:
+
+- casos aprobados, fallidos, omitidos y total;
+- duración;
+- nivel: unitario, integración o E2E.
+
+Fórmulas:
 
 ```text
-# 2) Anotar totales de la salida → editar:
-#    docs/testing-strategy.md
-#    README.md (badges + tabla)
-
-# 3) Actualizar **Última actualización:** a la fecha de hoy en los docs tocados
+test_success_% = aprobados / ejecutados * 100
+cuota_nivel_% = casos_del_nivel / total_de_casos * 100
 ```
+
+Los omitidos se informan por separado. La cuota 70/20/10 es una guía de diseño, no
+un umbral de aprobación.
+
+## 3. Cobertura
+
+### Frontend
+
+```bash
+docker compose run --rm --no-deps frontend npm run test:coverage
+```
+
+La configuración cubre `src/lib`, `src/pages` y `src/components`, excluyendo tests
+y stories. Revisa el resumen V8 y registra:
+
+- `% Lines`;
+- `% Statements`;
+- `% Functions`;
+- `% Branches`;
+- archivos o módulos críticos con cobertura baja.
+
+### Backend
+
+Cuando exista el script:
+
+```bash
+docker compose run --rm backend npm run test:coverage
+```
+
+La inclusión debe limitarse a código productivo (`src/**`) y excluir migraciones,
+archivos generados, tests y `dist`. Para evitar doble conteo, se recomienda producir
+un reporte combinado de unitarias e integración o fusionar coberturas V8.
+
+### Criterios iniciales
+
+Los umbrales se fijan después de obtener la primera línea base:
+
+| Métrica | Umbral inicial orientativo |
+|---------|-----------------------------|
+| Líneas | 70 % |
+| Sentencias | 70 % |
+| Funciones | 70 % |
+| Ramas | 60 % |
+| Código nuevo/modificado | 80 % |
+
+No se fuerza artificialmente un 80 % global si la línea base es inferior. El primer
+gate debe impedir retrocesos y después subir gradualmente.
+
+En autenticación, autorización por tenant, idempotencia, asientos balanceados y
+dinero exacto, la revisión debe priorizar **comportamientos críticos cubiertos**,
+no solo el porcentaje agregado.
+
+## 4. Seguridad automatizada — perfil base
+
+La evaluación se mapea a OWASP Top 10, OWASP API Security Top 10 y controles
+aplicables de OWASP ASVS nivel 1.
+
+### 4.1 Dependencias (SCA)
+
+```bash
+docker compose run --rm backend npm audit --audit-level=high
+docker compose run --rm --no-deps frontend npm audit --audit-level=high
+```
+
+Registra vulnerabilidades por severidad, dependencia afectada, exposición real,
+versión corregida y decisión. No uses `npm audit fix --force` durante la auditoría.
+
+### 4.2 Secretos
+
+Con gitleaks instalado:
+
+```bash
+gitleaks git . --redact
+```
+
+Debe analizar el historial, no solo el árbol actual. El reporte solo registra
+conteos y referencias saneadas; nunca copies un secreto encontrado.
+
+### 4.3 SAST
+
+Con Semgrep instalado:
+
+```bash
+semgrep scan \
+  --config p/owasp-top-ten \
+  --config p/typescript \
+  backend/src frontend/src
+```
+
+Cada hallazgo se valida manualmente para separar vulnerabilidades reales de falsos
+positivos. Registra regla, ubicación, severidad, evidencia y decisión.
+
+## 5. Seguridad dinámica — perfil extendido
+
+Levanta el stack de prueba y verifica salud:
+
+```bash
+docker compose up -d postgres backend frontend
+docker compose ps
+mkdir -p .quality-results
+```
+
+Ejecuta OWASP ZAP Baseline contra la superficie pública:
+
+```bash
+docker run --rm --network host \
+  -v "$PWD/.quality-results:/zap/wrk/:rw" \
+  ghcr.io/zaproxy/zaproxy:stable \
+  zap-baseline.py -t http://127.0.0.1:5173 \
+  -J zap-report.json -r zap-report.html
+```
+
+Limitaciones:
+
+- Baseline es pasivo y no cubre adecuadamente rutas autenticadas.
+- No demuestra ausencia de vulnerabilidades.
+- Los flujos financieros autenticados requieren revisión manual o un contexto ZAP
+  específico; eso queda fuera del perfil base.
+- Nunca ejecutar ataques activos contra producción.
+
+## 6. Revisión manual OWASP
+
+Valida como mínimo:
+
+- autenticación, recuperación y verificación de cuenta;
+- cookies (`httpOnly`, `secure`, `sameSite`) y CSRF;
+- autorización de cada recurso propiedad de un tenant;
+- validación Zod y límites de tamaño;
+- inyección en Prisma/SQL y construcción de consultas;
+- rate limiting y prevención de fuerza bruta;
+- cabeceras HTTP y CORS;
+- exposición de errores, logs y datos sensibles;
+- gestión de secretos y configuración de producción;
+- idempotencia y concurrencia en mutaciones financieras.
+
+Cada hallazgo debe incluir categoría OWASP, severidad, evidencia reproducible,
+impacto, remediación y estado.
+
+## 7. Actualizar el reporte
+
+Edita [`docs/software-quality-report.md`](../../docs/software-quality-report.md):
+
+1. Fecha, commit y entorno.
+2. Resultados del quality gate.
+3. Conteos y tasa de éxito de pruebas.
+4. Cobertura backend/frontend.
+5. Hallazgos de seguridad por herramienta y categoría OWASP.
+6. Limitaciones y riesgos aceptados.
+7. Conclusión basada en evidencia.
+
+Actualiza además:
+
+- [`docs/testing-strategy.md`](../../docs/testing-strategy.md), si cambian conteos;
+- [`docs/quality-tooling.md`](../../docs/quality-tooling.md), si cambia tooling;
+- [`docs/security.md`](../../docs/security.md), si cambia el estado de seguridad;
+- `README.md`, solo si cambian badges o el resumen.
+
+## 8. Criterio de cierre
+
+- [x] Todas las suites obligatorias fueron ejecutadas.
+- [x] No se presenta 70/20/10 como cobertura.
+- [x] Cobertura incluye las cuatro métricas y su alcance.
+- [x] Fallos, omitidos y controles N/A están visibles.
+- [x] Hallazgos automáticos fueron validados manualmente.
+- [x] No quedan vulnerabilidades críticas abiertas.
+- [x] Riesgos altos abiertos tienen justificación y plan.
+- [x] El reporte identifica commit, fecha y versiones.
+- [x] Las limitaciones de ZAP y de cobertura están declaradas.
+
+El resultado es **aprobado** únicamente si los controles obligatorios pasan, no hay
+hallazgos críticos abiertos y cualquier riesgo alto está corregido o aceptado de
+forma explícita y justificada.
+
+**Cierre 2026-07-18:** cumplido — ver [`docs/software-quality-report.md`](../../docs/software-quality-report.md).

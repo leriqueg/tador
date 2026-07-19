@@ -21,6 +21,14 @@ arquitectura vigentes.
 - [ADR 0004 — Saldos derivados y control concurrente](adr/0004-derived-balances-and-concurrent-overdraft-guard.md)
 - [ADR 0005 — IDs de texto (CUID) en Asiento y LineaAsiento](adr/0005-text-cuid-primary-keys-for-ledger.md)
 
+## Calidad, seguridad y pruebas
+
+- [Informe de calidad y seguridad (2026-07-18)](software-quality-report.md)
+- [Estrategia de pruebas](testing-strategy.md)
+- [Herramientas de calidad](quality-tooling.md)
+- [Seguridad](security.md)
+- [Checklist de entrega](delivery-checklist.md)
+
 ## Operación
 
 - [Archivos de entorno](environment-files.md)

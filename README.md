@@ -6,11 +6,12 @@
 
 <!-- Calidad, seguridad y pruebas -->
 [![CI](https://github.com/leriqueg/tador/actions/workflows/ci.yml/badge.svg)](https://github.com/leriqueg/tador/actions/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/tests-162%20passing%20%2F%20165-yellow)](docs/testing-strategy.md)
-[![Test pyramid](https://img.shields.io/badge/70%2F20%2F10-68%20unit%20%7C%2092%20int%20%7C%205%20e2e-informational)](docs/testing-strategy.md)
+[![Tests](https://img.shields.io/badge/tests-368%20passing-brightgreen)](docs/testing-strategy.md)
+[![Test pyramid](https://img.shields.io/badge/70%2F20%2F10-179%20unit%20%7C%20180%20int%20%7C%209%20E2E-informational)](docs/testing-strategy.md)
 [![Typecheck](https://img.shields.io/badge/typecheck-strict-3178C6?logo=typescript&logoColor=white)](docs/quality-tooling.md)
-[![Lint](https://img.shields.io/badge/lint-oxlint-6a5acd)](docs/quality-tooling.md)
-[![Security](https://img.shields.io/badge/security-JudgmentDay%20pending-orange)](docs/security.md)
+[![Coverage](https://img.shields.io/badge/coverage%20FE-49%25%20lines-yellow)](docs/software-quality-report.md)
+[![Lint](https://img.shields.io/badge/lint-oxlint%20BE%2BFE-6a5acd)](docs/quality-tooling.md)
+[![Security](https://img.shields.io/badge/security-OWASP%20baseline%20approved-brightgreen)](docs/software-quality-report.md)
 
 <!-- Stack -->
 ![Prisma](https://img.shields.io/badge/Prisma-2D3748?logo=prisma)
@@ -142,14 +143,15 @@ TADOR se desarrolla con **TDD** y una pirámide de pruebas 70/20/10. Estado actu
 
 | Dimensión | Estado | Detalle |
 |-----------|--------|---------|
-| **Pruebas** | 165 casos · **162 passing** (3 fallos Position en dashboard-report) | [`docs/testing-strategy.md`](docs/testing-strategy.md) |
-| **Calidad** | TypeScript strict, oxlint, Vitest, Playwright, CI en cada PR | [`docs/quality-tooling.md`](docs/quality-tooling.md) |
-| **Seguridad** | *Secure-by-design*; auditoría **JudgmentDay** pendiente | [`docs/security.md`](docs/security.md) |
+| **Pruebas** | **368 passing** (96+112 BE, 83+68 FE, 9 E2E) · 2026-07-18 | [`docs/testing-strategy.md`](docs/testing-strategy.md) |
+| **Calidad** | Typecheck PASS; oxlint BE/FE; FE coverage ~49 % (gate ≥45 %); Vitest 4 | [`docs/quality-tooling.md`](docs/quality-tooling.md) |
+| **Seguridad** | OWASP baseline **aprobado** (helmet, rate-limit, CORS, AuthToken, ZAP 0 FAIL) | [`docs/security.md`](docs/security.md) |
+| **Informe** | Evaluación + remediaciones fechadas 2026-07-18 | [`docs/software-quality-report.md`](docs/software-quality-report.md) |
 | **Entrega** | Checklist de requisitos de publicación | [`docs/delivery-checklist.md`](docs/delivery-checklist.md) |
 
-Los badges de la cabecera reflejan calidad, seguridad y pruebas y enlazan a cada
-documento técnico. El badge de seguridad quedará como *JudgmentDay pending* hasta
-ejecutar la auditoría del ecosistema *gentleman-ia* al cierre de la implementación.
+Los badges de la cabecera reflejan el **cierre aprobado** del **2026-07-18**
+(368 tests; OWASP baseline). Detalle:
+[`docs/software-quality-report.md`](docs/software-quality-report.md).
 
 Para **recontar tests / actualizar badges** o **cerrar brechas de tooling**, ver
 [`specs/011-seguridad-calidad-y-tests/`](specs/011-seguridad-calidad-y-tests/).

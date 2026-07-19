@@ -18,6 +18,7 @@ const config: PlaywrightTestConfig = {
   },
   projects: [
     { name: 'setup', testMatch: /auth\.setup\.ts/ },
+    { name: 'setup-pro', testMatch: /auth\.pro\.setup\.ts/ },
     {
       name: 'chromium',
       dependencies: ['setup'],
@@ -25,7 +26,20 @@ const config: PlaywrightTestConfig = {
         ...devices['Desktop Chrome'],
         storageState: 'e2e/.auth/user.json',
       },
-      testIgnore: [/auth\.setup\.ts/, /(smoke|auth-guest)\.spec\.ts/],
+      testIgnore: [
+        /auth\.setup\.ts/,
+        /auth\.pro\.setup\.ts/,
+        /(smoke|auth-guest|pro-quickstart)\.spec\.ts/,
+      ],
+    },
+    {
+      name: 'chromium-pro',
+      dependencies: ['setup-pro'],
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: 'e2e/.auth/pro-user.json',
+      },
+      testMatch: /pro-quickstart\.spec\.ts/,
     },
     {
       name: 'guest',

@@ -8,7 +8,7 @@
  */
 
 import { readFileSync, readdirSync } from 'node:fs';
-import { resolve, dirname, basename, extname } from 'node:path';
+import { resolve, dirname, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 // ---------------------------------------------------------------------------
@@ -67,7 +67,7 @@ interface ValidationError {
   message: string;
 }
 
-function validatePlantilla(raw: Record<string, unknown>, file: string): string | null {
+function validatePlantilla(raw: Record<string, unknown>, _file: string): string | null {
   if (!raw.code || typeof raw.code !== 'string') {
     return `Missing or invalid 'code'`;
   }

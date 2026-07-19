@@ -131,6 +131,18 @@ test-e2e-host: test-db-ensure ## E2E desde el host (backend → tador_test, Vite
 typecheck:                ## Verifica TypeScript sin emitir
 	$(RUN_BACKEND) npx tsc --noEmit
 
+.PHONY: lint-backend
+lint-backend:             ## oxlint del backend
+	$(RUN_BACKEND) sh -c 'test -x node_modules/.bin/oxlint || npm ci; npm run lint'
+
+.PHONY: lint-frontend
+lint-frontend:            ## oxlint del frontend
+	$(COMPOSE) run --rm --no-deps frontend npm run lint
+
+.PHONY: coverage-backend
+coverage-backend:         ## Cobertura unitaria del backend (domain + application)
+	$(RUN_BACKEND) sh -c 'test -d node_modules/@vitest/coverage-v8 || npm ci; npm run test:coverage'
+
 .PHONY: check
 check: typecheck test     ## Typecheck + tests
 

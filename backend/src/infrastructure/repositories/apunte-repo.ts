@@ -13,7 +13,6 @@ import type {
   ApunteRecord,
   ApunteRepository,
   IdempotentApunteReplay,
-  PersistCreateApunteInput,
   PersistCreateApunteResult,
   UpdateApunteInput,
 } from '../../application/ports/apunte-repository.js';

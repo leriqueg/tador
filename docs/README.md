@@ -1,7 +1,7 @@
 # Índice de documentación TADOR
 
 **Fecha**: 2026-07-18  
-**Última actualización**: 2026-07-19
+**Última actualización**: 2026-07-20
 
 Este índice apunta a la documentación operativa y a las decisiones de
 arquitectura vigentes. La descripción general, estado del producto y comandos
@@ -59,6 +59,7 @@ limitaciones para evitar presentar objetivos futuros como resultados actuales.
 ## Operación
 
 - [Archivos de entorno](environment-files.md)
+- [Deploy (HAProxy same-origin / staging VPS)](deploy/README.md)
 
 ## Entrega
 

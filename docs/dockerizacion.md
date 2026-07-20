@@ -1,12 +1,11 @@
 # Dockerización y reproducibilidad de TADOR
 
 **Fecha:** 2026-07-18  
-**Última actualización:** 2026-07-19
+**Última actualización:** 2026-07-20
 
 TADOR usa Docker y Docker Compose para reproducir el entorno de desarrollo y
-aislar las pruebas que requieren infraestructura real. La contenerización
-actual cubre PostgreSQL, backend, frontend y Playwright E2E; no debe confundirse
-con una plataforma de producción completamente definida.
+aislar las pruebas que requieren infraestructura real. El manifiesto
+`compose.staging.yaml` cubre el despliegue staging detrás de HAProxy.
 
 ## Síntesis
 
@@ -40,6 +39,8 @@ En términos de ISO/IEC 25010, esta estrategia aporta principalmente:
 
 ## 2. Topología de contenedores
 
+### Desarrollo (`compose.yaml`)
+
 ```mermaid
 flowchart LR
     U[Usuario :5173] --> F[frontend<br/>Vite]
@@ -47,6 +48,16 @@ flowchart LR
     B --> P[(postgres<br/>PostgreSQL 18.4)]
     E[e2e<br/>Playwright] --> F
     E --> B
+```
+
+### Staging (`compose.staging.yaml` + HAProxy)
+
+```mermaid
+flowchart LR
+    U[Usuario :443] --> H[HAProxy]
+    H -->|/api /auth /book /health| B[backend production :3000]
+    H -->|/*| N[frontend nginx :80]
+    B --> P[(postgres staging)]
 ```
 
 `compose.yaml` define cuatro servicios:
@@ -76,10 +87,14 @@ hosting, observabilidad, TLS, backups y estrategia de rollback.
 
 ### Frontend
 
-`frontend/Dockerfile` está orientado a desarrollo: instala dependencias y
-ejecuta Vite sobre `0.0.0.0`. No es una imagen final para servir archivos
-estáticos en producción. El despliegue deberá construir la SPA y servirla desde
-un hosting estático o reverse proxy con cabeceras de seguridad.
+`frontend/Dockerfile` es multi-stage:
+
+- `development` (default en `compose.yaml`): Vite + hot reload;
+- `builder`: `npm run build` de la SPA;
+- `production`: nginx sirve `dist/` (`frontend/nginx.conf`).
+
+Staging/VPS usa `compose.staging.yaml` con targets `production` en backend y
+frontend. Guía: [`deploy/haproxy-same-origin.md`](deploy/haproxy-same-origin.md).
 
 ### E2E
 

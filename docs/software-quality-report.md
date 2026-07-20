@@ -1,7 +1,8 @@
 # Informe de calidad de software y seguridad — TADOR
 
 **Estado:** **APROBADO** (cierre completo 2026-07-18)  
-**Última actualización:** 2026-07-18  
+**Última actualización:** 2026-07-19
+
 **Fecha de evaluación:** 2026-07-18  
 **Commit base evaluado:** `4ccb17c5ce9d05b291baa27c1d3ee77e3e58a6ae` (`4ccb17c`)  
 **Rama:** `sprint/010-seguridad-calidad-y-tests`  
@@ -31,7 +32,7 @@ Artefactos locales de esta corrida (ignorados por Git): `.quality-results/`.
 **Conclusión:** perfil **base + extendido** cerrados el **2026-07-18** sobre el
 commit base `4ccb17c` y remediaciones del mismo día (tooling, hardening OWASP,
 tokens en DB, CORS, E2E PRO setup, ZAP). **Apto para cierre completo** con
-riesgos residuales documentados (cobertura pedagógica <70 %, cabeceras ZAP en
+riesgos residuales documentados (cobertura por debajo de la referencia del 70 %, cabeceras ZAP en
 Vite dev).
 
 ## 1. Alcance y método
@@ -126,7 +127,7 @@ la capa de integración.
 
 ### Umbrales de referencia
 
-| Métrica | Referencia pedagógica | Resultado |
+| Métrica | Referencia objetivo | Resultado |
 |---------|----------------------|-----------|
 | Lines | 70 % | FE 48.98 % / BE unit 19.05 % — bajo objetivo; riesgo aceptado |
 | Gate FE | ≥45/45/40/40 | **PASS** |
@@ -173,7 +174,7 @@ el reverse proxy / hosting estático — aceptado para MVP.
 - [x] Autenticación y recuperación — `argon2`; tokens persistidos y consumidos en DB.
 - [x] Cookies / CSRF MVP — `httpOnly` + `sameSite=lax`; same-origin vía proxy Vite.
 - [x] Autorización tenant — tests de integración del motor.
-- [x] Validación de entrada — Zod en backend.
+- [~] Validación de entrada — parcial en dominio/rutas; Zod declarado pero no cableado en `backend/src` (deuda abierta).
 - [x] Inyección SQL/Prisma — Semgrep 0; Prisma.
 - [x] Rate limiting — auth/recovery 20/min (techo alto bajo `VITEST`).
 - [x] CORS — allowlist `CORS_ORIGIN` + credentials.
@@ -193,7 +194,7 @@ el reverse proxy / hosting estático — aceptado para MVP.
 
 | Riesgo | Motivo de aceptación | Compensación | Revisión |
 |--------|----------------------|--------------|----------|
-| Cobertura FE/BE <70 % pedagógico | Línea base honesta; valor en integración/E2E | Gates ≥45 % FE y ≥15 % BE unit; 368 tests | Subir umbrales al crecer suites |
+| Cobertura FE/BE <70 % | Línea base medida; valor en integración/E2E | Gates ≥45 % FE y ≥15 % BE unit; 368 tests | Subir umbrales al crecer suites |
 | WARN ZAP en Vite SPA | Dev/static sin helmet de CDN | Helmet en API; headers en proxy prod | Pre-producción / hosting |
 | CSRF Double-Submit no implementado | MVP same-site + proxy | `sameSite=lax` + CORS allowlist | Si FE/BE cross-site |
 | E2E ~2 % de la pirámide | Coste/beneficio; journeys críticos cubiertos | Integración densa del motor | Ampliar E2E bajo demanda |
@@ -205,8 +206,8 @@ Evaluación del **2026-07-18** (commit base `4ccb17c` + remediaciones del mismo 
 - **Fortalezas:** 368 pruebas en verde (base + E2E); typecheck/build/lint OK;
   Semgrep limpio; `npm audit` 0; helmet, rate-limit, CORS, tokens en DB; ZAP sin
   FAIL; CI con lint/coverage.
-- **Residuales aceptados:** cobertura pedagógica <70 %; WARN ZAP de cabeceras SPA.
-- **Decisión:** **APROBADO — cierre completo** para entrega académica / MVP con
+- **Residuales aceptados:** cobertura <70 %; WARN ZAP de cabeceras SPA.
+- **Decisión:** **APROBADO — cierre completo del MVP** con
   baseline OWASP documentada.
 - **Siguiente ciclo (no bloqueante):** Biome/format (Q2), husky (Q5), E2E en CI
   nightly (Q6), subir cobertura hacia 60–70 %, headers estáticos en producción.

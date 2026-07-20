@@ -1,6 +1,8 @@
 # Herramientas de calidad — TADOR
 
-**Última actualización:** 2026-07-18
+**Fecha de corte:** 2026-07-18
+
+**Última actualización:** 2026-07-19
 
 Inventario de las herramientas de calidad **aplicadas hoy** en el repositorio, dónde
 se configuran, y las herramientas **recomendadas** para cerrar brechas. La seguridad
@@ -19,6 +21,13 @@ se documenta aparte en [`docs/security.md`](./security.md).
 
 ## Aplicadas actualmente
 
+Estas herramientas forman controles complementarios: el compilador detecta
+inconsistencias de tipos, el linter señala defectos y convenciones, las pruebas
+aportan evidencia de comportamiento y la cobertura identifica código no
+ejercitado. Ninguna métrica aislada equivale a calidad; el criterio se aproxima
+con evidencia diversa y riesgos residuales explícitos, en línea con
+mantenibilidad, fiabilidad y seguridad de ISO/IEC 25010.
+
 | Herramienta | Ámbito | Dónde | Qué garantiza |
 |-------------|--------|-------|---------------|
 | **TypeScript strict (`tsc --noEmit`)** | Backend | `make typecheck`, CI job `test` | Tipado estático sin emitir; contrato de tipos correcto |
@@ -29,7 +38,7 @@ se documenta aparte en [`docs/security.md`](./security.md).
 | **Umbrales de cobertura FE** | Frontend | `frontend/vitest.config.ts` | Gate anti-regresión: lines/statements ≥ 45 %, functions/branches ≥ 40 % |
 | **Umbrales de cobertura BE** | Backend | `backend/vitest.unit.config.ts` | Gate anti-regresión domain+app: ≥15/15/15/12 |
 | **Playwright** | Frontend/E2E | `playwright.config.ts` | Recorridos de usuario en Chromium (`make test-e2e` → 9 passed al cierre) |
-| **Storybook** | Frontend | `npm run storybook` | Documentación y aislamiento visual de componentes |
+| **Storybook** | Frontend | `npm run storybook` | Documentación y aislamiento visual; transforma patrones de [mockups Stitch en una biblioteca de componentes](diseno-visual-y-storybook.md) |
 | **GitHub Actions CI** | Repo | `.github/workflows/ci.yml` | Typecheck + lint + unit + coverage + integración |
 | **Docker Compose** | Repo | `compose.yaml`, `compose.e2e.yaml` | Entorno reproducible; volúmenes nombrados de `node_modules` |
 | **Prisma migrate** | Backend | `make db-migrate` | Integridad de esquema y migraciones versionadas |
@@ -54,7 +63,7 @@ Los E2E de Playwright **no** corren en CI todavía; se ejecutan localmente con
 | Prioridad | Herramienta | Motivo | Acción sugerida |
 |-----------|-------------|--------|-----------------|
 | **Alta** | **Prettier o Biome (format)** | No hay formateo automático consistente | Adoptar Biome o Prettier; verificar en CI |
-| **Media** | **Subir cobertura unitaria BE/FE** | FE ~49 % lines; BE domain+app ~19 % lines (unit); objetivo pedagógico 70 % | Más tests unitarios; subir umbrales gradualmente |
+| **Media** | **Subir cobertura unitaria BE/FE** | FE ~49 % lines; BE domain+app ~19 % lines (unit); referencia objetivo 70 % | Más tests unitarios; subir umbrales gradualmente |
 | **Media** | **Husky + lint-staged** | Nada bloquea commits con errores de lint/format | Pre-commit solo sobre staged |
 | **Media** | **E2E en CI (nightly/opcional)** | Playwright solo corre local | Job con perfil Docker `make test-e2e` |
 | **Baja** | **Codecov / badge de cobertura** | Visibilidad en PR | Subir `lcov` |

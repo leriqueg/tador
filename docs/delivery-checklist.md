@@ -1,6 +1,8 @@
 # Checklist de entrega del proyecto
 
-**Última actualización:** 2026-07-16
+**Fecha de corte:** 2026-07-18
+
+**Última actualización:** 2026-07-20
 
 Seguimiento de los entregables exigidos para la revisión y calificación del
 proyecto. Este documento es la **lista de control operativa**; el contenido
@@ -16,13 +18,10 @@ descriptivo vive en el `README.md` y en `docs/`.
 |------|--------|-------------------|
 | a. Descripción general del proyecto | ✅ | README — Origen, Visión, Modos Hogar/PRO |
 | b. Stack tecnológico | ✅ | README — sección Stack (+ badges) |
-| c. Instalación y ejecución | ⚠️ Parcial | Falta sección clara “Quick start” (Docker / `make up`, migraciones, puertos). Ver `docs/environment-files.md` y Makefile; **hay que consolidar en README** |
-| d. Estructura del proyecto | ⚠️ Parcial | Hay Arquitectura Clean; falta árbol de carpetas (`backend/`, `frontend/`, `specs/`, `docs/`) |
+| c. Instalación y ejecución | ✅ | README — “Inicio rápido con Docker”, migraciones y puertos |
+| d. Estructura del proyecto | ✅ | README — estructura de `backend/`, `frontend/`, `specs/`, `docs/`, Docker y CI |
 | e. Funcionalidades principales | ✅ | README — paneles PYG/posición, modos, sprints |
-| f. Usuario y contraseña de prueba | ❌ Pendiente | Añadir en README cuando exista usuario seed o credenciales de demo estables |
-
-**Acción pendiente:** ampliar README con Quick start, estructura de directorios y
-credenciales de demo (sin secretos de producción).
+| f. Usuario y contraseña de prueba | ✅ | README — sección “Despliegue y demo”; usuario seed Hogar |
 
 ---
 
@@ -40,11 +39,8 @@ credenciales de demo (sin secretos de producción).
 
 | Ítem | Estado | URL |
 |------|--------|-----|
-| App en funcionamiento | ❌ Pendiente | _añadir URL aquí_ |
-| URL también en README | ❌ Pendiente | Sección “Despliegue” o badge |
-
-**Acción pendiente:** publicar (p. ej. Railway, Fly, Render, VPS) y documentar
-URL + variables de entorno necesarias (sin pegar secretos).
+| App en funcionamiento | ✅ | http://tador.nesis.tel/ |
+| URL también en README | ✅ | Sección “Despliegue y demo” |
 
 ---
 
@@ -52,11 +48,8 @@ URL + variables de entorno necesarias (sin pegar secretos).
 
 | Ítem | Estado | URL / archivo |
 |------|--------|---------------|
-| Slides del proyecto | ❌ Pendiente | _Google Slides / Canva / PDF en repo_ |
-| Enlace o archivo referenciado en README | ❌ Pendiente | |
-
-**Acción pendiente:** crear presentación y enlazarla desde README (o subir el
-archivo bajo `docs/` y enlazarlo).
+| Slides del proyecto | ✅ | https://1drv.ms/p/c/f7ab4fab2f89560c/IQAocx3RX3kdSLTMh-3XQpTHAQ9FXLdAKeYuogmzngmpfd8?e=dsomho |
+| Enlace o archivo referenciado en README | ✅ | Sección “Despliegue y demo” |
 
 ---
 
@@ -64,13 +57,10 @@ archivo bajo `docs/` y enlazarlo).
 
 | Ítem | Estado | URL |
 |------|--------|-----|
-| Vídeo con explicación propia | ❌ Pendiente | _YouTube / Drive / …_ |
-| Captura de pantalla mientras se explica (obligatorio) | ❌ Pendiente | |
-| Cámara / rostro (opcional) | — | Opcional |
-| URL en README | ❌ Pendiente | |
-
-**Acción pendiente:** grabar screencast del flujo (login → onboarding/dashboard →
-apuntes / reportes) y publicar enlace público.
+| Vídeo con explicación propia | ✅ | https://1drv.ms/v/c/f7ab4fab2f89560c/IQD8M5Ntb0E_TrI7Nz0tsk0QAZn-p8jv882RYarlq84RstM?e=HYpHJk |
+| Captura de pantalla mientras se explica (obligatorio) | ✅ | Incluido en el vídeo |
+| Cámara / rostro (opcional) | — | ✅ |
+| URL en README | ✅ | Sección “Despliegue y demo” |
 
 ---
 
@@ -79,8 +69,8 @@ apuntes / reportes) y publicar enlace público.
 | Recurso | Estado |
 |---------|--------|
 | Documentación | ✅ `README.md` + `docs/` + `specs/` |
-| Información de despliegue | ⚠️ Cuando exista URL → documentar en README y marcar aquí |
-| Slides (enlace o archivo) | ❌ |
+| Información de despliegue | ✅ URL en README — “Despliegue y demo” |
+| Slides (enlace o archivo) | ✅ Enlace OneDrive en README |
 
 ---
 
@@ -90,14 +80,14 @@ Completar al enviar (copiar desde aquí al formulario):
 
 | Campo | Valor |
 |-------|-------|
-| Nombre completo | _pendiente_ |
-| Email de inscripción | _pendiente_ |
+| Nombre completo | Luis Arturo Erique Guajala |
+| Email de inscripción | luis_arturo_erique@hotmail.com |
 | URL del repositorio GitHub | `https://github.com/leriqueg/tador` |
-| URL de despliegue | _pendiente_ |
-| URL de las slides | _pendiente_ |
-| URL del vídeo | _pendiente_ |
-| Usuario de prueba | _pendiente_ |
-| Contraseña de prueba | _pendiente_ |
+| URL de despliegue | http://tador.nesis.tel/ |
+| URL de las slides | https://1drv.ms/p/c/f7ab4fab2f89560c/IQAocx3RX3kdSLTMh-3XQpTHAQ9FXLdAKeYuogmzngmpfd8?e=dsomho |
+| URL del vídeo | https://1drv.ms/v/c/f7ab4fab2f89560c/IQD8M5Ntb0E_TrI7Nz0tsk0QAZn-p8jv882RYarlq84RstM?e=HYpHJk |
+| Usuario de prueba | `hogar_user@tador.tel` |
+| Contraseña de prueba | `demoPass11!` |
 
 **Fecha objetivo de entrega (referencia del temario):** 2026-07-20  
 (Se puede enviar antes o después; fuera de plazo los tiempos de corrección pueden variar.)
@@ -107,12 +97,12 @@ Completar al enviar (copiar desde aquí al formulario):
 ## Orden de cierre recomendado
 
 ```text
-1. Completar gaps del README (quick start, estructura, credenciales demo)
-2. Despliegue + URL
-3. Slides + URL
-4. Vídeo (pantalla) + URL
-5. Marcar este checklist en ✅
-6. Rellenar formulario de entrega con las URLs de la sección 7
+1. Completar el gap restante del README (credenciales demo)     ✅
+2. Despliegue + URL                                              ✅
+3. Slides + URL                                                  ✅
+4. Vídeo (pantalla) + URL                                        ✅
+5. Marcar este checklist en ✅                                   ✅
+6. Rellenar formulario de entrega con las URLs de la sección 7   ✅
 ```
 
 Tras cada ítem cerrado, actualizar **solo** este archivo y el README (URLs /

@@ -1,5 +1,9 @@
 # TADOR Component Inventory
 
+**Fecha de corte:** 2026-07-18
+
+**Última actualización:** 2026-07-18
+
 Living design-system catalog for the frontend. **Source of brand tokens:** [`specs/foundation/mockup/stitch/DESIGN.md`](../../specs/foundation/mockup/stitch/DESIGN.md). **Executable demos:** Storybook (`npm run storybook`).
 
 Sprint 006 maps routes ↔ APIs in [`specs/006-frontend-hogar/inventory-vistas-endpoints.md`](../../specs/006-frontend-hogar/inventory-vistas-endpoints.md); this file owns **UI component definitions**.

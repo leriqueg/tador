@@ -1,5 +1,9 @@
 # TADOR Frontend
 
+**Fecha de corte:** 2026-07-18
+
+**Última actualización:** 2026-07-18
+
 React + Vite + Tailwind v4 client for the Hogar experience (Sprint 06).
 
 ## Design system

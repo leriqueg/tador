@@ -23,8 +23,8 @@ codigo;nombre;esPostable;codigoPadre;naturaleza;clasificacion;permite Custom/Ent
 11430001;Electrodomesticos;true;11430000;gadget;asset;false;;;
 11430002;Muebles Hogar;true;11430000;gadget;asset;false;;;
 11440000;Herramientas de trabajo;false;11400000;group;asset;false;;;
-11440001;Fisicas;true;11450000;tool;asset;false;;;
-11440002;Software de Trabajo;true;11450000;tool;asset;false;;;
+11440001;Fisicas;true;11440000;tool;asset;false;;;
+11440002;Software de Trabajo;true;11440000;tool;asset;false;;;
 20000000;Pasivo;false;;root;liability;false;;;
 21000000;Pasivo corriente;false;20000000;group;liability;false;;;
 21100000;Cuentas por pagar;false;21000000;group;liability;false;;;
@@ -34,7 +34,7 @@ codigo;nombre;esPostable;codigoPadre;naturaleza;clasificacion;permite Custom/Ent
 21300000;Prestamos y financiamiento;false;21000000;group;liability;false;;;
 21310000;Prestamos bancarios;false;21300000;group;liability;ConEntidadAutomatica;EntidadFinanciera;;
 21320000;Credito de consumo;true;21310000;loan;liability;ConEntidadAutomatica;EntidadFinanciera;;
-21330000;Prestamos informales;true;21310000;loan;liability;ConEntidadAutomatica;PersonaNatural;;
+21330001;Prestamos informales;true;21330000;loan;liability;ConEntidadAutomatica;PersonaNatural;;
 21330000;Prestamo familiar;false;21300000;group;liability;ConEntidadAutomatica;PersonaNatural;;
 21400000;Obligaciones fiscales y sociales;false;21000000;group;liability;false;;;
 21400001;Impuestos Estatales;true;21400000;tax;liability;ConEntidadAutomatica;EntidadGubernamental;;
@@ -43,7 +43,7 @@ codigo;nombre;esPostable;codigoPadre;naturaleza;clasificacion;permite Custom/Ent
 40000000;Ingresos;false;;root;income;false;;;
 41000000;Ingresos por trabajo;false;40000000;group;income;false;;;
 41010000;Trabajo dependiente;false;41000000;group;income;false;;;
-41010001;Sueldo / Salario;true;41010000;income_category;income;false;;;
+41010001;Sueldo / Salario;true;41010000;income_category;income;false;;;41000001
 41010002;Prestaciones Legales;true;41010000;income_category;income;false;;;
 41010003;Extras de Nomina;true;41010000;income_category;income;false;;;
 41020000;Trabajo independiente;false;41000000;group;income;false;;;
@@ -54,8 +54,8 @@ codigo;nombre;esPostable;codigoPadre;naturaleza;clasificacion;permite Custom/Ent
 41110000;Rentas;false;41100000;group;income;false;;;
 41110001;Alquileres;true;41110000;income_category;income;false;;;
 41120000;Rendimientos;false;41100000;group;income;false;;;
-41120001;Intereses;true;41120000;income_category;income;false;;;
-41120002;Ganancias por invertir;true;41120000;income_category;income;false;;;
+41120001;Intereses;true;41120000;income_category;income;false;;;41100003
+41120002;Utilidades;true;41120000;income_category;income;false;;;
 41120003;Pensiones;true;41120000;income_category;income;false;;;
 41200000;Otros ingresos;false;40000000;group;income;false;;;
 41210000;Ingresos extraordinarios;false;41200000;group;income;false;;;
@@ -68,42 +68,51 @@ codigo;nombre;esPostable;codigoPadre;naturaleza;clasificacion;permite Custom/Ent
 61000000;Gastos del hogar;false;60000000;group;expense;false;;;
 61100000;Vivienda;false;61000000;group;expense;false;;;
 61110000;Alquiler y vivienda;false;61100000;group;expense;false;;;
-61110001;Alquiler de vivienda;true;61110000;expense_category;expense;false;;;
+61110001;Alquiler / Arriendo de vivienda;true;61110000;expense_category;expense;false;;;61115001
 61110002;Mantenimiento vivienda;true;61110000;expense_category;expense;false;;;
 61110003;Reparaciones vivienda;true;61110000;expense_category;expense;false;;;
 61120000;Servicios del hogar;false;61100000;group;expense;Custom;;;
-61120001;Agua;true;61120000;expense_category;expense;false;;;
+61120001;Agua;true;61120000;expense_category;expense;false;;;61211001
 61120002;Energia;true;61120000;expense_category;expense;false;;;
 61120003;Internet;true;61120000;expense_category;expense;false;;;
-61120004;Telefono;true;61120000;expense_category;expense;false;;;
+61120004;Telefono;true;61120000;expense_category;expense;false;;;64100001
 61130000;Alimentacion;false;61000000;group;expense;Custom;;;
-61130001;Supermercado;true;61130000;expense_category;expense;false;;;
-61130002;Restaurantes;true;61130000;expense_category;expense;false;;;
-61130003;Desayunos y almuerzos;true;61130000;expense_category;expense;false;;;
+61130001;Supermercado / Tiendas;true;61130000;expense_category;expense;false;;;61240001
+61130002;Fondas / Comedores;true;61130000;expense_category;expense;false;;;
+61130003;Desayunos y Almuerzos;true;61130000;expense_category;expense;false;;;61240004
 61140000;Salud;false;61000000;group;expense;Custom;;;
 61140001;Farmacia;true;61140000;expense_category;expense;false;;;
 61140002;Clinicas y medicos;true;61140000;expense_category;expense;false;;;
 61140003;Dentista;true;61140000;expense_category;expense;false;;;
 61140004;Optica;true;61140000;expense_category;expense;false;;;
+61140005;Primas de Seguros de Salud;true;61140000;expense_category;expense;false;;;63400004
+61140006;Otros Gastos en Salud;true;61140000;expense_category;expense;false;;;61150008
 61150000;Educacion;false;61000000;group;expense;Custom;;;
 61150001;Cursos;true;61150000;expense_category;expense;false;;;
 61150002;Material escolar;true;61150000;expense_category;expense;false;;;
 61150003;Libros;true;61150000;expense_category;expense;false;;;
-61160000;Transporte;false;61000000;group;expense;Custom;;;
-61160001;Taxi;true;61160000;expense_category;expense;false;;;
+61160000;Transporte;false;61000000;group;expense;Custom;;;61260001
+61160001;Taxi;true;61160000;expense_category;expense;false;;;61260002
 61160002;Combustible;true;61160000;expense_category;expense;false;;;
 61160003;Mantenimiento vehiculo;true;61160000;expense_category;expense;false;;;
 61160004;Parqueo y peajes;true;61160000;expense_category;expense;false;;;
+61160005;Transporte Public / Metro / Tren;true;61160000;expense_category;expense;false;;;
 61170000;Gastos personales;false;61000000;group;expense;Custom;;;
 61170001;Ropa / Sastreria;true;61170000;expense_category;expense;false;;;
 61170002;Estetica / peluqieria;true;61170000;expense_category;expense;false;;;
 61170003;Ocio;true;61170000;expense_category;expense;false;;;
 61180000;Gastos No escenciales;false;61000000;group;expense;Custom;;;
-61180001;Espectaculos / Teatro  / Cine;true;61170000;expense_category;expense;false;;;
-61180002;Bares / Restaurantes ;true;61170000;expense_category;expense;false;;;
-61180003;Celebraciones / Fiestas / Eventos;true;61170000;expense_category;expense;false;;;
-61180004;Gimnasios / Spa ;true;61170000;expense_category;expense;false;;;
-61180005;Regalos;true;61170000;expense_category;expense;false;;;
+61180001;Espectaculos / Teatro  / Cine;true;61180000;expense_category;expense;false;;;
+61180002;Restaurantes / Bares / Casinos;true;61180000;expense_category;expense;false;;;61240002
+61180003;Celebraciones / Fiestas / Eventos;true;61180000;expense_category;expense;false;;;
+61180004;Gimnasios / Spa;true;61180000;expense_category;expense;false;;;
+61180005;Hoteles y Alojamientos;true;61180000;expense_category;expense;false;;;64000003
+61180006;Licores;true;61180000;expense_category;expense;false;;;64000005
+61180007;Cigarrillos;true;61180000;expense_category;expense;false;;;64000006
+61180008;Loterias y Apuestas;true;61180000;expense_category;expense;false;;;64000002
+61180009;Regalos;true;61180000;expense_category;expense;false;;;
+61190000;Otros Gastos;false;61000000;group;expense;Custom;;;
+61190001;Gastos No Identificados;true;61190000;expense_category;expense;false;;;63400002
 62000000;Gastos financieros;false;60000000;group;expense;Custom;;;
 62010000;Servicios financieros;false;62000000;group;expense;false;;;
 62010001;Comisiones;true;62010000;expense_category;expense;false;;;
@@ -117,7 +126,7 @@ codigo;nombre;esPostable;codigoPadre;naturaleza;clasificacion;permite Custom/Ent
 63010001;Aportes a la seguridad social;true;63010000;expense_category;expense;false;;;
 63010002;Tramites publicos;true;63010000;expense_category;expense;false;;;
 63020000;Pensiones a Familiares;false;63010000;expense_category;expense;Custom;;;
-63020001;Pension Alimenticia;true;63020000;expense_category;expense;false;;;
+63020001;Pension Alimenticia;true;63020000;expense_category;expense;false;;;63000003
 64000000;Gastos del negocio;false;60000000;group;expense;false;;;
 64010000;Servicios profesionales;false;64000000;group;expense;Custom;;;
 64010001;Asesores;true;64010000;expense_category;expense;false;;;
@@ -125,6 +134,6 @@ codigo;nombre;esPostable;codigoPadre;naturaleza;clasificacion;permite Custom/Ent
 64010003;Proveedores;true;64010000;expense_category;expense;false;;;
 64010004;Software y suscripciones;true;64010000;expense_category;expense;false;;;
 64020000;Servicios Online;false;64000000;group;expense;Custom;;;
-64020001;Streaming Musica y Video;true;64020000;expense_category;expense;false;;;
+64020001;Streaming Musica y Video;true;64020000;expense_category;expense;false;;;64100003
 64020002;Gaming y Suscripciones;true;64020000;expense_category;expense;false;;;
 64020003;Consolas Gamming;true;64020000;expense_category;expense;false;;;

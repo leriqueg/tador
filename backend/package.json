@@ -16,6 +16,7 @@
     "db:generate": "prisma generate",
     "db:studio": "node scripts/run-with-db-url.mjs npx prisma studio",
     "seed:catalogos": "node scripts/run-with-db-url.mjs npx tsx prisma/seed/catalogos.ts",
+    "migrate:test20260719": "node scripts/run-with-db-url.mjs npx tsx scripts/migrate/test20260719/run.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

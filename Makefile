@@ -125,6 +125,25 @@ test-e2e-host: test-db-ensure ## E2E desde el host (backend → tador_test, Vite
 	@echo "Restaurando backend a tador_dev..."
 	$(COMPOSE) up -d --force-recreate backend
 
+# ─── Migración demo test20260719 ───────────────────────
+# Requiere DEMO_SEED_ENABLED=true y credenciales en
+# migrations/test20260719/.env (ver .env.example).
+
+MIGRATE_TEST_VOL = -v "$(CURDIR)/migrations:/migrations:ro"
+# Credenciales se leen desde /migrations/test20260719/.env (dotenv en el script).
+RUN_MIGRATE_TEST = $(COMPOSE) run --rm $(MIGRATE_TEST_VOL) \
+	-e DEMO_SEED_ENABLED=true \
+	-e NODE_ENV=development \
+	-e MIGRATE_DATA_DIR=/migrations/test20260719
+
+.PHONY: migrate-test20260719-dry
+migrate-test20260719-dry: ## Dry-run expansión CSV + users (sin postear)
+	$(RUN_MIGRATE_TEST) -e MIGRATE_DRY_RUN=true backend npm run migrate:test20260719
+
+.PHONY: migrate-test20260719
+migrate-test20260719:     ## Importa demo users + asientos test20260719
+	$(RUN_MIGRATE_TEST) backend npm run migrate:test20260719
+
 # ─── Calidad ───────────────────────────────────────────
 
 .PHONY: typecheck

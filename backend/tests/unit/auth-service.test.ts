@@ -9,6 +9,7 @@ import type { BookRepository } from '../../src/application/ports/book-repository
 import type { SessionService } from '../../src/application/ports/session-service.js';
 import type { EmailService } from '../../src/application/ports/email-service.js';
 import type { PasswordHasher } from '../../src/application/ports/password-hasher.js';
+import type { AuthTokenRepository } from '../../src/application/ports/auth-token-repository.js';
 import type { User } from '../../src/domain/user.js';
 import type { Book, BookConfig } from '../../src/domain/book.js';
 
@@ -17,7 +18,19 @@ function createFakes() {
   const byEmail = new Map<string, string>();
   let userSeq = 0;
   let sessionSeq = 0;
+  let tokenSeq = 0;
   const sessions = new Map<string, { id: string; userId: string; token: string; expiresAt: Date }>();
+  const authTokens = new Map<
+    string,
+    {
+      id: string;
+      userId: string;
+      purpose: 'EMAIL_VERIFICATION' | 'PASSWORD_RECOVERY';
+      tokenHash: string;
+      expiresAt: Date;
+      consumedAt: Date | null;
+    }
+  >();
   const emails: Array<{ type: string; to: string; token: string }> = [];
 
   const userRepo: UserRepository = {
@@ -110,6 +123,35 @@ function createFakes() {
     },
   };
 
+  const authTokenRepo: AuthTokenRepository = {
+    async issue(userId, purpose, tokenHash, expiresAt) {
+      for (const [key, row] of authTokens) {
+        if (row.userId === userId && row.purpose === purpose && row.consumedAt === null) {
+          authTokens.set(key, { ...row, consumedAt: new Date() });
+        }
+      }
+      const record = {
+        id: `at${++tokenSeq}`,
+        userId,
+        purpose,
+        tokenHash,
+        expiresAt,
+        consumedAt: null,
+      };
+      authTokens.set(tokenHash, record);
+      return { ...record };
+    },
+    async consume(tokenHash, purpose, now = new Date()) {
+      const row = authTokens.get(tokenHash);
+      if (!row || row.purpose !== purpose || row.consumedAt || row.expiresAt <= now) {
+        return null;
+      }
+      const consumed = { ...row, consumedAt: now };
+      authTokens.set(tokenHash, consumed);
+      return { ...consumed };
+    },
+  };
+
   return {
     auth: createAuthApplicationService(
       userRepo,
@@ -117,6 +159,7 @@ function createFakes() {
       sessionService,
       emailService,
       passwordHasher,
+      authTokenRepo,
     ),
     emails,
     users,
@@ -186,5 +229,17 @@ describe('AuthApplicationService', () => {
     });
     expect(login.sessionToken).toBeTruthy();
     expect(login.sessionToken).not.toBe(reg.sessionToken);
+  });
+
+  it('rejects reused verification tokens after consume', async () => {
+    const reg = await fakes.auth.register({
+      email: 'verify@example.com',
+      password: 'secret',
+    });
+    expect(reg.verificationToken).toBeTruthy();
+    await fakes.auth.verifyEmail(reg.verificationToken!);
+    await expect(fakes.auth.verifyEmail(reg.verificationToken!)).rejects.toThrow(
+      'Invalid or expired verification token',
+    );
   });
 });

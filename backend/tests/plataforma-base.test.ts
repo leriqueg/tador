@@ -19,6 +19,15 @@ async function createTestApp(): Promise<FastifyInstance> {
 }
 
 describe('US1 — Registration and first book', () => {
+  it('should expose security headers from helmet on health', async () => {
+    const app = await createTestApp();
+    const res = await app.inject({ method: 'GET', url: '/health' });
+    expect(res.statusCode).toBe(200);
+    expect(res.headers['x-content-type-options']).toBe('nosniff');
+    expect(res.headers['x-frame-options']).toBeDefined();
+    await app.close();
+  });
+
   it('should register a user, create book, and allow book access without email verification (MVP)', async () => {
     const app = await createTestApp();
 

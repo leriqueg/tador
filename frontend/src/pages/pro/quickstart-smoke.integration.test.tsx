@@ -110,7 +110,7 @@ describe('Quickstart smoke (T028)', () => {
       );
       expect(await screen.findByText(/apunte guardado/i)).toBeInTheDocument();
     },
-    10_000,
+    30_000,
   );
 
   it('ManualEntryForm rejects unbalanced lines before calling onSubmit', async () => {

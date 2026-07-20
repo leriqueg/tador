@@ -104,7 +104,7 @@ describe('5.2 — Guided account creation (US2)', () => {
       payload: { nombre: 'Banco del Pacífico', tipo: 'bank' },
     });
     expect(entityRes.statusCode).toBe(201);
-    const { entity } = entityRes.json();
+    expect(entityRes.json().entity).toBeDefined();
 
     // Get a global account ID from the chart
     const chartRes = await app.inject({
@@ -113,8 +113,7 @@ describe('5.2 — Guided account creation (US2)', () => {
       headers: { cookie: cookies.join('; ') },
     });
     expect(chartRes.statusCode).toBe(200);
-    const chartBody = chartRes.json();
-    const globalId = chartBody.chart[0].id;
+    expect(chartRes.json().chart.length).toBeGreaterThan(0);
 
     // Create a bank account linked to the entity and global chart account
     // FR-004b: bank/card must go through entity provision — still allowed via

@@ -3,6 +3,17 @@
 ![GitHub last commit](https://img.shields.io/github/last-commit/leriqueg/tador)
 ![GitHub repo size](https://img.shields.io/github/repo-size/leriqueg/tador)
 ![GitHub](https://img.shields.io/github/license/leriqueg/tador)
+
+<!-- Calidad, seguridad y pruebas -->
+[![CI](https://github.com/leriqueg/tador/actions/workflows/ci.yml/badge.svg)](https://github.com/leriqueg/tador/actions/workflows/ci.yml)
+[![Tests](https://img.shields.io/badge/tests-368%20passing-brightgreen)](docs/testing-strategy.md)
+[![Test pyramid](https://img.shields.io/badge/70%2F20%2F10-179%20unit%20%7C%20180%20int%20%7C%209%20E2E-informational)](docs/testing-strategy.md)
+[![Typecheck](https://img.shields.io/badge/typecheck-strict-3178C6?logo=typescript&logoColor=white)](docs/quality-tooling.md)
+[![Coverage](https://img.shields.io/badge/coverage%20FE-49%25%20lines-yellow)](docs/software-quality-report.md)
+[![Lint](https://img.shields.io/badge/lint-oxlint%20BE%2BFE-6a5acd)](docs/quality-tooling.md)
+[![Security](https://img.shields.io/badge/security-OWASP%20baseline%20approved-brightgreen)](docs/software-quality-report.md)
+
+<!-- Stack -->
 ![Prisma](https://img.shields.io/badge/Prisma-2D3748?logo=prisma)
 ![Fastify](https://img.shields.io/badge/Fastify-000000?logo=fastify)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?logo=postgresql&logoColor=white)
@@ -126,6 +137,26 @@ El pipeline de GitHub Actions ejecuta typecheck, tests unitarios e integración 
 
 ---
 
+## Calidad, seguridad y pruebas
+
+TADOR se desarrolla con **TDD** y una pirámide de pruebas 70/20/10. Estado actual:
+
+| Dimensión | Estado | Detalle |
+|-----------|--------|---------|
+| **Pruebas** | **368 passing** (96+112 BE, 83+68 FE, 9 E2E) · 2026-07-18 | [`docs/testing-strategy.md`](docs/testing-strategy.md) |
+| **Calidad** | Typecheck PASS; oxlint BE/FE; FE coverage ~49 % (gate ≥45 %); Vitest 4 | [`docs/quality-tooling.md`](docs/quality-tooling.md) |
+| **Seguridad** | OWASP baseline **aprobado** (helmet, rate-limit, CORS, AuthToken, ZAP 0 FAIL) | [`docs/security.md`](docs/security.md) |
+| **Informe** | Evaluación + remediaciones fechadas 2026-07-18 | [`docs/software-quality-report.md`](docs/software-quality-report.md) |
+| **Entrega** | Checklist de requisitos de publicación | [`docs/delivery-checklist.md`](docs/delivery-checklist.md) |
+
+Los badges de la cabecera reflejan el **cierre aprobado** del **2026-07-18**
+(368 tests; OWASP baseline). Detalle:
+[`docs/software-quality-report.md`](docs/software-quality-report.md).
+
+Para **recontar tests / actualizar badges** o **cerrar brechas de tooling**, ver
+[`specs/011-seguridad-calidad-y-tests/`](specs/011-seguridad-calidad-y-tests/).
+
+---
 ## Documentación
 
 | Documento | Ubicación |

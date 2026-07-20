@@ -15,6 +15,13 @@ export default defineConfig({
       provider: 'v8',
       include: ['src/lib/**', 'src/pages/**', 'src/components/**'],
       exclude: ['**/*.test.ts', '**/*.integration.test.tsx', '**/*.stories.tsx'],
+      // Baseline 2026-07-18 ≈ 49% lines — anti-regression gate (pedagogical target 70%).
+      thresholds: {
+        lines: 45,
+        statements: 45,
+        functions: 40,
+        branches: 40,
+      },
     },
   },
 });

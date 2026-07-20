@@ -49,8 +49,14 @@ jobs:
       - name: Type check
         run: npm run typecheck
 
+      - name: Lint
+        run: npm run lint
+
       - name: Unit tests
         run: npm run test:unit
+
+      - name: Unit coverage
+        run: npm run test:coverage
 
       - name: Integration tests
         run: npm run test:integration
@@ -81,6 +87,10 @@ jobs:
         working-directory: frontend
         run: npm run build
 
+      - name: Lint
+        working-directory: frontend
+        run: npm run lint
+
       - name: Unit tests
         working-directory: frontend
         run: npm run test:unit
@@ -88,3 +98,7 @@ jobs:
       - name: Integration tests
         working-directory: frontend
         run: npm run test:integration
+
+      - name: Coverage
+        working-directory: frontend
+        run: npm run test:coverage

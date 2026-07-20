@@ -26,6 +26,7 @@ export async function createInitializedUser(
   request: APIRequestContext,
   email: string,
   password = E2E_PASSWORD,
+  mode: 'hogar' | 'pro' = 'hogar',
 ): Promise<void> {
   const register = await request.post(`${BACKEND_URL}/auth/register`, {
     data: { email, password },
@@ -50,7 +51,7 @@ export async function createInitializedUser(
 
   const config = await request.patch(`${BACKEND_URL}/book/config`, {
     data: {
-      mode: 'hogar',
+      mode,
       currency: 'USD',
       timeZone: 'America/New_York',
       completeOnboarding: true,

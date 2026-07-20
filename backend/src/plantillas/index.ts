@@ -174,7 +174,8 @@ export function getPlantilla(code: string): Plantilla | undefined {
 export function getAllPlantillas(mode?: string): Plantilla[] {
   const all = loadPlantillas();
   if (!mode) return all;
-  return all.filter((p) => p.modes.includes(mode));
+  const normalized = mode.toLowerCase();
+  return all.filter((p) => p.modes.includes(normalized));
 }
 
 /**

@@ -28,6 +28,8 @@ COPY src/ ./src/
 
 RUN npx prisma generate
 RUN npx tsc
+# tsc does not copy plantilla JSON; loader reads them next to dist/plantillas/index.js
+RUN cp src/plantillas/*.json dist/plantillas/
 
 # ─── Production ────────────────────────────────────────────────────
 FROM node:22-alpine AS production

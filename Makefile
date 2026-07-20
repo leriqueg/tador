@@ -69,6 +69,10 @@ dev-backend:              ## Arranca backend en modo watch (contenedor)
 dev-frontend:             ## Arranca frontend en modo watch (contenedor)
 	$(COMPOSE) up frontend
 
+.PHONY: storybook
+storybook:                ## Arranca el catálogo de componentes en localhost:6006
+	cd frontend && npm run storybook
+
 .PHONY: build
 build:                    ## Compila TypeScript (backend)
 	$(RUN_BACKEND) npx tsc
@@ -149,6 +153,18 @@ migrate-test20260719:     ## Importa demo users + asientos test20260719
 .PHONY: typecheck
 typecheck:                ## Verifica TypeScript sin emitir
 	$(RUN_BACKEND) npx tsc --noEmit
+
+.PHONY: lint-backend
+lint-backend:             ## oxlint del backend
+	$(RUN_BACKEND) sh -c 'test -x node_modules/.bin/oxlint || npm ci; npm run lint'
+
+.PHONY: lint-frontend
+lint-frontend:            ## oxlint del frontend
+	$(COMPOSE) run --rm --no-deps frontend npm run lint
+
+.PHONY: coverage-backend
+coverage-backend:         ## Cobertura unitaria del backend (domain + application)
+	$(RUN_BACKEND) sh -c 'test -d node_modules/@vitest/coverage-v8 || npm ci; npm run test:coverage'
 
 .PHONY: check
 check: typecheck test     ## Typecheck + tests

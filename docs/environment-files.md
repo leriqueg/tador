@@ -1,21 +1,29 @@
 # Environment files — which one when
 
-Config is split so Docker, local Node, Vitest, and future deploys never share the wrong database or leak secrets into the frontend.
+**Fecha:** 2026-07-14
+
+**Última actualización:** 2026-07-19
+
+La configuración se separa para que Docker, las herramientas locales, Vitest y
+los despliegues no compartan por accidente una base de datos ni expongan
+secretos al frontend. Los archivos `*.example` son contratos versionados; los
+archivos con valores reales permanecen ignorados por Git.
 
 ## Quick path
 
 | I am… | Use | Points at |
 |-------|-----|-----------|
 | Developing with `docker compose up` | Root `.env` | `tador_dev` (Compose → postgres + backend) |
-| Running Prisma/Node **on the host** against published Postgres | `backend/.env` | `localhost:5432/tador_dev` |
+| Running Prisma directly **on the host** | `backend/.env` or exported variables | `localhost:5432/tador_dev` |
 | Running integration tests | `backend/.env.test` | `tador_test` (same Postgres instance, other DB) |
-| Staging / production | Host secrets / platform env — **not** these local files | Staging/prod database URLs |
+| Preparing production configuration | `.env.production.example` | Variable contract, without real secrets |
+| Deploying staging / production | Secret manager / platform env | Dedicated staging/prod services |
 
 Never put backend secrets in `VITE_*` vars. The browser only sees Vite-prefixed values.
 
 ---
 
-## The three local files
+## Archivos y plantillas
 
 ### 1. Root `.env` (+ `.env.example`)
 
@@ -31,13 +39,26 @@ POSTGRES_PORT=5432
 SESSION_SECRET=…
 ```
 
-Compose substitutes them into `postgres` and `backend` in `compose.yaml`. The **frontend** service does **not** receive `POSTGRES_*` or `SESSION_SECRET` — only things like `VITE_PROXY_TARGET`.
+Compose uses the root `.env` for **interpolation** and injects only the
+variables listed under each service's `environment:` block. Uncommenting
+`REQUIRE_EMAIL_VERIFICATION`, email settings or `APP_PUBLIC_URL` in root
+`.env` does **not** reach the backend unless `compose.yaml` also maps them.
+
+The **frontend** service does **not** receive `POSTGRES_*` or
+`SESSION_SECRET`; it gets `VITE_PROXY_TARGET` (Vite proxy only) and
+`CHOKIDAR_USEPOLLING`. Optional published ports: `BACKEND_PORT`,
+`FRONTEND_PORT`.
 
 Copy from `.env.example`. Keep the real `.env` gitignored.
 
+Note: `make db-up` and `make test-db-ensure` still hardcode user/database
+`tador` / `tador_dev`. Changing those names only in `.env` can break those
+targets.
+
 ### 2. `backend/.env` (+ `backend/.env.example`)
 
-**Consumer:** Backend tools on the host (Prisma, occasional `npm` outside Compose) that expect a full URL.
+**Consumer:** Prisma ejecutado directamente en `backend/` y procesos del host a
+los que se cargue el archivo explícitamente.
 
 **Typical keys:**
 
@@ -48,7 +69,16 @@ PORT=3000
 HOST=0.0.0.0
 ```
 
-Use `localhost` because Postgres port is published on the machine. Inside the backend **container**, Compose injects `POSTGRES_HOST=postgres` and `ensureDatabaseUrl()` rewrites any mounted `DATABASE_URL=@localhost` to the Compose hostname — never call localhost from inside the container.
+Use `localhost` because Postgres port is published on the machine. Inside the
+backend **container**, Compose injects `POSTGRES_HOST=postgres` and
+`ensureDatabaseUrl()` aligns hostnames for wrapped Prisma commands
+(`db:migrate`, `db:studio`, `seed:catalogos`). Never rely on `localhost`
+from inside the container network.
+
+El servidor Fastify no carga `backend/.env` por sí mismo. Para arrancarlo en el
+host hay que exportar las variables o usar un mecanismo explícito como
+`node --env-file=.env …`. Los targets habituales del Makefile ejecutan el
+backend en Compose y no necesitan este archivo.
 
 ### 3. `backend/.env.test` (+ `backend/.env.test.example`)
 
@@ -67,6 +97,17 @@ SESSION_SECRET=test-secret-for-integration-tests
 
 Must **never** target `tador_dev`. Cleanup in tests deletes users/books/apuntes **only after** `SELECT current_database()` confirms `tador_test`.
 
+`backend/.env.test` is recommended locally. It is not mandatory: if missing,
+Vitest warns and can still run from CI-injected variables or defaults. When
+the file exists, dotenv loads it with `override: true`, so it wins over shell
+exports for the keys it defines.
+
+Create it with:
+
+```bash
+cp backend/.env.test.example backend/.env.test
+```
+
 List databases in the container:
 
 ```bash
@@ -74,6 +115,19 @@ docker exec tador-postgres psql -U tador -d postgres -c "\l"
 ```
 
 You should see both `tador_dev` (app) and `tador_test` (Vitest).
+
+### 4. `.env.production.example`
+
+**Consumer:** ninguno directamente. Es el contrato versionado para configurar
+un secret manager o crear un `.env.production` ignorado en el host:
+
+```bash
+cp .env.production.example .env.production
+```
+
+No se debe pasar este archivo a `docker compose` actual: `compose.yaml` y el
+Dockerfile del frontend siguen orientados a desarrollo. En un despliegue real,
+la plataforma debe inyectar sus valores al proceso backend.
 
 ---
 
@@ -96,7 +150,7 @@ npm run test:integration   (inside backend container or make test)
 
 - [ ] Root `.env` exists (from `.env.example`)
 - [ ] App UI / API use `tador_dev`
-- [ ] `backend/.env.test` exists (from `.env.test.example`) before integration tests
+- [ ] Prefer `backend/.env.test` (from `.env.test.example`) before local integration tests
 - [ ] After tests, your login in the app still works (if not, tests hit the wrong DB — bug)
 
 ---
@@ -109,15 +163,24 @@ Prefer platform secrets (Fly, Railway, ECS, K8s Secret, etc.):
 
 | Variable | Staging meaning |
 |----------|-----------------|
-| `DATABASE_URL` or `POSTGRES_*` | Staging Postgres (own instance or schema) |
+| `DATABASE_URL` | Staging Postgres, isolated from local/test/production |
 | `SESSION_SECRET` | Strong random; **different** from local |
-| `NODE_ENV=production` (or staging flag) | Disables plantillas-admin unless you opt in |
-| `APP_PUBLIC_URL` | Public HTTPS URL of the staging frontend |
-| Email SMTP_* | Staging mailbox / Mailtrap, not prod |
+| `NODE_ENV=production` | Must be exactly `production`; values like `staging` keep non-production cookie/admin behavior |
+| `CORS_ORIGIN` | Exact HTTPS origin(s) allowed to send credentials |
+| `ENABLE_PLANTILLAS_ADMIN=false` | Keeps development administration routes closed |
+| `LOG_LEVEL` | Runtime log level; normally `info` |
 
 Optional later: a **server-side** `.env.staging` only on the host, never in git — same shape as production.
 
-Frontend build: only public `VITE_*` (API base URL if not same-origin). No DB password, no session secret.
+The frontend currently uses relative `/api` and `/auth` requests. Production
+hosting should therefore route those paths to Fastify under the same public
+origin. `VITE_PROXY_TARGET` is a Vite development-server setting, not a
+production API URL. No DB password or session secret belongs in the frontend
+build.
+
+`APP_PUBLIC_URL`, `EMAIL_PROVIDER`, `EMAIL_FROM` and `SMTP_*` appear in the
+local example as planned post-MVP configuration, but the backend does not
+consume them yet. They must not be treated as an implemented email integration.
 
 **Checklist**
 
@@ -130,16 +193,59 @@ Frontend build: only public `VITE_*` (API base URL if not same-origin). No DB pa
 
 ## Production
 
-Same as staging, stricter:
+The repository has a production stage for the backend image, but it does not
+yet define a complete production deployment. The frontend image serves Vite in
+development mode, there is no production Compose manifest, and email remains a
+stub. `.env.production.example` documents the intended runtime variables; it
+does not make the stack production-ready by itself.
 
-- New `SESSION_SECRET` (never reuse staging/local)
-- Managed Postgres backups / least-privilege DB user
-- `REQUIRE_EMAIL_VERIFICATION` and real email provider when product requires it
-- No `/api/dev/*` exposed (admin gate is off when `NODE_ENV=production` unless forced)
+### Recomendaciones para implementar el ambiente
+
+1. **Definir la topología.** Build the SPA as static assets and serve it from a
+   CDN or reverse proxy. Route `/api/*` and `/auth/*` to Fastify under the same
+   HTTPS origin when possible; this matches the current relative API client and
+   simplifies credentialed cookies.
+2. **Endurecer el arranque.** Validate production variables with a schema and
+   fail closed when `NODE_ENV` is not exactly `production`, or when
+   `DATABASE_URL`, `SESSION_SECRET` or `CORS_ORIGIN` are absent, use
+   placeholders, or contain development values. Set `NODE_ENV=production` in
+   the deployment runtime: the backend production Docker stage does not set it
+   by itself. Remove the `change-me-in-production` fallback in production.
+3. **Corregir logging productivo.** Fastify currently always configures
+   `pino-pretty`, while the production image installs production dependencies
+   only and `pino-pretty` is a development dependency. Use structured JSON
+   logging in production and pretty output only in development.
+4. **Usar secretos administrados.** Inject `DATABASE_URL` and
+   `SESSION_SECRET` from the deployment platform or vault. Generate a different
+   session secret per environment, restrict access, and document rotation.
+5. **Aislar y proteger PostgreSQL.** Use managed Postgres with TLS, a
+   least-privilege application role, private networking, encrypted backups and
+   a restore drill. Never reuse `tador_dev` or `tador_test`.
+6. **Automatizar releases.** Build immutable images, run
+   `prisma migrate deploy` as a one-off release job, smoke-test `/health`, and
+   retain a tested rollback procedure. Do not run development migrations at
+   application startup.
+7. **Reemplazar el email stub antes de habilitar verificación.** The current
+   adapter logs verification and recovery tokens and builds localhost links.
+   Implement a reputable provider, redact tokens from logs, and then set
+   `REQUIRE_EMAIL_VERIFICATION=true`. Until then, keep it `false`.
+8. **Cerrar superficies de desarrollo.** Keep
+   `ENABLE_PLANTILLAS_ADMIN=false`; do not publish PostgreSQL or Prisma Studio;
+   expose only HTTPS through the proxy/load balancer.
+9. **Añadir operación y observabilidad.** Define readiness, centralized logs
+   with redaction and retention, metrics/alerts, resource limits, graceful
+   shutdown and incident ownership.
 
 **Checklist**
 
-- [ ] Secrets rotated and stored in a vault/platform
+- [ ] Frontend static build and same-origin reverse proxy are defined
+- [ ] Production startup rejects missing, weak or development configuration
+- [ ] Secrets are generated independently and stored in a vault/platform
+- [ ] Database TLS, least privilege, backups and restore are verified
+- [ ] Release migrations and rollback are tested
+- [ ] Production logs are structured and contain no tokens or secrets
+- [ ] Real email delivery is implemented before verification is enabled
+- [ ] Only HTTPS is public; DB and administration ports stay private
 - [ ] CI uses a **separate** test DB (or ephemeral Postgres), still via `DATABASE_URL` / `.env.test` pattern — never prod
 - [ ] Frontend CDN/build has zero backend secrets
 
@@ -178,21 +284,30 @@ SESSION_SECRET=test-secret-for-integration-tests
 **Staging (platform env — illustrative)**
 
 ```env
-DATABASE_URL=postgresql://tador_stg:…@stg-db.example:5432/tador_staging
-SESSION_SECRET=<long-random>
 NODE_ENV=production
-APP_PUBLIC_URL=https://staging.tador.example
+DATABASE_URL=postgresql://tador_stg:…@stg-db.example:5432/tador_staging?sslmode=require
+SESSION_SECRET=<environment-specific-random-value>
+CORS_ORIGIN=https://staging.tador.example
+ENABLE_PLANTILLAS_ADMIN=false
+REQUIRE_EMAIL_VERIFICATION=false
 ```
 
 **Production (platform env — illustrative)**
 
 ```env
-DATABASE_URL=postgresql://tador_app:…@prod-db.example:5432/tador
-SESSION_SECRET=<different-long-random>
 NODE_ENV=production
-APP_PUBLIC_URL=https://app.tador.example
-REQUIRE_EMAIL_VERIFICATION=true
+HOST=0.0.0.0
+PORT=3000
+LOG_LEVEL=info
+DATABASE_URL=postgresql://tador_app:…@prod-db.example:5432/tador?sslmode=require
+SESSION_SECRET=<at-least-32-random-bytes>
+CORS_ORIGIN=https://app.tador.example
+ENABLE_PLANTILLAS_ADMIN=false
+REQUIRE_EMAIL_VERIFICATION=false
 ```
+
+This matches `.env.production.example`. `REQUIRE_EMAIL_VERIFICATION` remains
+disabled until the production email adapter replaces the token-logging stub.
 
 ---
 
@@ -201,11 +316,12 @@ REQUIRE_EMAIL_VERIFICATION=true
 | Layer | Config source | Database |
 |-------|---------------|----------|
 | Compose local | `/.env` | `tador_dev` |
-| Host Node/Prisma | `backend/.env` | `tador_dev` via `localhost` |
+| Host Node/Prisma | Explicitly loaded `backend/.env` | `tador_dev` via `localhost` |
 | Vitest integration | `backend/.env.test` | `tador_test` |
 | Staging deploy | Platform secrets | Staging DB |
-| Production deploy | Platform secrets | Production DB |
+| Production template | `.env.production.example` | No real credentials |
+| Production deploy | Platform secrets / ignored host file | Production DB |
 
 Same Postgres **container** locally can host both `tador_dev` and `tador_test`. Staging/prod should be **other servers** (or at least other instances), configured only outside the repo.
 
-Version 1.0 (2026-07-14)
+Version 1.1 (2026-07-19)

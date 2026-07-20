@@ -3,11 +3,13 @@
  * Orchestrates registration, login, verification, and recovery.
  */
 
+import { createHash } from 'node:crypto';
 import type { UserRepository } from './ports/user-repository.js';
 import type { BookRepository } from './ports/book-repository.js';
 import type { SessionService } from './ports/session-service.js';
 import type { EmailService } from './ports/email-service.js';
 import type { PasswordHasher } from './ports/password-hasher.js';
+import type { AuthTokenRepository } from './ports/auth-token-repository.js';
 import type { User } from '../domain/user.js';
 import { isUserVerified } from '../domain/user.js';
 import {
@@ -43,54 +45,51 @@ export interface AuthApplicationService {
   updateProfile(user: User): Promise<User>;
 }
 
+function hashToken(rawToken: string): string {
+  return createHash('sha256').update(rawToken).digest('hex');
+}
+
 export function createAuthApplicationService(
   userRepo: UserRepository,
   bookRepo: BookRepository,
   sessionService: SessionService,
   emailService: EmailService,
   passwordHasher: PasswordHasher,
+  authTokenRepo: AuthTokenRepository,
 ): AuthApplicationService {
-  // Simple in-memory token stores (replace with DB in production)
-  const verificationTokens = new Map<string, { userId: string; expiresAt: Date }>();
-  const recoveryTokens = new Map<string, { userId: string; expiresAt: Date }>();
-
   return {
     async register(input: RegisterInput): Promise<AuthResult> {
-      // Check for duplicate email
       const existing = await userRepo.findByEmail(input.email);
       if (existing) {
         throw new Error('Email already registered');
       }
 
-      // Hash password
       const passwordHash = await passwordHasher.hash(input.password);
 
-      // Create user
       const user = await userRepo.create({
         email: input.email,
         passwordHash,
       });
 
-      // Create book with default config
       await bookRepo.create(user.id);
 
-      // Generate verification token
       const token = generateVerificationToken();
-      verificationTokens.set(token, {
-        userId: user.id,
-        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24h
-      });
+      await authTokenRepo.issue(
+        user.id,
+        'EMAIL_VERIFICATION',
+        hashToken(token),
+        new Date(Date.now() + 24 * 60 * 60 * 1000),
+      );
 
-      // Send verification email
       await emailService.sendVerificationEmail(user.email, token);
 
-      // Create session
       const session = await sessionService.create(user.id);
 
       return {
         user,
         sessionToken: session.token,
-        verificationToken: token, // exposed for testing
+        // Exposed for integration tests; not used by the SPA.
+        verificationToken: token,
       };
     },
 
@@ -114,14 +113,12 @@ export function createAuthApplicationService(
     },
 
     async verifyEmail(token: string): Promise<User> {
-      const stored = verificationTokens.get(token);
+      const stored = await authTokenRepo.consume(
+        hashToken(token),
+        'EMAIL_VERIFICATION',
+      );
       if (!stored) {
         throw new Error('Invalid or expired verification token');
-      }
-
-      if (stored.expiresAt < new Date()) {
-        verificationTokens.delete(token);
-        throw new Error('Verification token has expired');
       }
 
       const user = await userRepo.findById(stored.userId);
@@ -130,16 +127,12 @@ export function createAuthApplicationService(
       }
 
       user.verifiedAt = new Date();
-      const updated = await userRepo.update(user);
-      verificationTokens.delete(token);
-
-      return updated;
+      return userRepo.update(user);
     },
 
     async resendVerification(email: string): Promise<void> {
       const user = await userRepo.findByEmail(email);
       if (!user) {
-        // Don't reveal if email exists
         console.log(`[RESEND] No user found for email: ${email}`);
         return;
       }
@@ -150,10 +143,12 @@ export function createAuthApplicationService(
       }
 
       const token = generateVerificationToken();
-      verificationTokens.set(token, {
-        userId: user.id,
-        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-      });
+      await authTokenRepo.issue(
+        user.id,
+        'EMAIL_VERIFICATION',
+        hashToken(token),
+        new Date(Date.now() + 24 * 60 * 60 * 1000),
+      );
 
       await emailService.sendVerificationEmail(user.email, token);
     },
@@ -161,29 +156,28 @@ export function createAuthApplicationService(
     async requestRecovery(email: string): Promise<void> {
       const user = await userRepo.findByEmail(email);
       if (!user) {
-        // Don't reveal if email exists per edge case spec
         console.log(`[RECOVERY] No user found for email: ${email}`);
         return;
       }
 
       const token = generateRecoveryToken();
-      recoveryTokens.set(token, {
-        userId: user.id,
-        expiresAt: new Date(Date.now() + 1 * 60 * 60 * 1000), // 1h
-      });
+      await authTokenRepo.issue(
+        user.id,
+        'PASSWORD_RECOVERY',
+        hashToken(token),
+        new Date(Date.now() + 1 * 60 * 60 * 1000),
+      );
 
       await emailService.sendRecoveryEmail(user.email, token);
     },
 
     async resetPassword(token: string, newPassword: string): Promise<User> {
-      const stored = recoveryTokens.get(token);
+      const stored = await authTokenRepo.consume(
+        hashToken(token),
+        'PASSWORD_RECOVERY',
+      );
       if (!stored) {
         throw new Error('Invalid or expired recovery token');
-      }
-
-      if (stored.expiresAt < new Date()) {
-        recoveryTokens.delete(token);
-        throw new Error('Recovery token has expired');
       }
 
       const user = await userRepo.findById(stored.userId);
@@ -193,9 +187,7 @@ export function createAuthApplicationService(
 
       user.passwordHash = await passwordHasher.hash(newPassword);
       const updated = await userRepo.update(user);
-      recoveryTokens.delete(token);
 
-      // Invalidate all sessions for this user
       await sessionService.deleteAllForUser(user.id);
 
       return updated;

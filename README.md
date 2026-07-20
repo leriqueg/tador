@@ -1,8 +1,23 @@
 # TADOR
 
+**Fecha de corte:** 2026-07-18
+
+**Última actualización:** 2026-07-20
+
 ![GitHub last commit](https://img.shields.io/github/last-commit/leriqueg/tador)
 ![GitHub repo size](https://img.shields.io/github/repo-size/leriqueg/tador)
 ![GitHub](https://img.shields.io/github/license/leriqueg/tador)
+
+<!-- Calidad, seguridad y pruebas -->
+[![CI](https://github.com/leriqueg/tador/actions/workflows/ci.yml/badge.svg)](https://github.com/leriqueg/tador/actions/workflows/ci.yml)
+[![Tests](https://img.shields.io/badge/tests-368%20passing-brightgreen)](docs/testing-strategy.md)
+[![Test pyramid](https://img.shields.io/badge/70%2F20%2F10-179%20unit%20%7C%20180%20int%20%7C%209%20E2E-informational)](docs/testing-strategy.md)
+[![Typecheck](https://img.shields.io/badge/typecheck-strict-3178C6?logo=typescript&logoColor=white)](docs/quality-tooling.md)
+[![Coverage](https://img.shields.io/badge/coverage%20FE-49%25%20lines-yellow)](docs/software-quality-report.md)
+[![Lint](https://img.shields.io/badge/lint-oxlint%20BE%2BFE-6a5acd)](docs/quality-tooling.md)
+[![Security](https://img.shields.io/badge/security-OWASP%20baseline%20approved-brightgreen)](docs/software-quality-report.md)
+
+<!-- Stack -->
 ![Prisma](https://img.shields.io/badge/Prisma-2D3748?logo=prisma)
 ![Fastify](https://img.shields.io/badge/Fastify-000000?logo=fastify)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?logo=postgresql&logoColor=white)
@@ -19,6 +34,20 @@ Con el tiempo aparecieron necesidades que el software no cubría bien: movimient
 ## Visión
 
 TADOR busca conservar la sencillez de los apuntes rápidos, pero con un motor interno basado en asientos contables balanceados. El usuario Hogar debería poder registrar cosas como “gasté dinero”, “recibí dinero” o “compré con tarjeta” sin pensar en contabilidad; el usuario PRO podrá ver y controlar más detalle cuando lo necesite.
+
+---
+
+## Documentación del proyecto
+
+La [guía documental](docs/README.md) organiza el proyecto en siete ejes:
+
+- [arquitectura de software](docs/arquitectura-software.md);
+- [metodología con GitHub Spec-Kit, Gentleman.AI y TDD](docs/spec-driven-development.md);
+- [diseño visual: de Stitch a Storybook](docs/diseno-visual-y-storybook.md);
+- [dominio y motor contable](docs/motor-contable/README.md);
+- [calidad de software](docs/software-quality-report.md);
+- [seguridad](docs/security.md);
+- [Dockerización y reproducibilidad](docs/dockerizacion.md).
 
 ---
 
@@ -65,11 +94,12 @@ Pensado para profesionales independientes, pequeños negocios o quienes necesita
 | 05 | Dashboard PYG | ✅ Completado |
 | 06 | Frontend Hogar | ✅ Completado |
 | 07 | Frontend PRO ligero | ✅ Completado |
-| **09** | **Frontend PRO avanzado** | **🔄 Activo** |
+| 09 | Frontend PRO avanzado | ✅ Completado |
+| 010 / 011 | Clean Architecture + calidad/seguridad | ✅ Completado |
 
 La IA v0 (`specs/008-ia-v0/`) está excluida del MVP por ADR 0002. El backend contable y sus reportes se mantienen compartidos por los modos Hogar y PRO.
 
-En julio de 2026 se completó la remediación de Clean Architecture del backend: las capas de aplicación y API ya no dependen directamente de Prisma, SQL, Argon2 ni detalles de infraestructura. La validación de cierre cubre 95 tests unitarios y 111 tests de integración.
+En julio de 2026 se completó la remediación de Clean Architecture del backend: las capas de aplicación y API ya no dependen directamente de Prisma, SQL, Argon2 ni detalles de infraestructura. La evidencia histórica de cierre reporta 96 unitarios y 112 de integración (véase `docs/software-quality-report.md`); cualquier re-ejecución debe contrastarse con el commit actual.
 
 ---
 
@@ -77,10 +107,10 @@ En julio de 2026 se completó la remediación de Clean Architecture del backend:
 
 | Capa | Tecnología |
 |------|------------|
-| Backend | Node.js + TypeScript + Fastify + Prisma + PostgreSQL |
-| Frontend | React + TypeScript + Vite + Mantine + Zustand + React Query |
-| Infraestructura | Docker + PostgreSQL 18.4 |
-| Cálculos financieros | decimal.js |
+| Backend | Node.js 22 + TypeScript + Fastify + Prisma + PostgreSQL |
+| Frontend | React + TypeScript + Vite + Tailwind CSS |
+| Infraestructura | Docker Compose + PostgreSQL 18.4 |
+| Cálculos financieros | `decimal.js` en validaciones críticas; persistencia `NUMERIC` / Prisma `Decimal` |
 
 ---
 
@@ -126,6 +156,78 @@ El pipeline de GitHub Actions ejecuta typecheck, tests unitarios e integración 
 
 ---
 
+## Inicio rápido con Docker
+
+**Requisitos:** Docker con Compose y `make`.
+
+```bash
+cp .env.example .env
+make db-setup
+make up
+```
+
+Después del arranque:
+
+- frontend: `http://localhost:5173`;
+- API: `http://localhost:3000`;
+- health check: `http://localhost:3000/health`.
+
+La configuración local, de pruebas y de un futuro despliegue se explica en
+[`docs/environment-files.md`](docs/environment-files.md). Los valores de ejemplo
+son exclusivos de desarrollo y no deben reutilizarse en producción.
+
+---
+
+## Despliegue y demo
+
+Datos de entrega y acceso a la demo publicada:
+
+| Campo | Valor |
+|-------|-------|
+| BIG SCHOOL - Nombre completo | Luis Arturo Erique Guajala |
+| BIG SCHOOL - Email de inscripción | luis_arturo_erique@hotmail.com |
+| Repositorio | [github.com/leriqueg/tador](https://github.com/leriqueg/tador) |
+| App publicada | [http://tador.nesis.tel/](http://tador.nesis.tel/) |
+| Slides | [OneDrive — presentación](https://1drv.ms/p/c/f7ab4fab2f89560c/IQAocx3RX3kdSLTMh-3XQpTHAQ9FXLdAKeYuogmzngmpfd8?e=dsomho) |
+| Vídeo de explicación | [OneDrive — presentación](https://1drv.ms/v/c/f7ab4fab2f89560c/IQD8M5Ntb0E_TrI7Nz0tsk0QAZn-p8jv882RYarlq84RstM?e=HYpHJk) |
+| Usuario de demo | `hogar_user@tador.tel` |
+| Contraseña de demo | `demoPass11!` |
+
+Checklist operativo de entrega: [`docs/delivery-checklist.md`](docs/delivery-checklist.md).
+
+## Estructura del repositorio
+
+```text
+backend/       API, aplicación, dominio, infraestructura, Prisma y pruebas
+frontend/      SPA React, componentes, páginas y pruebas
+specs/         especificaciones, planes, contratos y tareas por capacidad
+docs/          arquitectura, ADRs, calidad, seguridad y motor contable
+docker/        inicialización de servicios de infraestructura
+.github/       integración continua
+```
+
+---
+
+## Calidad, seguridad y pruebas
+
+TADOR se desarrolla con **TDD** y una pirámide de pruebas 70/20/10. Estado actual:
+
+| Dimensión | Estado | Detalle |
+|-----------|--------|---------|
+| **Pruebas** | **368 passing** (96+112 BE, 83+68 FE, 9 E2E) · 2026-07-18 | [`docs/testing-strategy.md`](docs/testing-strategy.md) |
+| **Calidad** | Typecheck PASS; oxlint BE/FE; FE coverage ~49 % (gate ≥45 %); Vitest 4 | [`docs/quality-tooling.md`](docs/quality-tooling.md) |
+| **Seguridad** | OWASP baseline **aprobado** (helmet, rate-limit, CORS, AuthToken, ZAP 0 FAIL) | [`docs/security.md`](docs/security.md) |
+| **Informe** | Evaluación + remediaciones fechadas 2026-07-18 | [`docs/software-quality-report.md`](docs/software-quality-report.md) |
+| **Entrega** | Checklist de requisitos de publicación | [`docs/delivery-checklist.md`](docs/delivery-checklist.md) |
+
+Los badges de la cabecera reflejan el **cierre aprobado** del **2026-07-18**
+(368 tests; OWASP baseline). Detalle:
+[`docs/software-quality-report.md`](docs/software-quality-report.md).
+
+Para **recontar tests / actualizar badges** o **cerrar brechas de tooling**, ver
+[`specs/011-seguridad-calidad-y-tests/`](specs/011-seguridad-calidad-y-tests/).
+
+---
 ## Documentación
 
 | Documento | Ubicación |
@@ -141,4 +243,5 @@ El pipeline de GitHub Actions ejecuta typecheck, tests unitarios e integración 
 
 ## Licencia
 
-[MIT](LICENSE)
+MIT. El archivo `LICENSE` todavía debe incorporarse al repositorio antes de la
+publicación final.

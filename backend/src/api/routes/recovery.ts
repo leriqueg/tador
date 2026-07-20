@@ -4,13 +4,16 @@
 
 import type { FastifyInstance } from 'fastify';
 import type { AuthApplicationService } from '../../application/auth-service.js';
+import { AUTH_RATE_LIMIT } from '../auth-rate-limit.js';
 
 export function registerRecoveryRoutes(
   app: FastifyInstance,
   authService: AuthApplicationService,
 ): void {
   // POST /auth/recovery/request
-  app.post('/auth/recovery/request', async (request, reply) => {
+  app.post('/auth/recovery/request', {
+    config: { rateLimit: AUTH_RATE_LIMIT },
+  }, async (request, reply) => {
     const { email } = request.body as { email: string };
 
     if (!email) {
@@ -30,7 +33,9 @@ export function registerRecoveryRoutes(
   });
 
   // POST /auth/recovery/reset
-  app.post('/auth/recovery/reset', async (request, reply) => {
+  app.post('/auth/recovery/reset', {
+    config: { rateLimit: AUTH_RATE_LIMIT },
+  }, async (request, reply) => {
     const { token, newPassword } = request.body as {
       token: string;
       newPassword: string;

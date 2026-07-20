@@ -5,6 +5,7 @@
 import type { FastifyInstance } from 'fastify';
 import type { AuthApplicationService } from '../../application/auth-service.js';
 import { createAuthMiddleware, SESSION_COOKIE_OPTIONS } from '../middleware/auth.js';
+import { AUTH_RATE_LIMIT } from '../auth-rate-limit.js';
 
 export function registerAuthRoutes(
   app: FastifyInstance,
@@ -13,7 +14,9 @@ export function registerAuthRoutes(
   const requireAuth = createAuthMiddleware(authService);
 
   // POST /auth/register
-  app.post('/auth/register', async (request, reply) => {
+  app.post('/auth/register', {
+    config: { rateLimit: AUTH_RATE_LIMIT },
+  }, async (request, reply) => {
     const { email, password } = request.body as {
       email: string;
       password: string;
@@ -54,7 +57,9 @@ export function registerAuthRoutes(
   });
 
   // POST /auth/login
-  app.post('/auth/login', async (request, reply) => {
+  app.post('/auth/login', {
+    config: { rateLimit: AUTH_RATE_LIMIT },
+  }, async (request, reply) => {
     const { email, password } = request.body as {
       email: string;
       password: string;

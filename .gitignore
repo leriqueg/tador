@@ -1,11 +1,13 @@
 .env
 .env.*
 !.env.example
+!.env.production.example
 !.env.test.example
 
 node_modules/
 dist/
 coverage/
+.quality-results/
 
 .DS_Store
 .idea/

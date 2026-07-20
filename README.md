@@ -2,7 +2,7 @@
 
 **Fecha de corte:** 2026-07-18
 
-**Última actualización:** 2026-07-19
+**Última actualización:** 2026-07-20
 
 ![GitHub last commit](https://img.shields.io/github/last-commit/leriqueg/tador)
 ![GitHub repo size](https://img.shields.io/github/repo-size/leriqueg/tador)
@@ -175,6 +175,25 @@ Después del arranque:
 La configuración local, de pruebas y de un futuro despliegue se explica en
 [`docs/environment-files.md`](docs/environment-files.md). Los valores de ejemplo
 son exclusivos de desarrollo y no deben reutilizarse en producción.
+
+---
+
+## Despliegue y demo
+
+Datos de entrega y acceso a la demo publicada:
+
+| Campo | Valor |
+|-------|-------|
+| BIG SCHOOL - Nombre completo | Luis Arturo Erique Guajala |
+| BIG SCHOOL - Email de inscripción | luis_arturo_erique@hotmail.com |
+| Repositorio | [github.com/leriqueg/tador](https://github.com/leriqueg/tador) |
+| App publicada | [http://tador.nesis.tel/](http://tador.nesis.tel/) |
+| Slides | [OneDrive — presentación](https://1drv.ms/p/c/f7ab4fab2f89560c/IQAocx3RX3kdSLTMh-3XQpTHAQ9FXLdAKeYuogmzngmpfd8?e=dsomho) |
+| Vídeo de explicación | [OneDrive — presentación](https://1drv.ms/v/c/f7ab4fab2f89560c/IQD8M5Ntb0E_TrI7Nz0tsk0QAZn-p8jv882RYarlq84RstM?e=HYpHJk) |
+| Usuario de demo | `hogar_user@tador.tel` |
+| Contraseña de demo | `demoPass11!` |
+
+Checklist operativo de entrega: [`docs/delivery-checklist.md`](docs/delivery-checklist.md).
 
 ## Estructura del repositorio
 

@@ -26,6 +26,31 @@ Artefactos:
 - `.env.staging.example` (contrato) → `.env` / `.env.staging` / `.env.prod.nesistel` en el host
 - `.env.production.example` (contrato de producción final)
 
+## Makefile staging (en el VPS)
+
+Desde la raíz del repo, con secretos en `.env` (o `STAGING_ENV=…`):
+
+| Target | Qué hace |
+|--------|----------|
+| `make staging-up` | Build + levanta postgres/backend/frontend |
+| `make staging-db-setup` | `migrate deploy` + `prisma generate` + seed catálogo |
+| `make staging-demo-migrate` | Usuarios demo + asientos `test20260719` (one-shot) |
+| `make staging-restart` | Reinicia contenedores (sin rebuild) |
+| `make staging-down` | Baja el stack (conserva volúmenes) |
+| `make staging-ps` / `staging-logs` | Estado / logs |
+
+Ejemplo primera vez:
+
+```bash
+make staging-up STAGING_ENV=.env
+make staging-db-setup STAGING_ENV=.env
+# opcional demo:
+make staging-demo-migrate STAGING_ENV=.env
+```
+
+Tras un reboot del VPS, Docker reinicia solo (`restart: unless-stopped`).
+No uses `make up` / `docker compose up` sin `-f` en este host.
+
 ## Por qué no dos dominios (por defecto)
 
 El cliente SPA usa rutas **relativas** (`/auth`, `/api`, …) y cookies de

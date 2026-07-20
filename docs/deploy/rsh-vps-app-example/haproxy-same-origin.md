@@ -104,10 +104,9 @@ PEM resultante: `certs/tador.nesis.tel.pem` (HAProxy carga el directorio
 
 ```bash
 # En este VPS el contrato vive en `.env` (instancia de `.env.staging.example`)
-docker compose --env-file .env -f compose.staging.yaml up -d --build
-
-docker compose --env-file .env -f compose.staging.yaml run --rm backend \
-  npx prisma migrate deploy
+make staging-up STAGING_ENV=.env
+make staging-db-setup STAGING_ENV=.env
+# opcional: make staging-demo-migrate STAGING_ENV=.env
 ```
 
 Smoke interno (loopback) antes del dominio:

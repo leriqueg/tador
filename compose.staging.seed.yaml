@@ -1,8 +1,11 @@
 # One-shot seed/tools against staging network (not for long-running).
-# Usage:
-#   docker compose --env-file .env.staging.local \
-#     -f compose.staging.yaml -f compose.staging.seed.yaml \
-#     run --rm seed sh -c 'npm ci && npx prisma generate && npm run seed:catalogos && npm run migrate:test20260719'
+# Prefer Makefile:
+#   make staging-db-setup STAGING_ENV=.env
+#   make staging-demo-migrate STAGING_ENV=.env
+#
+# Or manually:
+#   docker compose --env-file .env -f compose.staging.yaml -f compose.staging.seed.yaml \
+#     run --rm seed sh -c 'npm ci && npx prisma generate && npm run seed:catalogos'
 
 services:
   seed:

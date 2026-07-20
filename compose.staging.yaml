@@ -1,16 +1,17 @@
-# TADOR staging stack — HAProxy same-origin on the VPS.
-# Guide: docs/deploy/haproxy-same-origin.md
+# TADOR staging stack — VPS / RSH (HAProxy modular same-origin).
+# Guide: docs/deploy/rsh-vps-app-example/haproxy-same-origin.md
 #
 # Usage (from repo root on the VPS):
-#   cp .env.staging.example .env.staging   # or use .env.prod.nesistel
-#   # fill REPLACE_* secrets
-#   docker compose --env-file .env.staging -f compose.staging.yaml up -d --build
-#   docker compose --env-file .env.staging -f compose.staging.yaml run --rm backend \
-#     npx prisma migrate deploy
+#   make staging-up STAGING_ENV=.env
+#   make staging-db-setup STAGING_ENV=.env
 #
-# Publishes backend/SPA on loopback only for HAProxy:
+# Frontend joins external network rsh-net-prod so modular HAProxy can reach
+# container_name tador-stg-frontend:80. Path split (/api|/auth|/book|/health)
+# is done by frontend/nginx.conf → backend:3000.
+#
+# Loopback publish is only for host smoke tests (optional):
 #   127.0.0.1:${BACKEND_HOST_PORT:-3000}  → Fastify
-#   127.0.0.1:${FRONTEND_HOST_PORT:-8080} → nginx SPA
+#   127.0.0.1:${FRONTEND_HOST_PORT:-8080} → nginx SPA (+ API gateway)
 #
 # Do NOT use this file for local day-to-day development (use compose.yaml).
 
@@ -33,6 +34,8 @@ services:
       timeout: 5s
       retries: 5
     # No host ports — only reachable on the Compose network.
+    networks:
+      - default
 
   backend:
     build:
@@ -73,6 +76,8 @@ services:
       timeout: 5s
       retries: 12
       start_period: 25s
+    networks:
+      - default
 
   frontend:
     build:
@@ -86,6 +91,14 @@ services:
     depends_on:
       backend:
         condition: service_healthy
+    networks:
+      - default
+      - rsh-net-prod
 
 volumes:
   staging_postgres_data:
+
+networks:
+  rsh-net-prod:
+    external: true
+    name: rsh-net-prod

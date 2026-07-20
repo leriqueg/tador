@@ -1,7 +1,7 @@
 # TADOR — Makefile
 # ────────────────────────────────────────────────────────
-# Comandos rápidos para desarrollo local.
-# Los comandos de app/DB se ejecutan dentro de contenedores.
+# Default targets = desarrollo local (compose.yaml).
+# staging-* = VPS / RSH (compose.staging.yaml). Ver docs/deploy/rsh-vps-app-example/.
 
 COMPOSE = docker compose
 # E2E stack: same services, but backend points at tador_test (isolated from tador_dev).
@@ -9,6 +9,12 @@ COMPOSE_E2E = $(COMPOSE) -f compose.yaml -f compose.e2e.yaml
 RUN_BACKEND = $(COMPOSE) run --rm backend
 RUN_BACKEND_E2E = $(COMPOSE_E2E) run --rm backend
 EXEC_BACKEND = $(COMPOSE) exec backend
+
+# Staging (VPS): override with `make staging-up STAGING_ENV=.env.staging`
+STAGING_ENV ?= .env
+COMPOSE_STG = docker compose --env-file $(STAGING_ENV) -f compose.staging.yaml
+COMPOSE_STG_SEED = $(COMPOSE_STG) -f compose.staging.seed.yaml
+RUN_STG_SEED = $(COMPOSE_STG_SEED) run --rm seed
 
 # ─── Base de datos ─────────────────────────────────────
 
@@ -148,6 +154,40 @@ migrate-test20260719-dry: ## Dry-run expansión CSV + users (sin postear)
 migrate-test20260719:     ## Importa demo users + asientos test20260719
 	$(RUN_MIGRATE_TEST) backend npm run migrate:test20260719
 
+# ─── Staging / RSH (VPS) ───────────────────────────────
+# Requiere red Docker externa rsh-net-prod y STAGING_ENV con secretos.
+# Primera vez en el host: make staging-up && make staging-db-setup
+# Demo asientos (opcional): make staging-demo-migrate
+
+.PHONY: staging-up
+staging-up:               ## Levanta stack staging (build + up)
+	$(COMPOSE_STG) up -d --build
+
+.PHONY: staging-down
+staging-down:             ## Detiene stack staging (conserva volúmenes)
+	$(COMPOSE_STG) down
+
+.PHONY: staging-restart
+staging-restart:          ## Reinicia contenedores staging sin rebuild
+	$(COMPOSE_STG) restart
+
+.PHONY: staging-ps
+staging-ps:               ## Estado de contenedores staging
+	$(COMPOSE_STG) ps
+
+.PHONY: staging-logs
+staging-logs:             ## Logs staging (follow)
+	$(COMPOSE_STG) logs -f
+
+.PHONY: staging-db-setup
+staging-db-setup:         ## Staging: migrate deploy + generate + seed catálogo
+	$(COMPOSE_STG) run --rm backend npx prisma migrate deploy
+	$(RUN_STG_SEED) sh -c 'npm ci && npx prisma generate && npm run seed:catalogos'
+
+.PHONY: staging-demo-migrate
+staging-demo-migrate:     ## Staging: usuarios demo + asientos test20260719
+	$(RUN_STG_SEED) sh -c 'npm ci && npx prisma generate && npm run migrate:test20260719'
+
 # ─── Calidad ───────────────────────────────────────────
 
 .PHONY: typecheck
@@ -197,6 +237,6 @@ clean:                    ## Limpia artefactos de build
 
 .PHONY: help
 help:                     ## Muestra esta ayuda
-	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | \
+	@grep -E '^[a-zA-Z0-9_-]+:.*?## ' $(MAKEFILE_LIST) | \
 		sort | \
-		awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'
+		awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-22s\033[0m %s\n", $$1, $$2}'

@@ -1,0 +1,169 @@
+# Example HAProxy config — TADOR same-origin staging (STANDALONE mode)
+#
+# Use this when HAProxy owns path ACLs. On Softwareholics modular HAProxy
+# (maps/local-hosts.map + conf.d/), do NOT apply this file: point one local
+# backend at tador-stg-frontend and let nginx.conf split /api|/auth|/book|/health.
+# See docs/deploy/haproxy-same-origin.md.
+#
+# Replace:
+#   tador.example.tel  → your public hostname
+#   certificate path   → your PEM (fullchain + private key)
+#   127.0.0.1:3000     → Fastify published on loopback
+#   127.0.0.1:8080     → SPA/nginx published on loopback
+#
+# This file is illustrative. Adapt to your HAProxy version and existing
+# frontends (stats, other vhosts, ACME challenges, etc.).
+
+global
+  log /dev/log local0
+  maxconn 4096
+  # tune.ssl.default-dh-param 2048   # if required by your HAProxy build
+
+defaults
+  log     global
+  mode    http
+  option  httplog
+  option  dontlognull
+  option  forwardfor
+  timeout connect 5s
+  timeout client  50s
+  timeout server  50s
+  retries 3
+
+# Optional: ACME HTTP-01 on :80 before redirect — keep if you terminate LE here.
+frontend fe_http
+  bind *:80
+  acl host_tador hdr(host) -i tador.example.tel
+  # acl is_acme path_beg /.well-known/acme-challenge/
+  # use_backend be_acme if is_acme
+  http-request redirect scheme https code 301 if host_tador !{ ssl_fc }
+
+frontend fe_https
+  bind *:443 ssl crt /etc/haproxy/certs/tador.example.tel.pem alpn h2,http/1.1
+  http-request set-header X-Forwarded-Proto https
+  http-request set-header X-Forwarded-Port 443
+
+  acl host_tador hdr(host) -i tador.example.tel
+  # Paths that must reach Fastify (same list Vite proxies in development).
+  acl is_api path_beg /api /auth /book /health
+
+  use_backend be_tador_api if host_tador is_api
+  use_backend be_tador_web if host_tador
+  # default_backend be_default_404
+
+backend be_tador_api
+  option httpchk GET /health
+  http-check expect status 200
+  server tador_api 127.0.0.1:3000 check inter 5s fall 3 rise 2
+
+backend be_tador_web
+  option httpchk GET /
+  http-check expect status 200
+  server tador_web 127.0.0.1:8080 check inter 5s fall 3 rise 2
+lerique@pere:/srv/deployments/tador$ cat docker-compose.yml
+# TADOR staging stack — HAProxy same-origin on the VPS.
+# Guide: docs/deploy/haproxy-same-origin.md
+#
+# Usage (from repo root on the VPS):
+#   cp .env.staging.example .env.staging   # or use .env.prod.nesistel
+#   # fill REPLACE_* secrets
+#   docker compose --env-file .env.staging -f compose.staging.yaml up -d --build
+#   docker compose --env-file .env.staging -f compose.staging.yaml run --rm backend \
+#     npx prisma migrate deploy
+#
+# Publishes backend/SPA on loopback for host smoke tests:
+#   127.0.0.1:${BACKEND_HOST_PORT:-3000}  → Fastify
+#   127.0.0.1:${FRONTEND_HOST_PORT:-8080} → nginx SPA (+ API path gateway)
+#
+# Modular HAProxy (Softwareholics) reaches the SPA via Docker DNS on
+# rsh-net-prod (container_name tador-stg-frontend). Path split is in nginx.
+#
+# Do NOT use this file for local day-to-day development (use compose.yaml).
+
+name: tador-staging
+
+services:
+  postgres:
+    image: postgres:18.4-alpine
+    container_name: tador-stg-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-tador_staging}
+      POSTGRES_USER: ${POSTGRES_USER:-tador_stg}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+    volumes:
+      - staging_postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    # No host ports — only reachable on the Compose network.
+    networks:
+      - default
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: production
+    container_name: tador-stg-backend
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${BACKEND_HOST_PORT:-3000}:3000"
+    environment:
+      NODE_ENV: production
+      HOST: ${HOST:-0.0.0.0}
+      PORT: ${PORT:-3000}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      POSTGRES_USER: ${POSTGRES_USER:-tador_stg}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: ${POSTGRES_DB:-tador_staging}
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required}
+      SESSION_SECRET: ${SESSION_SECRET:?SESSION_SECRET is required}
+      CORS_ORIGIN: ${CORS_ORIGIN:?CORS_ORIGIN is required}
+      ENABLE_PLANTILLAS_ADMIN: ${ENABLE_PLANTILLAS_ADMIN:-false}
+      REQUIRE_EMAIL_VERIFICATION: ${REQUIRE_EMAIL_VERIFICATION:-false}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3000/health').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 25s
+    networks:
+      - default
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: production
+    container_name: tador-stg-frontend
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${FRONTEND_HOST_PORT:-8080}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - default
+      - rsh-net-prod
+
+volumes:
+  staging_postgres_data:
+
+networks:
+  rsh-net-prod:
+    external: true
+    name: rsh-net-prod

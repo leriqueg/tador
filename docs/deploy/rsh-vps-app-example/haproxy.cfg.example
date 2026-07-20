@@ -1,0 +1,62 @@
+# Example HAProxy config — TADOR same-origin staging (STANDALONE mode)
+#
+# Use this when HAProxy owns path ACLs. On Softwareholics modular HAProxy
+# (maps/local-hosts.map + conf.d/), do NOT apply this file: point one local
+# backend at tador-stg-frontend and let nginx.conf split /api|/auth|/book|/health.
+# See docs/deploy/haproxy-same-origin.md.
+#
+# Replace:
+#   tador.example.tel  → your public hostname
+#   certificate path   → your PEM (fullchain + private key)
+#   127.0.0.1:3000     → Fastify published on loopback
+#   127.0.0.1:8080     → SPA/nginx published on loopback
+#
+# This file is illustrative. Adapt to your HAProxy version and existing
+# frontends (stats, other vhosts, ACME challenges, etc.).
+
+global
+  log /dev/log local0
+  maxconn 4096
+  # tune.ssl.default-dh-param 2048   # if required by your HAProxy build
+
+defaults
+  log     global
+  mode    http
+  option  httplog
+  option  dontlognull
+  option  forwardfor
+  timeout connect 5s
+  timeout client  50s
+  timeout server  50s
+  retries 3
+
+# Optional: ACME HTTP-01 on :80 before redirect — keep if you terminate LE here.
+frontend fe_http
+  bind *:80
+  acl host_tador hdr(host) -i tador.example.tel
+  # acl is_acme path_beg /.well-known/acme-challenge/
+  # use_backend be_acme if is_acme
+  http-request redirect scheme https code 301 if host_tador !{ ssl_fc }
+
+frontend fe_https
+  bind *:443 ssl crt /etc/haproxy/certs/tador.example.tel.pem alpn h2,http/1.1
+  http-request set-header X-Forwarded-Proto https
+  http-request set-header X-Forwarded-Port 443
+
+  acl host_tador hdr(host) -i tador.example.tel
+  # Paths that must reach Fastify (same list Vite proxies in development).
+  acl is_api path_beg /api /auth /book /health
+
+  use_backend be_tador_api if host_tador is_api
+  use_backend be_tador_web if host_tador
+  # default_backend be_default_404
+
+backend be_tador_api
+  option httpchk GET /health
+  http-check expect status 200
+  server tador_api 127.0.0.1:3000 check inter 5s fall 3 rise 2
+
+backend be_tador_web
+  option httpchk GET /
+  http-check expect status 200
+  server tador_web 127.0.0.1:8080 check inter 5s fall 3 rise 2

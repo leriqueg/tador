@@ -18,10 +18,10 @@ export interface AccountsTreeGroup {
 }
 
 const MANUAL_CREATE_TYPES: TipoCuentaManualCreate[] = [
-  'wallet',
-  'bridge',
   'incomeCategory',
   'expenseCategory',
+  'wallet',
+  'bridge',
 ];
 
 export function manualCreateAccountTypes(): TipoCuentaManualCreate[] {
@@ -66,6 +66,52 @@ export function listAllowedCreateMothers(chart: ChartGlobalNode[]): ChartGlobalN
   return chart
     .filter((node) => !node.esPostable)
     .sort((a, b) => a.codigo.localeCompare(b.codigo));
+}
+
+/**
+ * Mothers for the create form, filtered by class so PRO users don't hang
+ * income/expense categories under Activo/Pasivo by accident.
+ */
+export function mothersForAccountType(
+  chart: ChartGlobalNode[],
+  tipo: TipoCuentaManualCreate,
+): ChartGlobalNode[] {
+  const all = listAllowedCreateMothers(chart);
+  switch (tipo) {
+    case 'incomeCategory':
+      return all.filter((n) => n.codigo.startsWith('4'));
+    case 'expenseCategory':
+      return all.filter((n) => n.codigo.startsWith('6'));
+    case 'wallet':
+      return all.filter((n) => n.codigo.startsWith('1111') || n.codigo.startsWith('111'));
+    case 'bridge':
+      return all.filter(
+        (n) =>
+          n.codigo.startsWith('11') ||
+          n.codigo.startsWith('12') ||
+          n.codigo.startsWith('21') ||
+          n.codigo.startsWith('22'),
+      );
+    default:
+      return all;
+  }
+}
+
+/** Prefer a concrete operational group when several mothers match. */
+export function preferredMotherCodigo(
+  mothers: ChartGlobalNode[],
+  tipo: TipoCuentaManualCreate,
+): string {
+  if (mothers.length === 0) return '';
+  const preferred =
+    tipo === 'incomeCategory'
+      ? mothers.find((m) => m.codigo === '41010000') ??
+        mothers.find((m) => m.codigo.startsWith('4101'))
+      : tipo === 'expenseCategory'
+        ? mothers.find((m) => m.codigo === '61000000') ??
+          mothers.find((m) => m.codigo.startsWith('610'))
+        : undefined;
+  return preferred?.codigo ?? mothers[0]!.codigo;
 }
 
 function emptyGroup(node: ChartGlobalNode): AccountsTreeGroup {

@@ -1,17 +1,18 @@
 # Contract: Sprint 07 - Frontend PRO ligero
 
-**Updated**: 2026-07-18
+**Updated**: 2026-07-20
 
 Observable behavior (not implementation).
 
 ## Inputs
 
 - Authenticated user; `BookConfig.mode`.
-- EntryBuilder fields; manual entry lines; account create under parent; optional employer org on onboarding.
+- EntryBuilder fields; manual entry lines; account create under parent; optional employer org on onboarding; work-profile flags.
 
 ## Outputs
 
 - Redirects to correct namespace; saved apunte/asiento; account tree with codes; validation errors in everyday language.
+- After onboarding: starter wallet + income/expense categories present.
 
 ## Invariants
 
@@ -29,9 +30,10 @@ Observable behavior (not implementation).
 
 ## US1 — Onboarding PRO
 
-1. Optional “¿relación de dependencia?” → create `organization` + `is_employment_dependency`.
+1. Independent flags: dependency and/or freelance (or neither). Dependency → create `organization` + `is_employment_dependency` (1–3).
 2. Skip clients/suppliers.
-3. Freelance without orgs → allowed; stamp onboarding complete → `/pro/dashboard`.
+3. Freelance or neither without orgs → allowed; stamp onboarding complete → `/pro/dashboard`.
+4. Completing onboarding (Hogar or PRO) seeds billetera default + minimal income/expense categories.
 
 ## US2 — EntryBuilder
 
@@ -40,6 +42,7 @@ Observable behavior (not implementation).
 3. JIT entity: name + minimal capabilities.
 4. Salary without employer capability → block + CTA.
 5. Un intento reutiliza su Idempotency-Key tras error y la descarta solo al confirmar éxito.
+6. Empty account options → clear empty state + CTA toward Cuentas/Entidades.
 
 ## US3 — Manual entry
 

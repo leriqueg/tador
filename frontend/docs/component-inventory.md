@@ -134,6 +134,8 @@ Tokens in code: `src/design/tokens.ts` · CSS: `src/globals.css`
 ## Apuntes
 
 > **UX locked 2026-07-13** (spec 006 US2): template-driven QuickAdd — three layers + mini-form + burst. **Not** PRO EntryBuilder.
+>
+> **PRO EntryBuilder (012)**: static decision graph (`/pro/entries`); plantillas only as leaf recipes — not a chip catalog.
 
 ### FrequentTemplatesGrid — missing (P0 US2)
 - **Purpose:** 4–6 frequent plantilla tiles (usage ranking or curated fallback)

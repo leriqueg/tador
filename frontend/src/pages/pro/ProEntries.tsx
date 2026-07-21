@@ -6,24 +6,28 @@ import ValidationMessage from '../../components/ui/ValidationMessage.tsx';
 import {
   accounts,
   apuntes,
+  chart,
   entities,
   newIdempotencyKey,
   type AccountSummary,
+  type ChartGlobalNode,
   type EntitySummary,
 } from '../../lib/api.ts';
+import { mergePostableGlobalsIntoAccounts } from '../../lib/chart-account-options.ts';
 import { useAuth } from '../../lib/auth.tsx';
 import { useBookGate } from '../../lib/use-book-gate.ts';
 import { useAbandonGuard } from '../../lib/use-abandon-guard.ts';
-import type { ApunteSubmitPayload } from '../../components/entry-builder/entry-builder-state.ts';
+import type { ApunteSubmitPayload } from '../../components/entry-builder/decision-walker.ts';
 import type { EntityJitFormValues } from '../../components/entry-builder/EntityJitForm.tsx';
 
-/** PRO capture — EntryBuilder replaces QuickAdd here; there is no template picker (US2, T014). */
+/** PRO capture — EntryBuilder decision graph (specs/012); plantillas only as leaf recipes. */
 export default function ProEntries() {
   const { user, loading: authLoading, logout } = useAuth();
   const gate = useBookGate();
 
   const [accountList, setAccountList] = useState<AccountSummary[]>([]);
   const [entityList, setEntityList] = useState<EntitySummary[]>([]);
+  const [chartNodes, setChartNodes] = useState<ChartGlobalNode[]>([]);
   const [loadingData, setLoadingData] = useState(true);
   const [loadError, setLoadError] = useState('');
   const idempotencyKeyRef = useRef<string | null>(null);
@@ -35,8 +39,13 @@ export default function ProEntries() {
     setLoadingData(true);
     setLoadError('');
     try {
-      const [accountsRes, entitiesRes] = await Promise.all([accounts.list(), entities.list()]);
-      setAccountList(accountsRes.accounts);
+      const [accountsRes, entitiesRes, chartRes] = await Promise.all([
+        accounts.list(),
+        entities.list(),
+        chart.list(),
+      ]);
+      setChartNodes(chartRes.chart);
+      setAccountList(mergePostableGlobalsIntoAccounts(chartRes.chart, accountsRes.accounts));
       setEntityList(entitiesRes.entities);
     } catch (err) {
       setLoadError(
@@ -93,7 +102,7 @@ export default function ProEntries() {
         <header className="mb-lg">
           <h1 className="text-headline-lg text-on-surface font-bold mb-xs">Apuntes PRO</h1>
           <p className="text-body-md text-on-surface-variant">
-            Construí el movimiento paso a paso: tipo, cuentas, entidad, concepto y monto.
+            Respondé preguntas en orden: tipo, origen, cuentas, concepto y monto.
           </p>
           <p className="text-label-sm mt-sm">
             <Link to="/pro/entries/manual" className="text-primary underline">
@@ -115,6 +124,7 @@ export default function ProEntries() {
           <EntryBuilder
             accounts={accountList}
             entities={entityList}
+            chart={chartNodes}
             onSubmit={handleSubmit}
             onCreateEntity={handleCreateEntity}
             onDraftChange={setHasDraft}

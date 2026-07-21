@@ -1,12 +1,6 @@
-import ProPlaceholderPage from './ProPlaceholderPage.tsx';
+import Entities from '../Entities.tsx';
 
-/** PRO entities shell (T009). JIT creation from EntryBuilder lands in T017. */
+/** PRO entities — same UI as Hogar, plus organization + capabilities (no design change). */
 export default function ProEntities() {
-  return (
-    <ProPlaceholderPage
-      activePath="/pro/entities"
-      title="Entidades PRO"
-      description="Organizaciones, bancos y tarjetas se gestionan igual que en Hogar. La creación rápida (JIT) desde el EntryBuilder llega en la próxima etapa."
-    />
-  );
+  return <Entities mode="pro" />;
 }

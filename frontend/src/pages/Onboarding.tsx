@@ -5,7 +5,8 @@ import OnboardingWizard, {
 } from '../components/onboarding/OnboardingWizard.tsx';
 import { MinimalHeader } from '../components/layout/MarketingHeader.tsx';
 import { AuthFooter } from '../components/layout/AppFooter.tsx';
-import { book, entities } from '../lib/api';
+import { accounts, book, entities } from '../lib/api';
+import { seedOnboardingStarterAccounts } from '../lib/onboarding-starter-accounts.ts';
 import { useAuth } from '../lib/auth.tsx';
 
 /** First-run book setup — banks/cards/wallets via entity provision (FR-003a–c, FR-010). */
@@ -37,6 +38,8 @@ export default function Onboarding() {
         timeZone: result.timeZone,
         completeOnboarding: true,
       });
+
+      await seedOnboardingStarterAccounts((input) => accounts.create(input));
 
       for (const bank of result.banks) {
         await entities.create({

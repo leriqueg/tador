@@ -28,10 +28,6 @@ interface LocaleContextValue {
 
 const LocaleContext = createContext<LocaleContextValue | null>(null);
 
-function useInitialLocale(): AppLocale {
-  return useMemo(() => detectDefaultLocale(), []);
-}
-
 function LocaleControllerBase({
   children,
   user,
@@ -41,7 +37,8 @@ function LocaleControllerBase({
   user: { id: string } | null;
   bootstrapLocale?: AppLocale;
 }) {
-  const initialLocale = bootstrapLocale ?? useInitialLocale();
+  const detectedLocale = useMemo(() => detectDefaultLocale(), []);
+  const initialLocale = bootstrapLocale ?? detectedLocale;
   const [locale, setLocaleState] = useState<AppLocale>(initialLocale);
   const [syncing, setSyncing] = useState(false);
 

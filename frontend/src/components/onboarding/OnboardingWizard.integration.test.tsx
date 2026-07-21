@@ -12,7 +12,7 @@ async function advanceToStep5(user: ReturnType<typeof userEvent.setup>, modeLabe
   await user.click(screen.getByRole('button', { name: /Continuar/i }));
 }
 
-describe('OnboardingWizard — PRO branch (T010-T012)', () => {
+describe('OnboardingWizard — PRO branch (T010-T012, T035)', () => {
   afterEach(() => {
     cleanup();
   });
@@ -23,7 +23,6 @@ describe('OnboardingWizard — PRO branch (T010-T012)', () => {
     render(<OnboardingWizard onComplete={onComplete} />);
 
     await advanceToStep5(user, 'Modo PRO');
-    await user.click(screen.getByRole('button', { name: /No, soy freelance/i }));
     await user.click(screen.getByRole('button', { name: /Continuar/i }));
 
     expect(screen.queryByText(/cliente/i)).not.toBeInTheDocument();
@@ -36,7 +35,7 @@ describe('OnboardingWizard — PRO branch (T010-T012)', () => {
     render(<OnboardingWizard onComplete={(r) => (result = r)} />);
 
     await advanceToStep5(user, 'Modo PRO');
-    await user.click(screen.getByRole('button', { name: /No, soy freelance/i }));
+    await user.click(screen.getByLabelText(/Trabajo por mi cuenta \/ freelance/i));
     await user.click(screen.getByRole('button', { name: /Continuar/i }));
 
     expect(await screen.findByText('Paso 6 de 6')).toBeInTheDocument();
@@ -45,15 +44,33 @@ describe('OnboardingWizard — PRO branch (T010-T012)', () => {
     expect(result).not.toBeNull();
     expect(result!.mode).toBe('pro');
     expect(result!.employers).toEqual([]);
+    expect(result!.isFreelance).toBe(true);
+    expect(result!.hasEmploymentDependency).toBe(false);
   });
 
-  it('collects the employer org when the user has an employment dependency (T010)', async () => {
+  it('allows neither dependency nor freelance (T035)', async () => {
     const user = userEvent.setup();
     let result: OnboardingResult | null = null;
     render(<OnboardingWizard onComplete={(r) => (result = r)} />);
 
     await advanceToStep5(user, 'Modo PRO');
-    await user.click(screen.getByRole('button', { name: /Sí, tengo empleador/i }));
+    // leave both unchecked
+    await user.click(screen.getByRole('button', { name: /Continuar/i }));
+    await user.click(screen.getByRole('button', { name: /Empezar/i }));
+
+    expect(result).not.toBeNull();
+    expect(result!.hasEmploymentDependency).toBe(false);
+    expect(result!.isFreelance).toBe(false);
+    expect(result!.employers).toEqual([]);
+  });
+
+  it('collects the employer org when dependency is marked (T010)', async () => {
+    const user = userEvent.setup();
+    let result: OnboardingResult | null = null;
+    render(<OnboardingWizard onComplete={(r) => (result = r)} />);
+
+    await advanceToStep5(user, 'Modo PRO');
+    await user.click(screen.getByLabelText(/Relación de dependencia/i));
     await user.type(screen.getByLabelText(/Nombre del empleador/i), 'Acme Corp');
     await user.click(screen.getByRole('button', { name: /Agregar empleador/i }));
     expect(screen.getByText(/Acme Corp/)).toBeInTheDocument();
@@ -63,6 +80,25 @@ describe('OnboardingWizard — PRO branch (T010-T012)', () => {
 
     expect(result).not.toBeNull();
     expect(result!.mode).toBe('pro');
+    expect(result!.hasEmploymentDependency).toBe(true);
+    expect(result!.employers).toEqual([{ nombre: 'Acme Corp' }]);
+  });
+
+  it('allows dependency and freelance together (T035)', async () => {
+    const user = userEvent.setup();
+    let result: OnboardingResult | null = null;
+    render(<OnboardingWizard onComplete={(r) => (result = r)} />);
+
+    await advanceToStep5(user, 'Modo PRO');
+    await user.click(screen.getByLabelText(/Relación de dependencia/i));
+    await user.click(screen.getByLabelText(/Trabajo por mi cuenta \/ freelance/i));
+    await user.type(screen.getByLabelText(/Nombre del empleador/i), 'Acme Corp');
+    await user.click(screen.getByRole('button', { name: /Agregar empleador/i }));
+    await user.click(screen.getByRole('button', { name: /Continuar/i }));
+    await user.click(screen.getByRole('button', { name: /Empezar/i }));
+
+    expect(result!.hasEmploymentDependency).toBe(true);
+    expect(result!.isFreelance).toBe(true);
     expect(result!.employers).toEqual([{ nombre: 'Acme Corp' }]);
   });
 
@@ -78,5 +114,7 @@ describe('OnboardingWizard — PRO branch (T010-T012)', () => {
     expect(result).not.toBeNull();
     expect(result!.mode).toBe('hogar');
     expect(result!.employers).toEqual([]);
+    expect(result!.hasEmploymentDependency).toBe(false);
+    expect(result!.isFreelance).toBe(false);
   });
 });

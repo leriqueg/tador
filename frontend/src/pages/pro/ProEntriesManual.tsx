@@ -30,6 +30,8 @@ export default function ProEntriesManual() {
     setLoadingData(true);
     setLoadError('');
     try {
+      // Manual asiento uses cuentaId (user accounts). Global ids need cuentaGlobalId
+      // (EntryBuilder/apuntes already resolve both). Catalog leaves stay on EntryBuilder.
       const res = await accounts.list();
       setAccountList(res.accounts);
     } catch (err) {

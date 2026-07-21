@@ -89,3 +89,19 @@
 - [x] T032 Exponer toggle “Impedir saldo negativo” en árbol de cuentas PRO
 - [x] T033 Configurar políticas tenant-safe para cuentas de usuario y globales
 - [x] T034 Probar interacción de toggles de política
+
+## Follow-up (2026-07-20 — onboarding seed + perfil laboral)
+
+- [x] T035 Onboarding PRO: perfil laboral con checkboxes independientes (dependencia / freelance / ambos / ninguno); copy alineado a público objetivo
+- [x] T036 Al completar onboarding (Hogar + PRO): seed billetera default + categorías mínimas ingreso/gasto vía `POST /api/accounts`
+- [x] T037 EntryBuilder `CuentasStep`: empty state + CTA cuando no hay opciones de debe/haber
+- [x] T038 Unit/integration: wizard perfiles + seed en página Onboarding; e2e helper seedea lo mismo
+- [x] T039 Playwright: EntryBuilder INGRESO guarda apunte en libro PRO recién onboardado
+- [x] T040 Actualizar quickstart + inventory (`/pro/entities` sigue placeholder; JIT follow-up)
+
+## Follow-up (2026-07-20 — /pro/entities)
+
+- [x] T041 `/pro/entities`: reutilizar UI Hogar (sin rediseño) + tipo `organization` con capacidades
+- [x] T043 `/pro/accounts`: mostrar hijas globales posteables (catálogo, no editables) y luego cuentas del libro
+- [x] T044 EntryBuilder PRO: incluir globales posteables en opciones (parity Hogar plantillas `availableAccounts`)
+- [ ] T042 JIT EntryBuilder polish (definir con producto; fuera de este corte)

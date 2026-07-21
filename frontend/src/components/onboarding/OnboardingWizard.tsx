@@ -41,8 +41,11 @@ export interface OnboardingResult {
   banks: OnboardingBankDraft[];
   wallets: OnboardingWalletDraft[];
   cards: OnboardingCardDraft[];
-  /** Only populated for PRO + "sí tengo empleador"; MUST NOT ask for clients/suppliers (T012). */
+  /** Independent of freelance; only when dependencia is marked (T035). */
   employers: OnboardingEmployerDraft[];
+  /** PRO work profile — flags are independent (both / neither allowed). */
+  hasEmploymentDependency: boolean;
+  isFreelance: boolean;
 }
 
 export interface OnboardingWizardProps {
@@ -78,7 +81,8 @@ export default function OnboardingWizard({
   const [cardNombre, setCardNombre] = useState('');
   const [cardLastFour, setCardLastFour] = useState('');
   const [cardCutoff, setCardCutoff] = useState('');
-  const [dependenciaLaboral, setDependenciaLaboral] = useState<boolean | null>(null);
+  const [hasEmploymentDependency, setHasEmploymentDependency] = useState(false);
+  const [isFreelance, setIsFreelance] = useState(false);
   const [employers, setEmployers] = useState<OnboardingEmployerDraft[]>([]);
   const [employerName, setEmployerName] = useState('');
 
@@ -159,7 +163,9 @@ export default function OnboardingWizard({
       banks,
       wallets: extraWallets,
       cards,
-      employers: mode === 'pro' ? employers : [],
+      employers: mode === 'pro' && hasEmploymentDependency ? employers : [],
+      hasEmploymentDependency: mode === 'pro' ? hasEmploymentDependency : false,
+      isFreelance: mode === 'pro' ? isFreelance : false,
     });
   }
 
@@ -171,7 +177,7 @@ export default function OnboardingWizard({
       : step === 4
         ? 'Una tarjeta de crédito es una deuda. No necesitás tener cuenta en ese banco; puede ser del exterior.'
         : step === 5 && mode === 'pro'
-          ? 'Solo preguntamos por tu empleador si trabajás en relación de dependencia. No pedimos clientes ni proveedores acá — eso se crea al vuelo cuando registrás un apunte.'
+          ? 'Podés marcar dependencia, freelance, ambos o ninguno. Solo pedimos el nombre del empleador si marcás dependencia. No pedimos clientes acá.'
           : tipMessage;
 
   return (
@@ -525,44 +531,66 @@ export default function OnboardingWizard({
         <>
           <section className="mb-lg">
             <h1 className="text-headline-lg-mobile text-on-surface mb-xs font-bold">
-              ¿Relación de dependencia?
+              ¿Cómo generás ingresos?
             </h1>
             <p className="text-body-md text-on-surface-variant">
-              Si trabajás para un empleador, creamos la organización para tus apuntes de sueldo. Si
-              sos freelance, podés omitir este paso — no vas a tener que declarar clientes ni
-              proveedores acá.
+              Marcá lo que aplique hoy. Podés ser empleado y freelance a la vez, o ninguna de las
+              dos — por ejemplo si estás empezando un emprendimiento. No pedimos clientes acá.
             </p>
           </section>
 
-          <div className="grid grid-cols-2 gap-md mb-lg">
-            <button
-              type="button"
-              onClick={() => setDependenciaLaboral(true)}
-              className={`text-center p-md rounded-xl border-2 transition-all text-label-md font-semibold ${
-                dependenciaLaboral === true
-                  ? 'border-primary bg-primary/5 text-primary'
-                  : 'border-outline-variant/40 text-on-surface-variant'
+          <div className="space-y-md mb-lg">
+            <label
+              className={`flex items-start gap-md p-md rounded-xl border-2 cursor-pointer transition-all ${
+                hasEmploymentDependency
+                  ? 'border-primary bg-primary/5'
+                  : 'border-outline-variant/40'
               }`}
             >
-              Sí, tengo empleador
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setDependenciaLaboral(false);
-                setEmployers([]);
-              }}
-              className={`text-center p-md rounded-xl border-2 transition-all text-label-md font-semibold ${
-                dependenciaLaboral === false
-                  ? 'border-primary bg-primary/5 text-primary'
-                  : 'border-outline-variant/40 text-on-surface-variant'
+              <input
+                type="checkbox"
+                className="mt-1"
+                checked={hasEmploymentDependency}
+                onChange={(e) => {
+                  const checked = e.target.checked;
+                  setHasEmploymentDependency(checked);
+                  if (!checked) setEmployers([]);
+                }}
+              />
+              <span>
+                <span className="block text-label-md font-semibold text-on-surface">
+                  Relación de dependencia
+                </span>
+                <span className="block text-body-sm text-on-surface-variant mt-xs">
+                  Cobro sueldo de un empleador. Vamos a crear esa organización para tus apuntes.
+                </span>
+              </span>
+            </label>
+
+            <label
+              className={`flex items-start gap-md p-md rounded-xl border-2 cursor-pointer transition-all ${
+                isFreelance ? 'border-primary bg-primary/5' : 'border-outline-variant/40'
               }`}
             >
-              No, soy freelance
-            </button>
+              <input
+                type="checkbox"
+                className="mt-1"
+                checked={isFreelance}
+                onChange={(e) => setIsFreelance(e.target.checked)}
+              />
+              <span>
+                <span className="block text-label-md font-semibold text-on-surface">
+                  Trabajo por mi cuenta / freelance
+                </span>
+                <span className="block text-body-sm text-on-surface-variant mt-xs">
+                  Emprendimiento o servicios. Los clientes se agregan después, cuando registres un
+                  apunte.
+                </span>
+              </span>
+            </label>
           </div>
 
-          {dependenciaLaboral && (
+          {hasEmploymentDependency && (
             <>
               {employers.length > 0 && (
                 <ul className="mb-md space-y-xs">
@@ -618,7 +646,7 @@ export default function OnboardingWizard({
               fullWidth
               size="lg"
               className="rounded-xl"
-              disabled={dependenciaLaboral === true && employers.length === 0}
+              disabled={hasEmploymentDependency && employers.length === 0}
               onClick={() => setStep(6)}
               iconRight="arrow_forward"
             >
@@ -668,12 +696,27 @@ export default function OnboardingWizard({
               </span>
             </p>
             {mode === 'pro' && (
-              <p className="text-label-md text-on-surface-variant">
-                Empleador:{' '}
-                <span className="font-semibold text-primary">
-                  {employers.length === 0 ? 'ninguno (freelance)' : employers.map((e) => e.nombre).join(', ')}
-                </span>
-              </p>
+              <>
+                <p className="text-label-md text-on-surface-variant">
+                  Perfil:{' '}
+                  <span className="font-semibold text-primary">
+                    {[
+                      hasEmploymentDependency ? 'dependencia' : null,
+                      isFreelance ? 'freelance' : null,
+                    ]
+                      .filter(Boolean)
+                      .join(' + ') || 'ninguno'}
+                  </span>
+                </p>
+                <p className="text-label-md text-on-surface-variant">
+                  Empleador:{' '}
+                  <span className="font-semibold text-primary">
+                    {employers.length === 0
+                      ? 'ninguno'
+                      : employers.map((e) => e.nombre).join(', ')}
+                  </span>
+                </p>
+              </>
             )}
           </div>
           <div className="flex gap-md">

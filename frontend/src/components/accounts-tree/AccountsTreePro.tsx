@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Button from '../ui/Button.tsx';
 import TextInput from '../ui/TextInput.tsx';
 import ValidationMessage from '../ui/ValidationMessage.tsx';
@@ -8,12 +8,14 @@ import type {
   ChartActivation,
   ChartGlobalNode,
   CreateAccountInput,
+  TipoCuentaManualCreate,
 } from '../../lib/api.ts';
 import {
   buildAccountsTree,
   friendlyAccountCreateError,
-  listAllowedCreateMothers,
   manualCreateAccountTypes,
+  mothersForAccountType,
+  preferredMotherCodigo,
   type AccountsTreeGroup,
 } from './accounts-tree.ts';
 
@@ -47,6 +49,12 @@ function isProtectedCode(code: string | null): boolean {
   );
 }
 
+function groupHasVisibleContent(group: AccountsTreeGroup): boolean {
+  if (group.esPostable) return true;
+  if (group.accounts.length > 0) return true;
+  return group.children.some(groupHasVisibleContent);
+}
+
 function GroupSection({
   group,
   depth,
@@ -60,8 +68,10 @@ function GroupSection({
   savingPolicyId: string | null;
   onToggleAccountBalancePolicy?: (id: string, enforce: boolean) => Promise<void>;
 }) {
-  const hasContent = group.accounts.length > 0 || group.children.length > 0;
-  if (!hasContent && group.id !== '__orphan__') return null;
+  if (!groupHasVisibleContent(group) && group.id !== '__orphan__') return null;
+
+  const catalogLeaves = group.children.filter((c) => c.esPostable);
+  const subgroups = group.children.filter((c) => !c.esPostable);
 
   return (
     <section className="space-y-xs" style={{ marginLeft: depth * 12 }}>
@@ -70,8 +80,29 @@ function GroupSection({
         <h3 className="text-label-md font-semibold text-on-surface">{group.nombre}</h3>
       </header>
 
+      {catalogLeaves.length > 0 && (
+        <ul className="space-y-xs mb-sm" aria-label={`Catálogo bajo ${group.codigo}`}>
+          {catalogLeaves.map((leaf) => (
+            <li
+              key={leaf.id}
+              className="flex items-center justify-between gap-md p-sm rounded-lg border border-outline-variant/30 bg-surface"
+            >
+              <div>
+                <p className="text-body-md text-on-surface font-medium">
+                  <span className="font-mono text-label-sm text-on-surface-variant mr-sm">
+                    {leaf.codigo}
+                  </span>
+                  {leaf.nombre}
+                </p>
+                <p className="text-label-sm text-on-surface-variant">Catálogo · no editable</p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+
       {group.accounts.length > 0 && (
-        <ul className="space-y-xs mb-sm">
+        <ul className="space-y-xs mb-sm" aria-label={`Cuentas del libro bajo ${group.codigo}`}>
           {group.accounts.map((acc) => (
             <li
               key={acc.id}
@@ -86,7 +117,7 @@ function GroupSection({
                 </p>
                 <p className="text-label-sm text-on-surface-variant">
                   {TIPO_LABEL[acc.tipoCuenta] ?? acc.tipoCuenta}
-                  {acc.isEntityProvisioned ? ' · vía Entidad' : ''}
+                  {acc.isEntityProvisioned ? ' · vía Entidad' : ' · tu libro'}
                 </p>
               </div>
               {acc.saldo != null && (
@@ -115,7 +146,7 @@ function GroupSection({
         </ul>
       )}
 
-      {group.children.map((child) => (
+      {subgroups.map((child) => (
         <GroupSection
           key={child.id}
           group={child}
@@ -140,11 +171,15 @@ export default function AccountsTreePro({
   currency = 'USD',
 }: AccountsTreeProProps) {
   const tree = buildAccountsTree(chart, accounts, balances);
-  const mothers = listAllowedCreateMothers(chart);
   const createTypes = manualCreateAccountTypes();
 
-  const [parentGroupCodigo, setParentGroupCodigo] = useState(mothers[0]?.codigo ?? '');
-  const [tipoCuenta, setTipoCuenta] = useState(createTypes[0] ?? 'expenseCategory');
+  const [tipoCuenta, setTipoCuenta] = useState<TipoCuentaManualCreate>(
+    createTypes[0] ?? 'incomeCategory',
+  );
+  const mothers = mothersForAccountType(chart, tipoCuenta);
+  const [parentGroupCodigo, setParentGroupCodigo] = useState(() =>
+    preferredMotherCodigo(mothers, createTypes[0] ?? 'incomeCategory'),
+  );
   const [nombre, setNombre] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -155,6 +190,15 @@ export default function AccountsTreePro({
   const protectedGlobals = chart.filter(
     (node) => node.esPostable && isProtectedCode(node.codigo),
   );
+
+  useEffect(() => {
+    const nextMothers = mothersForAccountType(chart, tipoCuenta);
+    setParentGroupCodigo((current) =>
+      nextMothers.some((m) => m.codigo === current)
+        ? current
+        : preferredMotherCodigo(nextMothers, tipoCuenta),
+    );
+  }, [chart, tipoCuenta]);
 
   async function togglePolicy(
     id: string,
@@ -270,22 +314,11 @@ export default function AccountsTreePro({
 
       <div className="p-md rounded-xl border border-outline-variant/30 bg-surface-container-lowest space-y-sm">
         <p className="text-label-md font-semibold text-on-surface">Nueva cuenta bajo madre</p>
-
-        <label className="text-label-md text-on-surface-variant block" htmlFor="acc-mother">
-          Cuenta madre
-        </label>
-        <select
-          id="acc-mother"
-          value={parentGroupCodigo}
-          onChange={(e) => setParentGroupCodigo(e.target.value)}
-          className="w-full h-12 px-md rounded-lg border border-outline-variant bg-surface text-body-md"
-        >
-          {mothers.map((m) => (
-            <option key={m.id} value={m.codigo}>
-              {m.codigo} · {m.nombre}
-            </option>
-          ))}
-        </select>
+        <p className="text-label-sm text-on-surface-variant">
+          Para apuntes de ingreso o egreso elegí tipo <strong>Ingreso</strong> o{' '}
+          <strong>Gasto</strong>. Billetera/Puente son activos. Bancos y tarjetas se crean en
+          Entidades.
+        </p>
 
         <label className="text-label-md text-on-surface-variant block" htmlFor="acc-tipo-pro">
           Tipo de cuenta
@@ -293,7 +326,7 @@ export default function AccountsTreePro({
         <select
           id="acc-tipo-pro"
           value={tipoCuenta}
-          onChange={(e) => setTipoCuenta(e.target.value as typeof tipoCuenta)}
+          onChange={(e) => setTipoCuenta(e.target.value as TipoCuentaManualCreate)}
           className="w-full h-12 px-md rounded-lg border border-outline-variant bg-surface text-body-md"
         >
           {createTypes.map((tipo) => (
@@ -303,13 +336,34 @@ export default function AccountsTreePro({
           ))}
         </select>
 
+        <label className="text-label-md text-on-surface-variant block" htmlFor="acc-mother">
+          Cuenta madre
+        </label>
+        <select
+          id="acc-mother"
+          value={parentGroupCodigo}
+          onChange={(e) => setParentGroupCodigo(e.target.value)}
+          className="w-full h-12 px-md rounded-lg border border-outline-variant bg-surface text-body-md"
+          disabled={mothers.length === 0}
+        >
+          {mothers.length === 0 ? (
+            <option value="">No hay madres para este tipo</option>
+          ) : (
+            mothers.map((m) => (
+              <option key={m.id} value={m.codigo}>
+                {m.codigo} · {m.nombre}
+              </option>
+            ))
+          )}
+        </select>
+
         <TextInput
           label="Nombre"
           id="acc-nombre-pro"
           name="acc-nombre-pro"
           value={nombre}
           onChange={(e) => setNombre(e.target.value)}
-          placeholder="Ej. Papelería · Ventas locales"
+          placeholder="Ej. Papelería · Sueldo · Ventas"
           autoComplete="off"
         />
 

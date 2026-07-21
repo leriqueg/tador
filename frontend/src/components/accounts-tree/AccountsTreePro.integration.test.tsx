@@ -77,6 +77,32 @@ describe('AccountsTreePro — tree display (US4, T022)', () => {
     expect(screen.getByText('11120001')).toBeInTheDocument();
   });
 
+  it('shows global postable children as non-editable catalog rows', () => {
+    const chartWithLeaves: ChartGlobalNode[] = [
+      ...CHART,
+      {
+        id: 'g-sueldo',
+        parentId: 'g-ing',
+        codigo: '41010001',
+        nombre: 'Sueldo / Salario',
+        esPostable: true,
+      },
+    ];
+    render(
+      <AccountsTreePro
+        chart={chartWithLeaves}
+        accounts={[]}
+        balances={{}}
+        onCreateAccount={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText('41010001')).toBeInTheDocument();
+    expect(screen.getByText('Sueldo / Salario')).toBeInTheDocument();
+    expect(screen.getByText(/Catálogo · no editable/i)).toBeInTheDocument();
+    expect(screen.getByText('Ingresos')).toBeInTheDocument();
+  });
+
   it('toggles balance protection for user and global accounts', async () => {
     const user = userEvent.setup();
     const onToggleAccountBalancePolicy = vi.fn().mockResolvedValue(undefined);
@@ -102,10 +128,12 @@ describe('AccountsTreePro — tree display (US4, T022)', () => {
     );
     expect(onToggleAccountBalancePolicy).toHaveBeenCalledWith('bank-1', false);
 
-    const walletRow = screen.getByText('Efectivo').closest('li');
-    expect(walletRow).not.toBeNull();
+    const policySection = screen.getByRole('heading', {
+      name: 'Control de saldo en cuentas globales',
+    }).closest('section');
+    expect(policySection).not.toBeNull();
     await user.click(
-      within(walletRow as HTMLElement).getByRole('checkbox', {
+      within(policySection as HTMLElement).getByRole('checkbox', {
         name: 'Impedir negativo',
       }),
     );
@@ -128,8 +156,8 @@ describe('AccountsTreePro — create under mother (US4, T023)', () => {
       />,
     );
 
-    await user.selectOptions(screen.getByLabelText('Cuenta madre'), '61010000');
     await user.selectOptions(screen.getByLabelText('Tipo de cuenta'), 'expenseCategory');
+    await user.selectOptions(screen.getByLabelText('Cuenta madre'), '61010000');
     await user.type(screen.getByLabelText('Nombre'), 'Papelería');
     await user.click(screen.getByRole('button', { name: 'Crear cuenta' }));
 
@@ -138,6 +166,23 @@ describe('AccountsTreePro — create under mother (US4, T023)', () => {
       nombre: 'Papelería',
       parentGroupCodigo: '61010000',
     });
+  });
+
+  it('defaults to income type and only offers 4xxx mothers', () => {
+    render(
+      <AccountsTreePro
+        chart={CHART}
+        accounts={ACCOUNTS}
+        balances={{}}
+        onCreateAccount={vi.fn()}
+      />,
+    );
+    const tipoSelect = screen.getByLabelText('Tipo de cuenta');
+    expect(tipoSelect).toHaveValue('incomeCategory');
+    const motherOptions = within(screen.getByLabelText('Cuenta madre'))
+      .getAllByRole('option')
+      .map((o) => (o as HTMLOptionElement).value);
+    expect(motherOptions).toEqual(['41010000']);
   });
 
   it('does not offer bank/card in manual create types', () => {
@@ -154,6 +199,7 @@ describe('AccountsTreePro — create under mother (US4, T023)', () => {
     const values = options.map((o) => (o as HTMLOptionElement).value);
     expect(values).not.toContain('bank');
     expect(values).not.toContain('card');
+    expect(values[0]).toBe('incomeCategory');
   });
 
   it('surfaces create failures via ValidationMessage', async () => {
@@ -168,8 +214,8 @@ describe('AccountsTreePro — create under mother (US4, T023)', () => {
       />,
     );
 
-    await user.selectOptions(screen.getByLabelText('Cuenta madre'), '61010000');
     await user.selectOptions(screen.getByLabelText('Tipo de cuenta'), 'expenseCategory');
+    await user.selectOptions(screen.getByLabelText('Cuenta madre'), '61010000');
     await user.type(screen.getByLabelText('Nombre'), 'Papelería');
     await user.click(screen.getByRole('button', { name: 'Crear cuenta' }));
 

@@ -87,18 +87,18 @@ PRO no solo quiere ver "si hubo gasto", sino qué tipo de movimiento fue. Por ej
 | | **QuickAdd (Hogar)** | **EntryBuilder (PRO)** |
 |--|----------------------|-------------------------|
 | Pregunta mental | “¿Qué hice?” → reconozco un nombre | “¿Qué tipo de movimiento?” → clasifico y armo |
-| Entrada | Plantilla nombrada (tile / categoría / búsqueda) | Pasos: INGRESO \| EGRESO \| TRANSFERENCIA → … |
-| Formulario | Mini: cuenta, monto, concepto | Secuencia; pasos previos visibles y editables |
-| Complejidad visible | Oculta códigos y líneas | Más control; sin ERP |
-| Validez | La plantilla ya es válida | Validez por construcción al avanzar |
-| Burst | Conserva plantilla + cuenta | Conserva tipo + cuenta |
+| Entrada | Plantilla nombrada (tile / categoría / búsqueda) | Grafo de decisión: preguntas → cuentas/entidad acotadas → hoja (plantilla o libre) |
+| Formulario | Mini: cuenta, monto, concepto | Secuencia por nodos; pasos previos visibles y editables |
+| Complejidad visible | Oculta códigos y líneas | Más control; sin ERP; sin catálogo de plantillas |
+| Validez | La plantilla ya es válida | Validez por construcción al avanzar el grafo |
+| Burst | Conserva plantilla + cuenta | Conserva camino (hoja) + cuentas; limpia monto/concepto |
 | Escape | — | Asiento manual |
-| Backend típico | `POST /api/apuntes` + `templateCode` | Apunte con o sin plantilla, o asiento manual (`/api/entries`) |
+| Backend típico | `POST /api/apuntes` + `templateCode` | Apunte con o sin plantilla (hoja del grafo), o asiento manual (`/api/entries`) |
 | Rutas UI (decisión 2026-07-16) | Namespace `/hogar/*` | Namespace `/pro/*` |
 
-> Analogía: QuickAdd es **elegir una receta**; EntryBuilder es **cocinar con la misma cocina**, paso a paso (a veces sin receta con nombre).
+> Analogía: QuickAdd es **elegir una receta**; EntryBuilder es **cocinar con la misma cocina**, paso a paso (012: grafo estático; plantillas = hojas).
 
-> **Decisión 2026-07-13 / 2026-07-16**: No reutilizar EntryBuilder como UX de Hogar ni QuickAdd como UX primaria de PRO. Ambos modos ofrecen **“Guardar y registrar otro”** (burst entry). Detalle: `specs/006-frontend-hogar/spec.md` (US2) y `specs/007-frontend-pro-ligero/spec.md` (US2 EntryBuilder).
+> **Decisión 2026-07-21 (012)**: EntryBuilder MUST NOT usar chips de plantillas como UX primaria. El grafo hace las preguntas; las plantillas solo resuelven la hoja contable.
 
 ---
 

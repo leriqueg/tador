@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
-import AppShell from '../components/layout/AppShell.tsx';
+import AppShell, { type AppShellMode } from '../components/layout/AppShell.tsx';
 import Button from '../components/ui/Button.tsx';
 import TextInput from '../components/ui/TextInput.tsx';
 import {
@@ -19,21 +19,41 @@ const TIPO_LABELS: Record<string, string> = {
   organization: 'Organización',
 };
 
-const CREATE_TIPOS: { value: EntityTipo; label: string }[] = [
+const HOGAR_CREATE_TIPOS: { value: EntityTipo; label: string }[] = [
   { value: 'bank', label: 'Banco' },
   { value: 'card_issuer', label: 'Tarjeta' },
   { value: 'wallet_platform', label: 'Billetera virtual' },
   { value: 'person', label: 'Persona' },
 ];
 
-/** Counterpart management + atomic account provision (FR-004 / US1c). */
-export default function Entities() {
+const PRO_CREATE_TIPOS: { value: EntityTipo; label: string }[] = [
+  ...HOGAR_CREATE_TIPOS,
+  { value: 'organization', label: 'Organización' },
+];
+
+const CAPABILITY_LABEL: Record<string, string> = {
+  can_be_customer: 'Puede ser cliente',
+  can_be_supplier: 'Puede ser proveedor',
+  is_employment_dependency: 'Relación de dependencia (empleador)',
+};
+
+export interface EntitiesPageProps {
+  /** Namespace chrome and create options. Default hogar. */
+  mode?: AppShellMode;
+}
+
+/** Counterpart management + atomic account provision (FR-004 / US1c). PRO adds organization + capabilities. */
+export default function Entities({ mode = 'hogar' }: EntitiesPageProps) {
   const { user, loading: authLoading, logout } = useAuth();
   const gate = useBookGate();
+  const createTipos = mode === 'pro' ? PRO_CREATE_TIPOS : HOGAR_CREATE_TIPOS;
+  const basePath = mode === 'pro' ? '/pro' : '/hogar';
+
   const [items, setItems] = useState<EntitySummary[]>([]);
   const [filter, setFilter] = useState<string>('all');
   const [nombre, setNombre] = useState('');
   const [tipo, setTipo] = useState<EntityTipo>('bank');
+  const [capabilities, setCapabilities] = useState<string[]>([]);
   const [network, setNetwork] = useState('VISA');
   const [lastFour, setLastFour] = useState('');
   const [cutoffDay, setCutoffDay] = useState('');
@@ -73,6 +93,17 @@ export default function Entities() {
   if (!user) return <Navigate to="/login" replace />;
   if (gate.redirectTo) return <Navigate to={gate.redirectTo} replace />;
 
+  function toggleCapability(cap: string) {
+    setCapabilities((prev) =>
+      prev.includes(cap) ? prev.filter((c) => c !== cap) : [...prev, cap],
+    );
+  }
+
+  function handleTipoChange(next: EntityTipo) {
+    setTipo(next);
+    if (next !== 'organization') setCapabilities([]);
+  }
+
   async function handleCreate() {
     const name = nombre.trim();
     if (!name) return;
@@ -83,6 +114,7 @@ export default function Entities() {
       await entities.create({
         nombre: name,
         tipo,
+        ...(tipo === 'organization' ? { capabilities } : {}),
         metadata:
           tipo === 'card_issuer'
             ? {
@@ -97,6 +129,7 @@ export default function Entities() {
       setNombre('');
       setLastFour('');
       setCutoffDay('');
+      setCapabilities([]);
       await load();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No se pudo crear');
@@ -106,13 +139,21 @@ export default function Entities() {
   }
 
   return (
-    <AppShell activePath="/hogar/entities" userLabel={user.email} onLogout={() => void logout()}>
+    <AppShell
+      mode={mode}
+      activePath={`${basePath}/entities`}
+      userLabel={user.email}
+      onLogout={() => void logout()}
+    >
       <section className="max-w-xl">
-        <h1 className="text-headline-lg text-on-surface font-bold mb-xs">Entidades</h1>
+        <h1 className="text-headline-lg text-on-surface font-bold mb-xs">
+          {mode === 'pro' ? 'Entidades PRO' : 'Entidades'}
+        </h1>
         <p className="text-body-md text-on-surface-variant mb-lg">
-          Bancos, tarjetas, billeteras virtuales y personas. Al crearlas, TADOR arma la cuenta
-          asociada. Las categorías de ingreso/gasto viven en{' '}
-          <Link to="/hogar/accounts" className="underline text-primary">
+          Bancos, tarjetas, billeteras virtuales y personas
+          {mode === 'pro' ? ', más organizaciones con capacidades' : ''}. Al crearlas, TADOR arma la
+          cuenta asociada. Las categorías de ingreso/gasto viven en{' '}
+          <Link to={`${basePath}/accounts`} className="underline text-primary">
             Cuentas
           </Link>
           .
@@ -132,10 +173,10 @@ export default function Entities() {
           <select
             id="ent-tipo"
             value={tipo}
-            onChange={(e) => setTipo(e.target.value as EntityTipo)}
+            onChange={(e) => handleTipoChange(e.target.value as EntityTipo)}
             className="w-full h-12 px-md rounded-lg border border-outline-variant bg-surface text-body-md"
           >
-            {CREATE_TIPOS.map((t) => (
+            {createTipos.map((t) => (
               <option key={t.value} value={t.value}>
                 {t.label}
               </option>
@@ -188,6 +229,21 @@ export default function Entities() {
               />
             </>
           )}
+          {tipo === 'organization' && mode === 'pro' && (
+            <fieldset className="space-y-xs pt-xs">
+              <legend className="text-label-sm text-on-surface-variant mb-xs">Capacidades</legend>
+              {Object.entries(CAPABILITY_LABEL).map(([cap, label]) => (
+                <label key={cap} className="flex items-center gap-xs text-label-md text-on-surface">
+                  <input
+                    type="checkbox"
+                    checked={capabilities.includes(cap)}
+                    onChange={() => toggleCapability(cap)}
+                  />
+                  {label}
+                </label>
+              ))}
+            </fieldset>
+          )}
           <Button
             fullWidth
             className="rounded-xl mt-sm"
@@ -201,7 +257,7 @@ export default function Entities() {
         <div className="flex flex-wrap gap-xs mb-md">
           {[
             { id: 'all', label: 'Todas' },
-            ...CREATE_TIPOS.map((t) => ({ id: t.value, label: t.label })),
+            ...createTipos.map((t) => ({ id: t.value, label: t.label })),
           ].map((f) => (
             <button
               key={f.id}
@@ -236,6 +292,9 @@ export default function Entities() {
                   <p className="text-label-sm text-on-surface-variant">
                     {TIPO_LABELS[e.tipo] ?? e.tipo}
                     {e.provisionedAccountId ? ' · cuenta creada' : ''}
+                    {e.capabilities && e.capabilities.length > 0
+                      ? ` · ${e.capabilities.map((c) => CAPABILITY_LABEL[c] ?? c).join(', ')}`
+                      : ''}
                   </p>
                 </div>
               </li>

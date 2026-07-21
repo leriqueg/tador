@@ -8,14 +8,24 @@
 
 ## Validation Path
 
-1. Create user → onboarding **PRO** + dependencia → employer org → `/pro/dashboard`.
-2. Second user → PRO freelance → completes without clients.
-3. `/pro/entries` → EntryBuilder ingreso → save → burst.
-4. Rama con Entidad → JIT organization/person.
-5. `/pro/entries/manual` → balanced OK; unbalanced rejected.
-6. `/pro/accounts` → codes visible; create under mother; bank manual fails.
-7. Visit `/hogar/entries` while PRO → redirect `/pro/entries`.
-8. P&G/Balance under `/pro/finances/*` match Hogar content level.
+1. Create user → onboarding **PRO** + dependencia → employer org → `/pro/dashboard` with starter accounts (billetera + categorías).
+2. Second user → PRO freelance **or none** → completes without clients; same starter accounts.
+3. User with **both** dependencia + freelance → employers created; no clients asked.
+4. `/pro/entries` → **decision graph** (012): Ingreso → origen (sueldo/cliente/otro) → cuentas → save → burst.
+   Subtype chips / plantilla catalog as primary UX are **superseded** by 012.
+5. Rama con Entidad → crear en `/pro/entities` (organization + caps) o JIT EntryBuilder (polish T042).
+6. `/pro/entries/manual` → balanced OK; unbalanced rejected.
+7. `/pro/accounts` → codes visible; create under mother; bank manual fails.
+8. Visit `/hogar/entries` while PRO → redirect `/pro/entries`.
+9. P&G/Balance under `/pro/finances/*` match Hogar content level.
+
+## Playwright — PRO apunte (T039)
+
+```bash
+cd frontend && npm run test:e2e -- e2e/pro-quickstart.spec.ts
+```
+
+Expect: chromium-pro project saves an EntryBuilder income apunte after setup seeds starter accounts.
 
 ## Smoke tests (T028)
 

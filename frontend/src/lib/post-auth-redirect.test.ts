@@ -21,7 +21,7 @@ describe('resolvePostAuthDestination', () => {
       config: {
         id: 'c1',
         currency: 'USD',
-        locale: 'en-US',
+        locale: 'es',
         format: 'symbol',
         currencyLocked: false,
         mode: 'hogar',
@@ -40,7 +40,7 @@ describe('resolvePostAuthDestination', () => {
       config: {
         id: 'c1',
         currency: 'USD',
-        locale: 'en-US',
+        locale: 'es',
         format: 'symbol',
         currencyLocked: false,
         mode: 'hogar',
@@ -59,7 +59,7 @@ describe('resolvePostAuthDestination', () => {
       config: {
         id: 'c1',
         currency: 'USD',
-        locale: 'en-US',
+        locale: 'es',
         format: 'symbol',
         currencyLocked: false,
         mode: 'pro',

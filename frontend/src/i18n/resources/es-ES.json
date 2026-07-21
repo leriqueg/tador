@@ -1,0 +1,15 @@
+{
+  "login": {
+    "subtitle": "Introduce tus datos para gestionar tu economía.",
+    "password": "Contraseña",
+    "forgotPassword": "¿Ha olvidado su contraseña?",
+    "noAccount": "¿No tiene cuenta?",
+    "register": "Regístrese"
+  },
+  "settings": {
+    "namePlaceholder": "Cómo quieres que te llamemos"
+  },
+  "onboarding": {
+    "currencyTimeDescription": "Puedes cambiar la zona horaria y el idioma después en Ajustes. La moneda queda fija cuando haya movimientos."
+  }
+}

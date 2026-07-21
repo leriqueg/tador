@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './lib/auth.tsx';
+import { I18nProvider } from './i18n/I18nProvider.tsx';
 import ModeNamespaceGuard from './components/routing/ModeNamespaceGuard.tsx';
 import Landing from './pages/Landing.tsx';
 import Login from './pages/Login.tsx';
@@ -33,7 +34,8 @@ import AnalysisPortfolio from './pages/pro/analysis/AnalysisPortfolio.tsx';
 export default function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
+      <I18nProvider>
+        <BrowserRouter>
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
@@ -84,7 +86,8 @@ export default function App() {
             <Route path="/pro/analysis/portfolio" element={<AnalysisPortfolio />} />
           </Route>
         </Routes>
-      </BrowserRouter>
+        </BrowserRouter>
+      </I18nProvider>
     </AuthProvider>
   );
 }

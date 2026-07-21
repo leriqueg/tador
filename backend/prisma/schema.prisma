@@ -75,7 +75,7 @@ model BookConfig {
   id                    String    @id @default(cuid())
   bookId                String    @unique
   currency              String    @default("USD")
-  locale                String    @default("en-US")
+  locale                String    @default("es")
   format                String    @default("symbol")
   currencyLocked        Boolean   @default(false)
   /// Active product mode: hogar | pro

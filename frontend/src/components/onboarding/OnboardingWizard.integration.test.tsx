@@ -2,6 +2,12 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import OnboardingWizard, { type OnboardingResult } from './OnboardingWizard.tsx';
+import { TestI18nProvider } from '../../i18n/I18nProvider.tsx';
+import type { ReactElement } from 'react';
+
+function renderWizard(ui: ReactElement) {
+  return render(<TestI18nProvider>{ui}</TestI18nProvider>);
+}
 
 /** Walks steps 1-4 (mode, currency/tz, bank/wallet, cards) and lands on step 5. */
 async function advanceToStep5(user: ReturnType<typeof userEvent.setup>, modeLabel: 'Modo Hogar' | 'Modo PRO') {
@@ -20,7 +26,7 @@ describe('OnboardingWizard — PRO branch (T010-T012)', () => {
   it('never shows client/supplier steps while walking the PRO flow (T012)', async () => {
     const user = userEvent.setup();
     const onComplete = vi.fn();
-    render(<OnboardingWizard onComplete={onComplete} />);
+    renderWizard(<OnboardingWizard onComplete={onComplete} />);
 
     await advanceToStep5(user, 'Modo PRO');
     await user.click(screen.getByRole('button', { name: /No, soy freelance/i }));
@@ -33,7 +39,7 @@ describe('OnboardingWizard — PRO branch (T010-T012)', () => {
   it('lets a freelancer finish onboarding without an employer org (T011)', async () => {
     const user = userEvent.setup();
     let result: OnboardingResult | null = null;
-    render(<OnboardingWizard onComplete={(r) => (result = r)} />);
+    renderWizard(<OnboardingWizard onComplete={(r) => (result = r)} />);
 
     await advanceToStep5(user, 'Modo PRO');
     await user.click(screen.getByRole('button', { name: /No, soy freelance/i }));
@@ -50,7 +56,7 @@ describe('OnboardingWizard — PRO branch (T010-T012)', () => {
   it('collects the employer org when the user has an employment dependency (T010)', async () => {
     const user = userEvent.setup();
     let result: OnboardingResult | null = null;
-    render(<OnboardingWizard onComplete={(r) => (result = r)} />);
+    renderWizard(<OnboardingWizard onComplete={(r) => (result = r)} />);
 
     await advanceToStep5(user, 'Modo PRO');
     await user.click(screen.getByRole('button', { name: /Sí, tengo empleador/i }));
@@ -69,7 +75,7 @@ describe('OnboardingWizard — PRO branch (T010-T012)', () => {
   it('still completes the Hogar flow unaffected by the PRO branch (regression)', async () => {
     const user = userEvent.setup();
     let result: OnboardingResult | null = null;
-    render(<OnboardingWizard onComplete={(r) => (result = r)} />);
+    renderWizard(<OnboardingWizard onComplete={(r) => (result = r)} />);
 
     await advanceToStep5(user, 'Modo Hogar');
     expect(await screen.findByText('Paso 5 de 5')).toBeInTheDocument();

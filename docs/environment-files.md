@@ -167,6 +167,7 @@ Prefer platform secrets (Fly, Railway, ECS, K8s Secret, etc.):
 | `SESSION_SECRET` | Strong random; **different** from local |
 | `NODE_ENV=production` | Must be exactly `production`; values like `staging` keep non-production cookie/admin behavior |
 | `CORS_ORIGIN` | Exact HTTPS origin(s) allowed to send credentials |
+| `COOKIE_SECURE` | `true` behind HTTPS; **`false` on plain HTTP** demos or browsers reject the session cookie |
 | `ENABLE_PLANTILLAS_ADMIN=false` | Keeps development administration routes closed |
 | `LOG_LEVEL` | Runtime log level; normally `info` |
 
@@ -288,6 +289,7 @@ NODE_ENV=production
 DATABASE_URL=postgresql://tador_stg:…@stg-db.example:5432/tador_staging?sslmode=require
 SESSION_SECRET=<environment-specific-random-value>
 CORS_ORIGIN=https://staging.tador.example
+COOKIE_SECURE=true
 ENABLE_PLANTILLAS_ADMIN=false
 REQUIRE_EMAIL_VERIFICATION=false
 ```
@@ -302,12 +304,14 @@ LOG_LEVEL=info
 DATABASE_URL=postgresql://tador_app:…@prod-db.example:5432/tador?sslmode=require
 SESSION_SECRET=<at-least-32-random-bytes>
 CORS_ORIGIN=https://app.tador.example
+COOKIE_SECURE=true
 ENABLE_PLANTILLAS_ADMIN=false
 REQUIRE_EMAIL_VERIFICATION=false
 ```
 
-This matches `.env.production.example`. `REQUIRE_EMAIL_VERIFICATION` remains
-disabled until the production email adapter replaces the token-logging stub.
+For an **HTTP-only demo** host (no TLS), set `COOKIE_SECURE=false` and put the
+exact `http://…` origin in `CORS_ORIGIN`; otherwise the browser never stores
+`session_token` and every authenticated request returns 401.
 
 ---
 

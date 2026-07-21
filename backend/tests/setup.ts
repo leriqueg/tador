@@ -9,6 +9,9 @@
  */
 
 import { execSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { PrismaClient } from '@prisma/client';
 import {
   ensureDatabaseUrl,
@@ -20,6 +23,17 @@ process.env.VITEST = 'true';
 
 const ALLOWED_TEST_DB = process.env.POSTGRES_TEST_DB ?? 'tador_test';
 const databaseUrl = ensureDatabaseUrl();
+const SEED_PATH = join(
+  dirname(fileURLToPath(import.meta.url)),
+  '../data/plan-de-cuentas/plan-de-cuentas-final-seed.json',
+);
+
+function seedAccountCodigos(): string[] {
+  const raw = JSON.parse(readFileSync(SEED_PATH, 'utf8')) as {
+    accounts: Array<{ codigo: string }>;
+  };
+  return raw.accounts.map((a) => a.codigo);
+}
 
 function databaseNameFromUrl(url: string): string {
   try {
@@ -85,6 +99,29 @@ async function ensureDatabaseExists(): Promise<void> {
 assertSafeTestDatabase('setup-module');
 const prisma = createPinnedClient(databaseUrl);
 
+/**
+ * Seed upserts but never deletes. Integration helpers create temporary
+ * CuentaGlobal rows; if a prior run crashed before cleanup, GET /api/chart
+ * grows past the seeded length. Drop anything not in the seed catalog.
+ */
+async function purgeNonSeedCuentaGlobal(): Promise<void> {
+  const codigos = seedAccountCodigos();
+  await prisma.activacionCuentaGlobal.deleteMany({
+    where: { global: { codigo: { notIn: codigos } } },
+  });
+  await prisma.lineaAsiento.updateMany({
+    where: { cuentaGlobal: { codigo: { notIn: codigos } } },
+    data: { cuentaGlobalId: null },
+  });
+  await prisma.cuentaUsuario.updateMany({
+    where: { global: { codigo: { notIn: codigos } } },
+    data: { globalId: null },
+  });
+  await prisma.cuentaGlobal.deleteMany({
+    where: { codigo: { notIn: codigos } },
+  });
+}
+
 beforeAll(async () => {
   await ensureDatabaseExists();
   await assertConnectedToTestDb(prisma, 'beforeAll');
@@ -101,6 +138,8 @@ beforeAll(async () => {
     env: { ...process.env, DATABASE_URL: databaseUrl, VITEST: 'true' },
     stdio: 'pipe',
   });
+
+  await purgeNonSeedCuentaGlobal();
 });
 
 afterAll(async () => {
@@ -115,4 +154,5 @@ afterEach(async () => {
   await prisma.bookConfig.deleteMany();
   await prisma.book.deleteMany();
   await prisma.user.deleteMany();
+  await purgeNonSeedCuentaGlobal();
 });

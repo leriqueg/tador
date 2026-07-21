@@ -28,7 +28,7 @@ vi.mock('../../lib/auth.tsx', () => ({
 
 const bank = {
   id: 'bank-1',
-  codigo: null,
+  codigo: '11120001',
   nombre: 'Banco',
   tipoCuenta: 'bank',
   entidadId: null,
@@ -38,8 +38,8 @@ const bank = {
 
 const income = {
   id: 'income-1',
-  codigo: null,
-  nombre: 'Ventas',
+  codigo: '41100001',
+  nombre: 'Otros ingresos',
   tipoCuenta: 'incomeCategory',
   entidadId: null,
   isEntityProvisioned: false,
@@ -80,29 +80,32 @@ describe('Quickstart smoke (T028)', () => {
   });
 
   it(
-    'EntryBuilder ingreso flow reaches guardar with amount',
+    'EntryBuilder otro-ingreso flow reaches guardar with amount',
     async () => {
       const user = userEvent.setup();
       const onSubmit = vi.fn().mockResolvedValue(undefined);
 
       render(
-        <EntryBuilder
-          accounts={[bank, income]}
-          entities={[]}
-          onSubmit={onSubmit}
-          onCreateEntity={vi.fn()}
-        />,
+        <MemoryRouter>
+          <EntryBuilder
+            accounts={[bank, income]}
+            entities={[]}
+            onSubmit={onSubmit}
+            onCreateEntity={vi.fn()}
+          />
+        </MemoryRouter>,
       );
 
-      // subtype defaults to "general" (Otro ingreso) — no chip click needed
       await user.click(screen.getByRole('button', { name: 'Ingreso' }));
+      await user.click(screen.getByRole('button', { name: 'Otro ingreso' }));
       await user.selectOptions(screen.getByLabelText('¿Dónde recibiste el dinero?'), 'bank-1');
+      await user.click(screen.getByRole('button', { name: 'Continuar' }));
       await user.selectOptions(screen.getByLabelText('Categoría de ingreso'), 'income-1');
       await user.click(screen.getByRole('button', { name: 'Continuar' }));
-      await user.click(screen.getByRole('button', { name: 'Omitir' }));
       await user.type(screen.getByLabelText('Concepto'), 'Venta julio');
       await user.click(screen.getByRole('button', { name: 'Continuar' }));
       await user.type(screen.getByLabelText('Monto'), '150');
+      await user.click(screen.getByRole('button', { name: 'Continuar' }));
       await user.click(screen.getByRole('button', { name: 'Guardar' }));
 
       expect(onSubmit).toHaveBeenCalledWith(

@@ -36,6 +36,12 @@
 - Q: ¿Clientes/proveedores? → A: **Just-in-Time** en EntryBuilder (inline). La UI JIT MUST ser clara (nombre + capacidades mínimas).
 - Q: ¿IA / mockup asistente? → A: Fuera de MVP (`008` excluido).
 
+### Session 2026-07-20 — Onboarding seed + perfil laboral
+
+- Q: ¿Dependencia vs freelance son excluyentes? → A: **No.** Flags independientes: dependencia, freelance, **ambos**, o **ninguno** (público: abuelita, joven, ama de casa, emprendimiento, freelance sin clientes).
+- Q: ¿Onboarding deja el libro listo para el primer apunte? → A: **Sí.** Al completar MUST seedear billetera default + categorías mínimas de ingreso/gasto (`CuentaUsuario`). Sin esto EntryBuilder queda sin opciones.
+- Q: ¿Clientes en onboarding? → A: Sigue **MUST NOT**. JIT se define en follow-up; `/pro/entities` aún placeholder.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 0 - Namespace PRO y guard de modo (Priority: P1)
@@ -51,17 +57,19 @@ Como usuario con modo PRO (o Hogar), quiero que la app me lleve al namespace cor
 
 ---
 
-### User Story 1 - Onboarding PRO con empleador opcional (Priority: P1)
+### User Story 1 - Onboarding PRO con perfil laboral flexible (Priority: P1)
 
-Como usuario que elige PRO, quiero indicar si trabajo en dependencia para crear la organización empleadora antes del primer sueldo — sin inventar clientes.
+Como usuario que elige PRO, quiero indicar si tengo dependencia y/o trabajo por mi cuenta (o ninguna), crear el empleador solo si aplica, y llegar al dashboard con cuentas listas para el primer apunte — sin inventar clientes.
 
-**Independent Test**: Completar onboarding PRO: (a) dependencia → org con `is_employment_dependency`; (b) freelance → sin clientes; ambos llegan a `/pro/dashboard`.
+**Independent Test**: Completar onboarding PRO: (a) solo dependencia → org + seed; (b) solo freelance → sin clientes + seed; (c) ambos; (d) ninguno; todos llegan a `/pro/dashboard` con billetera + categorías.
 
 **Acceptance Scenarios**:
 
-1. **Given** onboarding modo PRO + “sí dependencia”, **When** nombro la empresa, **Then** se crea `organization` con `is_employment_dependency`.
-2. **Given** onboarding PRO freelance, **When** omito clientes, **Then** el libro queda inicializado.
+1. **Given** onboarding modo PRO + dependencia, **When** nombro la empresa, **Then** se crea `organization` con `is_employment_dependency`.
+2. **Given** onboarding PRO freelance (o ninguno), **When** omito clientes, **Then** el libro queda inicializado.
 3. **Given** onboarding PRO, **When** avanzo, **Then** **MUST NOT** pedirse lista de clientes/proveedores.
+4. **Given** onboarding PRO o Hogar completado, **When** listo cuentas, **Then** existe billetera default + al menos una categoría de ingreso y una de gasto.
+5. **Given** dependencia + freelance marcados a la vez, **When** completo, **Then** se crean empleadores y no se exigen clientes.
 
 ---
 
@@ -155,7 +163,8 @@ Como usuario PRO, quiero P&G y Balance con la misma claridad que Hogar (sin aná
 - **FR-009**: Entidad requerida MUST permitir selección o JIT inline con capacidades mínimas.
 - **FR-010**: Asiento manual MUST aceptar balanceados y rechazar descuadres.
 - **FR-011**: P&G y Balance PRO MUST equivaler conceptualmente a Hogar (sin análisis 009).
-- **FR-012**: Onboarding PRO MUST preguntar dependencia laboral opcional; MUST NOT exigir clientes/proveedores.
+- **FR-012**: Onboarding PRO MUST ofrecer perfil laboral con flags independientes (dependencia y/o freelance, o ninguno); MUST NOT exigir clientes/proveedores.
+- **FR-016**: Al completar onboarding (Hogar o PRO) el sistema MUST crear cuentas starter: billetera default sin entidad + categorías mínimas de ingreso y gasto, para que EntryBuilder/QuickAdd tengan opciones.
 - **FR-013**: Organizaciones MUST usar tipo `organization` + capacidades; validación al apunte.
 - **FR-014**: Sticky defaults: última cuenta por tipo de operación SHOULD preseleccionarse.
 - **FR-015**: Funciones PRO MUST respetar tenant, periodo y postables.
@@ -185,7 +194,8 @@ Como usuario PRO, quiero P&G y Balance con la misma claridad que Hogar (sin aná
 - **SC-002**: 100 % descuadres de asiento manual rechazados.
 - **SC-003**: Ingreso típico EntryBuilder &lt; 60 s.
 - **SC-004**: Burst no exige reelegir tipo ni cuenta.
-- **SC-005**: Freelance completa onboarding PRO sin clientes.
+- **SC-005**: Freelance (o perfil ninguno) completa onboarding PRO sin clientes.
+- **SC-008**: Tras onboarding, EntryBuilder muestra al menos una opción en debe y haber para INGRESO.
 - **SC-006**: Cross-namespace siempre redirige al modo del libro.
 - **SC-007**: Ninguna función PRO salta reglas del motor.
 

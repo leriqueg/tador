@@ -6,7 +6,9 @@
 
 ## Summary
 
-Ship **PRO ligero**: namespaces `/pro/*` (and migrate Hogar to `/hogar/*` with mode guards), EntryBuilder capture, account tree with codes, manual balanced entry, optional employer org on PRO onboarding. Keep P&G/Balance conceptually identical to Hogar. Advanced analysis → `009-frontend-pro-avanzado`. IA v0 (`008`) excluded from MVP.
+Ship **PRO ligero**: namespaces `/pro/*` (and migrate Hogar to `/hogar/*` with mode guards), EntryBuilder capture, account tree with codes, manual balanced entry, flexible PRO work profile (dependency and/or freelance, or neither) plus starter account seed on onboarding. Keep P&G/Balance conceptually identical to Hogar. Advanced analysis → `009-frontend-pro-avanzado`. IA v0 (`008`) excluded from MVP.
+
+**Follow-up 2026-07-20**: onboarding MUST seed default wallet + income/expense categories so EntryBuilder is usable; work-profile flags are independent (not exclusive).
 
 ## Technical Context
 

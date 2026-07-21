@@ -129,8 +129,9 @@ Do **not** copy local `.env` into the image or commit site files.
 |----------|-----------------|
 | `DATABASE_URL` / `POSTGRES_*` | Staging Postgres (`tador_staging`), isolated |
 | `SESSION_SECRET` | Strong random; **different** from local |
-| `NODE_ENV=production` | Exact value required for secure cookies |
-| `CORS_ORIGIN` | Exact HTTPS origin (`https://tador.nesis.tel`, …) |
+| `NODE_ENV=production` | Must be exactly `production`; values like `staging` keep non-production cookie/admin behavior |
+| `CORS_ORIGIN` | Exact public origin (`https://tador.nesis.tel`, …) |
+| `COOKIE_SECURE` | `true` behind HTTPS; **`false` on plain HTTP** demos or browsers reject the session cookie |
 | `ENABLE_PLANTILLAS_ADMIN=false` | Admin routes closed |
 | `LOG_LEVEL` | Usually `info` |
 
@@ -188,6 +189,7 @@ NODE_ENV=production
 DATABASE_URL=postgresql://tador_stg:…@postgres:5432/tador_staging
 SESSION_SECRET=<openssl rand -base64 48>
 CORS_ORIGIN=https://tador.example.tel
+COOKIE_SECURE=true
 ENABLE_PLANTILLAS_ADMIN=false
 REQUIRE_EMAIL_VERIFICATION=false
 BACKEND_HOST_PORT=3000
@@ -201,9 +203,14 @@ NODE_ENV=production
 DATABASE_URL=postgresql://tador_app:…@db.example.com:5432/tador?sslmode=require
 SESSION_SECRET=<at-least-32-random-bytes>
 CORS_ORIGIN=https://app.example.com
+COOKIE_SECURE=true
 ENABLE_PLANTILLAS_ADMIN=false
 REQUIRE_EMAIL_VERIFICATION=false
 ```
+
+For an **HTTP-only demo** host (no TLS), set `COOKIE_SECURE=false` and put the
+exact `http://…` origin in `CORS_ORIGIN`; otherwise the browser never stores
+`session_token` and every authenticated request returns 401.
 
 ---
 

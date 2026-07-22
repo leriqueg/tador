@@ -5,6 +5,7 @@
 import { prisma } from '../database.js';
 import type { Book, BookConfig, BookMode } from '../../domain/book.js';
 import { defaultBookConfigCreateInput } from '../../domain/book.js';
+import { DEFAULT_LOCALE } from '../../domain/locales.js';
 import type { BookRepository } from '../../application/ports/book-repository.js';
 
 export type { BookRepository };
@@ -54,7 +55,7 @@ export function createBookRepository(): BookRepository {
         create: {
           bookId,
           currency: config.currency ?? 'USD',
-          locale: config.locale ?? 'en-US',
+          locale: config.locale ?? DEFAULT_LOCALE,
           format: config.format ?? 'symbol',
           currencyLocked: config.currencyLocked ?? false,
           mode: config.mode ?? 'hogar',

@@ -31,7 +31,7 @@ describe('BookConfig onboarding', () => {
     expect(again.onboardingCompletedAt).toEqual(updated.onboardingCompletedAt);
   });
 
-  it('rejects invalid mode and empty timeZone', () => {
+  it('rejects invalid mode, empty timeZone, and unsupported locale', () => {
     const current = createDefaultBookConfig();
     expect(() =>
       applyBookConfigUpdate(current, { mode: 'enterprise' as 'hogar' }),
@@ -39,5 +39,12 @@ describe('BookConfig onboarding', () => {
     expect(() => applyBookConfigUpdate(current, { timeZone: '  ' })).toThrow(
       'Invalid time zone',
     );
+    expect(() => applyBookConfigUpdate(current, { locale: 'fr-FR' })).toThrow(
+      'Invalid locale',
+    );
+  });
+
+  it('defaults to neutral Spanish locale', () => {
+    expect(createDefaultBookConfig().locale).toBe('es');
   });
 });

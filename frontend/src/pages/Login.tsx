@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { AuthFooter } from '../components/layout/AppFooter.tsx';
 import { MinimalHeader } from '../components/layout/MarketingHeader.tsx';
 import Button from '../components/ui/Button.tsx';
@@ -9,6 +10,7 @@ import { useAuth } from '../lib/auth.tsx';
 import { resolvePostAuthDestination } from '../lib/post-auth-redirect.ts';
 
 export default function Login() {
+  const { t } = useTranslation();
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -27,7 +29,7 @@ export default function Login() {
       const dest = await resolvePostAuthDestination();
       navigate(dest, { replace: true });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al iniciar sesión');
+      setError(err instanceof Error ? err.message : t('login.error'));
     } finally {
       setLoading(false);
     }
@@ -41,11 +43,9 @@ export default function Login() {
         <div className="w-full max-w-[440px] bg-white rounded-lg card-shadow p-lg md:p-xl flex flex-col gap-xl border border-surface-container-high">
           <div className="flex flex-col gap-xs text-center md:text-left">
             <h1 className="text-headline-lg-mobile md:text-headline-lg text-primary font-bold">
-              ¡Hola de nuevo!
+              {t('login.title')}
             </h1>
-            <p className="text-body-md text-on-surface-variant">
-              Ingrese sus datos para gestionar su economía.
-            </p>
+            <p className="text-body-md text-on-surface-variant">{t('login.subtitle')}</p>
           </div>
 
           {error && (
@@ -56,7 +56,7 @@ export default function Login() {
 
           <form className="flex flex-col gap-lg" onSubmit={handleSubmit}>
             <TextInput
-              label="Email"
+              label={t('login.email')}
               icon="mail"
               id="email"
               type="email"
@@ -67,7 +67,7 @@ export default function Login() {
             />
 
             <TextInput
-              label="Contraseña"
+              label={t('login.password')}
               icon="lock"
               id="password"
               type={showPassword ? 'text' : 'password'}
@@ -77,7 +77,7 @@ export default function Login() {
               required
               labelAction={
                 <span className="text-label-sm text-secondary hover:text-primary transition-all cursor-pointer">
-                  ¿Olvidó su contraseña?
+                  {t('login.forgotPassword')}
                 </span>
               }
               trailing={
@@ -85,7 +85,7 @@ export default function Login() {
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="text-on-surface-variant hover:text-primary transition-colors cursor-pointer"
-                  aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                  aria-label={showPassword ? t('login.hidePassword') : t('login.showPassword')}
                 >
                   <Icon name={showPassword ? 'visibility_off' : 'visibility'} />
                 </button>
@@ -93,19 +93,19 @@ export default function Login() {
             />
 
             <Button type="submit" disabled={loading} fullWidth size="lg" iconRight={loading ? undefined : 'arrow_forward'}>
-              {loading ? 'Ingresando…' : 'Ingresar'}
+              {loading ? t('login.submitting') : t('login.submit')}
             </Button>
           </form>
 
           <div className="flex flex-col items-center gap-md">
             <div className="w-full h-px bg-surface-variant" />
             <p className="text-body-md text-on-surface-variant">
-              ¿No tiene cuenta?{' '}
+              {t('login.noAccount')}{' '}
               <Link
                 to="/register"
                 className="text-secondary font-bold hover:text-primary hover:underline underline-offset-4 transition-all"
               >
-                Regístrese
+                {t('login.register')}
               </Link>
             </p>
           </div>

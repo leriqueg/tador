@@ -1,12 +1,16 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import Button from '../ui/Button.tsx';
 import Icon from '../ui/Icon.tsx';
 import TextInput from '../ui/TextInput.tsx';
+import LocaleSelect from '../i18n/LocaleSelect.tsx';
 import {
   CURATED_TIME_ZONES,
   detectDefaultTimeZone,
   timeZoneLabel,
 } from '../../lib/time-zones.ts';
+import { detectDefaultLocale, type AppLocale } from '../../i18n/locales.ts';
+import { useAppLocale } from '../../i18n/I18nProvider.tsx';
 
 export type OnboardingStep = 1 | 2 | 3 | 4 | 5 | 6;
 
@@ -37,6 +41,7 @@ export interface OnboardingEmployerDraft {
 export interface OnboardingResult {
   mode: OnboardingMode;
   currency: string;
+  locale: AppLocale;
   timeZone: string;
   banks: OnboardingBankDraft[];
   wallets: OnboardingWalletDraft[];
@@ -68,9 +73,12 @@ export default function OnboardingWizard({
   submitting = false,
   onComplete,
 }: OnboardingWizardProps) {
+  const { t } = useTranslation();
+  const { setLocale } = useAppLocale();
   const [step, setStep] = useState<OnboardingStep>(initialStep);
   const [mode, setMode] = useState<OnboardingMode | null>(null);
   const [currency, setCurrency] = useState('USD');
+  const [locale, setLocaleState] = useState<AppLocale>(detectDefaultLocale());
   const [timeZone, setTimeZone] = useState('UTC');
   const [extraWallets, setExtraWallets] = useState<OnboardingWalletDraft[]>([]);
   const [walletName, setWalletName] = useState('');
@@ -159,6 +167,7 @@ export default function OnboardingWizard({
     onComplete({
       mode,
       currency,
+      locale,
       timeZone,
       banks,
       wallets: extraWallets,
@@ -254,15 +263,15 @@ export default function OnboardingWizard({
       {step === 2 && (
         <>
           <section className="mb-lg">
-            <h1 className="text-headline-lg-mobile text-on-surface mb-xs font-bold">Moneda y zona horaria</h1>
+            <h1 className="text-headline-lg-mobile text-on-surface mb-xs font-bold">
+              {t('onboarding.currencyTimeTitle')}
+            </h1>
             <p className="text-body-md text-on-surface-variant">
-              Elegí la moneda principal y la zona horaria del libro. La zona se detecta desde tu
-              navegador cuando podemos. Después de registrar movimientos, la moneda no se podrá
-              cambiar.
+              {t('onboarding.currencyTimeDescription')}
             </p>
           </section>
           <label className="text-label-md text-on-surface-variant mb-xs block" htmlFor="currency">
-            Moneda
+            {t('onboarding.currency')}
           </label>
           <select
             id="currency"
@@ -280,7 +289,7 @@ export default function OnboardingWizard({
             <option value="BRL">BRL — Real brasileño</option>
           </select>
           <label className="text-label-md text-on-surface-variant mb-xs block" htmlFor="timezone">
-            Zona horaria
+            {t('onboarding.timeZone')}
           </label>
           <select
             id="timezone"
@@ -294,15 +303,30 @@ export default function OnboardingWizard({
               </option>
             ))}
           </select>
+          <label className="text-label-md text-on-surface-variant mb-xs block" htmlFor="locale">
+            {t('onboarding.language')}
+          </label>
+          <LocaleSelect
+            id="locale"
+            value={locale}
+            onChange={(value) => {
+              const next = value as AppLocale;
+              setLocaleState(next);
+              void setLocale(next);
+            }}
+            className="w-full h-12 px-md mb-xl rounded-lg border border-outline-variant bg-surface-container-lowest text-body-md"
+          />
           <div className="flex gap-md">
             <Button variant="outline" fullWidth size="lg" className="rounded-xl" onClick={() => setStep(1)}>
-              Atrás
+              {t('common.back')}
             </Button>
             <Button fullWidth size="lg" className="rounded-xl" onClick={continueFromStep2} iconRight="arrow_forward">
-              Continuar
+              {t('common.continue')}
             </Button>
           </div>
-          <p className="text-center mt-sm text-label-sm text-outline">Paso 2 de {totalSteps}</p>
+          <p className="text-center mt-sm text-label-sm text-outline">
+            {t('onboarding.stepOf', { current: 2, total: totalSteps })}
+          </p>
         </>
       )}
 

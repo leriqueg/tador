@@ -100,7 +100,8 @@ export function registerBookRoutes(
       if (
         message === 'Cannot change currency after financial activity has been recorded' ||
         message === 'Invalid book mode' ||
-        message === 'Invalid time zone'
+        message === 'Invalid time zone' ||
+        message === 'Invalid locale'
       ) {
         return reply.status(400).send({ error: message });
       }

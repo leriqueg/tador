@@ -13,7 +13,7 @@ Audits (agent `ui-design-governance`) walk this table view-by-view.
 | `/hogar/dashboard` | [hogar-dashboard.md](./hogar-dashboard.md) | Resumen mes/año + posición | stub |
 | `/hogar/entries` | [hogar-entries.md](./hogar-entries.md) | QuickAdd captura | stub |
 | `/hogar/finances` | [hogar-finances.md](./hogar-finances.md) | Hub Estado | stub |
-| `/hogar/finances/pyg` | [hogar-finances-pyg.md](./hogar-finances-pyg.md) | P&G + top cuentas | stub |
+| `/hogar/finances/pyg` | [hogar-finances-pyg.md](./hogar-finances-pyg.md) | P&G + top cuentas | debt |
 | `/hogar/finances/balance` | [hogar-finances-balance.md](./hogar-finances-balance.md) | Posición / balance | stub |
 | `/hogar/finances/apuntes` | [hogar-finances-apuntes.md](./hogar-finances-apuntes.md) | Historial filtrable | stub |
 | `/hogar/accounts` | [hogar-accounts.md](./hogar-accounts.md) | Cuentas y saldos | stub |
@@ -28,7 +28,7 @@ Audits (agent `ui-design-governance`) walk this table view-by-view.
 | `/pro/entries` | [pro-entries.md](./pro-entries.md) | EntryBuilder | stub |
 | `/pro/entries/manual` | [pro-entries-manual.md](./pro-entries-manual.md) | Asiento manual | stub |
 | `/pro/finances` | [pro-finances.md](./pro-finances.md) | Hub Estado | stub |
-| `/pro/finances/pyg` | [pro-finances-pyg.md](./pro-finances-pyg.md) | P&G (shared page) | stub |
+| `/pro/finances/pyg` | [pro-finances-pyg.md](./pro-finances-pyg.md) | P&G (shared page) | debt |
 | `/pro/finances/balance` | [pro-finances-balance.md](./pro-finances-balance.md) | Balance | stub |
 | `/pro/finances/apuntes` | [pro-finances-apuntes.md](./pro-finances-apuntes.md) | Historial (density debt) | stub |
 | `/pro/accounts` | [pro-accounts.md](./pro-accounts.md) | Árbol de cuentas | stub |

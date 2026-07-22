@@ -3,6 +3,13 @@ alwaysApply: true
 ---
 
 <!-- SPECKIT START -->
+Current active plan: `specs/012-entry-builder-decision-graph/plan.md`.
+Capture: Hogar = QuickAdd `/hogar/*` (006); PRO = EntryBuilder decision graph `/pro/*` (012; builds on 007).
+Advanced PRO analysis → `specs/009-frontend-pro-avanzado/`.
+IA v0 `specs/008-ia-v0/` → **excluded from MVP** (ADR 0002; do not renumber).
+Modos / QuickAdd vs EntryBuilder: `specs/foundation/modos-hogar-pro.md` (density: `.cursor/rules/hogar-pro-ui-density.mdc`).
+UI catalog: Storybook canonical SoT; views = `frontend/docs/views/`; exceptions = `frontend/docs/ui-exceptions.md`; ADR 0006.
+Agents: `ui-design-governance` (audit/polish), `ui-storybook-sync` (drift) — see `AGENTS.md`.
 For additional context about technologies to be used, project structure,
 shell commands, and other important information, read the current plan
 at specs/013-admin-platform/plan.md

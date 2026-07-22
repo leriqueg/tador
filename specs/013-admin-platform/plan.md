@@ -117,12 +117,12 @@ docs/adr/0006-admin-platform-architecture.md
 
 ### Phase 0 — Foundation (P1)
 
-1. Prisma: `Operator`, `OperatorSession`, `AdminAuditLog`; `User.blockedAt`, `User.blockedReason`.
-2. Seed: bootstrap `superadmin` via env-gated script (`ADMIN_BOOTSTRAP_EMAIL` / `ADMIN_BOOTSTRAP_PASSWORD`).
+1. Prisma: `Operator`, `OperatorSession`, `AdminAuditLog`; `User.blockedAt`, `User.blockedReason`; `Operator.mustChangePassword`, `Operator.passwordChangedAt`.
+2. Bootstrap: `ensureBootstrapOperator()` post-migrate — idempotent; policy per [auth-bootstrap.md](./auth-bootstrap.md).
 3. Middleware: `requireOperator`, `requireRole(...)`.
 4. `DEPLOYMENT_PROFILE` route registration in `server.ts`.
-5. `admin-ui` scaffold + login + empty dashboard.
-6. Tests: unauthorized access to `/api/admin/*`; operator login/logout.
+5. `admin-ui` scaffold + login + change-password gate + empty dashboard.
+6. Tests: unauthorized access to `/api/admin/*`; operator login/logout; `mustChangePassword` flow in staging profile.
 
 ### Phase 1 — User administration (P1)
 

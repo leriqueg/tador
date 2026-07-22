@@ -117,7 +117,10 @@ As an operations lead, I need dashboards for logins and apuntes created per day,
 - **FR-011**: System MUST expose usage reports: logins (session creations), distinct active users, apuntes created — aggregatable by day, week, month.
 - **FR-012**: Product API deployments MUST be able to omit admin route registration via deployment profile (future edge-safe builds).
 - **FR-013**: Admin mutations on tenant data MUST intentionally bypass tenant scope through explicit admin application services, never via accidental missing filters.
-- **FR-014**: System MUST fail closed: missing role, blocked operator, or invalid session → deny admin access.
+- **FR-015**: System MUST create the first `superadmin` operator automatically after migration when no operator exists (`ensureBootstrapOperator`, idempotent).
+- **FR-016**: Bootstrap MUST use `ADMIN_INITIAL_EMAIL` (required staging/prod; default dev) per [auth-bootstrap.md](./auth-bootstrap.md).
+- **FR-017**: Staging and production bootstrap MUST set `mustChangePassword=true`; development MUST set `mustChangePassword=false`.
+- **FR-018**: Operators with `mustChangePassword=true` MUST complete password change before accessing admin features other than change-password.
 
 ### Constitution Alignment
 
@@ -151,7 +154,10 @@ As an operations lead, I need dashboards for logins and apuntes created per day,
 ## Assumptions
 
 - Operator count is small (single digits); no public self-registration for admin.
-- MVP operator auth is email/password with Argon2, same crypto standards as product; SSO is a later phase.
+- MVP operator auth is email/password with Argon2; bootstrap creates first `superadmin` automatically — see [auth-bootstrap.md](./auth-bootstrap.md).
+- **Dev**: `mustChangePassword=false`, known dev credentials for frictionless local use.
+- **Staging/prod**: `mustChangePassword=true`; `ADMIN_INITIAL_EMAIL` required; initial password auto-generated (preferred) or from vault; never committed to git.
+- Rigorous lockout/MFA/operator self-recovery deferred — see [auth-hardening-todo.md](./auth-hardening-todo.md).
 - One admin deployment per organization; not replicated to edge nodes.
 - Statistics use primary database with indexed aggregation in MVP; read replica or rollups deferred until volume requires.
 - Admin UI is a separate Vite app (`admin-ui/`) sharing Mantine/design tokens where practical.
@@ -163,7 +169,7 @@ As an operations lead, I need dashboards for logins and apuntes created per day,
 - Bulk user import/export.
 - Editing plantilla JSON files in production from UI (preview/test only).
 - Billing, subscriptions, feature flags console.
-- MFA / SSO (planned phase 2).
+- MFA / SSO (planned phase 2) — see [auth-hardening-todo.md](./auth-hardening-todo.md).
 - Separate physical database for admin.
 
 ## Dependencies
@@ -180,4 +186,6 @@ As an operations lead, I need dashboards for logins and apuntes created per day,
 - [inventory-views-endpoints.md](./inventory-views-endpoints.md) — UI views and API surface
 - [contracts/behavior.md](./contracts/behavior.md) — behavioral contracts
 - [research.md](./research.md) — decision log
+- [auth-bootstrap.md](./auth-bootstrap.md) — operator bootstrap & password policy
+- [auth-hardening-todo.md](./auth-hardening-todo.md) — deferred auth controls
 - [docs/adr/0006-admin-platform-architecture.md](../../docs/adr/0006-admin-platform-architecture.md)

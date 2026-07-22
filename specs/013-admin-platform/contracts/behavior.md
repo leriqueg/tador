@@ -126,3 +126,31 @@ Contracts describe observable behavior for tests and implementation. HTTP status
 **Given** repeated failed admin logins  
 **When** threshold exceeded  
 **Then** `429` on `/api/admin/auth/login` (stricter limit than product auth)
+
+---
+
+## CC-ADMIN-011 — Bootstrap operator on empty database
+
+**Given** zero rows in `operators`  
+**When** `ensureBootstrapOperator()` runs after migrate  
+**Then** one `superadmin` is created with email from `ADMIN_INITIAL_EMAIL` (or dev default)  
+**And** `mustChangePassword` is `false` in development and `true` in staging/production  
+**And** if no `ADMIN_INITIAL_PASSWORD` is set in staging/prod, a random password is generated and logged once (not stored in plaintext)
+
+**Given** at least one operator exists  
+**When** bootstrap runs again  
+**Then** no operator is created or updated (idempotent)
+
+---
+
+## CC-ADMIN-012 — Forced password change (staging/prod)
+
+**Given** operator with `mustChangePassword=true`  
+**When** login with valid initial password  
+**Then** response indicates password change required  
+**And** protected admin routes return `403` until `POST /api/admin/auth/change-password` succeeds  
+**And** after change, `mustChangePassword=false` and `passwordChangedAt` is set
+
+**Given** development environment  
+**When** operator logs in with dev credentials  
+**Then** `mustChangePassword` does not block dashboard access

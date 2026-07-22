@@ -8,6 +8,7 @@
 | Route | View | Role min | Description |
 |-------|------|----------|-------------|
 | `/login` | Login | — | Operator email/password |
+| `/change-password` | Change password | `support` | Forced when `mustChangePassword=true` (staging/prod first login) |
 | `/` | Dashboard | `support` | Summary cards: users total, blocked count, apuntes today, quick links |
 | `/users` | Users list | `support` | Search by email, filter active/blocked, pagination |
 | `/users/:id` | User detail | `support` | Profile, books summary, sessions count, last activity |
@@ -72,7 +73,10 @@ Dashboard
 |--------|------|------|-----------|
 | `POST` | `/api/admin/auth/login` | — | Operator login |
 | `POST` | `/api/admin/auth/logout` | `support` | Invalidate operator session |
-| `GET` | `/api/admin/auth/me` | `support` | Current operator profile + role |
+| `GET` | `/api/admin/auth/me` | `support` | Current operator profile + role + `mustChangePassword` |
+| `POST` | `/api/admin/auth/change-password` | `support`* | Change password (`currentPassword`, `newPassword`); required when `mustChangePassword` |
+
+\* Role `support` minimum, but only reachable when authenticated; `mustChangePassword` operators may access only auth + change-password routes until complete.
 
 ### Users
 

@@ -24,7 +24,7 @@
 - [ ] T003 [P] Add `admin-ui/tsconfig.json`, `admin-ui/tsconfig.app.json`, `admin-ui/tsconfig.node.json` aligned with `frontend/`
 - [ ] T004 [P] Scaffold `admin-ui/src/main.tsx`, `admin-ui/src/App.tsx`, Mantine provider, React Router shell in `admin-ui/src/`
 - [ ] T005 [P] Add root `package.json` workspace script or `docs` note for `cd admin-ui && npm run dev` in `specs/013-admin-platform/quickstart.md`
-- [ ] T006 Document planned admin env vars (`DEPLOYMENT_PROFILE`, `OPERATOR_SESSION_SECRET`, `ADMIN_CORS_ORIGIN`, bootstrap vars) in `docs/environment-files.md`
+- [ ] T006 Document admin env vars (`DEPLOYMENT_PROFILE`, `OPERATOR_SESSION_SECRET`, `ADMIN_CORS_ORIGIN`, `ADMIN_INITIAL_*`) in `docs/environment-files.md` per `auth-bootstrap.md`
 
 ---
 
@@ -36,7 +36,7 @@
 
 ### Schema & domain
 
-- [ ] T007 Add `OperatorRole` enum, `Operator`, `OperatorSession`, `AdminAuditLog` models and `User.blockedAt` / `User.blockedReason` in `backend/prisma/schema.prisma` per `data-model.md`
+- [ ] T007 Add `OperatorRole` enum, `Operator` (incl. `mustChangePassword`, `passwordChangedAt`), `OperatorSession`, `AdminAuditLog` models and `User.blockedAt` / `User.blockedReason` in `backend/prisma/schema.prisma` per `data-model.md`
 - [ ] T008 Run Prisma migration for admin tables in `backend/prisma/migrations/`
 - [ ] T009 [P] Add `backend/src/domain/operator.ts` with `OperatorRole` type and role-order helpers (`support` < `admin` < `superadmin`)
 - [ ] T010 [P] Extend `backend/src/domain/user.ts` with `isUserBlocked(user)` helper
@@ -61,15 +61,17 @@
 
 ### Bootstrap & wiring
 
-- [ ] T023 Add env-gated bootstrap script `backend/scripts/admin/bootstrap-operator.ts` (creates first `superadmin` from `ADMIN_BOOTSTRAP_*`)
-- [ ] T024 Add `npm run admin:bootstrap` script in `backend/package.json`
-- [ ] T025 Inject operator repos and admin services in `backend/src/server.ts` composition root
+- [ ] T023 Implement `ensureBootstrapOperator()` in `backend/prisma/seed/ensure-bootstrap-operator.ts` per `auth-bootstrap.md` (idempotent; dev vs staging/prod policy)
+- [ ] T024 [P] Add CLI wrapper `backend/scripts/admin/bootstrap-operator.ts` + `npm run admin:bootstrap` in `backend/package.json`
+- [ ] T025 [P] Invoke `ensureBootstrapOperator()` after migrate in dev startup or document release-step for staging/prod in `quickstart.md`
+- [ ] T026 Inject operator repos and admin services in `backend/src/server.ts` composition root
 
 ### Foundational tests (RED first)
 
-- [ ] T026 [P] Integration RED: anonymous `GET /api/admin/auth/me` → 401 in `backend/tests/admin/auth.test.ts`
-- [ ] T027 [P] Integration RED: product user session cannot access `/api/admin/auth/me` → 403 in `backend/tests/admin/auth.test.ts`
-- [ ] T028 Integration RED: `DEPLOYMENT_PROFILE=product` does not register `/api/admin/*` in `backend/tests/admin/deployment-profile.test.ts`
+- [ ] T027 [P] Integration RED: anonymous `GET /api/admin/auth/me` → 401 in `backend/tests/admin/auth.test.ts`
+- [ ] T028 [P] Integration RED: product user session cannot access `/api/admin/auth/me` → 403 in `backend/tests/admin/auth.test.ts`
+- [ ] T029 Integration RED: `DEPLOYMENT_PROFILE=product` does not register `/api/admin/*` in `backend/tests/admin/deployment-profile.test.ts`
+- [ ] T030 [P] Integration RED: `ensureBootstrapOperator` creates superadmin when empty; skips when operator exists in `backend/tests/admin/bootstrap.test.ts`
 
 **Checkpoint**: Migration applied, middleware exists, admin routes gated by profile, foundational tests written (may still fail until US1).
 
@@ -83,23 +85,25 @@
 
 ### Tests for US1 ⚠️
 
-- [ ] T029 [P] [US1] Integration RED: operator login sets `admin_session` cookie in `backend/tests/admin/auth.test.ts`
-- [ ] T030 [P] [US1] Integration RED: operator logout clears session in `backend/tests/admin/auth.test.ts`
-- [ ] T031 [P] [US1] Integration RED: blocked operator login → 403 in `backend/tests/admin/auth.test.ts`
+- [ ] T031 [P] [US1] Integration RED: operator login sets `admin_session` cookie in `backend/tests/admin/auth.test.ts`
+- [ ] T032 [P] [US1] Integration RED: operator logout clears session in `backend/tests/admin/auth.test.ts`
+- [ ] T033 [P] [US1] Integration RED: blocked operator login → 403 in `backend/tests/admin/auth.test.ts`
+- [ ] T034 [P] [US1] Integration RED: operator with `mustChangePassword=true` cannot access `/api/admin/users` until password changed in `backend/tests/admin/auth.test.ts`
 
 ### Implementation for US1
 
-- [ ] T032 [US1] Complete `OperatorAuthApplicationService.login/logout/getAuthenticatedOperator` in `backend/src/application/admin/operator-auth-service.ts` (Argon2 via existing `PasswordHasher`)
-- [ ] T033 [US1] Implement `POST /api/admin/auth/login`, `POST /api/admin/auth/logout`, `GET /api/admin/auth/me` in `backend/src/api/routes/admin/auth.ts`
-- [ ] T034 [US1] Set `admin_session` cookie (`httpOnly`, `sameSite=lax`, `secure` in prod, distinct from product cookie) in `backend/src/api/routes/admin/auth.ts`
-- [ ] T035 [US1] GREEN: run `backend/tests/admin/auth.test.ts` through T031
-- [ ] T036 [P] [US1] Create `admin-ui/src/services/admin-api.ts` with credentials fetch wrapper for `/api/admin/*`
-- [ ] T037 [P] [US1] Create `admin-ui/src/state/operator-session.ts` (or context) for authenticated operator
-- [ ] T038 [US1] Implement `admin-ui/src/pages/Login.tsx` (email/password, Spanish labels)
-- [ ] T039 [US1] Implement protected route wrapper and `admin-ui/src/pages/Dashboard.tsx` stub with operator name + role
-- [ ] T040 [US1] Wire routes in `admin-ui/src/App.tsx` (`/login`, `/` dashboard)
+- [ ] T035 [US1] Complete `OperatorAuthApplicationService` (login/logout/me/changePassword) in `backend/src/application/admin/operator-auth-service.ts` with `mustChangePassword` gate per `auth-bootstrap.md`
+- [ ] T036 [US1] Implement `POST /api/admin/auth/login`, `logout`, `GET /me`, `POST /change-password` in `backend/src/api/routes/admin/auth.ts`
+- [ ] T037 [US1] Set `admin_session` cookie (`httpOnly`, `sameSite=lax`, `secure` in prod) in `backend/src/api/routes/admin/auth.ts`
+- [ ] T038 [US1] GREEN: run `backend/tests/admin/auth.test.ts` through T034
+- [ ] T039 [P] [US1] Create `admin-ui/src/services/admin-api.ts` with credentials fetch wrapper for `/api/admin/*`
+- [ ] T040 [P] [US1] Create `admin-ui/src/state/operator-session.ts` (or context) for authenticated operator + `mustChangePassword` flag
+- [ ] T041 [US1] Implement `admin-ui/src/pages/Login.tsx` (email/password, Spanish labels)
+- [ ] T042 [US1] Implement `admin-ui/src/pages/ChangePassword.tsx` (forced when `mustChangePassword`; min 12 chars)
+- [ ] T043 [US1] Implement protected route wrapper and `admin-ui/src/pages/Dashboard.tsx` stub with operator name + role
+- [ ] T044 [US1] Wire routes in `admin-ui/src/App.tsx` (`/login`, `/change-password`, `/` dashboard)
 
-**Checkpoint**: Operator can log in via UI; product session blocked from admin API.
+**Checkpoint**: Operator can log in via UI; staging policy forces password change; product session blocked from admin API.
 
 ---
 
@@ -111,23 +115,23 @@
 
 ### Tests for US2 ⚠️
 
-- [ ] T041 [P] [US2] Integration RED: `GET /api/admin/users` search by email in `backend/tests/admin/users.test.ts`
-- [ ] T042 [P] [US2] Integration RED: block revokes sessions + sets `blockedAt` in `backend/tests/admin/users.test.ts`
-- [ ] T043 [P] [US2] Integration RED: blocked user product login fails generically in `backend/tests/admin/users.test.ts`
-- [ ] T044 [P] [US2] Integration RED: `support` role denied on block → 403 in `backend/tests/admin/users.test.ts`
-- [ ] T045 [P] [US2] Integration RED: force recovery creates `AuthToken` + revokes sessions + audit log in `backend/tests/admin/users.test.ts`
+- [ ] T045 [P] [US2] Integration RED: `GET /api/admin/users` search by email in `backend/tests/admin/users.test.ts`
+- [ ] T046 [P] [US2] Integration RED: block revokes sessions + sets `blockedAt` in `backend/tests/admin/users.test.ts`
+- [ ] T047 [P] [US2] Integration RED: blocked user product login fails generically in `backend/tests/admin/users.test.ts`
+- [ ] T048 [P] [US2] Integration RED: `support` role denied on block → 403 in `backend/tests/admin/users.test.ts`
+- [ ] T049 [P] [US2] Integration RED: force recovery creates `AuthToken` + revokes sessions + audit log in `backend/tests/admin/users.test.ts`
 
 ### Implementation for US2
 
-- [ ] T046 [US2] Implement `AdminUserApplicationService` in `backend/src/application/admin/admin-user-service.ts` (list, get, block, unblock, forceRecovery — uses existing `AuthToken` flow)
-- [ ] T047 [US2] Enforce `blockedAt` check in `backend/src/application/auth-service.ts` `login()` with generic error
-- [ ] T048 [US2] Implement user routes in `backend/src/api/routes/admin/users.ts` per `inventory-views-endpoints.md`
-- [ ] T049 [US2] Register users routes in `backend/src/api/routes/admin/index.ts` with `requireRole('support')` read / `requireRole('admin')` mutate
-- [ ] T050 [US2] Call `AdminAuditService` on block, unblock, force-recovery in `admin-user-service.ts`
-- [ ] T051 [US2] GREEN: run `backend/tests/admin/users.test.ts`
-- [ ] T052 [P] [US2] Implement `admin-ui/src/pages/Users.tsx` (search, pagination, blocked filter)
-- [ ] T053 [US2] Implement `admin-ui/src/pages/UserDetail.tsx` with block/unblock/force-recovery actions (admin role only)
-- [ ] T054 [US2] Wire `/users` and `/users/:id` routes in `admin-ui/src/App.tsx`
+- [ ] T050 [US2] Implement `AdminUserApplicationService` in `backend/src/application/admin/admin-user-service.ts` (list, get, block, unblock, forceRecovery — uses existing `AuthToken` flow)
+- [ ] T051 [US2] Enforce `blockedAt` check in `backend/src/application/auth-service.ts` `login()` with generic error
+- [ ] T052 [US2] Implement user routes in `backend/src/api/routes/admin/users.ts` per `inventory-views-endpoints.md`
+- [ ] T053 [US2] Register users routes in `backend/src/api/routes/admin/index.ts` with `requireRole('support')` read / `requireRole('admin')` mutate
+- [ ] T054 [US2] Call `AdminAuditService` on block, unblock, force-recovery in `admin-user-service.ts`
+- [ ] T055 [US2] GREEN: run `backend/tests/admin/users.test.ts`
+- [ ] T056 [P] [US2] Implement `admin-ui/src/pages/Users.tsx` (search, pagination, blocked filter)
+- [ ] T057 [US2] Implement `admin-ui/src/pages/UserDetail.tsx` with block/unblock/force-recovery actions (admin role only)
+- [ ] T058 [US2] Wire `/users` and `/users/:id` routes in `admin-ui/src/App.tsx`
 
 **Checkpoint**: Full user support workflow from admin UI; audit entries on mutations.
 
@@ -143,20 +147,20 @@
 
 ### Tests for US4 ⚠️
 
-- [ ] T055 [P] [US4] Copy/adapt plantillas admin tests to `backend/tests/admin/templates.test.ts` targeting `/api/admin/templates/*` with operator auth
-- [ ] T056 [P] [US4] Integration RED: preview response parity with legacy `/api/dev/plantillas-admin` for `pagar_servicios` hogar mode
-- [ ] T057 [P] [US4] Integration RED: unauthenticated template preview → 401
+- [ ] T059 [P] [US4] Copy/adapt plantillas admin tests to `backend/tests/admin/templates.test.ts` targeting `/api/admin/templates/*` with operator auth
+- [ ] T060 [P] [US4] Integration RED: preview response parity with legacy `/api/dev/plantillas-admin` for `pagar_servicios` hogar mode
+- [ ] T061 [P] [US4] Integration RED: unauthenticated template preview → 401
 
 ### Implementation for US4
 
-- [ ] T058 [US4] Extract shared preview/readiness logic from `backend/src/api/routes/plantillas-admin.ts` into `backend/src/application/admin/admin-template-service.ts`
-- [ ] T059 [US4] Implement routes in `backend/src/api/routes/admin/templates.ts` (`GET` list, `GET` detail, `GET` readiness, `POST` preview)
-- [ ] T060 [US4] Register templates routes in `backend/src/api/routes/admin/index.ts` (`requireRole('support')`)
-- [ ] T061 [US4] GREEN: run `backend/tests/admin/templates.test.ts` and existing `plantillas.test.ts` admin parity block
-- [ ] T062 [US4] Hard-disable `registerPlantillasAdminRoutes` when `NODE_ENV=production` OR `DEPLOYMENT_PROFILE=product` in `backend/src/server.ts`
-- [ ] T063 [P] [US4] Implement `admin-ui/src/pages/Templates.tsx` (list with modes/status)
-- [ ] T064 [US4] Implement `admin-ui/src/pages/TemplatePreview.tsx` (readiness + mock asiento panel)
-- [ ] T065 [US4] Wire `/templates` and `/templates/:code` in `admin-ui/src/App.tsx`
+- [ ] T062 [US4] Extract shared preview/readiness logic from `backend/src/api/routes/plantillas-admin.ts` into `backend/src/application/admin/admin-template-service.ts`
+- [ ] T063 [US4] Implement routes in `backend/src/api/routes/admin/templates.ts` (`GET` list, `GET` detail, `GET` readiness, `POST` preview)
+- [ ] T064 [US4] Register templates routes in `backend/src/api/routes/admin/index.ts` (`requireRole('support')`)
+- [ ] T065 [US4] GREEN: run `backend/tests/admin/templates.test.ts` and existing `plantillas.test.ts` admin parity block
+- [ ] T066 [US4] Hard-disable `registerPlantillasAdminRoutes` when `NODE_ENV=production` OR `DEPLOYMENT_PROFILE=product` in `backend/src/server.ts`
+- [ ] T067 [P] [US4] Implement `admin-ui/src/pages/Templates.tsx` (list with modes/status)
+- [ ] T068 [US4] Implement `admin-ui/src/pages/TemplatePreview.tsx` (readiness + mock asiento panel)
+- [ ] T069 [US4] Wire `/templates` and `/templates/:code` in `admin-ui/src/App.tsx`
 
 **Checkpoint**: Template QA available in admin UI; dev route unreachable in prod profile.
 
@@ -170,21 +174,21 @@
 
 ### Tests for US3 ⚠️
 
-- [ ] T066 [P] [US3] Integration RED: create postable child under valid parent in `backend/tests/admin/global-accounts.test.ts`
-- [ ] T067 [P] [US3] Integration RED: invalid 8-digit code → 400 in `backend/tests/admin/global-accounts.test.ts`
-- [ ] T068 [P] [US3] Integration RED: delete with `activaciones` or `lineas` → 409 with dependency summary
-- [ ] T069 [P] [US3] Integration RED: `support` role denied on create → 403
+- [ ] T070 [P] [US3] Integration RED: create postable child under valid parent in `backend/tests/admin/global-accounts.test.ts`
+- [ ] T071 [P] [US3] Integration RED: invalid 8-digit code → 400 in `backend/tests/admin/global-accounts.test.ts`
+- [ ] T072 [P] [US3] Integration RED: delete with `activaciones` or `lineas` → 409 with dependency summary
+- [ ] T073 [P] [US3] Integration RED: `support` role denied on create → 403
 
 ### Implementation for US3
 
-- [ ] T070 [US3] Implement `AdminGlobalAccountApplicationService` in `backend/src/application/admin/admin-global-account-service.ts` (reuse `domain/cuenta-global` validation)
-- [ ] T071 [US3] Implement routes in `backend/src/api/routes/admin/global-accounts.ts` (list tree, get, create, patch, delete)
-- [ ] T072 [US3] Register global-accounts routes in `backend/src/api/routes/admin/index.ts` (`requireRole('admin')`)
-- [ ] T073 [US3] Audit all mutations via `AdminAuditService`
-- [ ] T074 [US3] GREEN: run `backend/tests/admin/global-accounts.test.ts`
-- [ ] T075 [P] [US3] Implement `admin-ui/src/pages/GlobalAccounts.tsx` (tree/table browser)
-- [ ] T076 [US3] Implement `admin-ui/src/pages/GlobalAccountForm.tsx` (create/edit with validation errors from API)
-- [ ] T077 [US3] Wire `/global-accounts`, `/global-accounts/new`, `/global-accounts/:id/edit` in `admin-ui/src/App.tsx`
+- [ ] T074 [US3] Implement `AdminGlobalAccountApplicationService` in `backend/src/application/admin/admin-global-account-service.ts` (reuse `domain/cuenta-global` validation)
+- [ ] T075 [US3] Implement routes in `backend/src/api/routes/admin/global-accounts.ts` (list tree, get, create, patch, delete)
+- [ ] T076 [US3] Register global-accounts routes in `backend/src/api/routes/admin/index.ts` (`requireRole('admin')`)
+- [ ] T077 [US3] Audit all mutations via `AdminAuditService`
+- [ ] T078 [US3] GREEN: run `backend/tests/admin/global-accounts.test.ts`
+- [ ] T079 [P] [US3] Implement `admin-ui/src/pages/GlobalAccounts.tsx` (tree/table browser)
+- [ ] T080 [US3] Implement `admin-ui/src/pages/GlobalAccountForm.tsx` (create/edit with validation errors from API)
+- [ ] T081 [US3] Wire `/global-accounts`, `/global-accounts/new`, `/global-accounts/:id/edit` in `admin-ui/src/App.tsx`
 
 **Checkpoint**: Operators can maintain global chart safely from admin UI.
 
@@ -198,20 +202,20 @@
 
 ### Tests for US5 ⚠️
 
-- [ ] T078 [P] [US5] Integration RED: `GET /api/admin/statistics/overview` returns daily buckets in `backend/tests/admin/statistics.test.ts`
-- [ ] T079 [P] [US5] Unit RED: week/month bucketing helper in `backend/tests/unit/admin-statistics-bucketing.test.ts`
-- [ ] T080 [P] [US5] Integration RED: empty range returns zero-filled series, not 500
+- [ ] T082 [P] [US5] Integration RED: `GET /api/admin/statistics/overview` returns daily buckets in `backend/tests/admin/statistics.test.ts`
+- [ ] T083 [P] [US5] Unit RED: week/month bucketing helper in `backend/tests/unit/admin-statistics-bucketing.test.ts`
+- [ ] T084 [P] [US5] Integration RED: empty range returns zero-filled series, not 500
 
 ### Implementation for US5
 
-- [ ] T081 [US5] Implement bucketing utilities in `backend/src/application/admin/admin-statistics-bucketing.ts` (UTC MVP)
-- [ ] T082 [US5] Implement `AdminStatisticsApplicationService` in `backend/src/application/admin/admin-statistics-service.ts` (queries on `User`, `Session`, `Apunte`)
-- [ ] T083 [US5] Add indexes if needed via migration on `sessions.createdAt`, `apuntes.createdAt`, `users.createdAt` in `backend/prisma/schema.prisma`
-- [ ] T084 [US5] Implement routes in `backend/src/api/routes/admin/statistics.ts`
-- [ ] T085 [US5] Register statistics routes in `backend/src/api/routes/admin/index.ts` (`requireRole('support')`)
-- [ ] T086 [US5] GREEN: run statistics tests
-- [ ] T087 [US5] Implement `admin-ui/src/pages/Statistics.tsx` (granularity toggle + date range + summary cards/table)
-- [ ] T088 [US5] Wire `/statistics` route and nav link in `admin-ui/src/App.tsx`
+- [ ] T085 [US5] Implement bucketing utilities in `backend/src/application/admin/admin-statistics-bucketing.ts` (UTC MVP)
+- [ ] T086 [US5] Implement `AdminStatisticsApplicationService` in `backend/src/application/admin/admin-statistics-service.ts` (queries on `User`, `Session`, `Apunte`)
+- [ ] T087 [US5] Add indexes if needed via migration on `sessions.createdAt`, `apuntes.createdAt`, `users.createdAt` in `backend/prisma/schema.prisma`
+- [ ] T088 [US5] Implement routes in `backend/src/api/routes/admin/statistics.ts`
+- [ ] T089 [US5] Register statistics routes in `backend/src/api/routes/admin/index.ts` (`requireRole('support')`)
+- [ ] T090 [US5] GREEN: run statistics tests
+- [ ] T091 [US5] Implement `admin-ui/src/pages/Statistics.tsx` (granularity toggle + date range + summary cards/table)
+- [ ] T092 [US5] Wire `/statistics` route and nav link in `admin-ui/src/App.tsx`
 
 **Checkpoint**: Usage dashboard loads within SC-005 target on staging-scale fixtures.
 
@@ -221,15 +225,15 @@
 
 **Purpose**: Audit log UI, docs, security hardening, quickstart validation.
 
-- [ ] T089 [P] Implement `GET /api/admin/audit` paginated endpoint in `backend/src/api/routes/admin/audit.ts` (`requireRole('superadmin')`)
-- [ ] T090 [P] Implement `admin-ui/src/pages/AuditLog.tsx` (superadmin only nav item)
-- [ ] T091 [P] Unit tests for `requireRole` ordering edge cases in `backend/tests/unit/require-role.test.ts`
-- [ ] T092 Security test: 100% admin route probe matrix (anon, product session, wrong role) in `backend/tests/admin/security-matrix.test.ts`
-- [ ] T093 Update `specs/013-admin-platform/quickstart.md` with verified local commands
-- [ ] T094 Update `docs/security.md` admin section (operator auth, audit, deployment profile)
-- [ ] T095 [P] Add admin nav shell (AppShell) in `admin-ui/src/components/AdminLayout.tsx` with role-aware menu per `inventory-views-endpoints.md`
-- [ ] T096 Run full backend test suite + `admin-ui` build; fix regressions
-- [ ] T097 Remove or deprecate `ENABLE_PLANTILLAS_ADMIN` docs references in favor of operator RBAC in `docs/environment-files.md`
+- [ ] T093 [P] Implement `GET /api/admin/audit` paginated endpoint in `backend/src/api/routes/admin/audit.ts` (`requireRole('superadmin')`)
+- [ ] T094 [P] Implement `admin-ui/src/pages/AuditLog.tsx` (superadmin only nav item)
+- [ ] T095 [P] Unit tests for `requireRole` ordering edge cases in `backend/tests/unit/require-role.test.ts`
+- [ ] T096 Security test: 100% admin route probe matrix (anon, product session, wrong role) in `backend/tests/admin/security-matrix.test.ts`
+- [ ] T097 Update `specs/013-admin-platform/quickstart.md` with verified local commands
+- [ ] T098 Update `docs/security.md` admin section (operator auth, audit, deployment profile)
+- [ ] T099 [P] Add admin nav shell (AppShell) in `admin-ui/src/components/AdminLayout.tsx` with role-aware menu per `inventory-views-endpoints.md`
+- [ ] T100 Run full backend test suite + `admin-ui` build; fix regressions
+- [ ] T101 Remove or deprecate `ENABLE_PLANTILLAS_ADMIN` docs references in favor of operator RBAC in `docs/environment-files.md`
 
 ---
 
@@ -244,7 +248,7 @@ Phase 2 (Foundational) — BLOCKS all stories
     ↓
 Phase 3 (US1 Auth) — MVP 🎯
     ↓
-Phase 4 (US2 Users) — depends on US1 operator auth + T047 blocked login
+Phase 4 (US2 Users) — depends on US1 operator auth + T051 blocked login
     ↓
 Phase 5 (US4 Templates) — depends on US1; parallel with US3 after US1 if staffed
     ↓
@@ -277,9 +281,9 @@ Phase 8 (Polish)
 ### Parallel Opportunities
 
 - **Phase 1**: T002–T004 parallel after T001
-- **Phase 2**: T009–T012, T017–T018, T026–T027 parallel within phase
+- **Phase 2**: T009–T012, T017–T018, T027–T029 parallel within phase
 - **After US1**: US4 (templates) and US3 (chart) can proceed in parallel on different developers
-- **US5**: T078–T080 parallel
+- **US5**: T082–T084 parallel
 
 ---
 
@@ -287,15 +291,15 @@ Phase 8 (Polish)
 
 ```bash
 # Tests first (parallel):
-T041  GET /api/admin/users search
-T042  block revokes sessions
-T043  blocked login fails
-T044  support role denied
-T045  force recovery + audit
+T045  GET /api/admin/users search
+T046  block revokes sessions
+T047  blocked login fails
+T048  support role denied
+T049  force recovery + audit
 
 # UI (parallel after backend GREEN):
-T052  Users.tsx
-# T053 depends on T052 patterns — sequential
+T056  Users.tsx
+# T057 depends on T056 patterns — sequential
 ```
 
 ---
@@ -333,18 +337,18 @@ For each task group:
 | Phase | Tasks | Story |
 |-------|------:|-------|
 | 1 Setup | T001–T006 | — |
-| 2 Foundational | T007–T028 | — |
-| 3 US1 Auth | T029–T040 | P1 MVP |
-| 4 US2 Users | T041–T054 | P1 |
-| 5 US4 Templates | T055–T065 | P2 |
-| 6 US3 Chart | T066–T077 | P2 |
-| 7 US5 Statistics | T078–T088 | P3 |
-| 8 Polish | T089–T097 | — |
-| **Total** | **97** | |
+| 2 Foundational | T007–T030 | — |
+| 3 US1 Auth | T031–T044 | P1 MVP |
+| 4 US2 Users | T045–T058 | P1 |
+| 5 US4 Templates | T059–T069 | P2 |
+| 6 US3 Chart | T070–T081 | P2 |
+| 7 US5 Statistics | T082–T092 | P3 |
+| 8 Polish | T093–T101 | — |
+| **Total** | **101** | |
 
-**Suggested MVP scope**: T001–T040 (Setup + Foundation + US1).  
-**Operational minimum**: through T054 (+ US2).  
-**Full 013 MVP**: through T088; T089–T097 recommended before production admin deploy.
+**Suggested MVP scope**: T001–T044 (Setup + Foundation + US1).  
+**Operational minimum**: through T058 (+ US2).  
+**Full 013 MVP**: through T092; T093–T101 recommended before production admin deploy.
 
 ---
 

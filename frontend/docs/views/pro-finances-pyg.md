@@ -30,32 +30,25 @@ P&G operativo con filtros por cuenta/entidad; misma base visual que Hogar hoy.
 
 | Role | Component / story | Class |
 |------|-------------------|-------|
-| Same as Hogar P&G | See [`hogar-finances-pyg.md`](./hogar-finances-pyg.md) | — |
-| Filters | Inline `<select>` | page-only |
+| Charts | `BreakdownDonut` ×2 · **PRO/FinancesPyg** (column) | canonical composition |
+| Filters | Inline on page | page-only |
+| Product today | `SimplePieChart` grid | exception until wired |
 
 ## Density
 
-- Mobile: usable.
-- Desktop: still `max-w-2xl` — **borderline debt** for a PRO report (filters + charts deserve more width).
-- PRO-specific: filters exist; layout not yet “report workstation”.
-
-## States to cover
-
-- [x] Loading
-- [ ] Empty
-- [x] Error
-- [x] Populated
+- Mobile: usable; charts in column.
+- Desktop: view story uses `max-w-3xl`; page may widen further later — charts stay column.
+- PRO-specific: account/entity filters on page.
 
 ## Gaps / exceptions
 
 | Priority | Type | Finding | Action |
 |----------|------|---------|--------|
-| P0 | elevate | Same chart fork as Hogar (`SimplePieChart` vs donut reference) | Same elevate plan |
-| P1 | density | Desktop width too Hogar-like for filtered PRO reports | Widen layout / denser filter bar on `md+` |
-| P2 | promote | Filter controls duplicated pattern possible later | Watch 3-use rule |
+| P0 | apply | Same as Hogar — wire BreakdownDonut column | See hogar-finances-pyg |
+| P1 | density | Page chrome still `max-w-2xl` | Optional widen on `md+` |
 
 ## Audit log
 
 | Date | Result | Notes |
 |------|--------|-------|
-| 2026-07-22 | debt | Shares `FinancesPyg`; chart elevate + desktop density. |
+| 2026-07-22 | debt | Aligned to Storybook IA; waiting on product wire. |

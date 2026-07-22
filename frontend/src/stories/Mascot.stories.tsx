@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { PachoAssistant, PachoGreeting, PachoMentorCard } from '../components/mascot/Pacho.tsx';
 
 const meta = {
-  title: 'Mascot/Pacho',
+  title: 'Experimental/Pacho',
   parameters: { layout: 'padded' },
 } satisfies Meta;
 

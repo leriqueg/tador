@@ -30,23 +30,23 @@ Mostrar el resultado financiero del período (ingresos, gastos, neto) y el top d
 
 | Role | Component / story | Class |
 |------|-------------------|-------|
-| Shell | `AppShell` · Hogar/P0 → Shell | canonical |
-| Errors | `ValidationMessage` · Hogar/P0 | canonical |
-| Top cuentas pie | `SimplePieChart` · **no dedicated story** | page-only → **elevate** |
-| Brand donut look | `PeriodBreakdownDonut` · DataViz/Advanced | **reference** (do not wire as-is) |
-| Monthly bars | Inline in page (not `MonthlyEvolutionChart`) | page-only; reference story exists separately |
-| Summary card | Inline in page | page-only |
+| Shell | `AppShell` · Patterns/Shells / Hogar/ShellAndPanels | canonical |
+| Errors | `ValidationMessage` | canonical |
+| Top egresos | `BreakdownDonut` · **Hogar/FinancesPyg** (column) | canonical composition |
+| Top ingresos | `BreakdownDonut` · same view story | canonical composition |
+| Stitch toggle mock | Charts/Reference → PeriodBreakdownDonut | **reference** — do not wire |
+| Product today | `SimplePieChart` (row on md) | page-only · exception until wired |
 
 ## Density
 
-- Mobile: `max-w-2xl` — acceptable for Hogar clarity.
-- Desktop: same width; fine for Hogar (not a dense report workstation).
-- PRO-specific: N/A on this doc — see [`pro-finances-pyg.md`](./pro-finances-pyg.md).
+- Mobile: `max-w-2xl` — OK for Hogar.
+- Desktop: charts **stacked in column** (not side-by-side) — Storybook view composition is SoT.
+- PRO-specific: N/A here — see [`pro-finances-pyg.md`](./pro-finances-pyg.md).
 
 ## States to cover
 
 - [x] Loading (text “Cargando…”)
-- [ ] Empty (no dedicated empty for zero activity beyond empty pies)
+- [ ] Empty (donut empty states exist in Charts/Donut + view story)
 - [x] Error (`ValidationMessage`)
 - [x] Populated
 
@@ -54,13 +54,11 @@ Mostrar el resultado financiero del período (ingresos, gastos, neto) y el top d
 
 | Priority | Type | Finding | Action |
 |----------|------|---------|--------|
-| P0 | elevate | Product pie (`SimplePieChart`) ≠ Storybook donut look (`PeriodBreakdownDonut` reference) | Elevate data-driven donut (tokens, hole+total, legend) as **canonical**; replace pies in P&G; add Storybook story; clear [`ui-exceptions`](../ui-exceptions.md) row |
-| P1 | elevate | “Ingresos vs egresos” bars are page-inline; Storybook has `MonthlyEvolutionChart` (reference, different API/shape) | Decide: restyle inline bars toward reference **or** promote a data-driven bar chart component |
-| P2 | states | Weak empty state when year has no movements | Add empty copy + CTA to apuntes |
-| P2 | story | `SimplePieChart` has no story | After elevate, story under Dashboard or DataViz as canonical |
+| P0 | apply | Product still uses `SimplePieChart` in a 2-col grid | Wire `BreakdownDonut` ×2 in **column** per Hogar/FinancesPyg; clear exception |
+| P2 | optional | Inline monthly bars vs Charts/Reference MonthlyEvolution | Defer until bars have a canonical chart |
 
 ## Audit log
 
 | Date | Result | Notes |
 |------|--------|-------|
-| 2026-07-22 | debt | First governance audit. Strong visual fork on charts vs DataViz/Advanced. Exception already logged. |
+| 2026-07-22 | debt | First audit; then Storybook IA reorganized. Canonical = BreakdownDonut + view composition. |

@@ -5,8 +5,8 @@
 
 | Date | View / surface | Component in product | Canonical / reference story | Why allowed | Exit criteria |
 |------|----------------|----------------------|-----------------------------|-------------|---------------|
-| 2026-07-22 | `/hogar/finances/pyg`, `/pro/finances/pyg` | `SimplePieChart` | DataViz/Advanced → `PeriodBreakdownDonut` (**reference**) | MVP shipped a data-driven pie before elevating the donut look | Elevate brand donut (or restyle pie) to **canonical** + wire P&G; remove or retarget reference story |
-| 2026-07-22 | `/pro/finances/apuntes` | `FinancesApuntes` + `RecentEntriesList` | Shared/Entries | Shared Hogar-width layout via `namespace` | PRO desktop dense historial; mark inventory debt cleared |
+| 2026-07-22 | `/hogar/finances/pyg`, `/pro/finances/pyg` | `SimplePieChart` | **Canonical:** Charts/Donut + Hogar\|PRO/FinancesPyg (column). **Reference:** Charts/Reference → PeriodBreakdownDonut | Product still on old pie; Storybook composition ready | Replace pies with `BreakdownDonut` ×2 in column; remove exception |
+| 2026-07-22 | `/pro/finances/apuntes` | `FinancesApuntes` + `RecentEntriesList` | Patterns/RecentEntries | Shared Hogar-width layout via `namespace` | PRO desktop dense historial |
 
 ## Rules of thumb
 

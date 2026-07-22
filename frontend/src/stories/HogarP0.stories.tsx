@@ -8,7 +8,7 @@ import PositionPanel from '../components/dashboard/PositionPanel.tsx';
 import ApunteForm, { ApunteConfirm } from '../components/entries/ApunteForm.tsx';
 
 const meta = {
-  title: 'Hogar/P0 Foundations',
+  title: 'Hogar/ShellAndPanels',
   parameters: { layout: 'padded' },
 } satisfies Meta;
 

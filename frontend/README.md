@@ -15,7 +15,7 @@ The UI follows the TADOR Finanzas design system:
 | **Canonical spec** (colors, typography, spacing, guidelines) | [`specs/foundation/mockup/stitch/DESIGN.md`](../specs/foundation/mockup/stitch/DESIGN.md) |
 | **TypeScript tokens** | [`src/design/tokens.ts`](src/design/tokens.ts) |
 | **CSS theme** (Tailwind `@theme`) | [`src/globals.css`](src/globals.css) |
-| **Component library (SoT)** | Storybook (`npm run storybook`) — prefer **canonical** stories |
+| **Component library (SoT)** | Storybook (`npm run storybook`) — see [`docs/storybook-ia.md`](docs/storybook-ia.md) |
 | **View docs** (per-route UI contract) | [`docs/views/index.md`](docs/views/index.md) |
 | **UI exceptions** | [`docs/ui-exceptions.md`](docs/ui-exceptions.md) |
 | **Component inventory** (thin index → stories) | [`docs/component-inventory.md`](docs/component-inventory.md) |

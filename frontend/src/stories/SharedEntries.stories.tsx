@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import RecentEntriesList from '../components/entries/RecentEntriesList.tsx';
 
 const meta = {
-  title: 'Shared/Entries',
+  title: 'Patterns/RecentEntries',
   parameters: { layout: 'padded' },
 } satisfies Meta;
 

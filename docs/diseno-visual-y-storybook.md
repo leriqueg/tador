@@ -119,23 +119,11 @@ Storybook permite renderizar componentes fuera de las páginas y del backend.
 La configuración vive en `frontend/.storybook/` y usa React + Vite, autodocs,
 controles, fondos de marca y `MemoryRouter` para componentes con navegación.
 
-Grupos de stories (actualizar al sincronizar):
+Grupos de stories (IA 2026-07-22 — ver [`frontend/docs/storybook-ia.md`](../frontend/docs/storybook-ia.md)):
 
-- `Foundations/Branding`;
-- `Inputs/Patterns`;
-- `Navigation/Shells`;
-- `Hogar/P0 Foundations`;
-- `Hogar/QuickAdd`;
-- `Dashboard/Widgets`;
-- `Financial/Account Banking`;
-- `DataViz/Advanced`;
-- `Marketing/Landing`;
-- `PRO/EntryBuilder`;
-- `PRO/AccountsTreePro`;
-- `PRO/ManualEntry`;
-- `PRO/Analysis`;
-- `Shared/Entries` (listas compartidas; marcar deuda de densidad PRO desktop);
-- `Mascot/Pacho` como experimento post-MVP.
+- Catálogo: `Foundations`, `Primitives`, `Patterns`, `Charts/Donut` (canonical), `Charts/Reference`;
+- Vistas: `Hogar/*`, `PRO/*`, `Marketing/*`;
+- `Experimental/Pacho` (reference / post-MVP).
 
 ```bash
 cd frontend

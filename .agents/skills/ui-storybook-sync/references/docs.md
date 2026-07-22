@@ -7,6 +7,7 @@
 | Density rule | `.cursor/rules/hogar-pro-ui-density.mdc` |
 | Mode intent | `specs/foundation/modos-hogar-pro.md` |
 | Route map | `frontend/docs/route-map.md` |
+| Storybook IA | `frontend/docs/storybook-ia.md` |
 | View docs | `frontend/docs/views/index.md` |
 | View template | `frontend/docs/views/_TEMPLATE.md` |
 | Exceptions | `frontend/docs/ui-exceptions.md` |

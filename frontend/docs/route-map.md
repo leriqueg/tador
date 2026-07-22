@@ -28,6 +28,12 @@ Legacy unprefixed routes (`/dashboard`, `/entries`, …) redirect to the active 
 
 Shared pre-mode: `/onboarding`, `/login`, `/register`, landing.
 
+## View docs (UI contracts)
+
+Per-route purpose, composition, and audit status: [`views/index.md`](./views/index.md).  
+Exceptions (product ≠ Storybook): [`ui-exceptions.md`](./ui-exceptions.md).  
+Policy: [`docs/adr/0006-ui-catalog-governance.md`](../../docs/adr/0006-ui-catalog-governance.md).
+
 ## Specs
 
 - Inventory Hogar: `specs/006-frontend-hogar/inventory-vistas-endpoints.md`

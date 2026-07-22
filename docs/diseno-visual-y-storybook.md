@@ -2,7 +2,7 @@
 
 **Fecha:** 2026-07-18
 
-**Última actualización:** 2026-07-19
+**Última actualización:** 2026-07-22
 
 El frontend de TADOR no se diseñó directamente dentro de las pantallas
 productivas. Primero se definieron requisitos de experiencia, luego se crearon
@@ -79,10 +79,16 @@ cambiar la identidad visual sin editar cada pantalla por separado.
 
 ## 3. Inventario y extracción de componentes
 
-El catálogo vivo se mantiene en
-[`frontend/docs/component-inventory.md`](../frontend/docs/component-inventory.md).
-Allí se registra para cada pieza su propósito, estados, propiedades, mockup de
-origen, ubicación en código y story asociada.
+**Fuente ejecutable del catálogo:** Storybook (`frontend/src/stories/`), con clases
+`canonical` (usar en producto) y `reference` (mock visual; no cablear tal cual).
+**Contratos por ruta:** [`frontend/docs/views/`](../frontend/docs/views/index.md).
+**Excepciones:** [`frontend/docs/ui-exceptions.md`](../frontend/docs/ui-exceptions.md).
+**Índice:** [`frontend/docs/component-inventory.md`](../frontend/docs/component-inventory.md).
+**Política:** [ADR 0006](../docs/adr/0006-ui-catalog-governance.md).
+Agentes: `ui-design-governance` (auditoría / polish Storybook→front),
+`ui-storybook-sync` (drift). Densidad Hogar/PRO:
+[`modos-hogar-pro.md`](../specs/foundation/modos-hogar-pro.md) y
+`.cursor/rules/hogar-pro-ui-density.mdc`.
 
 La extracción sigue una regla práctica:
 
@@ -113,18 +119,22 @@ Storybook permite renderizar componentes fuera de las páginas y del backend.
 La configuración vive en `frontend/.storybook/` y usa React + Vite, autodocs,
 controles, fondos de marca y `MemoryRouter` para componentes con navegación.
 
-La biblioteca cuenta con once grupos de stories:
+Grupos de stories (actualizar al sincronizar):
 
 - `Foundations/Branding`;
 - `Inputs/Patterns`;
 - `Navigation/Shells`;
 - `Hogar/P0 Foundations`;
+- `Hogar/QuickAdd`;
 - `Dashboard/Widgets`;
 - `Financial/Account Banking`;
 - `DataViz/Advanced`;
 - `Marketing/Landing`;
 - `PRO/EntryBuilder`;
 - `PRO/AccountsTreePro`;
+- `PRO/ManualEntry`;
+- `PRO/Analysis`;
+- `Shared/Entries` (listas compartidas; marcar deuda de densidad PRO desktop);
 - `Mascot/Pacho` como experimento post-MVP.
 
 ```bash
@@ -173,8 +183,8 @@ El diseño visual forma parte de la trazabilidad SDD:
 | Necesidad | historias y requisitos de las specs 006/007 |
 | Exploración | mockups Stitch |
 | Decisiones visuales | `stitch/DESIGN.md` |
-| Contrato reusable | inventario de componentes |
-| Evidencia ejecutable | stories |
+| Contrato reusable | stories + índice de inventario |
+| Evidencia ejecutable | Storybook (SoT del catálogo) |
 | Integración | páginas React conectadas con rutas y API |
 | Verificación | pruebas frontend y recorridos E2E |
 

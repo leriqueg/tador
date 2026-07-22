@@ -9,6 +9,11 @@
 
 import { describe, it, expect } from 'vitest';
 import type { CuentaGlobal } from '../../src/domain/cuenta-global.js';
+import {
+  isValidGlobalAccountCodigo,
+  isGroupCodigo,
+  validateGlobalAccountCreate,
+} from '../../src/domain/cuenta-global.js';
 
 function makeCuenta(overrides: Partial<CuentaGlobal> = {}): CuentaGlobal {
   return {
@@ -76,5 +81,42 @@ describe('CuentaGlobal', () => {
 
     expect(cuenta.legacyId).toBeNull();
     expect(cuenta.legacyCode).toBeNull();
+  });
+});
+
+describe('CuentaGlobal codigo validation (013)', () => {
+  it('accepts 8-digit codes and rejects shorter/longer', () => {
+    expect(isValidGlobalAccountCodigo('61120001')).toBe(true);
+    expect(isValidGlobalAccountCodigo('6112')).toBe(false);
+    expect(isValidGlobalAccountCodigo('611200011')).toBe(false);
+    expect(isValidGlobalAccountCodigo('6112000a')).toBe(false);
+  });
+
+  it('detects group codes ending in 000', () => {
+    expect(isGroupCodigo('61120000')).toBe(true);
+    expect(isGroupCodigo('61120001')).toBe(false);
+  });
+
+  it('rejects postable under postable parent', () => {
+    const err = validateGlobalAccountCreate({
+      codigo: '61120099',
+      nombre: 'Child',
+      esPostable: true,
+      parentId: 'p1',
+      parentEsPostable: true,
+    });
+    expect(err).toMatch(/non-postable group/i);
+  });
+
+  it('accepts postable under group parent', () => {
+    expect(
+      validateGlobalAccountCreate({
+        codigo: '61120099',
+        nombre: 'Child',
+        esPostable: true,
+        parentId: 'p1',
+        parentEsPostable: false,
+      }),
+    ).toBeNull();
   });
 });

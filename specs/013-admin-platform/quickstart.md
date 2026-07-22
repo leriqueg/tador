@@ -1,85 +1,82 @@
 # Quickstart: Admin Platform (013)
 
-**Status**: Planning — update when Phase 0 lands.
+**Status**: Implemented through Phase 8 (T001–T101). Apply pending DB migration for statistics indexes if not yet deployed.
 
-## Local development (future)
+## Local development
 
 ```bash
-# Terminal 1 — backend
-cd backend
-DEPLOYMENT_PROFILE=full npm run dev
-# First migrate creates operator automatically (dev policy)
+# Terminal 1 — Postgres (reuse existing tador-postgres if present)
+# make db-up   # may conflict if container already running
 
-# Terminal 2 — admin UI
+# Terminal 2 — backend
+cd backend
+npx prisma migrate deploy   # includes admin tables + statistics indexes
+DEPLOYMENT_PROFILE=full npm run dev
+
+# Terminal 3 — admin UI
 cd admin-ui
+npm install
 npm run dev
+# → http://localhost:5174 (proxies /api/admin → backend :3000)
 ```
 
-### Dev credentials (after first migrate)
+### Dev credentials (after bootstrap)
 
 | Field | Value |
 |-------|-------|
 | URL | `http://localhost:5174/login` |
 | Email | `admin@localhost` (or `ADMIN_INITIAL_EMAIL`) |
-| Password | `dev-admin` |
-| Change password on login | **No** (`mustChangePassword=false`) |
+| Password | `dev-admin` / `dev-admin-password` (see seed) |
+| Change password on login | **No** in local (`mustChangePassword=false`) |
 
 Optional override in `backend/.env.local` (gitignored):
 
 ```bash
 ADMIN_INITIAL_EMAIL=you@localhost
 ADMIN_INITIAL_PASSWORD=dev-admin
+OPERATOR_SESSION_SECRET=dev-operator-secret-change-me
+ADMIN_CORS_ORIGIN=http://localhost:5174
+DEPLOYMENT_PROFILE=full
 ```
+
+## Verified smoke paths
+
+1. Login → Panel (role-aware nav)
+2. Usuarios → search / block / force recovery (admin+)
+3. Plantillas → list + preview with sample `userId` (no persist)
+4. Cuentas globales → create postable child (admin+)
+5. Estadísticas → day range overview
+6. Auditoría → superadmin only
 
 ## Staging / production bootstrap
 
-Runs automatically after `prisma migrate deploy` via release job or `npm run admin:bootstrap`.
+```bash
+cd backend
+npm run db:migrate:deploy
+npm run admin:bootstrap
+```
 
 | Variable | Required | Purpose |
 |----------|----------|---------|
 | `ADMIN_INITIAL_EMAIL` | **Yes** | Pre-created superadmin email |
 | `ADMIN_INITIAL_PASSWORD` | No | Vault temp password; if omitted, random password generated and logged **once** |
-| `mustChangePassword` | — | Always `true` (not an env var; driven by `NODE_ENV`) |
+| `DEPLOYMENT_PROFILE` | Yes | `full` / `admin` / `product` |
+| `OPERATOR_SESSION_SECRET` | Yes | Distinct from product `SESSION_SECRET` |
+| `ADMIN_CORS_ORIGIN` | Yes | Admin UI origin |
 
-**First login (staging/prod)**:
+**First login (staging/prod)**: forced password change (min 12 chars) before data routes.
 
-1. Use email from `ADMIN_INITIAL_EMAIL`.
-2. Use password from vault **or** one-time value from deploy log.
-3. UI forces **Cambiar contraseña** before dashboard.
-4. New password: minimum 12 characters.
-
-## Other environment variables
-
-| Variable | Purpose |
-|----------|---------|
-| `DEPLOYMENT_PROFILE` | `full` \| `product` \| `admin` |
-| `OPERATOR_SESSION_SECRET` | Admin session signing (distinct from `SESSION_SECRET`) |
-| `ADMIN_CORS_ORIGIN` | Admin UI origin for CORS |
-
-## URLs
-
-| Surface | Dev URL |
-|---------|---------|
-| Admin UI | `http://localhost:5174` |
-| Admin API | `http://localhost:3000/api/admin/*` |
-| Product UI | `http://localhost:5173` |
-
-## Manual bootstrap (recovery)
+## Tests
 
 ```bash
 cd backend
-ADMIN_INITIAL_EMAIL=ops@example.com \
-ADMIN_INITIAL_PASSWORD='optional-temp-from-vault' \
-npm run admin:bootstrap
+npm run test:unit -- tests/unit/require-role.test.ts tests/unit/admin-statistics-bucketing.test.ts tests/unit/cuenta-global.test.ts
+npm run test:integration -- tests/admin/
+cd ../admin-ui && npm run build
 ```
 
-Idempotent: skips if any operator already exists.
+## Notes
 
-## Verification checklist
-
-- [ ] After migrate, dev login works with `admin@localhost` / `dev-admin`
-- [ ] Staging profile: login returns `mustChangePassword` until change completes
-- [ ] Product user cannot access `/api/admin/users`
-- [ ] `DEPLOYMENT_PROFILE=product` → admin routes 404
-
-See [auth-bootstrap.md](./auth-bootstrap.md) for full policy.
+- Legacy `/api/dev/plantillas-admin` is not available in production or `DEPLOYMENT_PROFILE=product`.
+- Prefer `/api/admin/templates/*` with operator auth.
+- Do not commit secrets. Delivery: `size:exception` + `feature-branch-chain` (no auto-commit in apply).

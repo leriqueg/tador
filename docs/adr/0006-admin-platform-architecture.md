@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted for planning (013-admin-platform). Implementation pending.
+Implemented (013-admin-platform closed 2026-07-22). Verify: PASS WITH WARNINGS. Archive: openspec/changes/archive/2026-07-22-013-admin-platform/.
 
 ## Date
 

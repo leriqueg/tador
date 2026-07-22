@@ -2,7 +2,7 @@
 
 **Fecha:** 2026-07-14
 
-**Última actualización:** 2026-07-19
+**Última actualización:** 2026-07-22
 
 La configuración se separa para que Docker, las herramientas locales, Vitest y
 los despliegues no compartan por accidente una base de datos ni expongan
@@ -16,6 +16,7 @@ archivos con valores reales permanecen ignorados por Git.
 | Developing with `docker compose up` | Root `.env` | `tador_dev` (Compose → postgres + backend) |
 | Running Prisma directly **on the host** | `backend/.env` or exported variables | `localhost:5432/tador_dev` |
 | Running integration tests | `backend/.env.test` | `tador_test` (same Postgres instance, other DB) |
+| Running admin UI locally | `admin-ui/` + `npm run dev` | Vite `:5174`, proxies `/api/admin` |
 | Preparing production configuration | `.env.production.example` | Variable contract, without real secrets |
 | Deploying staging / production | Secret manager / platform env | Dedicated staging/prod services |
 
@@ -37,7 +38,25 @@ POSTGRES_USER=tador
 POSTGRES_PASSWORD=…
 POSTGRES_PORT=5432
 SESSION_SECRET=…
+# Admin platform (013) — optional locally; defaults documented in auth-bootstrap.md
+# DEPLOYMENT_PROFILE=full
+# OPERATOR_SESSION_SECRET=…
+# ADMIN_CORS_ORIGIN=http://localhost:5174
+# ADMIN_INITIAL_EMAIL=admin@localhost
+# ADMIN_INITIAL_PASSWORD=dev-admin
 ```
+
+### Admin platform variables (013)
+
+| Variable | Local / dev | Staging / production |
+|----------|-------------|----------------------|
+| `DEPLOYMENT_PROFILE` | `full` (default) registers product + admin routes | `product` on edge nodes; `admin` on private admin instance |
+| `OPERATOR_SESSION_SECRET` | Distinct from `SESSION_SECRET`; fallback only in non-prod | Required strong secret; never reuse product session secret |
+| `ADMIN_CORS_ORIGIN` | `http://localhost:5174` | Exact HTTPS origin of admin-ui |
+| `ADMIN_INITIAL_EMAIL` | Optional; default `admin@localhost` | **Required** for bootstrap |
+| `ADMIN_INITIAL_PASSWORD` | Optional; default `dev-admin` | Optional vault temp; else auto-generated once |
+
+Policy detail: `specs/013-admin-platform/auth-bootstrap.md`. Quickstart: `specs/013-admin-platform/quickstart.md`.
 
 Compose uses the root `.env` for **interpolation** and injects only the
 variables listed under each service's `environment:` block. Uncommenting
@@ -168,8 +187,13 @@ Prefer platform secrets (Fly, Railway, ECS, K8s Secret, etc.):
 | `NODE_ENV=production` | Must be exactly `production`; values like `staging` keep non-production cookie/admin behavior |
 | `CORS_ORIGIN` | Exact HTTPS origin(s) allowed to send credentials |
 | `COOKIE_SECURE` | `true` behind HTTPS; **`false` on plain HTTP** demos or browsers reject the session cookie |
-| `ENABLE_PLANTILLAS_ADMIN=false` | Keeps development administration routes closed |
+| `ENABLE_PLANTILLAS_ADMIN` | **Deprecated (013)** — legacy `/api/dev/plantillas-admin` is hard-disabled when `NODE_ENV=production` or `DEPLOYMENT_PROFILE=product`. Prefer operator RBAC via `/api/admin/templates/*` |
 | `LOG_LEVEL` | Runtime log level; normally `info` |
+| `DEPLOYMENT_PROFILE` | `full` \| `product` \| `admin` — which API surfaces register (see 013) |
+| `OPERATOR_SESSION_SECRET` | Admin session cookie signing; **distinct** from `SESSION_SECRET` |
+| `ADMIN_CORS_ORIGIN` | Exact origin(s) for admin-ui credentials (e.g. `https://admin.staging…`) |
+| `ADMIN_INITIAL_EMAIL` | **Required** staging/prod — first superadmin email (bootstrap) |
+| `ADMIN_INITIAL_PASSWORD` | Optional vault temp password; if unset, bootstrap generates one |
 
 Optional later: a **server-side** `.env.staging` only on the host, never in git — same shape as production.
 
@@ -187,8 +211,9 @@ consume them yet. They must not be treated as an implemented email integration.
 
 - [ ] Staging DB ≠ local `tador_dev` / `tador_test`
 - [ ] Secrets set in the platform, not in the repo
-- [ ] `ENABLE_PLANTILLAS_ADMIN` off unless you explicitly need it
+- [ ] Legacy plantillas admin: leave unset / false; use admin-ui templates instead
 - [ ] Smoke: register/login, one apunte, dashboard
+- [ ] Admin smoke (if profile includes admin): operator login, users list, template preview
 
 ---
 
@@ -230,9 +255,10 @@ does not make the stack production-ready by itself.
    adapter logs verification and recovery tokens and builds localhost links.
    Implement a reputable provider, redact tokens from logs, and then set
    `REQUIRE_EMAIL_VERIFICATION=true`. Until then, keep it `false`.
-8. **Cerrar superficies de desarrollo.** Keep
-   `ENABLE_PLANTILLAS_ADMIN=false`; do not publish PostgreSQL or Prisma Studio;
-   expose only HTTPS through the proxy/load balancer.
+8. **Cerrar superficies de desarrollo.** Do not rely on
+   `ENABLE_PLANTILLAS_ADMIN` (deprecated); production / `DEPLOYMENT_PROFILE=product`
+   already hard-disable `/api/dev/plantillas-admin`. Do not publish PostgreSQL or
+   Prisma Studio; expose only HTTPS through the proxy/load balancer.
 9. **Añadir operación y observabilidad.** Define readiness, centralized logs
    with redaction and retention, metrics/alerts, resource limits, graceful
    shutdown and incident ownership.
@@ -262,6 +288,11 @@ POSTGRES_USER=tador
 POSTGRES_PASSWORD=tador_dev_password
 POSTGRES_PORT=5432
 SESSION_SECRET=local-dev-only-not-for-deploy
+DEPLOYMENT_PROFILE=full
+OPERATOR_SESSION_SECRET=local-dev-admin-session-not-for-deploy
+ADMIN_CORS_ORIGIN=http://localhost:5174
+ADMIN_INITIAL_EMAIL=admin@localhost
+ADMIN_INITIAL_PASSWORD=dev-admin
 ```
 
 **Local host Prisma (`backend/.env`)**
@@ -290,8 +321,14 @@ DATABASE_URL=postgresql://tador_stg:…@stg-db.example:5432/tador_staging?sslmod
 SESSION_SECRET=<environment-specific-random-value>
 CORS_ORIGIN=https://staging.tador.example
 COOKIE_SECURE=true
-ENABLE_PLANTILLAS_ADMIN=false
+# ENABLE_PLANTILLAS_ADMIN deprecated — ignored when NODE_ENV=production
+# ENABLE_PLANTILLAS_ADMIN=false
 REQUIRE_EMAIL_VERIFICATION=false
+DEPLOYMENT_PROFILE=full
+OPERATOR_SESSION_SECRET=<distinct-from-session-secret>
+ADMIN_CORS_ORIGIN=https://admin.staging.tador.example
+ADMIN_INITIAL_EMAIL=ops@example.com
+# ADMIN_INITIAL_PASSWORD from vault, or omit to auto-generate once
 ```
 
 **Production (platform env — illustrative)**
@@ -305,8 +342,15 @@ DATABASE_URL=postgresql://tador_app:…@prod-db.example:5432/tador?sslmode=requi
 SESSION_SECRET=<at-least-32-random-bytes>
 CORS_ORIGIN=https://app.tador.example
 COOKIE_SECURE=true
-ENABLE_PLANTILLAS_ADMIN=false
+# ENABLE_PLANTILLAS_ADMIN deprecated — production hard-disables legacy plantillas admin
 REQUIRE_EMAIL_VERIFICATION=false
+# Edge product node:
+DEPLOYMENT_PROFILE=product
+# Admin private node (separate deploy):
+# DEPLOYMENT_PROFILE=admin
+# OPERATOR_SESSION_SECRET=<at-least-32-random-bytes>
+# ADMIN_CORS_ORIGIN=https://admin.tador.example
+# ADMIN_INITIAL_EMAIL=ops@example.com
 ```
 
 For an **HTTP-only demo** host (no TLS), set `COOKIE_SECURE=false` and put the
@@ -328,4 +372,4 @@ exact `http://…` origin in `CORS_ORIGIN`; otherwise the browser never stores
 
 Same Postgres **container** locally can host both `tador_dev` and `tador_test`. Staging/prod should be **other servers** (or at least other instances), configured only outside the repo.
 
-Version 1.1 (2026-07-19)
+Version 1.2 (2026-07-22) — admin platform env vars (013)

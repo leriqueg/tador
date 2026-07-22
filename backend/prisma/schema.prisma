@@ -42,6 +42,9 @@ model User {
   /// Display name; editable in Settings (MVP). Not an auth identifier.
   fullName     String?
   verifiedAt   DateTime?
+  /// Set by admin block (013); null = active.
+  blockedAt    DateTime?
+  blockedReason String?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
@@ -54,6 +57,7 @@ model User {
   activaciones     ActivacionCuentaGlobal[]
   apuntes          Apunte[]
 
+  @@index([createdAt])
   @@map("users")
 }
 
@@ -101,6 +105,7 @@ model Session {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([createdAt])
   @@map("sessions")
 }
 
@@ -290,6 +295,7 @@ model Apunte {
   createdAt    DateTime @default(now())
 
   @@index([entityId])
+  @@index([createdAt])
   @@map("apuntes")
 }
 
@@ -306,4 +312,67 @@ model PeriodoContable {
 
   @@unique([bookId, año])
   @@map("periodos_contables")
+}
+
+enum OperatorRole {
+  support
+  admin
+  superadmin
+
+  @@map("operator_role")
+}
+
+/// Internal admin platform operator (013). Distinct from product User.
+model Operator {
+  id                 String       @id @default(cuid())
+  email              String       @unique
+  passwordHash       String
+  displayName        String?
+  role               OperatorRole
+  mustChangePassword Boolean      @default(false)
+  passwordChangedAt  DateTime?
+  blockedAt          DateTime?
+  lastLoginAt        DateTime?
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+
+  sessions OperatorSession[]
+  audits   AdminAuditLog[]
+
+  @@map("operators")
+}
+
+model OperatorSession {
+  id         String   @id @default(cuid())
+  operatorId String
+  token      String   @unique
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  ipAddress  String?
+  userAgent  String?
+
+  operator Operator @relation(fields: [operatorId], references: [id], onDelete: Cascade)
+
+  @@index([operatorId])
+  @@map("operator_sessions")
+}
+
+/// Append-only admin mutation audit trail (013).
+model AdminAuditLog {
+  id            String   @id @default(cuid())
+  operatorId    String
+  action        String
+  targetType    String
+  targetId      String?
+  payloadBefore Json?
+  payloadAfter  Json?
+  metadata      Json?
+  createdAt     DateTime @default(now())
+
+  operator Operator @relation(fields: [operatorId], references: [id], onDelete: Restrict)
+
+  @@index([createdAt])
+  @@index([operatorId, createdAt])
+  @@index([targetType, targetId])
+  @@map("admin_audit_logs")
 }

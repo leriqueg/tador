@@ -2,7 +2,7 @@
 
 **Última actualización:** 2026-07-22
 
-Thin index. **IA:** [`storybook-ia.md`](./storybook-ia.md). **Policy:** [ADR 0006](../../docs/adr/0006-ui-catalog-governance.md).
+Thin index. **IA:** [`storybook-ia.md`](./storybook-ia.md). **Policy:** [ADR 0007](../../docs/adr/0007-ui-catalog-governance.md).
 
 | Layer | Path |
 |-------|------|

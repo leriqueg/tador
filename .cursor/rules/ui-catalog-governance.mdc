@@ -6,7 +6,7 @@ alwaysApply: false
 
 # UI catalog governance
 
-Policy: `docs/adr/0006-ui-catalog-governance.md`. Density: `hogar-pro-ui-density.mdc`.
+Policy: `docs/adr/0007-ui-catalog-governance.md`. Density: `hogar-pro-ui-density.mdc`.
 
 ## Sources of truth
 

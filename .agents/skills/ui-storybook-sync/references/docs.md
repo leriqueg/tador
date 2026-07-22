@@ -2,7 +2,7 @@
 
 | Concern | Path |
 |---------|------|
-| Policy ADR | `docs/adr/0006-ui-catalog-governance.md` |
+| Policy ADR | `docs/adr/0007-ui-catalog-governance.md` |
 | Catalog rule | `.cursor/rules/ui-catalog-governance.mdc` |
 | Density rule | `.cursor/rules/hogar-pro-ui-density.mdc` |
 | Mode intent | `specs/foundation/modos-hogar-pro.md` |

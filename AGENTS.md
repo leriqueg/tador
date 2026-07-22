@@ -20,7 +20,7 @@ Project skills live under `.agents/skills/`. Cursor subagents live under `.curso
 
 | Artifact | Path |
 |----------|------|
-| Policy ADR | [`docs/adr/0006-ui-catalog-governance.md`](docs/adr/0006-ui-catalog-governance.md) |
+| Policy ADR | [`docs/adr/0007-ui-catalog-governance.md`](docs/adr/0007-ui-catalog-governance.md) |
 | Catalog rule | [`.cursor/rules/ui-catalog-governance.mdc`](.cursor/rules/ui-catalog-governance.mdc) |
 | Density rule | [`.cursor/rules/hogar-pro-ui-density.mdc`](.cursor/rules/hogar-pro-ui-density.mdc) |
 | View docs | [`frontend/docs/views/index.md`](frontend/docs/views/index.md) |

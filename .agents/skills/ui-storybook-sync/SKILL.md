@@ -13,7 +13,7 @@ Use for UI audits, Storybook↔frontend alignment, view-doc updates, exceptions,
 
 ## Hard Rules
 
-- Policy: `docs/adr/0006-ui-catalog-governance.md` + `.cursor/rules/ui-catalog-governance.mdc` + density rule.
+- Policy: `docs/adr/0007-ui-catalog-governance.md` + `.cursor/rules/ui-catalog-governance.mdc` + density rule.
 - **Polish / apply direction:** Storybook **canonical** → frontend. Do not wire **reference** stories as-is; elevate look into a data-driven canonical component.
 - **Sync direction** (drift catch): frontend → Storybook when product changed first; record debt/exceptions.
 - Prefer reuse of canonical components. Page-only composition OK in `pages/`. New reusable UI ships with a story in the same work unit.
@@ -35,7 +35,7 @@ Use for UI audits, Storybook↔frontend alignment, view-doc updates, exceptions,
 
 ### Mode A — Audit (default when user says auditoría / review UI)
 
-1. Read `references/docs.md`, ADR 0006, density + catalog rules.
+1. Read `references/docs.md`, ADR 0007, density + catalog rules.
 2. Pick views from `frontend/docs/views/index.md` (or the route the user named).
 3. For each view: read page module, list components used, map to stories + class (`canonical`/`reference`/`page-only`).
 4. Check states (loading/empty/error/populated) and density.

@@ -1,6 +1,6 @@
 # View docs — index
 
-Per-route UI contracts for TADOR. **Policy:** [ADR 0006](../../../docs/adr/0006-ui-catalog-governance.md).  
+Per-route UI contracts for TADOR. **Policy:** [ADR 0007](../../../docs/adr/0007-ui-catalog-governance.md).  
 **Routes:** [`../route-map.md`](../route-map.md). **Exceptions:** [`../ui-exceptions.md`](../ui-exceptions.md).  
 **Template:** [`_TEMPLATE.md`](./_TEMPLATE.md).
 

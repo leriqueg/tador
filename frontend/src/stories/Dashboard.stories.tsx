@@ -7,7 +7,7 @@ import {
 } from '../components/dashboard/DashboardWidgets.tsx';
 
 const meta = {
-  title: 'Dashboard/Widgets',
+  title: 'Patterns/DashboardWidgets',
   parameters: { layout: 'padded' },
 } satisfies Meta;
 

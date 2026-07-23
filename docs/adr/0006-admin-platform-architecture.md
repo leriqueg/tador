@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted for planning (013-admin-platform). Implementation pending.
+Implemented (013-admin-platform closed 2026-07-22). Verify: PASS WITH WARNINGS. Archive: openspec/changes/archive/2026-07-22-013-admin-platform/.
 
 ## Date
 
@@ -51,6 +51,8 @@ Constraints from the constitution and security baseline:
 8. **Statistics** — MVP uses aggregated queries on existing tables; optional rollups or read replica later.
 
 9. **Retire dev plantillas route** — After parity, `/api/dev/plantillas-admin` is disabled in production; functionality lives under `/api/admin/templates/*`.
+
+10. **Operator bootstrap** — `ensureBootstrapOperator()` runs idempotently after migrate when no operator exists. Development: `mustChangePassword=false`, known dev credentials. Staging/production: `ADMIN_INITIAL_EMAIL` required; initial password auto-generated or from vault; `mustChangePassword=true`. See `specs/013-admin-platform/auth-bootstrap.md`.
 
 ## Alternatives considered
 

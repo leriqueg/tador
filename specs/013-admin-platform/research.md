@@ -1,7 +1,8 @@
 # Research & Decision Log: Admin Platform (013)
 
 **Date**: 2026-07-22  
-**Status**: Accepted for planning
+**Updated**: 2026-07-22  
+**Status**: Accepted
 
 ## R-001 — Monorepo module vs separate project
 
@@ -102,12 +103,41 @@ Prevents cookie confusion and allows independent session TTL and revocation.
 
 ---
 
-## Open questions (for `/speckit-clarify` if needed)
+## R-010 — Operator bootstrap on DB init
 
-| ID | Question | Default if unanswered |
-|----|----------|----------------------|
-| Q1 | SSO provider for operators? | Email/password MVP; SSO phase 5 |
+**Decision**: Idempotent `ensureBootstrapOperator()` after migration when zero operators exist.
+
+| Environment | `ADMIN_INITIAL_EMAIL` | Initial password | `mustChangePassword` |
+|-------------|----------------------|------------------|----------------------|
+| Development | Optional (`admin@localhost`) | Fixed `dev-admin` or `.env.local` | **`false`** |
+| Staging / Production | **Required** | Auto-generated random (preferred) **or** `ADMIN_INITIAL_PASSWORD` from vault | **`true`** |
+
+**Rejected**:
+
+- Manual-only bootstrap with no auto-create — ops would forget; admin always needed.
+- Permanent `ADMIN_INITIAL_PASSWORD` in env without forced change — temp credential must not become de facto production password.
+- Email-only bootstrap with no initial auth path — operator cannot reach change-password screen.
+
+**Rationale**: Dev stays frictionless. Staging/prod pre-fill identity via email env var; first login forces password rotation. Generated one-time password in deploy log is preferred over long-lived env secrets.
+
+Full policy: [auth-bootstrap.md](./auth-bootstrap.md).
+
+---
+
+## R-011 — Auth hardening scope (MVP vs deferred)
+
+**Decision**: MVP ships baseline security (Argon2, rate limit, RBAC, audit, `mustChangePassword` by env). Account lockout after failed attempts, operator self-recovery, MFA, and SSO are **explicit TODOs** in [auth-hardening-todo.md](./auth-hardening-todo.md).
+
+**Rationale**: Small operator count and internal network controls make full enterprise auth out of scope for first release; document deferred items to avoid silent gaps.
+
+---
+
+## Open questions (resolved)
+
+| ID | Question | Resolution |
+|----|----------|------------|
+| Q1 | SSO provider for operators? | Deferred — [auth-hardening-todo.md](./auth-hardening-todo.md) T-OP-07 |
 | Q2 | Soft vs hard delete for `CuentaGlobal`? | Hard delete only when zero deps; else `409` |
 | Q3 | Operator session TTL? | 8 hours |
-
-No blocking clarifications required to proceed to `/speckit-tasks`.
+| Q4 | Bootstrap mechanism? | Post-migrate `ensureBootstrapOperator`; see R-010 |
+| Q5 | `ADMIN_INITIAL_PASSWORD` required? | No — optional vault temp; prefer auto-generate + first-login change |

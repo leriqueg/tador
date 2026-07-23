@@ -3,8 +3,8 @@
  */
 
 import type { FastifyRequest, FastifyReply } from 'fastify';
-import type { Operator, OperatorRole } from '../../../domain/operator.js';
-import type { OperatorAuthApplicationService } from '../../../application/admin/operator-auth-service.js';
+import type { Operator, OperatorRole } from '../../../../domain/operator.js';
+import type { OperatorAuthApplicationService } from '../../../../application/admin/operator-auth-service.js';
 
 export const ADMIN_SESSION_COOKIE = 'admin_session';
 

@@ -96,7 +96,7 @@ Normal login → admin dashboard.
 
 | Location | Responsibility |
 |----------|----------------|
-| `backend/prisma/seed/ensure-bootstrap-operator.ts` | Core idempotent logic |
+| `backend/src/application/admin/ensure-bootstrap-operator.ts` | Core idempotent logic |
 | `backend/scripts/admin/bootstrap-operator.ts` | CLI wrapper calling same function |
 | Post-migrate hook or `server.ts` startup (dev only) | Call `ensureBootstrapOperator` when `operators` table empty |
 | Release job after `migrate deploy` | Run `npm run admin:bootstrap` in staging/prod pipelines |

@@ -58,7 +58,7 @@ import { createAdminStatisticsApplicationService } from './application/admin/adm
 import { createGlobalAccountAdminRepository } from './infrastructure/repositories/global-account-admin-repository.js';
 import { createAdminStatisticsReadRepository } from './infrastructure/repositories/admin-statistics-read-repository.js';
 import { createAdminUserQueryRepository } from './infrastructure/repositories/admin-user-query-repository.js';
-import { ensureBootstrapOperator } from '../prisma/seed/ensure-bootstrap-operator.js';
+import { ensureBootstrapOperator } from './application/admin/ensure-bootstrap-operator.js';
 import {
   deploymentAllowsAdmin,
   deploymentAllowsProduct,

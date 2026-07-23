@@ -4,8 +4,8 @@
  */
 
 import { randomBytes } from 'node:crypto';
-import type { PasswordHasher } from '../../src/application/ports/password-hasher.js';
-import type { OperatorRepository } from '../../src/application/ports/operator-repository.js';
+import type { PasswordHasher } from '../ports/password-hasher.js';
+import type { OperatorRepository } from '../ports/operator-repository.js';
 
 export interface BootstrapOperatorEnv {
   NODE_ENV?: string;

@@ -4,7 +4,7 @@
 
 import { createArgon2PasswordHasher } from '../../src/infrastructure/services/argon2-password-hasher.js';
 import { createOperatorRepository } from '../../src/infrastructure/repositories/operator-repository.js';
-import { ensureBootstrapOperator } from '../../prisma/seed/ensure-bootstrap-operator.js';
+import { ensureBootstrapOperator } from '../../src/application/admin/ensure-bootstrap-operator.js';
 
 async function main(): Promise<void> {
   const result = await ensureBootstrapOperator(

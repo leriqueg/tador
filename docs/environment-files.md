@@ -16,8 +16,8 @@ archivos con valores reales permanecen ignorados por Git.
 | Developing with `docker compose up` | Root `.env` | `tador_dev` (Compose → postgres + backend) |
 | Running Prisma directly **on the host** | `backend/.env` or exported variables | `localhost:5432/tador_dev` |
 | Running integration tests | `backend/.env.test` | `tador_test` (same Postgres instance, other DB) |
-| Running admin UI locally | `admin-ui/` + `npm run dev` or compose `admin-ui` | Vite `:5174`, base `/admin-ui/`; gateway `:8080/admin-ui/` |
-| Staging-like path entry | compose `gateway` | http://localhost:8080 → `/webapp/`, `/admin-ui/` |
+| Running admin UI locally | `admin-ui/` + `npm run dev` or compose `admin-ui` | Vite `:5174` (root base in local) |
+| Staging path entry | HAProxy → nginx | `/webapp/`, `/admin-ui/` (see deploy-path-routing.md) |
 | Preparing production configuration | `.env.production.example` | Variable contract, without real secrets |
 | Deploying staging / production | Secret manager / platform env | Dedicated staging/prod services |
 
@@ -291,14 +291,10 @@ POSTGRES_PORT=5432
 SESSION_SECRET=local-dev-only-not-for-deploy
 DEPLOYMENT_PROFILE=full
 OPERATOR_SESSION_SECRET=local-dev-admin-session-not-for-deploy
-ADMIN_CORS_ORIGIN=http://localhost:8080,http://localhost:5174,http://admin-ui:5174
+ADMIN_CORS_ORIGIN=http://localhost:5174,http://admin-ui:5174
 ADMIN_INITIAL_EMAIL=admin@localhost
 ADMIN_INITIAL_PASSWORD=dev-admin
-# Path routing (compose defaults)
-# FRONTEND_BASE_PATH=/webapp/
-# ADMIN_UI_BASE_PATH=/admin-ui/
-# GATEWAY_PORT=8080
-# CORS_ORIGIN=http://localhost:8080,http://localhost:5173,http://frontend:5173
+# CORS_ORIGIN=http://localhost:5173,http://frontend:5173
 ```
 
 **Local host Prisma (`backend/.env`)**

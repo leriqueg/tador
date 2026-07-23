@@ -1,34 +1,42 @@
-# Path routing (HAProxy → nginx → Docker services)
+# Path routing (staging / HAProxy → nginx)
 
-**Status:** local gateway implemented; staging applies the same path map.  
+**Dev:** no local gateway. Use published ports (`5173` product, `5174` admin, `3000` API).  
+**Staging:** apply path map via nginx; do not publish Vite ports publicly.
+
 **Security:** admin UI is **open** at this stage. IP/VPN allowlist for `/admin-ui/` and `/api/admin/` is deferred (see TODO in nginx snippets).
 
-## Public path map
+## Staging public path map
 
 | Public path | Upstream | App |
 |-------------|----------|-----|
 | `/api/*` | `backend:3000` | Fastify (product + admin API) |
 | `/auth/*`, `/book/*`, `/health` | `backend:3000` | Product auth/book (not under `/api`) |
-| `/webapp/*` | `frontend:5173` | Product SPA (Vite `base` `/webapp/`) |
-| `/admin-ui/*` | `admin-ui:5174` | Operator SPA (Vite `base` `/admin-ui/`) |
+| `/webapp/*` | `frontend` | Product SPA (`VITE_BASE_PATH=/webapp/`) |
+| `/admin-ui/*` | `admin-ui` | Operator SPA (`VITE_BASE_PATH=/admin-ui/`) |
 | `/` | nginx | `302` → `/webapp/` |
 
-Local **gateway**: `http://localhost:8080` (compose service `gateway`).  
-Direct ports `5173` / `5174` / `3000` remain for debugging; prefer gateway for staging-like smoke.
+Snippet: [`deploy-nginx-path-routing.snippet.conf`](./deploy-nginx-path-routing.snippet.conf)  
+Reference config (unused in local compose): `docker/nginx/default.conf`
+
+## Local development ports
+
+| Surface | URL |
+|---------|-----|
+| Product | http://localhost:5173/ |
+| Admin | http://localhost:5174/login |
+| API | http://localhost:3000/ |
+
+Compose defaults `VITE_BASE_PATH=/` for both SPAs. For staging builds, set `FRONTEND_BASE_PATH=/webapp/` and `ADMIN_UI_BASE_PATH=/admin-ui/`.
 
 ## Environment
 
 | Variable | Purpose |
 |----------|---------|
-| `VITE_BASE_PATH` | Vite `base` + React Router basename (`/webapp/` or `/admin-ui/`) |
-| `VITE_PROXY_TARGET` | Dev proxy target inside compose (`http://backend:3000`) |
-| `CORS_ORIGIN` | Product browser origins (include `http://localhost:8080` when using gateway) |
-| `ADMIN_CORS_ORIGIN` | Admin UI origins (include gateway + `:5174`) |
+| `VITE_BASE_PATH` / `FRONTEND_BASE_PATH` / `ADMIN_UI_BASE_PATH` | Vite `base` + React Router basename |
+| `VITE_PROXY_TARGET` | Dev proxy to backend (`http://backend:3000`) |
+| `CORS_ORIGIN` | Product browser origins |
+| `ADMIN_CORS_ORIGIN` | Admin UI origins |
 | `DEPLOYMENT_PROFILE` | `full` locally so `/api/admin` registers |
-
-## Staging
-
-Use [`docs/deploy-nginx-path-routing.snippet.conf`](./deploy-nginx-path-routing.snippet.conf) behind HAProxy. Do **not** publish Vite ports publicly; nginx reaches containers on the internal network.
 
 ```text
 # TODO(security): later restrict /admin-ui/ and /api/admin/ by IP or VPN at HAProxy/nginx.

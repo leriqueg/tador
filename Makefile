@@ -50,7 +50,7 @@ db-studio:                ## Abre Prisma Studio
 # ─── Servidores ────────────────────────────────────────
 
 .PHONY: up
-up:                       ## Levanta todos los servicios (Docker + gateway :8080)
+up:                       ## Levanta todos los servicios (Docker)
 	$(COMPOSE) up -d
 
 .PHONY: down

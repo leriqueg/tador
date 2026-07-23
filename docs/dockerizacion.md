@@ -42,13 +42,12 @@ En términos de ISO/IEC 25010, esta estrategia aporta principalmente:
 
 ```mermaid
 flowchart LR
-    G[Usuario :8080<br/>gateway nginx] --> F[frontend<br/>/webapp/]
-    G --> A[admin-ui<br/>/admin-ui/]
-    G --> B[backend<br/>Fastify :3000]
-    F -->|proxy interno| B
+    U[Usuario] --> F[frontend :5173]
+    U --> A[admin-ui :5174]
+    F -->|proxy interno| B[backend :3000]
     A -->|proxy interno| B
-    B --> P[(postgres<br/>PostgreSQL 18.4)]
-    E[e2e<br/>Playwright] --> G
+    B --> P[(postgres)]
+    E[e2e Playwright] --> F
     E --> B
 ```
 
@@ -56,12 +55,11 @@ flowchart LR
 
 1. `postgres`: base de desarrollo y creación inicial de `tador_test`;
 2. `backend`: API con código montado, Prisma y hot reload (`DEPLOYMENT_PROFILE=full`);
-3. `frontend`: SPA producto bajo `VITE_BASE_PATH=/webapp/`;
-4. `admin-ui`: SPA operadores bajo `VITE_BASE_PATH=/admin-ui/`;
-5. `gateway`: nginx local (`:8080`) con el mismo mapa de paths que staging;
-6. `e2e`: runner opcional, perfil `e2e`.
+3. `frontend`: SPA producto en `:5173` (`VITE_BASE_PATH=/` en local);
+4. `admin-ui`: SPA operadores en `:5174`;
+5. `e2e`: runner opcional, perfil `e2e`.
 
-Path routing (HAProxy → nginx): [`deploy-path-routing.md`](./deploy-path-routing.md).
+Staging path routing (HAProxy → nginx, sin gateway local): [`deploy-path-routing.md`](./deploy-path-routing.md).
 
 Compose aporta DNS interno por nombre de servicio. Por eso los frontends usan
 `http://backend:3000` dentro de la red, no `localhost`.

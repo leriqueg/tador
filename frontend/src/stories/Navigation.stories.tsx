@@ -4,7 +4,7 @@ import MobileBottomBar from '../components/navigation/MobileBottomBar.tsx';
 import MarketingHeader from '../components/layout/MarketingHeader.tsx';
 
 const meta = {
-  title: 'Navigation/Shells',
+  title: 'Patterns/Shells',
   parameters: { layout: 'padded' },
 } satisfies Meta;
 

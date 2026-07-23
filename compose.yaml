@@ -100,6 +100,7 @@ services:
     build:
       context: ./admin-ui
       dockerfile: Dockerfile
+      target: development
     container_name: tador-admin-ui
     restart: unless-stopped
     ports:

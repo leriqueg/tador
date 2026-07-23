@@ -57,8 +57,10 @@ flowchart LR
 ```mermaid
 flowchart LR
     U[Usuario :443] --> H[HAProxy]
-    H -->|/api /auth /book /health| B[backend production :3000]
-    H -->|/*| N[frontend nginx :80]
+    H --> N[frontend nginx :80]
+    N -->|/api /auth /book /health| B[backend :3000]
+    N -->|/admin-ui/| A[admin-ui :80]
+    N -->|/*| SPA[product SPA]
     B --> P[(postgres staging)]
 ```
 

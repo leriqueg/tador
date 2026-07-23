@@ -188,6 +188,10 @@ staging-db-setup:         ## Staging: migrate deploy + generate + seed catálogo
 	$(COMPOSE_STG) run --rm backend npx prisma migrate deploy
 	$(RUN_STG_SEED) sh -c 'npm ci && npx prisma generate && npm run seed:catalogos'
 
+.PHONY: staging-admin-bootstrap
+staging-admin-bootstrap:  ## Staging: idempotent operator bootstrap
+	$(COMPOSE_STG) run --rm backend npm run admin:bootstrap
+
 .PHONY: staging-demo-migrate
 staging-demo-migrate:     ## Staging: usuarios demo + asientos test20260719
 	$(RUN_STG_SEED) sh -c 'npm ci && npx prisma generate && npm run migrate:test20260719'

@@ -4,14 +4,15 @@
 # Usage (from repo root on the VPS):
 #   make staging-up STAGING_ENV=.env
 #   make staging-db-setup STAGING_ENV=.env
+#   make staging-admin-bootstrap STAGING_ENV=.env
 #
 # Frontend joins external network rsh-net-prod so modular HAProxy can reach
-# container_name tador-stg-frontend:80. Path split (/api|/auth|/book|/health)
-# is done by frontend/nginx.conf → backend:3000.
+# container_name tador-stg-frontend:80. Path split (/api|/auth|/book|/health|/admin-ui)
+# is done by frontend/nginx.conf → backend:3000 or admin-ui:80.
 #
 # Loopback publish is only for host smoke tests (optional):
 #   127.0.0.1:${BACKEND_HOST_PORT:-3000}  → Fastify
-#   127.0.0.1:${FRONTEND_HOST_PORT:-8080} → nginx SPA (+ API gateway)
+#   127.0.0.1:${FRONTEND_HOST_PORT:-8080} → nginx SPA (+ API + /admin-ui gateway)
 #
 # Do NOT use this file for local day-to-day development (use compose.yaml).
 
@@ -58,7 +59,12 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-tador_staging}
       DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required}
       SESSION_SECRET: ${SESSION_SECRET:?SESSION_SECRET is required}
+      OPERATOR_SESSION_SECRET: ${OPERATOR_SESSION_SECRET:?OPERATOR_SESSION_SECRET is required}
+      DEPLOYMENT_PROFILE: ${DEPLOYMENT_PROFILE:-full}
       CORS_ORIGIN: ${CORS_ORIGIN:?CORS_ORIGIN is required}
+      ADMIN_CORS_ORIGIN: ${ADMIN_CORS_ORIGIN:-${CORS_ORIGIN}}
+      ADMIN_INITIAL_EMAIL: ${ADMIN_INITIAL_EMAIL:-}
+      ADMIN_INITIAL_PASSWORD: ${ADMIN_INITIAL_PASSWORD:-}
       ENABLE_PLANTILLAS_ADMIN: ${ENABLE_PLANTILLAS_ADMIN:-false}
       REQUIRE_EMAIL_VERIFICATION: ${REQUIRE_EMAIL_VERIFICATION:-false}
     depends_on:
@@ -79,6 +85,21 @@ services:
     networks:
       - default
 
+  admin-ui:
+    build:
+      context: ./admin-ui
+      dockerfile: Dockerfile
+      target: production
+      args:
+        VITE_BASE_PATH: ${ADMIN_UI_BASE_PATH:-/admin-ui/}
+    container_name: tador-stg-admin-ui
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - default
+
   frontend:
     build:
       context: ./frontend
@@ -91,6 +112,8 @@ services:
     depends_on:
       backend:
         condition: service_healthy
+      admin-ui:
+        condition: service_started
     networks:
       - default
       - rsh-net-prod

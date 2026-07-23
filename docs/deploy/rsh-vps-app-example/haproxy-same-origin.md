@@ -32,13 +32,13 @@ HAProxy (TLS + SNI + local-hosts.map)
    │
    └─ host tador.nesis.tel  →  tador-stg-frontend:80  (nginx)
                                     │
-                    ┌───────────────┴───────────────┐
-                    │ /api /auth /book /health      │ /*
-                    ▼                               ▼
-              backend:3000                    estáticos SPA
-              (Compose network)               (nginx root)
-                    │
-               postgres (sin puerto público)
+          ┌─────────────────────────┼─────────────────────────┐
+          │ /api /auth /book /health│ /admin-ui/              │ /*
+          ▼                         ▼                         ▼
+    backend:3000              admin-ui:80               estáticos SPA
+    (Compose network)         (admin SPA)               (nginx root)
+          │
+     postgres (sin puerto público)
 ```
 
 | Superficie | Público | Interno |

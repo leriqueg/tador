@@ -20,11 +20,13 @@ Internal platform user. Not a product `User`.
 | `passwordHash` | `string` | Argon2 |
 | `displayName` | `string?` | UI only |
 | `role` | `OperatorRole` enum | `support`, `admin`, `superadmin` |
-| `blockedAt` | `DateTime?` | Operator lockout |
+| `mustChangePassword` | `boolean` | `false` dev; `true` staging/prod on bootstrap |
+| `passwordChangedAt` | `DateTime?` | Set when operator completes forced or voluntary password change |
+| `blockedAt` | `DateTime?` | Manual operator lockout |
 | `lastLoginAt` | `DateTime?` | Analytics |
 | `createdAt` / `updatedAt` | `DateTime` | Audit |
 
-**Bootstrap**: One `superadmin` created via secure seed script; not self-service.
+**Bootstrap**: First `superadmin` created by `ensureBootstrapOperator()` after migrate when table is empty. See [auth-bootstrap.md](./auth-bootstrap.md).
 
 ### OperatorRole (enum)
 
@@ -127,7 +129,7 @@ erDiagram
 1. Add nullable `blockedAt` / `blockedReason` to `users` — non-breaking.
 2. Create `operators`, `operator_sessions`, `admin_audit_logs` tables.
 3. No changes to ledger tables in phase 0.
-4. Seed script for bootstrap operator — run once per environment, credentials from env.
+4. `ensureBootstrapOperator()` — idempotent post-migrate; see [auth-bootstrap.md](./auth-bootstrap.md).
 
 ## Privacy & Retention
 

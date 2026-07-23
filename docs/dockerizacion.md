@@ -1,7 +1,7 @@
 # Dockerización y reproducibilidad de TADOR
 
 **Fecha:** 2026-07-18  
-**Última actualización:** 2026-07-20
+**Última actualización:** 2026-07-23
 
 TADOR usa Docker y Docker Compose para reproducir el entorno de desarrollo y
 aislar las pruebas que requieren infraestructura real. El manifiesto
@@ -43,10 +43,12 @@ En términos de ISO/IEC 25010, esta estrategia aporta principalmente:
 
 ```mermaid
 flowchart LR
-    U[Usuario :5173] --> F[frontend<br/>Vite]
-    F -->|proxy interno| B[backend<br/>Fastify :3000]
-    B --> P[(postgres<br/>PostgreSQL 18.4)]
-    E[e2e<br/>Playwright] --> F
+    U[Usuario] --> F[frontend :5173]
+    U --> A[admin-ui :5174]
+    F -->|proxy interno| B[backend :3000]
+    A -->|proxy interno| B
+    B --> P[(postgres)]
+    E[e2e Playwright] --> F
     E --> B
 ```
 
@@ -60,14 +62,18 @@ flowchart LR
     B --> P[(postgres staging)]
 ```
 
-`compose.yaml` define cuatro servicios:
+`compose.yaml` (desarrollo) define:
 
 1. `postgres`: base de desarrollo y creación inicial de `tador_test`;
-2. `backend`: API con código montado, Prisma y hot reload;
-3. `frontend`: SPA Vite con proxy al nombre DNS `backend`;
-4. `e2e`: runner opcional, habilitado por el perfil `e2e`.
+2. `backend`: API con código montado, Prisma y hot reload (`DEPLOYMENT_PROFILE=full`);
+3. `frontend`: SPA producto en `:5173`;
+4. `admin-ui`: SPA operadores en `:5174`;
+5. `e2e`: runner opcional, habilitado por el perfil `e2e`.
 
-Compose aporta DNS interno por nombre de servicio. Por eso el frontend usa
+Staging usa `compose.staging.yaml` + HAProxy (misma origen). Path map futuro
+admin: [`deploy-path-routing.md`](./deploy-path-routing.md).
+
+Compose aporta DNS interno por nombre de servicio. Por eso los frontends usan
 `http://backend:3000` dentro de la red, no `localhost`.
 
 ## 3. Estrategia de imágenes
@@ -152,6 +158,7 @@ make up
 Servicios esperados:
 
 - frontend: `http://localhost:5173`;
+- admin-ui: `http://localhost:5174/login`;
 - backend: `http://localhost:3000`;
 - health del backend: `http://localhost:3000/health`;
 - PostgreSQL: `localhost:5432`.

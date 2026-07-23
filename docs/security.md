@@ -159,3 +159,20 @@ controles recurrentes en CI.
 > | — | Semgrep 0; audit 0; E2E 9/9; ZAP 0 FAIL | PASS | perfil extendido |
 >
 > **Resultado final:** baseline OWASP **aprobado** · **Fecha:** 2026-07-18
+
+---
+
+## Admin platform (013)
+
+Operator identity is **separate** from product `User` sessions.
+
+| Control | Behavior |
+|---------|----------|
+| Cookie | `admin_session` (httpOnly, sameSite=lax, secure in production) |
+| Authz | `requireOperator` + `requireRole` (`support` < `admin` < `superadmin`) |
+| Password gate | `mustChangePassword` blocks data routes until change |
+| Audit | Append-only `AdminAuditLog` on mutations; `GET /api/admin/audit` is superadmin-only |
+| Deployment profile | `DEPLOYMENT_PROFILE=product` does not register `/api/admin/*`; `admin` skips product APIs |
+| Legacy plantillas | `/api/dev/plantillas-admin` hard-disabled when `NODE_ENV=production` or `DEPLOYMENT_PROFILE=product`; use `/api/admin/templates/*` |
+
+Secrets: `OPERATOR_SESSION_SECRET` must differ from product `SESSION_SECRET`. Bootstrap: `npm run admin:bootstrap` (see `specs/013-admin-platform/auth-bootstrap.md`).

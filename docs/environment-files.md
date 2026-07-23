@@ -2,7 +2,7 @@
 
 **Fecha:** 2026-07-14
 
-**Última actualización:** 2026-07-20
+**Última actualización:** 2026-07-23
 
 La configuración se separa para que Docker, las herramientas locales, Vitest y
 los despliegues no compartan por accidente una base de datos ni expongan
@@ -13,7 +13,7 @@ los archivos con valores reales permanecen ignorados por Git.
 
 | I am… | Copy from (versioned) | To (gitignored) | Points at |
 |-------|----------------------|-----------------|-----------|
-| Developing with `docker compose up` | `.env.example` | `.env` | `tador_dev` + `compose.yaml` |
+| Developing with `docker compose up` | `.env.example` | `.env` | `tador_dev` + `compose.yaml` (frontend `:5173`, admin-ui `:5174`) |
 | Prisma on the **host** | `backend/.env.example` | `backend/.env` | `localhost:5432/tador_dev` |
 | Integration tests | `backend/.env.test.example` | `backend/.env.test` | `tador_test` |
 | Staging VPS (HAProxy) | `.env.staging.example` | `.env.staging` (or `.env.prod.nesistel`) | `tador_staging` + `compose.staging.yaml` |
@@ -42,7 +42,9 @@ file for one network (nesisstel). Keep it gitignored; regenerate secrets there.
 **Consumer:** `compose.yaml` (auto-loads `.env` from repo root).
 
 **Typical keys:** `POSTGRES_*`, `SESSION_SECRET`, `CORS_ORIGIN`, optional
-`BACKEND_PORT` / `FRONTEND_PORT`.
+`BACKEND_PORT` / `FRONTEND_PORT` / `ADMIN_UI_PORT`, plus admin bootstrap
+(`DEPLOYMENT_PROFILE`, `OPERATOR_SESSION_SECRET`, `ADMIN_CORS_ORIGIN`,
+`ADMIN_INITIAL_*` — see `.env.example` and `specs/013-admin-platform/auth-bootstrap.md`).
 
 Compose injects only the variables listed under each service's `environment:`
 block. Uncommenting email/`APP_PUBLIC_URL` in `.env` does **not** reach the

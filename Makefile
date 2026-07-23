@@ -50,7 +50,7 @@ db-studio:                ## Abre Prisma Studio
 # ─── Servidores ────────────────────────────────────────
 
 .PHONY: up
-up:                       ## Levanta todos los servicios (Docker)
+up:                       ## Levanta todos los servicios (Docker + gateway :8080)
 	$(COMPOSE) up -d
 
 .PHONY: down
@@ -68,6 +68,10 @@ dev-backend:              ## Arranca backend en modo watch (contenedor)
 .PHONY: dev-frontend
 dev-frontend:             ## Arranca frontend en modo watch (contenedor)
 	$(COMPOSE) up frontend
+
+.PHONY: dev-admin-ui
+dev-admin-ui:             ## Arranca admin-ui en modo watch (contenedor)
+	$(COMPOSE) up admin-ui
 
 .PHONY: storybook
 storybook:                ## Arranca el catálogo de componentes en localhost:6006

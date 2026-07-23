@@ -20,12 +20,20 @@ function apiProxy(): ProxyOptions {
   }
 }
 
+/** Public path prefix behind nginx (e.g. `/admin-ui/`). Default `/` for direct Vite access. */
+function viteBase(): string {
+  const raw = process.env.VITE_BASE_PATH ?? '/'
+  if (raw === '/' || raw === '') return '/'
+  return raw.endsWith('/') ? raw : `${raw}/`
+}
+
 export default defineConfig({
+  base: viteBase(),
   plugins: [react()],
   server: {
     port: 5174,
     host: true,
-    allowedHosts: ['admin-ui', 'localhost', '127.0.0.1'],
+    allowedHosts: ['admin-ui', 'localhost', '127.0.0.1', 'gateway'],
     watch: {
       usePolling: true,
     },

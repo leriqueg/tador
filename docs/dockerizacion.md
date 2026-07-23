@@ -42,21 +42,28 @@ En términos de ISO/IEC 25010, esta estrategia aporta principalmente:
 
 ```mermaid
 flowchart LR
-    U[Usuario :5173] --> F[frontend<br/>Vite]
-    F -->|proxy interno| B[backend<br/>Fastify :3000]
+    G[Usuario :8080<br/>gateway nginx] --> F[frontend<br/>/webapp/]
+    G --> A[admin-ui<br/>/admin-ui/]
+    G --> B[backend<br/>Fastify :3000]
+    F -->|proxy interno| B
+    A -->|proxy interno| B
     B --> P[(postgres<br/>PostgreSQL 18.4)]
-    E[e2e<br/>Playwright] --> F
+    E[e2e<br/>Playwright] --> G
     E --> B
 ```
 
-`compose.yaml` define cuatro servicios:
+`compose.yaml` define:
 
 1. `postgres`: base de desarrollo y creación inicial de `tador_test`;
-2. `backend`: API con código montado, Prisma y hot reload;
-3. `frontend`: SPA Vite con proxy al nombre DNS `backend`;
-4. `e2e`: runner opcional, habilitado por el perfil `e2e`.
+2. `backend`: API con código montado, Prisma y hot reload (`DEPLOYMENT_PROFILE=full`);
+3. `frontend`: SPA producto bajo `VITE_BASE_PATH=/webapp/`;
+4. `admin-ui`: SPA operadores bajo `VITE_BASE_PATH=/admin-ui/`;
+5. `gateway`: nginx local (`:8080`) con el mismo mapa de paths que staging;
+6. `e2e`: runner opcional, perfil `e2e`.
 
-Compose aporta DNS interno por nombre de servicio. Por eso el frontend usa
+Path routing (HAProxy → nginx): [`deploy-path-routing.md`](./deploy-path-routing.md).
+
+Compose aporta DNS interno por nombre de servicio. Por eso los frontends usan
 `http://backend:3000` dentro de la red, no `localhost`.
 
 ## 3. Estrategia de imágenes

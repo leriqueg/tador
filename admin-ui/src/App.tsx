@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { routerBasename } from './lib/router-basename'
 import { OperatorSessionProvider } from './state/operator-session'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import AdminLayout from './components/AdminLayout'
@@ -17,7 +18,7 @@ import AuditLogPage from './pages/AuditLog'
 export default function App() {
   return (
     <OperatorSessionProvider>
-      <BrowserRouter>
+      <BrowserRouter basename={routerBasename()}>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/change-password" element={<ChangePasswordPage />} />

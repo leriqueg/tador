@@ -5,7 +5,7 @@ import TextInput from '../components/ui/TextInput.tsx';
 import { AITemplateResult, ConversationalWizard, FabButton } from '../components/inputs/InputPatterns.tsx';
 
 const meta = {
-  title: 'Inputs/Patterns',
+  title: 'Primitives/Inputs',
   parameters: { layout: 'padded' },
 } satisfies Meta;
 

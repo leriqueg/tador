@@ -143,11 +143,12 @@ La dirección de dependencias se protege con tests de arquitectura en `backend/t
 Los comandos de backend se ejecutan en Docker:
 
 ```bash
-make up          # levanta la aplicación
-make typecheck   # verifica TypeScript
-make test-unit   # tests unitarios
-make test        # tests de integración con PostgreSQL
-make check       # typecheck + integración
+make up            # stack local completo (postgres + backend + frontend + admin-ui)
+make dev-admin-ui  # solo admin-ui en foreground (si el resto ya está arriba)
+make typecheck     # verifica TypeScript
+make test-unit     # tests unitarios
+make test          # tests de integración con PostgreSQL
+make check         # typecheck + integración
 ```
 
 `make test` regenera Prisma Client dentro del mismo contenedor antes de ejecutar la suite, evitando desalineaciones con `schema.prisma`. Los tests de integración operan exclusivamente sobre `tador_test`.
@@ -166,11 +167,17 @@ make db-setup
 make up
 ```
 
-Después del arranque:
+Después del arranque (`make up` incluye **admin-ui**; no hace falta un segundo
+comando para el día a día):
 
-- frontend: `http://localhost:5173`;
+- producto: `http://localhost:5173`;
+- admin (operadores): `http://localhost:5174/login` — credenciales de ejemplo en `.env.example` (`admin@localhost` / `dev-admin`);
 - API: `http://localhost:3000`;
-- health check: `http://localhost:3000/health`.
+- health: `http://localhost:3000/health`.
+
+Staging VPS: `make staging-up` levanta el stack completo (incluye admin en
+`/admin-ui/`). Detalle: [`docs/dockerizacion.md`](docs/dockerizacion.md) y
+[`docs/deploy/rsh-vps-app-example/`](docs/deploy/rsh-vps-app-example/).
 
 La configuración local, de pruebas y de un futuro despliegue se explica en
 [`docs/environment-files.md`](docs/environment-files.md). Los valores de ejemplo

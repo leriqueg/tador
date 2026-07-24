@@ -56,7 +56,7 @@ db-studio:                ## Abre Prisma Studio
 # ─── Servidores ────────────────────────────────────────
 
 .PHONY: up
-up:                       ## Levanta todos los servicios (Docker)
+up:                       ## Stack local completo (postgres+backend+frontend+admin-ui)
 	$(COMPOSE) up -d
 
 .PHONY: down
@@ -76,7 +76,7 @@ dev-frontend:             ## Arranca frontend en modo watch (contenedor)
 	$(COMPOSE) up frontend
 
 .PHONY: dev-admin-ui
-dev-admin-ui:             ## Arranca admin-ui en modo watch (contenedor)
+dev-admin-ui:             ## Solo admin-ui en foreground (atajo; preferir `make up`)
 	$(COMPOSE) up admin-ui
 
 .PHONY: storybook
@@ -164,7 +164,7 @@ migrate-test20260719:     ## Importa demo users + asientos test20260719
 # Demo asientos (opcional): make staging-demo-migrate
 
 .PHONY: staging-up
-staging-up:               ## Levanta stack staging (build + up)
+staging-up:               ## Staging: stack completo (postgres+backend+frontend+admin-ui)
 	$(COMPOSE_STG) up -d --build
 
 .PHONY: staging-down

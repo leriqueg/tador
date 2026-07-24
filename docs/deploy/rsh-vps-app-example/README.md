@@ -32,18 +32,23 @@ Desde la raíz del repo, con secretos en `.env` (o `STAGING_ENV=…`):
 
 | Target | Qué hace |
 |--------|----------|
-| `make staging-up` | Build + levanta postgres/backend/frontend |
+| `make staging-up` | Build + levanta **postgres / backend / frontend / admin-ui** |
 | `make staging-db-setup` | `migrate deploy` + `prisma generate` + seed catálogo |
+| `make staging-admin-bootstrap` | Operador inicial idempotente (`ADMIN_INITIAL_*`) |
 | `make staging-demo-migrate` | Usuarios demo + asientos `test20260719` (one-shot) |
 | `make staging-restart` | Reinicia contenedores (sin rebuild) |
 | `make staging-down` | Baja el stack (conserva volúmenes) |
 | `make staging-ps` / `staging-logs` | Estado / logs |
+
+`staging-up` siempre incluye admin-ui (no hay target “solo admin” en VPS): el
+navegador llega a `/admin-ui/` vía nginx del frontend.
 
 Ejemplo primera vez:
 
 ```bash
 make staging-up STAGING_ENV=.env
 make staging-db-setup STAGING_ENV=.env
+make staging-admin-bootstrap STAGING_ENV=.env
 # opcional demo:
 make staging-demo-migrate STAGING_ENV=.env
 ```

@@ -101,8 +101,16 @@ hosting, observabilidad, TLS, backups y estrategia de rollback.
 - `builder`: `npm run build` de la SPA;
 - `production`: nginx sirve `dist/` (`frontend/nginx.conf`).
 
-Staging/VPS usa `compose.staging.yaml` con targets `production` en backend y
-frontend. Guía: [`deploy/haproxy-same-origin.md`](deploy/haproxy-same-origin.md).
+Staging/VPS usa `compose.staging.yaml` con targets `production` en backend,
+frontend y **admin-ui**. Guía:
+[`deploy/rsh-vps-app-example/haproxy-same-origin.md`](deploy/rsh-vps-app-example/haproxy-same-origin.md).
+
+### Admin-ui
+
+`admin-ui/Dockerfile` es multi-stage:
+
+- `development` (default en `compose.yaml`): Vite en `:5174`;
+- `builder` / `production`: nginx sirve `dist` bajo `/admin-ui/` (`admin-ui/nginx.conf`).
 
 ### E2E
 
@@ -157,7 +165,19 @@ make db-setup
 make up
 ```
 
-Servicios esperados:
+### Cómo se arranca admin-ui (decisión actual)
+
+| Contexto | Comando | Qué incluye admin-ui |
+|----------|---------|----------------------|
+| Desarrollo local | `make up` | **Sí** — stack completo (`postgres`, `backend`, `frontend`, `admin-ui`) en detached |
+| Solo SPA admin (resto ya arriba) | `make dev-admin-ui` | Solo `admin-ui` en foreground (atajo; no es el flujo por defecto) |
+| Staging VPS | `make staging-up` | **Sí** — imagen production; expuesto como `https://<host>/admin-ui/` vía nginx del frontend |
+| Bootstrap operador (staging) | `make staging-admin-bootstrap` | No arranca UI; crea/actualiza operador idempotente |
+
+No hay un target Make “solo admin” para staging: HAProxy apunta al frontend y
+ese nginx hace proxy de `/admin-ui/` al contenedor `admin-ui`.
+
+Servicios esperados (local):
 
 - frontend: `http://localhost:5173`;
 - admin-ui: `http://localhost:5174/login`;

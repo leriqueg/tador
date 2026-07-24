@@ -1,7 +1,10 @@
 # Path routing (staging / HAProxy → nginx)
 
-**Dev:** no local gateway. Use published ports (`5173` product, `5174` admin, `3000` API).  
-**Staging:** apply path map via nginx; do not publish Vite ports publicly.
+**Dev:** no local gateway. `make up` starts the full stack (including admin-ui)
+on published ports (`5173` product, `5174` admin, `3000` API). Optional:
+`make dev-admin-ui` if only the admin SPA needs a foreground restart.  
+**Staging:** `make staging-up` starts the full stack; path map via frontend
+nginx (`/admin-ui/` → `admin-ui:80`). Do not publish Vite ports publicly.
 
 **Security:** admin UI is **open** at this stage. IP/VPN allowlist for `/admin-ui/` and `/api/admin/` is deferred (see TODO in nginx snippets).
 

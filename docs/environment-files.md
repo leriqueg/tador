@@ -13,7 +13,7 @@ los archivos con valores reales permanecen ignorados por Git.
 
 | I am… | Copy from (versioned) | To (gitignored) | Points at |
 |-------|----------------------|-----------------|-----------|
-| Developing with `docker compose up` | `.env.example` | `.env` | `tador_dev` + `compose.yaml` (frontend `:5173`, admin-ui `:5174`) |
+| Developing with `make up` / `docker compose up` | `.env.example` | `.env` | `tador_dev` + full `compose.yaml` stack (frontend `:5173`, admin-ui `:5174`) |
 | Prisma on the **host** | `backend/.env.example` | `backend/.env` | `localhost:5432/tador_dev` |
 | Integration tests | `backend/.env.test.example` | `backend/.env.test` | `tador_test` |
 | Staging VPS (HAProxy) | `.env.staging.example` | `.env.staging` (or `.env.prod.nesistel`) | `tador_staging` + `compose.staging.yaml` |

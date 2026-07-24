@@ -1,281 +1,85 @@
 # TADOR Component Inventory
 
-**Fecha de corte:** 2026-07-18
+**Última actualización:** 2026-07-22
 
-**Última actualización:** 2026-07-18
+Thin index. **IA:** [`storybook-ia.md`](./storybook-ia.md). **Policy:** [ADR 0006](../../docs/adr/0006-ui-catalog-governance.md).
 
-Living design-system catalog for the frontend. **Source of brand tokens:** [`specs/foundation/mockup/stitch/DESIGN.md`](../../specs/foundation/mockup/stitch/DESIGN.md). **Executable demos:** Storybook (`npm run storybook`).
+| Layer | Path |
+|-------|------|
+| Storybook IA | [`storybook-ia.md`](./storybook-ia.md) |
+| View contracts | [`views/index.md`](./views/index.md) |
+| Exceptions | [`ui-exceptions.md`](./ui-exceptions.md) |
+| Routes | [`route-map.md`](./route-map.md) |
 
-Sprint 006 maps routes ↔ APIs in [`specs/006-frontend-hogar/inventory-vistas-endpoints.md`](../../specs/006-frontend-hogar/inventory-vistas-endpoints.md); this file owns **UI component definitions**.
-
-**Namespaces Hogar/PRO (007):** [`route-map.md`](./route-map.md) — `/hogar/*` vs `/pro/*`.
-
-**Status legend:** `exists` · `missing` · `post-MVP`
-
-**Pacho / mascot:** not used in functional MVP views. Keep Storybook entries as experimental until character design supports off | messages-only | character.
-
----
-
-## Foundations (exists)
-
-| Component | Purpose | Story | Status |
-|-----------|---------|-------|--------|
-| ColorPalette | Swatches from DESIGN.md | Foundations/Branding | exists |
-| TypographyScale | Manrope + Work Sans scale | Foundations/Branding | exists |
-| DesignPrinciples | Brand voice / spacing / elevation notes | Foundations/Branding → Guidelines | exists |
-
-Tokens in code: `src/design/tokens.ts` · CSS: `src/globals.css`
+**Status:** `exists` · `debt` · `post-MVP` · **Class:** `canonical` · `reference` · `page-only`
 
 ---
 
-## UI primitives
+## Foundations & primitives
 
-### Button — exists
-- **Purpose:** Primary / secondary / outline / ghost / surface actions
-- **Mockup:** All neutro pages
-- **Anatomy:** Label + optional leading/trailing Material icon; squishy active scale
-- **States:** default, hover, disabled, loading (via disabled + label)
-- **Props:** `variant`, `size`, `fullWidth`, `to` | `href`, `iconLeft`, `iconRight`
-- **Story:** Inputs/Patterns → ButtonVariants
-- **Path:** `src/components/ui/Button.tsx`
-
-### TextInput — exists
-- **Purpose:** Labeled field with optional icon and trailing control
-- **Tokens:** surface-container-low, outline-variant, focus ring primary/20
-- **States:** default, focus, error
-- **Props:** `label`, `icon`, `error`, `trailing`, `labelAction`
-- **Story:** Inputs/Patterns → TextField
-- **Path:** `src/components/ui/TextInput.tsx`
-
-### PasswordRequirement — exists
-- **Purpose:** Chip for password rule met/unmet
-- **Path:** `src/components/ui/PasswordRequirement.tsx`
-
-### Icon — exists
-- **Purpose:** Material Symbols wrapper (`filled` flag)
-- **Path:** `src/components/ui/Icon.tsx`
-
-### ValidationMessage — exists (P0)
-- **Purpose:** Everyday-language validation / API errors (FR-008); no technical jargon
-- **Mockup:** Login/Register error banners; apuntes form
-- **Anatomy:** Container (error-container or soft surface) + short sentence + optional field hint
-- **States:** error, warning, info, success
-- **Props:** `tone`, `title?`, `children`
-- **Story:** Hogar/P0 Foundations → ValidationMessages
-- **Path:** `src/components/ui/ValidationMessage.tsx`
+| Component | Path | Story | Class | Status |
+|-----------|------|-------|-------|--------|
+| Branding | `foundations/` | Foundations/Branding | canonical | exists |
+| Button, TextInput, PasswordRequirement | `ui/*` | Primitives/Inputs | canonical | exists |
+| Icon, ValidationMessage | `ui/*` | Hogar/ShellAndPanels (+ Inputs) | canonical | exists |
 
 ---
 
-## Layout & navigation
+## Patterns
 
-### MarketingHeader / GlassMarketingHeader / MinimalHeader / AuthHeader — exists
-- **Purpose:** Public / auth chrome
-- **Path:** `src/components/layout/MarketingHeader.tsx`
-
-### AppFooter / AuthFooter / CompactAuthFooter — exists
-- **Path:** `src/components/layout/AppFooter.tsx`
-
-### DesktopSidebar / MobileBottomBar — exists (shell pieces)
-- **Purpose:** PRO/Hogar nav patterns from Storybook mockup
-- **Story:** Navigation/Shells
-- **Note:** Not yet wired as a single authenticated shell
-
-### AppShell — exists (P0)
-- **Purpose:** Authenticated layout: top bar + `MobileBottomBar` (sm) + desktop nav (md+)
-- **Mockup:** `dashboard_hogar_tador`, `entidades_tador`
-- **Nav map:** Resumen `/dashboard` · Apuntes `/entries` · Cuentas `/accounts` · Entidades `/entities` · Ajustes `/settings`
-- **Anatomy:** Outlet region; active route highlight; no Pacho avatar in MVP
-- **Props:** `activePath`, `userLabel?`, `onLogout?`
-- **Story:** Hogar/P0 Foundations → Shell
-- **Path:** `src/components/layout/AppShell.tsx`
+| Component | Path | Story | Class | Status |
+|-----------|------|-------|-------|--------|
+| AppShell, sidebars, bottom bar | `layout/`, `navigation/` | Patterns/Shells, Hogar/ShellAndPanels | canonical | exists |
+| Dashboard widgets | `dashboard/DashboardWidgets.tsx` | Patterns/DashboardWidgets | canonical | exists |
+| AccountBankingRow | `financial/` | Patterns/AccountBanking | canonical | exists |
+| RecentEntriesList | `entries/` | Patterns/RecentEntries | canonical | exists · debt:pro-desktop-density |
 
 ---
 
-## Onboarding
+## Charts
 
-### OnboardingWizard — exists (P0)
-- **Purpose:** Multi-step first-run (mode → currency/book → ready)
-- **Mockups:** `onboarding_tador_mobile`, `onboarding_tador_desktop`
-- **MVP rules:** No Pacho card/avatar. Guidance = typographic callout / tip banner only. Mode step: Hogar selectable; PRO “próximamente”
-- **Anatomy:** Step indicator (3 bars) · title + body · selection cards or currency form · Continuar
-- **States:** step index, selection required before continue
-- **Props:** `initialStep?`, `showProComingSoon?`, `tipMessage?`, `onComplete`
-- **Story:** Hogar/P0 Foundations → Onboarding
-- **Path:** `src/components/onboarding/OnboardingWizard.tsx`
-- **APIs:** `GET/PATCH /book` (when wired)
+| Component | Path | Story | Class | Status |
+|-----------|------|-------|-------|--------|
+| **BreakdownDonut** | `charts/BreakdownDonut.tsx` | Charts/Donut | **canonical** | exists (not wired to P&G yet) |
+| PeriodBreakdownDonut / MonthlyEvolutionChart | `dataviz/DataViz.tsx` | Charts/Reference | **reference** | exists |
+| SimplePieChart | `dashboard/SimplePieChart.tsx` | — (product only) | page-only → replace | debt |
 
 ---
 
-## Dashboard (Hogar)
+## View compositions (Storybook)
 
-### NetResultWidget / TotalIncomeWidget / OperatingExpensesWidget / NetProfitWidget — exists
-- **Story:** Dashboard/Widgets
-- **Note:** PRO-leaning visuals; prefer dedicated Hogar panels below for `/dashboard`
-
-### PygPanelHogar — exists (P0)
-- **Purpose:** Annual PYG summary for Hogar: income, expenses, net, simple monthly bars (FR-H-001/002); no account codes
-- **Mockup:** `dashboard_hogar_tador`
-- **Tokens:** primary, expense-rose, success-emerald, surface cards, ambient-shadow
-- **Props:** `totalIncome`, `totalExpenses`, `netResult`, `monthlySeries`, `year`, `currencyFormat`
-- **API:** `GET /api/reports/pyg?year=`
-- **Story:** Hogar/P0 Foundations → DashboardPanels
-- **Path:** `src/components/dashboard/PygPanelHogar.tsx`
-
-### PositionPanel — exists (P0)
-- **Purpose:** Disponible + Me deben (por cobrar) + Deudas (FR-H-004 / FR-007)
-- **Mockup:** `dashboard_hogar_tador` / position contract
-- **Props:** `disponible`, `porCobrar`, `deudas`, optional `currencyFormat`
-- **API:** `GET /api/reports/position`
-- **Story:** Hogar/P0 Foundations → DashboardPanels
-- **Path:** `src/components/dashboard/PositionPanel.tsx`
+| View story | Route | Notes | Class |
+|------------|-------|-------|-------|
+| Hogar/QuickAdd | `/hogar/entries` | Frequent + nav + mini-form | canonical |
+| Hogar/ShellAndPanels | shell / dashboard panels | Onboarding, PYG panel, Position | canonical |
+| **Hogar/FinancesPyg** | `/hogar/finances/pyg` | **2 donuts column: egresos + ingresos** | canonical composition |
+| **PRO/FinancesPyg** | `/pro/finances/pyg` | Same chart composition; filters on page | canonical composition |
+| PRO/EntryBuilder | `/pro/entries` | | canonical |
+| PRO/ManualEntry | `/pro/entries/manual` | | canonical |
+| PRO/AccountsTreePro | `/pro/accounts` | | canonical |
+| PRO/Analysis | `/pro/analysis/*` | | canonical |
+| Marketing/Landing | `/`, FAQ | | canonical |
+| Experimental/Pacho | — | | reference |
 
 ---
 
-## Apuntes
+## Hogar QuickAdd pieces
 
-> **UX locked 2026-07-13** (spec 006 US2): template-driven QuickAdd — three layers + mini-form + burst. **Not** PRO EntryBuilder.
->
-> **PRO EntryBuilder (012)**: static decision graph (`/pro/entries`); plantillas only as leaf recipes — not a chip catalog.
-
-### FrequentTemplatesGrid — missing (P0 US2)
-- **Purpose:** 4–6 frequent plantilla tiles (usage ranking or curated fallback)
-- **Path (target):** `src/components/entries/FrequentTemplatesGrid.tsx`
-
-### KindSegment + CategoryChips — missing (P0 US2)
-- **Purpose:** Gasto | Ingreso | Transferencia + ≤6 category chips; ≤3 plantillas visible per category
-- **Path (target):** `src/components/entries/`
-
-### TemplateSearch — missing (P0 US2)
-- **Purpose:** Typeahead by name/synonym (long tail)
-- **Path (target):** `src/components/entries/TemplateSearch.tsx`
-
-### ApunteMiniForm (evolves ApunteForm) — exists as ApunteForm (P0)
-- **Purpose:** Confirm account (sticky), amount, short description only — no ledger lines
-- **Mockup:** `apuntes_tador`
-- **Actions:** Guardar | Guardar y registrar otro (burst)
-- **Deep link:** `/entries/new?plantilla=<code>`
-- **Props:** `plantillas`, `onSubmit`, `error?`, `submitting?`, burst handlers
-- **API:** `GET /api/plantillas?mode=hogar`, `POST /api/apuntes`, `GET /api/accounts`
-- **Story:** Hogar/P0 Foundations → ApunteFlow
-- **Path:** `src/components/entries/ApunteForm.tsx` (rename/evolve to mini-form per FR-005b)
-
-### ApunteConfirm / SuccessBanner — exists (P0)
-- **Purpose:** Clear confirmation after save (`aria-live`) (US2)
-- **Anatomy:** Short success message + optional dismiss
-- **Story:** Hogar/P0 Foundations → ApunteFlow
-- **Path:** `src/components/entries/ApunteForm.tsx` (`ApunteConfirm`)
-
-### RecentEntriesList — missing (P1)
-- **Purpose:** Chronological apuntes list for `/entries`
-- **API:** `GET /api/apuntes`
+| Component | Path | Story | Class | Status |
+|-----------|------|-------|-------|--------|
+| FrequentTemplatesGrid, KindCategoryNav, TemplateSearch, ApunteMiniForm, ApunteSuccessPanel | `entries/` | Hogar/QuickAdd | canonical | exists |
+| ApunteForm (legacy) | `entries/ApunteForm.tsx` | Hogar/ShellAndPanels → ApunteFlow | reference | exists |
 
 ---
 
-## Accounts & balances
+## Open debt
 
-### SaldoTotalHero — missing (P1)
-- **Purpose:** Total balance hero + Nueva Cuenta CTA
-- **Mockup:** `cuentas_tador`
-- **Props:** `total`, `currencyFormat`, `onCreate`
+1. Wire `BreakdownDonut` into `FinancesPyg` (column); retire `SimplePieChart` usage — see `ui-exceptions.md`.
+2. PRO historial density (`Patterns/RecentEntries`).
+3. Optional: data-driven bar chart to replace inline P&G bars / reference MonthlyEvolution.
 
-### AccountGroupList — missing (P1)
-- **Purpose:** Groups Efectivo / Bancos / Billeteras with row balances
-- **Mockup:** `cuentas_tador`
-- **Anatomy:** Group header · account rows (name, subtitle, amount) · no reconcile CTA in MVP
-- **API:** `GET /api/accounts` + balances
-- **Note:** Reuse layout ideas from `AccountBankingRow` but drop Conciliar for Sprint 06
+## Agent checklist
 
-### AccountBankingRow — exists
-- **Story:** Financial/Account Banking
-- **Status:** exists — adapt for Hogar (no conciliación)
-
-### GuidedAccountCreate — missing (P1)
-- **Purpose:** Wizard banco/tarjeta/billetera/puente without account codes (FR-001, FR-003)
-- **Mockup:** `cuentas_tador` FAB / Nueva Cuenta
-- **API:** `POST /api/accounts`, optionally `GET /api/chart`
-- **Story:** Inputs/Patterns → GuidedAccountCreate
-
----
-
-## Entities
-
-### EntityCard / EntityTable — missing (P1)
-- **Purpose:** Banks, cards, people/contacts listing with search/filter
-- **Mockup:** `entidades_tador`
-- **API:** `GET /api/entities`
-- **Story:** Financial/Entities
-
-### EntityCreateForm — missing (P1)
-- **Purpose:** Añadir Entidad
-- **API:** `POST /api/entities`
-- **Story:** Financial/Entities → CreateForm
-
----
-
-## Settings & contact
-
-### BookConfigForm — missing (P1)
-- **Purpose:** Currency, date format; Hogar mode fixed in MVP (PRO toggle disabled or hidden)
-- **Mockup:** `configuraci_n_tador`
-- **API:** `GET /book`, `PATCH /book/config`
-- **Story:** Inputs/Patterns → BookConfigForm
-
-### ContactForm — missing (P2)
-- **Purpose:** Public contact form
-- **Mockup:** `contacto_tador_neutro`
-- **API:** none yet (static / mailto until endpoint exists)
-- **Story:** Marketing/Contact
-
-### EmptyState — missing (P2)
-- **Purpose:** No accounts / no apuntes edge cases
-- **Anatomy:** Short copy + single CTA
-- **Story:** Foundations/EmptyState
-
----
-
-## Marketing (exists)
-
-| Component | Path | Status |
-|-----------|------|--------|
-| BenefitCard, HeroEvolutionCard, StepItem, CtaBanner | `marketing/LandingSections.tsx` | exists |
-| AccordionItem, FaqCategory, FaqCta | `faq/FaqComponents.tsx` | exists |
-
----
-
-## Data viz (exists — optional for Hogar)
-
-| Component | Note | Status |
-|-----------|------|--------|
-| MonthlyEvolutionChart | May feed PygPanelHogar | exists |
-| PeriodBreakdownDonut | More PRO; optional | exists |
-
----
-
-## Inputs / wizards (partial)
-
-| Component | Status | MVP use |
-|-----------|--------|---------|
-| ConversationalWizard | exists | post-MVP / IA |
-| AITemplateResult | exists | post-MVP / IA |
-| FabButton | exists | optional on accounts |
-
----
-
-## Mascot (post-MVP experimental)
-
-| Component | Path | Status |
-|-----------|------|--------|
-| PachoMentorCard, PachoGreeting, PachoAssistant | `mascot/Pacho.tsx` | post-MVP |
-
-**Future config (not implemented):** `advisorMode: 'off' | 'messages' | 'character'`. Until character art/motion is ready, functional UI uses `off` or plain `messages` callouts only.
-
----
-
-## Priority build order (Storybook before screens)
-
-1. ValidationMessage, AppShell  
-2. OnboardingWizard (no Pacho), PygPanelHogar, PositionPanel  
-3. ApunteForm, ApunteConfirm  
-4. SaldoTotalHero, AccountGroupList, GuidedAccountCreate  
-5. EntityCard/Table, EntityCreateForm, BookConfigForm  
-6. ContactForm, EmptyState, RecentEntriesList  
+1. Prefer view stories under `Hogar/*` / `PRO/*` when auditing a route.
+2. Prefer `Charts/Donut` over `Charts/Reference`.
+3. Update [`storybook-ia.md`](./storybook-ia.md) if folders change.

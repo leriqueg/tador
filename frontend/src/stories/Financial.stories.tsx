@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import AccountBankingRow from '../components/financial/AccountBankingRow.tsx';
 
 const meta = {
-  title: 'Financial/Account Banking',
+  title: 'Patterns/AccountBanking',
   parameters: { layout: 'padded' },
 } satisfies Meta;
 

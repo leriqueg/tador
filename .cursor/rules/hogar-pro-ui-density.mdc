@@ -1,0 +1,41 @@
+---
+description: Non-negotiable Hogar vs PRO UI density and Storybook source-of-truth rules
+globs: frontend/**/*.{tsx,ts,css,md}
+alwaysApply: false
+---
+
+# Hogar / PRO UI — non-negotiable
+
+## Modes
+
+- Hogar (`/hogar/*`): clarity over detail. QuickAdd (plantillas). Simple reading.
+- PRO (`/pro/*`): control over simplicity. EntryBuilder + manual escape. More options visible.
+- Same domain APIs; difference is **presentation, routes, and density** — not a limited/complete split.
+- Intent: `specs/foundation/modos-hogar-pro.md`.
+
+## Density by surface (viewport)
+
+| Surface | Hogar | PRO mobile | PRO desktop |
+|---------|-------|------------|-------------|
+| Captura (entries) | Compact QuickAdd | EntryBuilder usable for quick/concrete captures | EntryBuilder + room for path/context |
+| Historial apuntes | Narrow, filterable list | Same usability as Hogar (quick check) | **Must use width**: more columns, filters visible, denser rows — do not clone Hogar `max-w-lg` |
+| Reportes / analysis | Simple panels | Usable, not optimal | Primary consumption surface — denser tables/charts |
+| Cuentas | Grouped balances, no codes | — | Tree + codes (`AccountsTreePro`) |
+
+- If PRO and Hogar share a page component only via `namespace`, treat identical desktop density as **debt**, not as the target.
+
+## Storybook / inventory / views
+
+- **Storybook `canonical`** = executable SoT for reusable UI; product should match or elevate toward it.
+- **Storybook `reference`** = visual mock only — do not wire as-is.
+- **`frontend/docs/views/`** = per-route purpose, composition, density, audit log.
+- **`frontend/docs/component-inventory.md`** = thin index (path → story → class → status).
+- **`frontend/docs/ui-exceptions.md`** = allowed product≠story forks + exit criteria.
+- Policy: `docs/adr/0006-ui-catalog-governance.md`. Agents: `ui-design-governance` (audit/polish), `ui-storybook-sync` (drift).
+
+## Do not
+
+- Ship PRO list/report screens that look like Hogar mobile cards on desktop without documenting debt.
+- Invent a new component when a **canonical** one already exists under `frontend/src/components/` / Storybook.
+- Put Pacho / IA in functional MVP flows (experimental Storybook only).
+- Create SpecKit features only for inventory/view catalog work.

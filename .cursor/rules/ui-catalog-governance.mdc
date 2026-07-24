@@ -1,0 +1,41 @@
+---
+description: UI catalog governance — Storybook canonical vs product, views, exceptions, promote-at-3
+globs: frontend/**/*.{tsx,ts,css,md}
+alwaysApply: false
+---
+
+# UI catalog governance
+
+Policy: `docs/adr/0006-ui-catalog-governance.md`. Density: `hogar-pro-ui-density.mdc`.
+
+## Sources of truth
+
+| Layer | Artifact |
+|-------|----------|
+| Visual patterns | Storybook (`canonical` stories) |
+| Per-route contract | `frontend/docs/views/*.md` |
+| Index | `frontend/docs/component-inventory.md` |
+| Allowed forks | `frontend/docs/ui-exceptions.md` |
+
+## Story class
+
+- **canonical** — use in product (or elevate product to match).
+- **reference** — mock/visual only; never wire as-is; extract look into a data-driven canonical component when adopting.
+
+## Reuse / promote
+
+- Prefer existing canonical components over new ones.
+- Page-only composition may stay in `pages/` without a story.
+- New reusable UI → component + story + inventory row in the same work unit.
+- Same pattern in **3+** places (or both Hogar and PRO) → promote to Storybook.
+
+## Agent modes
+
+- **Audit / polish apply:** Storybook canonical → frontend (`ui-design-governance`).
+- **Drift sync:** frontend → Storybook when product led (`ui-storybook-sync`).
+
+## Do not
+
+- Ship a second visual language for the same pattern without an exceptions row + exit criteria.
+- Create SpecKit features only to track inventory/views.
+- Use per-exception ADRs (use `ui-exceptions.md`).

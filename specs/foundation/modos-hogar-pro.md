@@ -3,8 +3,8 @@
 | Campo | Valor |
 |-------|-------|
 | **Documento** | Definición de modos Hogar y PRO |
-| **Versión** | 1.3.0 |
-| **Última actualización** | 2026-07-16 |
+| **Versión** | 1.4.0 |
+| **Última actualización** | 2026-07-22 |
 | **Estado** | Aprobado |
 | **Relación** | Complementa la constitución y el documento `mvp-scope.md` |
 
@@ -153,6 +153,21 @@ PRO no solo quiere ver "si hubo gasto", sino qué tipo de movimiento fue. Por ej
 
 ---
 
+## Densidad UI por superficie y viewport
+
+Regla operativa (no negociable en frontend): ver también `.cursor/rules/hogar-pro-ui-density.mdc`.
+
+| Superficie | HOGAR | PRO móvil | PRO desktop |
+|------------|-------|-----------|-------------|
+| Captura | QuickAdd compacto | EntryBuilder para apuntes rápidos y concretos | EntryBuilder con más contexto de camino |
+| Historial de apuntes | Lista estrecha filtrable | Misma usabilidad rápida | **Usar el ancho**: más columnas, filtros visibles, filas densas — no clonar el layout móvil de Hogar |
+| Reportes / análisis | Paneles simples | Usable, no óptimo | Superficie principal de consumo |
+| Cuentas | Saldos agrupados sin códigos | — | Árbol + códigos |
+
+Compartir un componente de página vía `namespace` está bien; **misma densidad desktop Hogar/PRO en listados/reportes es deuda**, no el objetivo.
+
+Storybook es la fuente ejecutable del catálogo UI; el inventario markdown es índice. Workflow: skill/agent `ui-storybook-sync`.
+
 ## Relación con el modelo de datos
 
 Ambos modos operan sobre el **mismo modelo de datos**. No existe un modelo "Hogar" y otro "PRO". La diferencia es de **presentación, rutas UI y densidad**.
@@ -181,6 +196,7 @@ No se usan tipos `client` / `supplier` separados. Se usa **`organization`** con 
 
 | Fecha | Versión | Cambio |
 |------|---------|--------|
+| 2026-07-22 | 1.4.0 | Densidad UI por superficie/viewport; Storybook como SoT del catálogo; deuda PRO desktop |
 | 2026-07-16 | 1.3.0 | QuickAdd vs EntryBuilder; namespaces `/hogar` `/pro`; organization+capacidades; 008 IA fuera MVP; 009 avanzado |
 | 2026-07-13 | 1.2.0 | Captura: Hogar = plantillas; PRO = EntryBuilder; motor compartido; burst entry |
 | 2026-07-12 | 1.1.0 | Hogar incluye CxC/CxP informales; módulo documental post-MVP |

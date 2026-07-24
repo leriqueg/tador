@@ -40,6 +40,8 @@ export function createUserRepository(): UserRepository {
           passwordHash: user.passwordHash,
           fullName: user.fullName,
           verifiedAt: user.verifiedAt,
+          blockedAt: user.blockedAt,
+          blockedReason: user.blockedReason,
         },
       });
       return mapToDomain(record);
@@ -54,6 +56,8 @@ function mapToDomain(record: {
   fullName: string | null;
   verifiedAt: Date | null;
   createdAt: Date;
+  blockedAt: Date | null;
+  blockedReason: string | null;
 }): User {
   return {
     id: record.id,
@@ -62,5 +66,7 @@ function mapToDomain(record: {
     fullName: record.fullName,
     verifiedAt: record.verifiedAt,
     createdAt: record.createdAt,
+    blockedAt: record.blockedAt,
+    blockedReason: record.blockedReason,
   };
 }

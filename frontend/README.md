@@ -2,7 +2,7 @@
 
 **Fecha de corte:** 2026-07-18
 
-**Última actualización:** 2026-07-18
+**Última actualización:** 2026-07-22
 
 React + Vite + Tailwind v4 client for the Hogar experience (Sprint 06).
 
@@ -15,8 +15,12 @@ The UI follows the TADOR Finanzas design system:
 | **Canonical spec** (colors, typography, spacing, guidelines) | [`specs/foundation/mockup/stitch/DESIGN.md`](../specs/foundation/mockup/stitch/DESIGN.md) |
 | **TypeScript tokens** | [`src/design/tokens.ts`](src/design/tokens.ts) |
 | **CSS theme** (Tailwind `@theme`) | [`src/globals.css`](src/globals.css) |
-| **Component library** | Storybook (`npm run storybook`) |
-| **Component inventory** (definitions, status, Storybook map) | [`docs/component-inventory.md`](docs/component-inventory.md) |
+| **Component library (SoT)** | Storybook (`npm run storybook`) — see [`docs/storybook-ia.md`](docs/storybook-ia.md) |
+| **View docs** (per-route UI contract) | [`docs/views/index.md`](docs/views/index.md) |
+| **UI exceptions** | [`docs/ui-exceptions.md`](docs/ui-exceptions.md) |
+| **Component inventory** (thin index → stories) | [`docs/component-inventory.md`](docs/component-inventory.md) |
+| **Hogar/PRO density rules** | [`../specs/foundation/modos-hogar-pro.md`](../specs/foundation/modos-hogar-pro.md), `.cursor/rules/hogar-pro-ui-density.mdc` |
+| **Governance** | ADR 0006 · agents in [`../AGENTS.md`](../AGENTS.md) |
 | **Sprint 06 route ↔ API map** | [`specs/006-frontend-hogar/inventory-vistas-endpoints.md`](../specs/006-frontend-hogar/inventory-vistas-endpoints.md) |
 
 ### Typography

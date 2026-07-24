@@ -24,6 +24,7 @@ const SAMPLE_ENTITIES: EntitySummary[] = [
 ];
 
 export const Default: StoryObj = {
+  name: 'Mobile / quick capture width',
   render: () => (
     <div className="max-w-lg">
       <EntryBuilder
@@ -38,6 +39,26 @@ export const Default: StoryObj = {
           console.log('create entity', values);
           return { id: `jit-${Date.now()}`, nombre: values.nombre, tipo: values.tipo, notas: null, capabilities: values.capabilities };
         }}
+      />
+    </div>
+  ),
+};
+
+export const DesktopCanvas: StoryObj = {
+  name: 'Desktop canvas (more path context)',
+  render: () => (
+    <div className="max-w-3xl">
+      <EntryBuilder
+        accounts={SAMPLE_ACCOUNTS}
+        entities={SAMPLE_ENTITIES}
+        onSubmit={async () => {}}
+        onCreateEntity={async (values) => ({
+          id: `jit-${Date.now()}`,
+          nombre: values.nombre,
+          tipo: values.tipo,
+          notas: null,
+          capabilities: values.capabilities,
+        })}
       />
     </div>
   ),

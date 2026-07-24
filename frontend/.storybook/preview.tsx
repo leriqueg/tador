@@ -21,6 +21,23 @@ const preview: Preview = {
         { name: 'primary', value: '#006565' },
       ],
     },
+    options: {
+      storySort: {
+        order: [
+          'Foundations',
+          'Primitives',
+          'Patterns',
+          'Charts',
+          ['Donut', 'Reference'],
+          'Hogar',
+          ['ShellAndPanels', 'QuickAdd', 'FinancesPyg'],
+          'PRO',
+          ['EntryBuilder', 'ManualEntry', 'AccountsTreePro', 'FinancesPyg', 'Analysis'],
+          'Marketing',
+          'Experimental',
+        ],
+      },
+    },
   },
 };
 

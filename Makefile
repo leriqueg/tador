@@ -142,16 +142,19 @@ test-e2e-host: test-db-ensure ## E2E desde el host (backend → tador_test, Vite
 # ─── Migración demo test20260719 ───────────────────────
 # Requiere DEMO_SEED_ENABLED=true y credenciales en
 # migrations/test20260719/.env (ver .env.example).
+# Mapa: account-map.csv → legacyCodigo;legacyNombre;codigoTador;codigoTadorPadre;crear_nombre;nueva_entidad
+# Postable codigoTador → CuentaGlobal (crear_nombre/nueva_entidad vacíos).
+# codigoTador ausente del seed → CuentaUsuario con codigo fijo bajo codigoTadorPadre.
+# Varios legacyCodigo pueden compartir el mismo destino TADOR.
 
 MIGRATE_TEST_VOL = -v "$(CURDIR)/migrations:/migrations:ro"
-# Credenciales se leen desde /migrations/test20260719/.env (dotenv en el script).
 RUN_MIGRATE_TEST = $(COMPOSE) run --rm $(MIGRATE_TEST_VOL) \
 	-e DEMO_SEED_ENABLED=true \
 	-e NODE_ENV=development \
 	-e MIGRATE_DATA_DIR=/migrations/test20260719
 
 .PHONY: migrate-test20260719-dry
-migrate-test20260719-dry: ## Dry-run expansión CSV + users (sin postear)
+migrate-test20260719-dry: ## Dry-run: cobertura de mapa + expansión (sin postear)
 	$(RUN_MIGRATE_TEST) -e MIGRATE_DRY_RUN=true backend npm run migrate:test20260719
 
 .PHONY: migrate-test20260719

@@ -3,11 +3,17 @@
  *
  * Guarded: refuses production unless DEMO_SEED_ENABLED=true and NODE_ENV!==production.
  *
- * Steps:
- *  1. Create (or reuse) demo users from env
- *  2. Provision CuentaUsuario from account-map.approved.json
- *  3. Expand CSV asientos to double-entry lines and post via AccountingService
- *  4. Create Apunte (no template) per asiento
+ * Inputs (deterministic):
+ *  - account-map.csv — legacyCodigo;legacyNombre;codigoTador;codigoTadorPadre;crear_nombre;nueva_entidad
+ *  - test20260719.csv — movements (mother columns are reference only)
+ *
+ * Rules:
+ *  - CuentaGlobal is never created from the map.
+ *  - If codigoTador is a postable chart leaf → post to that global (crear_nombre/nueva_entidad empty).
+ *  - If codigoTador is not in the chart → create CuentaUsuario under codigoTadorPadre with
+ *    codigo = codigoTador (deterministic; no autoAsignarCodigo) and nombre = crear_nombre.
+ *  - codigoTador must not be a chart group (non-postable); put the group in codigoTadorPadre.
+ *  - Several legacyCodigo may share the same TADOR target.
  */
 
 import { readFileSync, existsSync } from 'node:fs';
@@ -20,13 +26,11 @@ import { prisma } from '../../../src/infrastructure/database.js';
 import { createArgon2PasswordHasher } from '../../../src/infrastructure/services/argon2-password-hasher.js';
 import { createUserRepository } from '../../../src/infrastructure/repositories/user-repo.js';
 import { createBookRepository } from '../../../src/infrastructure/repositories/book-repo.js';
-import { createAccountRepository } from '../../../src/infrastructure/repositories/account-repo.js';
 import { createJournalStore } from '../../../src/infrastructure/repositories/journal-store.js';
 import {
   createAccountingService,
   type CreateEntryLineInput,
 } from '../../../src/application/accounting-service.js';
-import { autoAsignarCodigo } from '../../../src/application/account-codigo.js';
 import type { BookMode } from '../../../src/domain/book.js';
 import type { TipoCuenta } from '../../../src/domain/cuenta-usuario.js';
 import type { TipoEntidad } from '../../../src/domain/entidad.js';
@@ -52,7 +56,6 @@ function resolveMigrateDir(): string {
   if (process.env.MIGRATE_DATA_DIR) {
     return process.env.MIGRATE_DATA_DIR;
   }
-  // Host: repo/migrations/test20260719 ; Docker: /migrations/test20260719
   const candidates = [
     '/migrations/test20260719',
     resolve(__dirname, '../../../../migrations/test20260719'),
@@ -67,6 +70,19 @@ function resolveMigrateDir(): string {
   );
 }
 
+function resolveChartSeedPath(): string {
+  const candidates = [
+    resolve(__dirname, '../../../data/plan-de-cuentas/plan-de-cuentas-final-seed.json'),
+    resolve(process.cwd(), 'data/plan-de-cuentas/plan-de-cuentas-final-seed.json'),
+  ];
+  for (const c of candidates) {
+    if (existsSync(c)) return c;
+  }
+  throw new Error(
+    `Cannot find plan-de-cuentas-final-seed.json (tried: ${candidates.join(', ')})`,
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -78,26 +94,38 @@ interface DemoUserEnv {
   mode: BookMode;
 }
 
-interface AccountResolution {
-  kind: 'cuenta_usuario' | 'cuenta_global';
-  nombre?: string;
-  codigo?: string;
-  parentCodigo?: string;
-  tipoCuenta?: TipoCuenta;
-  entidadTipo?: TipoEntidad | null;
-  entidadNombre?: string | null;
-  clasificacion: string;
-  legacyMadre?: string;
-}
-
-interface AccountMapEntry {
+/** One row from account-map.csv (legacy → TADOR). */
+interface AccountMapRow {
   legacyCodigo: string;
-  role: 'bal' | 'pyg';
-  resolution: AccountResolution;
+  legacyNombre: string | null;
+  codigoTador: string;
+  codigoTadorPadre: string;
+  /** Display name when creating CuentaUsuario; null when posting to a global leaf. */
+  crearNombre: string | null;
+  nuevaEntidad: string | null;
+  /** true = post to CuentaGlobal; false = find/create CuentaUsuario with fixed codigo. */
+  isGlobal: boolean;
 }
 
 interface AccountMapFile {
-  accounts: AccountMapEntry[];
+  rows: AccountMapRow[];
+}
+
+interface ChartAccount {
+  codigo: string;
+  nombre: string;
+  codigoPadre: string | null;
+  esPostable: boolean;
+  naturaleza: string;
+  clasificacion: string;
+  permiteCustom: string;
+  relacionadasEntidades: string | null;
+}
+
+interface ResolvedTarget {
+  kind: 'user' | 'global';
+  /** CuentaGlobal.id or CuentaUsuario.id */
+  id: string;
 }
 
 interface CsvRow {
@@ -110,7 +138,17 @@ interface CsvRow {
   Importe: string;
   fecha: string;
   codigo_cuenta_pyg: string;
+  nombre_cuenta_pyg: string;
   codigo_cuenta_bal: string;
+  nombre_cuenta_bal: string;
+}
+
+interface UsedAccountRef {
+  legacyCodigo: string;
+  role: 'bal' | 'pyg';
+  uses: number;
+  nombres: Set<string>;
+  sampleDescripcion: string;
 }
 
 interface ExpandedLine {
@@ -131,35 +169,351 @@ interface ExpandedAsiento {
 }
 
 // ---------------------------------------------------------------------------
-// CSV parse (semicolon, no external dep)
+// Chart catalog (classification / entity support from plan seed — not DB)
 // ---------------------------------------------------------------------------
 
-function parseSemicolonCsv(raw: string): CsvRow[] {
+function loadChartCatalog(): Map<string, ChartAccount> {
+  const raw = JSON.parse(readFileSync(resolveChartSeedPath(), 'utf-8')) as {
+    accounts: Array<{
+      codigo: string;
+      nombre: string;
+      codigoPadre?: string | null;
+      esPostable: boolean;
+      naturaleza?: string;
+      clasificacion?: string;
+      permiteCustom?: string;
+      relacionadasEntidades?: string | null;
+    }>;
+  };
+  const map = new Map<string, ChartAccount>();
+  for (const a of raw.accounts) {
+    map.set(a.codigo, {
+      codigo: a.codigo,
+      nombre: a.nombre,
+      codigoPadre: a.codigoPadre ?? null,
+      esPostable: a.esPostable,
+      naturaleza: a.naturaleza ?? '',
+      clasificacion: a.clasificacion ?? '',
+      permiteCustom: a.permiteCustom ?? 'false',
+      relacionadasEntidades: a.relacionadasEntidades ?? null,
+    });
+  }
+  return map;
+}
+
+function allowsEntidad(chart: ChartAccount): boolean {
+  return chart.permiteCustom === 'ConEntidadAutomatica';
+}
+
+function inferTipoCuenta(chart: ChartAccount): TipoCuenta {
+  const c = chart.codigo;
+  if (chart.naturaleza === 'cash') return 'wallet';
+  if (chart.naturaleza === 'loan') return 'card';
+  if (c.startsWith('1112')) return 'bank';
+  if (c.startsWith('212')) return 'card';
+  if (c.startsWith('213')) return 'card';
+  if (c.startsWith('211')) return 'bridge';
+  if (c.startsWith('112')) return 'wallet';
+  if (c.startsWith('113')) return 'wallet';
+  if (c.startsWith('1111')) return 'wallet';
+  return 'wallet';
+}
+
+function inferEntidadTipo(chart: ChartAccount): TipoEntidad {
+  const rel = chart.relacionadasEntidades;
+  if (rel === 'PersonaNatural') return 'person';
+  if (rel === 'EntidadGubernamental') return 'organization';
+  if (rel === 'EntidadFinanciera') {
+    if (chart.codigo.startsWith('212')) return 'card_issuer';
+    if (chart.codigo.startsWith('1111')) return 'wallet_platform';
+    return 'bank';
+  }
+  return 'person';
+}
+
+function userTargetKey(codigoTador: string): string {
+  return `user:${codigoTador}`;
+}
+
+function globalTargetKey(codigoTador: string): string {
+  return `global:${codigoTador}`;
+}
+
+// ---------------------------------------------------------------------------
+// CSV parse
+// ---------------------------------------------------------------------------
+
+function parseSemicolonCsv(raw: string): Record<string, string>[] {
   const text = raw.replace(/^\uFEFF/, '');
   const lines = text.split(/\r?\n/).filter((l) => l.trim().length > 0);
   if (lines.length < 2) return [];
   const headers = lines[0].split(';').map((h) => h.trim());
-  const rows: CsvRow[] = [];
+  const rows: Record<string, string>[] = [];
   for (let i = 1; i < lines.length; i++) {
     const cols = lines[i].split(';');
     const obj: Record<string, string> = {};
     for (let j = 0; j < headers.length; j++) {
       obj[headers[j]] = (cols[j] ?? '').trim();
     }
-    rows.push(obj as unknown as CsvRow);
+    rows.push(obj);
   }
   return rows;
 }
 
-function parseFecha(value: string): Date {
-  const [d, m, y] = value.split('/').map((p) => Number(p));
-  if (!d || !m || !y) throw new Error(`Invalid fecha: ${value}`);
-  return new Date(Date.UTC(y, m - 1, d, 12, 0, 0));
+function emptyToNull(value: string): string | null {
+  const v = value.trim();
+  return v.length === 0 ? null : v;
 }
 
 function nullish(code: string): string | null {
   if (!code || code === 'NULL') return null;
   return code;
+}
+
+/**
+ * account-map.csv columns:
+ *   legacyCodigo;legacyNombre;codigoTador;codigoTadorPadre;crear_nombre;nueva_entidad
+ */
+function parseAccountMapCsv(
+  raw: string,
+  chart: Map<string, ChartAccount>,
+): AccountMapFile {
+  const rows = parseSemicolonCsv(raw);
+  if (rows.length === 0) {
+    throw new Error('account-map.csv has no data rows');
+  }
+
+  const out: AccountMapRow[] = [];
+  const errors: string[] = [];
+  const seenLegacy = new Set<string>();
+  /** Consistency across many-legacy → one TADOR target */
+  const targetShape = new Map<string, string>();
+
+  for (let i = 0; i < rows.length; i++) {
+    const r = rows[i];
+    const line = i + 2;
+    const legacyCodigo = (r.legacyCodigo ?? '').trim();
+    const legacyNombre = emptyToNull(r.legacyNombre ?? '');
+    const codigoTador = (r.codigoTador ?? '').trim();
+    const codigoTadorPadre = (r.codigoTadorPadre ?? '').trim();
+    const crearNombre = emptyToNull(r.crear_nombre ?? '');
+    const nuevaEntidad = emptyToNull(r.nueva_entidad ?? '');
+
+    if (!legacyCodigo) {
+      errors.push(`line ${line}: missing legacyCodigo`);
+      continue;
+    }
+    if (!codigoTador) {
+      errors.push(`line ${line}: missing codigoTador`);
+      continue;
+    }
+    if (!codigoTadorPadre) {
+      errors.push(`line ${line}: missing codigoTadorPadre`);
+      continue;
+    }
+    if (seenLegacy.has(legacyCodigo)) {
+      errors.push(`line ${line}: duplicate legacyCodigo ${legacyCodigo}`);
+      continue;
+    }
+    seenLegacy.add(legacyCodigo);
+
+    const parent = chart.get(codigoTadorPadre);
+    if (!parent) {
+      errors.push(
+        `line ${line}: codigoTadorPadre ${codigoTadorPadre} not in chart seed`,
+      );
+      continue;
+    }
+    if (parent.esPostable) {
+      errors.push(
+        `line ${line}: codigoTadorPadre ${codigoTadorPadre} must be a non-postable group`,
+      );
+      continue;
+    }
+
+    const chartAcc = chart.get(codigoTador);
+
+    if (chartAcc?.esPostable) {
+      if (crearNombre || nuevaEntidad) {
+        errors.push(
+          `line ${line}: postable ${codigoTador} must leave crear_nombre and nueva_entidad empty`,
+        );
+        continue;
+      }
+      if (chartAcc.codigoPadre && chartAcc.codigoPadre !== codigoTadorPadre) {
+        errors.push(
+          `line ${line}: codigoTadorPadre ${codigoTadorPadre} does not match chart parent ${chartAcc.codigoPadre} for ${codigoTador}`,
+        );
+        continue;
+      }
+      const key = globalTargetKey(codigoTador);
+      const shape = `global|padre=${codigoTadorPadre}`;
+      const prev = targetShape.get(key);
+      if (prev && prev !== shape) {
+        errors.push(`line ${line}: conflicting shapes for global ${codigoTador}`);
+        continue;
+      }
+      targetShape.set(key, shape);
+      out.push({
+        legacyCodigo,
+        legacyNombre,
+        codigoTador,
+        codigoTadorPadre,
+        crearNombre: null,
+        nuevaEntidad: null,
+        isGlobal: true,
+      });
+      continue;
+    }
+
+    if (chartAcc && !chartAcc.esPostable) {
+      errors.push(
+        `line ${line}: codigoTador ${codigoTador} is a chart group; use a user-scoped code and put the group in codigoTadorPadre`,
+      );
+      continue;
+    }
+
+    if (!crearNombre) {
+      errors.push(
+        `line ${line}: user account ${codigoTador} requires crear_nombre`,
+      );
+      continue;
+    }
+    if (nuevaEntidad && !allowsEntidad(parent)) {
+      errors.push(
+        `line ${line}: chart group ${codigoTadorPadre} does not allow nueva_entidad (got "${nuevaEntidad}")`,
+      );
+      continue;
+    }
+
+    const key = userTargetKey(codigoTador);
+    const shape = `padre=${codigoTadorPadre}|nombre=${crearNombre}|entidad=${nuevaEntidad ?? ''}`;
+    const prev = targetShape.get(key);
+    if (prev && prev !== shape) {
+      errors.push(
+        `line ${line}: same user codigoTador ${codigoTador} has conflicting padre/crear_nombre/nueva_entidad`,
+      );
+      continue;
+    }
+    targetShape.set(key, shape);
+
+    out.push({
+      legacyCodigo,
+      legacyNombre,
+      codigoTador,
+      codigoTadorPadre,
+      crearNombre,
+      nuevaEntidad,
+      isGlobal: false,
+    });
+  }
+
+  if (errors.length > 0) {
+    throw new Error(
+      `Invalid account-map.csv (${errors.length} error(s)):\n  - ${errors.join('\n  - ')}`,
+    );
+  }
+
+  return { rows: out };
+}
+
+function collectUsedAccounts(rows: CsvRow[]): UsedAccountRef[] {
+  const byKey = new Map<string, UsedAccountRef>();
+
+  const bump = (
+    code: string | null,
+    role: 'bal' | 'pyg',
+    nombre: string,
+    descripcion: string,
+  ): void => {
+    if (!code) return;
+    const key = `${role}:${code}`;
+    let cur = byKey.get(key);
+    if (!cur) {
+      cur = {
+        legacyCodigo: code,
+        role,
+        uses: 0,
+        nombres: new Set(),
+        sampleDescripcion: descripcion.split('{')[0].trim().slice(0, 80),
+      };
+      byKey.set(key, cur);
+    }
+    cur.uses += 1;
+    if (nombre && nombre !== 'NULL') cur.nombres.add(nombre);
+  };
+
+  for (const r of rows) {
+    bump(nullish(r.codigo_cuenta_bal), 'bal', r.nombre_cuenta_bal ?? '', r.Descripcion);
+    bump(nullish(r.codigo_cuenta_pyg), 'pyg', r.nombre_cuenta_pyg ?? '', r.Descripcion);
+  }
+
+  return [...byKey.values()].sort((a, b) =>
+    a.legacyCodigo.localeCompare(b.legacyCodigo),
+  );
+}
+
+function assertMapCoversMovements(
+  map: AccountMapFile,
+  used: UsedAccountRef[],
+): void {
+  const mapped = new Set(map.rows.map((a) => a.legacyCodigo));
+  const missing = used.filter((u) => !mapped.has(u.legacyCodigo));
+
+  if (missing.length === 0) {
+    console.log(
+      `Map coverage OK: ${used.length} codes used in movements, all present in account-map.csv`,
+    );
+    return;
+  }
+
+  console.error(`\nUNMAPPED accounts (${missing.length}):`);
+  console.error(
+    'Add a row to account-map.csv: legacyCodigo;legacyNombre;codigoTador;codigoTadorPadre;crear_nombre;nueva_entidad\n',
+  );
+  for (const m of missing) {
+    const names = [...m.nombres].join(' | ') || '(no nombre_cuenta in CSV)';
+    console.error(
+      `  ${m.role.padEnd(3)} ${m.legacyCodigo}  uses=${m.uses}  names=[${names}]  sample="${m.sampleDescripcion}"`,
+    );
+  }
+  throw new Error(
+    `${missing.length} account code(s) used in movements are missing from account-map.csv`,
+  );
+}
+
+/** Preferred ISO YYYY-MM-DD; fallback legacy DD/MM/YYYY. Noon UTC avoids TZ day-shift. */
+function parseFecha(value: string): Date {
+  const raw = value.trim();
+  const iso = /^(\d{4})-(\d{2})-(\d{2})(?:[T\s].*)?$/.exec(raw);
+  if (iso) {
+    return utcNoonDate(Number(iso[1]), Number(iso[2]), Number(iso[3]), raw);
+  }
+  const legacy = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(raw);
+  if (legacy) {
+    return utcNoonDate(
+      Number(legacy[3]),
+      Number(legacy[2]),
+      Number(legacy[1]),
+      raw,
+    );
+  }
+  throw new Error(`Invalid fecha: ${value}`);
+}
+
+function utcNoonDate(y: number, m: number, d: number, raw: string): Date {
+  if (!y || m < 1 || m > 12 || d < 1 || d > 31) {
+    throw new Error(`Invalid fecha: ${raw}`);
+  }
+  const date = new Date(Date.UTC(y, m - 1, d, 12, 0, 0));
+  if (
+    date.getUTCFullYear() !== y ||
+    date.getUTCMonth() !== m - 1 ||
+    date.getUTCDate() !== d
+  ) {
+    throw new Error(`Invalid fecha: ${raw}`);
+  }
+  return date;
 }
 
 // ---------------------------------------------------------------------------
@@ -243,8 +597,6 @@ function expandAsiento(tipo: string, rows: CsvRow[]): ExpandedAsiento {
       );
     }
     const importe = new Decimal(r.Importe);
-    // Directo: one signed importe drives BAL; PYG is the opposite signed leg.
-    // egreso I<0 → Dr expense / Cr asset; ingreso I>0 → Dr asset / Cr income.
     const balSigned = importe;
     const pygSigned = importe.negated();
     raw.push({ legacyCodigo: pyg, role: 'pyg', ...signedToDC(pygSigned) });
@@ -381,103 +733,142 @@ async function ensureUser(demo: DemoUserEnv): Promise<{
 async function provisionAccounts(
   userId: string,
   map: AccountMapFile,
-): Promise<Map<string, { kind: 'user' | 'global'; id: string }>> {
-  const accounts = createAccountRepository();
-  const resolved = new Map<string, { kind: 'user' | 'global'; id: string }>();
+  chart: Map<string, ChartAccount>,
+): Promise<Map<string, ResolvedTarget>> {
+  const legacyToTarget = new Map<string, ResolvedTarget>();
+  const provisioned = new Map<string, ResolvedTarget>();
 
-  for (const entry of map.accounts) {
-    const res = entry.resolution;
-    if (res.kind === 'cuenta_global') {
-      const codigo = res.codigo!;
-      const global = await prisma.cuentaGlobal.findUnique({
-        where: { codigo },
-        select: { id: true, esPostable: true },
-      });
-      if (!global) throw new Error(`CuentaGlobal ${codigo} not found (seed?)`);
-      if (!global.esPostable) {
-        throw new Error(`CuentaGlobal ${codigo} is not postable`);
+  for (const row of map.rows) {
+    if (row.isGlobal) {
+      const key = globalTargetKey(row.codigoTador);
+      let target = provisioned.get(key);
+      if (!target) {
+        const global = await prisma.cuentaGlobal.findUnique({
+          where: { codigo: row.codigoTador },
+          select: { id: true, esPostable: true },
+        });
+        if (!global) {
+          throw new Error(
+            `CuentaGlobal ${row.codigoTador} missing in DB — seed catalog first (never auto-created)`,
+          );
+        }
+        if (!global.esPostable) {
+          throw new Error(`CuentaGlobal ${row.codigoTador} is not postable`);
+        }
+        target = { kind: 'global', id: global.id };
+        provisioned.set(key, target);
       }
-      resolved.set(entry.legacyCodigo, { kind: 'global', id: global.id });
+      legacyToTarget.set(row.legacyCodigo, target);
       continue;
     }
 
-    // cuenta_usuario
-    const parent = await prisma.cuentaGlobal.findUnique({
-      where: { codigo: res.parentCodigo! },
-      select: { id: true },
-    });
-    if (!parent) {
+    const parentChart = chart.get(row.codigoTadorPadre);
+    if (!parentChart) {
       throw new Error(
-        `Parent group ${res.parentCodigo} missing for legacy ${entry.legacyCodigo}`,
+        `codigoTadorPadre ${row.codigoTadorPadre} not in chart (legacy ${row.legacyCodigo})`,
       );
     }
 
-    let entidadId: string | null = null;
-    if (res.entidadTipo && res.entidadNombre) {
-      const existingEnt = await prisma.entidad.findUnique({
-        where: {
-          userId_nombre: { userId, nombre: res.entidadNombre },
-        },
+    const key = userTargetKey(row.codigoTador);
+    let target = provisioned.get(key);
+    if (!target) {
+      const parent = await prisma.cuentaGlobal.findUnique({
+        where: { codigo: row.codigoTadorPadre },
+        select: { id: true, esPostable: true },
       });
-      if (existingEnt) {
-        entidadId = existingEnt.id;
+      if (!parent) {
+        throw new Error(
+          `Chart group ${row.codigoTadorPadre} missing in DB — seed catalog first (never auto-created)`,
+        );
+      }
+      if (parent.esPostable) {
+        throw new Error(
+          `codigoTadorPadre ${row.codigoTadorPadre} is postable; expected a group`,
+        );
+      }
+
+      const crearNombre = row.crearNombre!;
+      let entidadId: string | null = null;
+      if (row.nuevaEntidad) {
+        const tipo = inferEntidadTipo(parentChart);
+        const existingEnt = await prisma.entidad.findUnique({
+          where: { userId_nombre: { userId, nombre: row.nuevaEntidad } },
+        });
+        if (existingEnt) {
+          entidadId = existingEnt.id;
+        } else {
+          const created = await prisma.entidad.create({
+            data: {
+              userId,
+              nombre: row.nuevaEntidad,
+              tipo,
+              capabilities: [],
+            },
+          });
+          entidadId = created.id;
+        }
+      }
+
+      const existingByCodigo = await prisma.cuentaUsuario.findUnique({
+        where: { userId_codigo: { userId, codigo: row.codigoTador } },
+      });
+      if (existingByCodigo) {
+        if (existingByCodigo.globalId !== parent.id) {
+          throw new Error(
+            `CuentaUsuario ${row.codigoTador} exists under a different parent (legacy ${row.legacyCodigo})`,
+          );
+        }
+        if (existingByCodigo.nombre !== crearNombre) {
+          throw new Error(
+            `CuentaUsuario ${row.codigoTador} exists with nombre "${existingByCodigo.nombre}", map wants "${crearNombre}"`,
+          );
+        }
+        if (existingByCodigo.enforceNonNegativeBalance) {
+          await prisma.cuentaUsuario.update({
+            where: { id: existingByCodigo.id },
+            data: { enforceNonNegativeBalance: false },
+          });
+        }
+        target = { kind: 'user', id: existingByCodigo.id };
       } else {
-        const created = await prisma.entidad.create({
+        const existingByNombre = await prisma.cuentaUsuario.findFirst({
+          where: { userId, nombre: crearNombre },
+        });
+        if (existingByNombre) {
+          throw new Error(
+            `CuentaUsuario nombre "${crearNombre}" already exists as codigo ${existingByNombre.codigo}; map wants ${row.codigoTador}`,
+          );
+        }
+        const created = await prisma.cuentaUsuario.create({
           data: {
             userId,
-            nombre: res.entidadNombre,
-            tipo: res.entidadTipo,
-            capabilities: [],
+            codigo: row.codigoTador,
+            globalId: parent.id,
+            entidadId,
+            tipoCuenta: inferTipoCuenta(parentChart),
+            nombre: crearNombre,
+            enforceNonNegativeBalance: false,
+            metadata: {
+              migration: 'test20260719',
+              codigoTador: row.codigoTador,
+              codigoTadorPadre: row.codigoTadorPadre,
+              legacyCodigo: row.legacyCodigo,
+            },
           },
         });
-        entidadId = created.id;
+        target = { kind: 'user', id: created.id };
       }
+      provisioned.set(key, target);
     }
-
-    const existing = await prisma.cuentaUsuario.findFirst({
-      where: {
-        userId,
-        nombre: res.nombre!,
-        globalId: parent.id,
-      },
-    });
-    if (existing) {
-      // Migration without opening balances: allow temporary negative natural balance.
-      if (existing.enforceNonNegativeBalance) {
-        await prisma.cuentaUsuario.update({
-          where: { id: existing.id },
-          data: { enforceNonNegativeBalance: false },
-        });
-      }
-      resolved.set(entry.legacyCodigo, { kind: 'user', id: existing.id });
-      continue;
-    }
-
-    const codigo = await autoAsignarCodigo(accounts, parent.id, userId);
-    const created = await prisma.cuentaUsuario.create({
-      data: {
-        userId,
-        codigo,
-        globalId: parent.id,
-        entidadId,
-        tipoCuenta: res.tipoCuenta as TipoCuenta,
-        nombre: res.nombre!,
-        enforceNonNegativeBalance: false,
-        metadata: {
-          legacyCodigo: entry.legacyCodigo,
-          migration: 'test20260719',
-        },
-      },
-    });
-    resolved.set(entry.legacyCodigo, { kind: 'user', id: created.id });
+    legacyToTarget.set(row.legacyCodigo, target);
   }
 
-  return resolved;
+  return legacyToTarget;
 }
 
 function toEntryLines(
   expanded: ExpandedAsiento,
-  resolved: Map<string, { kind: 'user' | 'global'; id: string }>,
+  resolved: Map<string, ResolvedTarget>,
 ): CreateEntryLineInput[] {
   return expanded.lines.map((line) => {
     const target = resolved.get(line.legacyCodigo);
@@ -497,26 +888,17 @@ function toEntryLines(
   });
 }
 
-// ---------------------------------------------------------------------------
-// Main
-// ---------------------------------------------------------------------------
-
 async function migrateForUser(
   demo: DemoUserEnv,
   asientos: ExpandedAsiento[],
   map: AccountMapFile,
-  dryRun: boolean,
+  chart: Map<string, ChartAccount>,
 ): Promise<{ created: number; skipped: number; errors: string[] }> {
   const { userId, bookId } = await ensureUser(demo);
   console.log(`\n=== ${demo.email} (${demo.mode}) userId=${userId} bookId=${bookId}`);
 
-  const resolved = await provisionAccounts(userId, map);
+  const resolved = await provisionAccounts(userId, map, chart);
   console.log(`  Accounts resolved: ${resolved.size}`);
-
-  if (dryRun) {
-    console.log(`  DRY RUN: would post ${asientos.length} asientos`);
-    return { created: 0, skipped: asientos.length, errors: [] };
-  }
 
   const accounting = createAccountingService(createJournalStore());
   let created = 0;
@@ -553,7 +935,6 @@ async function migrateForUser(
       created += 1;
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      // Idempotent replay already counted as success path above; treat duplicates soft
       if (msg.includes('idempotency') || msg.includes('Unique constraint')) {
         skipped += 1;
         continue;
@@ -574,25 +955,31 @@ async function main(): Promise<void> {
     dotenv.config({ path: envPath });
   }
   if (process.env.DEMO_SEED_ENABLED !== 'true') {
-    // Allow make -e to set it without .env
     process.env.DEMO_SEED_ENABLED = process.env.DEMO_SEED_ENABLED ?? 'false';
   }
   assertDemoGuard();
 
   const dryRun = process.env.MIGRATE_DRY_RUN === 'true';
-  const mapPath = resolve(migrateDir, 'account-map.approved.json');
+  const mapPath = resolve(migrateDir, 'account-map.csv');
   const csvPath = resolve(migrateDir, 'test20260719.csv');
 
   if (!existsSync(mapPath)) {
-    throw new Error(`Missing ${mapPath}`);
+    throw new Error(
+      `Missing ${mapPath}. Columns: legacyCodigo;legacyNombre;codigoTador;codigoTadorPadre;crear_nombre;nueva_entidad`,
+    );
   }
   if (!existsSync(csvPath)) {
     throw new Error(`Missing ${csvPath}`);
   }
 
-  const map = JSON.parse(readFileSync(mapPath, 'utf-8')) as AccountMapFile;
+  const chart = loadChartCatalog();
+  const map = parseAccountMapCsv(readFileSync(mapPath, 'utf-8'), chart);
+  const rows = parseSemicolonCsv(
+    readFileSync(csvPath, 'utf-8'),
+  ) as unknown as CsvRow[];
+  const used = collectUsedAccounts(rows);
+  assertMapCoversMovements(map, used);
 
-  const rows = parseSemicolonCsv(readFileSync(csvPath, 'utf-8'));
   const byAsiento = new Map<string, CsvRow[]>();
   for (const row of rows) {
     const list = byAsiento.get(row.asiento_simple) ?? [];
@@ -602,24 +989,29 @@ async function main(): Promise<void> {
 
   const asientos: ExpandedAsiento[] = [];
   for (const [, group] of byAsiento) {
-    const tipo = group[0].tipo_asiento;
-    asientos.push(expandAsiento(tipo, group));
+    asientos.push(expandAsiento(group[0].tipo_asiento, group));
   }
   asientos.sort((a, b) => a.fecha.getTime() - b.fecha.getTime());
 
   console.log(
-    `Loaded ${rows.length} CSV rows → ${asientos.length} asientos (dryRun=${dryRun})`,
+    `Loaded ${rows.length} movement rows → ${asientos.length} asientos; map rows=${map.rows.length} (dryRun=${dryRun})`,
   );
-
-  // Preflight expand already validated balance; print sample
   console.log(
     `Sample: ${asientos[0]?.asientoSimple} ${asientos[0]?.tipoAsiento} lines=${asientos[0]?.lines.length} amount=${asientos[0]?.amount}`,
   );
 
+  if (dryRun) {
+    console.log(
+      '\nDRY RUN: map coverage + chart refs + expansion OK. No users/asientos posted.',
+    );
+    console.log('Migration finished OK');
+    return;
+  }
+
   const demos = loadDemoUsers();
   const allErrors: string[] = [];
   for (const demo of demos) {
-    const result = await migrateForUser(demo, asientos, map, dryRun);
+    const result = await migrateForUser(demo, asientos, map, chart);
     allErrors.push(...result.errors.map((e) => `${demo.email}: ${e}`));
   }
 

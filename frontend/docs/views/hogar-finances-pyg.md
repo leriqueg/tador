@@ -32,8 +32,8 @@ Mostrar el resultado financiero del período (ingresos, gastos, neto) y el top d
 |------|-------------------|-------|
 | Shell | `AppShell` · Patterns/Shells / Hogar/ShellAndPanels | canonical |
 | Errors | `ValidationMessage` | canonical |
-| Top egresos | `BreakdownDonut` · Hogar/FinancesPyg | canonical |
-| Top ingresos | `BreakdownDonut` · Hogar/FinancesPyg | canonical |
+| Top egresos | `BreakdownOutcomesDonut` (rose) · Hogar/FinancesPyg | canonical |
+| Top ingresos | `BreakdownIncomesDonut` (green) · Hogar/FinancesPyg | canonical |
 
 ## Density
 

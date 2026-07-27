@@ -40,7 +40,9 @@ Thin index. **IA:** [`storybook-ia.md`](./storybook-ia.md). **Policy:** [ADR 000
 
 | Component | Path | Story | Class | Status |
 |-----------|------|-------|-------|--------|
-| **BreakdownDonut** | `charts/BreakdownDonut.tsx` | Charts/Donut, Hogar\|PRO/FinancesPyg | **canonical** | exists · wired in FinancesPyg |
+| **BreakdownDonut** | `charts/BreakdownDonut.tsx` | Charts/Donut | **canonical** (base) | exists |
+| **BreakdownIncomesDonut** | `charts/BreakdownIncomesDonut.tsx` | Charts/Donut → Incomes, Hogar\|PRO/FinancesPyg | **canonical** | exists · wired (green) |
+| **BreakdownOutcomesDonut** | `charts/BreakdownOutcomesDonut.tsx` | Charts/Donut → Outcomes, Hogar\|PRO/FinancesPyg | **canonical** | exists · wired (rose) |
 | PeriodBreakdownDonut / MonthlyEvolutionChart | `dataviz/DataViz.tsx` | Charts/Reference | **reference** | exists |
 
 ---

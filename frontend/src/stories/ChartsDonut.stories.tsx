@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import BreakdownDonut from '../components/charts/BreakdownDonut.tsx';
+import BreakdownIncomesDonut from '../components/charts/BreakdownIncomesDonut.tsx';
+import BreakdownOutcomesDonut from '../components/charts/BreakdownOutcomesDonut.tsx';
 
 const meta = {
   title: 'Charts/Donut',
@@ -22,7 +24,7 @@ const INCOME_ITEMS = [
 ];
 
 export const Default: StoryObj = {
-  name: 'BreakdownDonut (canonical)',
+  name: 'BreakdownDonut (neutral)',
   render: () => (
     <div className="max-w-sm">
       <BreakdownDonut title="Desglose" items={EXPENSE_ITEMS} />
@@ -30,10 +32,29 @@ export const Default: StoryObj = {
   ),
 };
 
-export const Empty: StoryObj = {
+export const Incomes: StoryObj = {
+  name: 'BreakdownIncomesDonut (green)',
   render: () => (
     <div className="max-w-sm">
-      <BreakdownDonut title="Sin movimientos" items={[]} />
+      <BreakdownIncomesDonut items={INCOME_ITEMS} />
+    </div>
+  ),
+};
+
+export const Outcomes: StoryObj = {
+  name: 'BreakdownOutcomesDonut (rose)',
+  render: () => (
+    <div className="max-w-sm">
+      <BreakdownOutcomesDonut items={EXPENSE_ITEMS} />
+    </div>
+  ),
+};
+
+export const Empty: StoryObj = {
+  render: () => (
+    <div className="max-w-sm flex flex-col gap-md">
+      <BreakdownOutcomesDonut items={[]} />
+      <BreakdownIncomesDonut items={[]} />
     </div>
   ),
 };
@@ -42,8 +63,8 @@ export const IncomeAndExpensesPair: StoryObj = {
   name: 'Pair preview (column) — prefer view stories',
   render: () => (
     <div className="max-w-md flex flex-col gap-md">
-      <BreakdownDonut title="Egresos" items={EXPENSE_ITEMS} />
-      <BreakdownDonut title="Ingresos" items={INCOME_ITEMS} />
+      <BreakdownOutcomesDonut items={EXPENSE_ITEMS} />
+      <BreakdownIncomesDonut items={INCOME_ITEMS} />
     </div>
   ),
 };

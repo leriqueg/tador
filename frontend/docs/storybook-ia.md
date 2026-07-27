@@ -32,7 +32,7 @@ Experimental/Pacho
 
 ## View compositions
 
-- `Hogar/FinancesPyg` and `PRO/FinancesPyg`: **two** donuts — Top egresos + Top ingresos — stacked in a **column** (not a generic Ingresos/Gastos toggle).
+- `Hogar/FinancesPyg` and `PRO/FinancesPyg`: **two typed** donuts — `BreakdownOutcomesDonut` (rose) + `BreakdownIncomesDonut` (green) — stacked in a **column**.
 
 ## Related
 

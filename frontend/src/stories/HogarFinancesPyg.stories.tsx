@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import BreakdownDonut from '../components/charts/BreakdownDonut.tsx';
+import BreakdownIncomesDonut from '../components/charts/BreakdownIncomesDonut.tsx';
+import BreakdownOutcomesDonut from '../components/charts/BreakdownOutcomesDonut.tsx';
 
 const meta = {
   title: 'Hogar/FinancesPyg',
@@ -22,17 +23,17 @@ const TOP_INCOME = [
 
 /**
  * View composition for `/hogar/finances/pyg` chart block.
- * Two explicit charts (Egresos | Ingresos), stacked in a column — not a generic toggle.
+ * Two typed charts (Outcomes rose | Incomes green), stacked in a column.
  */
 export const TopIncomeAndExpenses: StoryObj = {
   name: 'Top egresos + ingresos (column)',
   render: () => (
     <div className="max-w-2xl mx-auto flex flex-col gap-md">
       <p className="text-label-sm text-on-surface-variant">
-        Composición de vista · ruta `/hogar/finances/pyg` · charts en columna
+        Composición de vista · ruta `/hogar/finances/pyg` · charts tipados en columna
       </p>
-      <BreakdownDonut title="Top egresos" items={TOP_EXPENSES} />
-      <BreakdownDonut title="Top ingresos" items={TOP_INCOME} />
+      <BreakdownOutcomesDonut items={TOP_EXPENSES} />
+      <BreakdownIncomesDonut items={TOP_INCOME} />
     </div>
   ),
 };
@@ -40,8 +41,8 @@ export const TopIncomeAndExpenses: StoryObj = {
 export const EmptyCharts: StoryObj = {
   render: () => (
     <div className="max-w-2xl mx-auto flex flex-col gap-md">
-      <BreakdownDonut title="Top egresos" items={[]} />
-      <BreakdownDonut title="Top ingresos" items={[]} />
+      <BreakdownOutcomesDonut items={[]} />
+      <BreakdownIncomesDonut items={[]} />
     </div>
   ),
 };

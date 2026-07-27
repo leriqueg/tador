@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import AppShell from '../components/layout/AppShell.tsx';
-import BreakdownDonut, { type BreakdownDonutItem } from '../components/charts/BreakdownDonut.tsx';
+import BreakdownIncomesDonut from '../components/charts/BreakdownIncomesDonut.tsx';
+import BreakdownOutcomesDonut from '../components/charts/BreakdownOutcomesDonut.tsx';
+import type { BreakdownDonutItem } from '../components/charts/BreakdownDonut.tsx';
 import ValidationMessage from '../components/ui/ValidationMessage.tsx';
 import { reports, accounts, entities, type PyGReport, type PyGTopAccount, type AccountSummary, type EntitySummary } from '../lib/api.ts';
 import { useAuth } from '../lib/auth.tsx';
@@ -285,17 +287,13 @@ export default function FinancesPyg({ namespace = 'hogar' }: FinancesPygProps) {
 
             {scope === 'year' && pyg && (
               <div className="flex flex-col gap-md">
-                <BreakdownDonut
-                  title="Top egresos"
+                <BreakdownOutcomesDonut
                   items={toDonutItems(pyg.topExpenses)}
                   currency={currency}
-                  emptyMessage="Sin egresos en este ejercicio."
                 />
-                <BreakdownDonut
-                  title="Top ingresos"
+                <BreakdownIncomesDonut
                   items={toDonutItems(pyg.topIncome)}
                   currency={currency}
-                  emptyMessage="Sin ingresos en este ejercicio."
                 />
               </div>
             )}

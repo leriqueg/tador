@@ -30,7 +30,7 @@ P&G operativo con filtros por cuenta/entidad; misma base visual que Hogar hoy.
 
 | Role | Component / story | Class |
 |------|-------------------|-------|
-| Charts | `BreakdownDonut` ×2 · PRO/FinancesPyg (column) | canonical |
+| Charts | `BreakdownOutcomesDonut` + `BreakdownIncomesDonut` · PRO/FinancesPyg (column) | canonical |
 | Filters | Inline on page | page-only |
 
 ## Density

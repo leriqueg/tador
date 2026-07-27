@@ -6,8 +6,8 @@
 | Mode | `pro` |
 | Page module | `frontend/src/pages/FinancesPyg.tsx` (`namespace="pro"`) |
 | Shell | `AppShell mode="pro"` |
-| Audit status | debt |
-| Last audit | 2026-07-22 |
+| Audit status | aligned |
+| Last audit | 2026-07-26 |
 
 ## Purpose
 
@@ -30,25 +30,22 @@ P&G operativo con filtros por cuenta/entidad; misma base visual que Hogar hoy.
 
 | Role | Component / story | Class |
 |------|-------------------|-------|
-| Charts | `BreakdownDonut` ×2 · **PRO/FinancesPyg** (column) | canonical composition |
+| Charts | `BreakdownOutcomesDonut` + `BreakdownIncomesDonut` · PRO/FinancesPyg (column) | canonical |
 | Filters | Inline on page | page-only |
-| Product today | `SimplePieChart` grid | exception until wired |
 
 ## Density
 
 - Mobile: usable; charts in column.
-- Desktop: view story uses `max-w-3xl`; page may widen further later — charts stay column.
+- Desktop: charts in column; page chrome `max-w-2xl` (optional widen later).
 - PRO-specific: account/entity filters on page.
 
 ## Gaps / exceptions
 
-| Priority | Type | Finding | Action |
-|----------|------|---------|--------|
-| P0 | apply | Same as Hogar — wire BreakdownDonut column | See hogar-finances-pyg |
-| P1 | density | Page chrome still `max-w-2xl` | Optional widen on `md+` |
+None open for charts (inherits Hogar wire 2026-07-26).
 
 ## Audit log
 
 | Date | Result | Notes |
 |------|--------|-------|
-| 2026-07-22 | debt | Aligned to Storybook IA; waiting on product wire. |
+| 2026-07-22 | debt | Storybook composition defined. |
+| 2026-07-26 | aligned | Shared `FinancesPyg` uses BreakdownDonut column. |

@@ -1,15 +1,25 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import AppShell from '../components/layout/AppShell.tsx';
-import SimplePieChart from '../components/dashboard/SimplePieChart.tsx';
+import BreakdownIncomesDonut from '../components/charts/BreakdownIncomesDonut.tsx';
+import BreakdownOutcomesDonut from '../components/charts/BreakdownOutcomesDonut.tsx';
+import type { BreakdownDonutItem } from '../components/charts/BreakdownDonut.tsx';
 import ValidationMessage from '../components/ui/ValidationMessage.tsx';
-import { reports, accounts, entities, type PyGReport, type AccountSummary, type EntitySummary } from '../lib/api.ts';
+import { reports, accounts, entities, type PyGReport, type PyGTopAccount, type AccountSummary, type EntitySummary } from '../lib/api.ts';
 import { useAuth } from '../lib/auth.tsx';
 import { useBookGate } from '../lib/use-book-gate.ts';
 import { formatMoney, MONTH_LABELS, monthFromSeries } from '../lib/finance.ts';
 import { namespacePaths, type AppNamespace } from '../lib/namespace-paths.ts';
 
 type Scope = 'year' | 'month';
+
+function toDonutItems(accounts: PyGTopAccount[]): BreakdownDonutItem[] {
+  return accounts.map((a) => ({
+    id: a.accountId,
+    label: a.accountName,
+    value: a.accumulated,
+  }));
+}
 
 export interface FinancesPygProps {
   namespace?: AppNamespace;
@@ -276,9 +286,15 @@ export default function FinancesPyg({ namespace = 'hogar' }: FinancesPygProps) {
             </div>
 
             {scope === 'year' && pyg && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
-                <SimplePieChart title="Top 10 egresos" items={pyg.topExpenses} />
-                <SimplePieChart title="Top 10 ingresos" items={pyg.topIncome} />
+              <div className="flex flex-col gap-md">
+                <BreakdownOutcomesDonut
+                  items={toDonutItems(pyg.topExpenses)}
+                  currency={currency}
+                />
+                <BreakdownIncomesDonut
+                  items={toDonutItems(pyg.topIncome)}
+                  currency={currency}
+                />
               </div>
             )}
           </>

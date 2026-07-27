@@ -1,4 +1,4 @@
-# ADR 0006: UI catalog governance (Storybook → frontend)
+# ADR 0007: UI catalog governance (Storybook → frontend)
 
 ## Status
 

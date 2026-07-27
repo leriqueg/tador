@@ -1,10 +1,10 @@
-import { colors } from '../../design/tokens.ts';
 import { formatMoney } from '../../lib/finance.ts';
+import { colors, semanticColors } from '../../design/tokens.ts';
 
-/** Brand palette for breakdown segments (DESIGN.md / Stitch donut look). */
+/** Neutral brand segments (generic BreakdownDonut). */
 export const DONUT_SEGMENT_COLORS = [
-  colors.primary, // #006565
-  colors.secondary, // warm brown family via #8d4f11 — use stitch secondary stroke
+  colors.primary,
+  colors.secondary,
   '#77574a',
   '#96d0d0',
   '#d8c2be',
@@ -13,6 +13,34 @@ export const DONUT_SEGMENT_COLORS = [
   colors.secondaryContainer,
   colors.outline,
   colors.onSurfaceVariant,
+] as const;
+
+/** Income / positive flow — greens from brand + semantic success. */
+export const DONUT_INCOME_COLORS = [
+  semanticColors.successEmerald,
+  colors.primary,
+  colors.primaryContainer,
+  colors.inversePrimary,
+  colors.primaryFixed,
+  '#059669',
+  '#34d399',
+  '#6ee7b7',
+  colors.onPrimaryFixedVariant,
+  '#96d0d0',
+] as const;
+
+/** Expense / outflow — rose + warm reds from brand + semantic expense. */
+export const DONUT_OUTCOME_COLORS = [
+  semanticColors.expenseRose,
+  colors.error,
+  colors.tertiary,
+  colors.tertiaryContainer,
+  colors.onErrorContainer,
+  '#be123c',
+  colors.tertiaryFixedDim,
+  '#fb7185',
+  colors.secondary,
+  '#9f1239',
 ] as const;
 
 export interface BreakdownDonutItem {
@@ -28,6 +56,10 @@ export interface BreakdownDonutProps {
   emptyMessage?: string;
   /** Max legend rows (default 6). */
   legendLimit?: number;
+  /** Segment stroke/legend colors (cycles). */
+  segmentColors?: readonly string[];
+  /** Tailwind classes for title + center total. */
+  accentClassName?: string;
 }
 
 const CIRCUMFERENCE = 2 * Math.PI * 15.9; // r=15.9 in viewBox 0..36
@@ -44,7 +76,7 @@ function compactTotal(total: number, currency: string): string {
 
 /**
  * Canonical brand donut — data-driven.
- * Visual language from Stitch / former PeriodBreakdownDonut reference.
+ * Prefer BreakdownIncomesDonut / BreakdownOutcomesDonut on P&G.
  */
 export default function BreakdownDonut({
   title,
@@ -52,14 +84,17 @@ export default function BreakdownDonut({
   currency = 'USD',
   emptyMessage = 'Sin datos todavía.',
   legendLimit = 6,
+  segmentColors = DONUT_SEGMENT_COLORS,
+  accentClassName = 'text-primary',
 }: BreakdownDonutProps) {
   const positive = items.filter((i) => i.value > 0);
   const total = positive.reduce((s, i) => s + i.value, 0);
+  const palette = segmentColors.length > 0 ? segmentColors : DONUT_SEGMENT_COLORS;
 
   if (positive.length === 0 || total <= 0) {
     return (
       <div className="rounded-xl border border-outline-variant/30 bg-surface-container-lowest p-md">
-        <h3 className="text-label-md font-bold text-primary mb-sm">{title}</h3>
+        <h3 className={`text-label-md font-bold mb-sm ${accentClassName}`}>{title}</h3>
         <p className="text-body-md text-on-surface-variant">{emptyMessage}</p>
       </div>
     );
@@ -74,7 +109,7 @@ export default function BreakdownDonut({
       pct,
       dasharray: `${length} ${CIRCUMFERENCE - length}`,
       dashoffset: -offset,
-      color: DONUT_SEGMENT_COLORS[i % DONUT_SEGMENT_COLORS.length],
+      color: palette[i % palette.length]!,
     };
     offset += length;
     return seg;
@@ -84,7 +119,7 @@ export default function BreakdownDonut({
 
   return (
     <div className="rounded-xl border border-outline-variant/30 bg-surface-container-lowest p-md flex flex-col">
-      <h3 className="text-label-md font-bold text-primary mb-lg">{title}</h3>
+      <h3 className={`text-label-md font-bold mb-lg ${accentClassName}`}>{title}</h3>
       <div className="flex flex-col items-center">
         <div className="relative w-32 h-32 flex items-center justify-center">
           <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36" aria-hidden="true">
@@ -104,7 +139,9 @@ export default function BreakdownDonut({
           </svg>
           <div className="absolute flex flex-col items-center">
             <span className="text-[9px] text-text-muted uppercase tracking-wide">Total</span>
-            <span className="font-bold text-primary tabular-nums">{compactTotal(total, currency)}</span>
+            <span className={`font-bold tabular-nums ${accentClassName}`}>
+              {compactTotal(total, currency)}
+            </span>
           </div>
         </div>
         <ul className="grid grid-cols-2 gap-x-6 gap-y-1 mt-6 w-full">

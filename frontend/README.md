@@ -20,7 +20,7 @@ The UI follows the TADOR Finanzas design system:
 | **UI exceptions** | [`docs/ui-exceptions.md`](docs/ui-exceptions.md) |
 | **Component inventory** (thin index → stories) | [`docs/component-inventory.md`](docs/component-inventory.md) |
 | **Hogar/PRO density rules** | [`../specs/foundation/modos-hogar-pro.md`](../specs/foundation/modos-hogar-pro.md), `.cursor/rules/hogar-pro-ui-density.mdc` |
-| **Governance** | ADR 0006 · agents in [`../AGENTS.md`](../AGENTS.md) |
+| **Governance** | ADR 0007 · agents in [`../AGENTS.md`](../AGENTS.md) |
 | **Sprint 06 route ↔ API map** | [`specs/006-frontend-hogar/inventory-vistas-endpoints.md`](../specs/006-frontend-hogar/inventory-vistas-endpoints.md) |
 
 ### Typography

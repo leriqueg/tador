@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import BreakdownDonut from '../components/charts/BreakdownDonut.tsx';
+import BreakdownIncomesDonut from '../components/charts/BreakdownIncomesDonut.tsx';
+import BreakdownOutcomesDonut from '../components/charts/BreakdownOutcomesDonut.tsx';
 
 const meta = {
   title: 'PRO/FinancesPyg',
@@ -19,16 +20,16 @@ const TOP_INCOME = [
   { id: 'i2', label: 'Honorarios', value: 2100 },
 ];
 
-/** Same chart composition as Hogar; PRO page may widen chrome later — charts stay column. */
+/** Same typed chart composition as Hogar; PRO filters live on the page. */
 export const TopIncomeAndExpenses: StoryObj = {
   name: 'Top egresos + ingresos (column)',
   render: () => (
     <div className="max-w-3xl mx-auto flex flex-col gap-md">
       <p className="text-label-sm text-on-surface-variant">
-        Composición de vista · ruta `/pro/finances/pyg` · filtros PRO viven en la página
+        Composición de vista · ruta `/pro/finances/pyg` · Outcomes rose · Incomes green
       </p>
-      <BreakdownDonut title="Top egresos" items={TOP_EXPENSES} />
-      <BreakdownDonut title="Top ingresos" items={TOP_INCOME} />
+      <BreakdownOutcomesDonut items={TOP_EXPENSES} />
+      <BreakdownIncomesDonut items={TOP_INCOME} />
     </div>
   ),
 };

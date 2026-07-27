@@ -1,7 +1,7 @@
 # Storybook information architecture
 
 **Última actualización:** 2026-07-22  
-**Policy:** [ADR 0006](../../docs/adr/0006-ui-catalog-governance.md)
+**Policy:** [ADR 0007](../../docs/adr/0007-ui-catalog-governance.md)
 
 Two layers in the sidebar:
 
@@ -32,7 +32,7 @@ Experimental/Pacho
 
 ## View compositions
 
-- `Hogar/FinancesPyg` and `PRO/FinancesPyg`: **two** donuts — Top egresos + Top ingresos — stacked in a **column** (not a generic Ingresos/Gastos toggle).
+- `Hogar/FinancesPyg` and `PRO/FinancesPyg`: **two typed** donuts — `BreakdownOutcomesDonut` (rose) + `BreakdownIncomesDonut` (green) — stacked in a **column**.
 
 ## Related
 

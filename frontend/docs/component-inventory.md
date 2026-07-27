@@ -2,7 +2,7 @@
 
 **Última actualización:** 2026-07-22
 
-Thin index. **IA:** [`storybook-ia.md`](./storybook-ia.md). **Policy:** [ADR 0006](../../docs/adr/0006-ui-catalog-governance.md).
+Thin index. **IA:** [`storybook-ia.md`](./storybook-ia.md). **Policy:** [ADR 0007](../../docs/adr/0007-ui-catalog-governance.md).
 
 | Layer | Path |
 |-------|------|
@@ -40,9 +40,10 @@ Thin index. **IA:** [`storybook-ia.md`](./storybook-ia.md). **Policy:** [ADR 000
 
 | Component | Path | Story | Class | Status |
 |-----------|------|-------|-------|--------|
-| **BreakdownDonut** | `charts/BreakdownDonut.tsx` | Charts/Donut | **canonical** | exists (not wired to P&G yet) |
+| **BreakdownDonut** | `charts/BreakdownDonut.tsx` | Charts/Donut | **canonical** (base) | exists |
+| **BreakdownIncomesDonut** | `charts/BreakdownIncomesDonut.tsx` | Charts/Donut → Incomes, Hogar\|PRO/FinancesPyg | **canonical** | exists · wired (green) |
+| **BreakdownOutcomesDonut** | `charts/BreakdownOutcomesDonut.tsx` | Charts/Donut → Outcomes, Hogar\|PRO/FinancesPyg | **canonical** | exists · wired (rose) |
 | PeriodBreakdownDonut / MonthlyEvolutionChart | `dataviz/DataViz.tsx` | Charts/Reference | **reference** | exists |
-| SimplePieChart | `dashboard/SimplePieChart.tsx` | — (product only) | page-only → replace | debt |
 
 ---
 
@@ -74,9 +75,8 @@ Thin index. **IA:** [`storybook-ia.md`](./storybook-ia.md). **Policy:** [ADR 000
 
 ## Open debt
 
-1. Wire `BreakdownDonut` into `FinancesPyg` (column); retire `SimplePieChart` usage — see `ui-exceptions.md`.
-2. PRO historial density (`Patterns/RecentEntries`).
-3. Optional: data-driven bar chart to replace inline P&G bars / reference MonthlyEvolution.
+1. PRO historial density (`Patterns/RecentEntries`).
+2. Optional: data-driven bar chart to replace inline P&G bars / reference MonthlyEvolution.
 
 ## Agent checklist
 

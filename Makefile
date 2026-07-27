@@ -2,6 +2,9 @@
 # ────────────────────────────────────────────────────────
 # Default targets = desarrollo local (compose.yaml).
 # staging-* = VPS / RSH (compose.staging.yaml). Ver docs/deploy/rsh-vps-app-example/.
+# Bare `make` → help (never side effects like db-up).
+
+.DEFAULT_GOAL := help
 
 COMPOSE = docker compose
 # E2E stack: same services, but backend points at tador_test (isolated from tador_dev).

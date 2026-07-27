@@ -5,7 +5,7 @@
 
 | Date | View / surface | Component in product | Canonical / reference story | Why allowed | Exit criteria |
 |------|----------------|----------------------|-----------------------------|-------------|---------------|
-| 2026-07-22 | `/pro/finances/apuntes` | `FinancesApuntes` + `RecentEntriesList` | Patterns/RecentEntries | Shared Hogar-width layout via `namespace` | PRO desktop dense historial |
+| 2026-07-22 | `/pro/finances/apuntes` | `FinancesApuntes` (`max-w-lg`) + `RecentEntriesList` | Patterns/RecentEntries (Hogar width); target: PRO/FinancesApuntes dense composition | Shared page via `namespace`; mobile OK, desktop clones Hogar | PRO desktop: wider layout + dense rows/table; view story then wire; clear this row |
 
 ## Rules of thumb
 

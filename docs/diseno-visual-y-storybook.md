@@ -88,7 +88,7 @@ cambiar la identidad visual sin editar cada pantalla por separado.
 Agentes: `ui-design-governance` (auditoría / polish Storybook→front),
 `ui-storybook-sync` (drift). Densidad Hogar/PRO:
 [`modos-hogar-pro.md`](../specs/foundation/modos-hogar-pro.md) y
-`.cursor/rules/hogar-pro-ui-density.mdc`.
+`frontend/docs/hogar-pro-density.md`.
 
 La extracción sigue una regla práctica:
 
@@ -121,7 +121,7 @@ controles, fondos de marca y `MemoryRouter` para componentes con navegación.
 
 Grupos de stories (IA 2026-07-22 — ver [`frontend/docs/storybook-ia.md`](../frontend/docs/storybook-ia.md)):
 
-- Catálogo: `Foundations`, `Primitives`, `Patterns`, `Charts/Donut` (canonical), `Charts/Reference`;
+- Catálogo: `Foundations`, `Primitives`, `Patterns`, `Charts/Donut`, `Charts/Bars`, `Charts/Reference`;
 - Vistas: `Hogar/*`, `PRO/*`, `Marketing/*`;
 - `Experimental/Pacho` (reference / post-MVP).
 

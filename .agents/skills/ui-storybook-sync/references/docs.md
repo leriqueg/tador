@@ -4,7 +4,7 @@
 |---------|------|
 | Policy ADR | `docs/adr/0007-ui-catalog-governance.md` |
 | Catalog rule | `.cursor/rules/ui-catalog-governance.mdc` |
-| Density rule | `.cursor/rules/hogar-pro-ui-density.mdc` |
+| Density (governance) | `frontend/docs/hogar-pro-density.md` |
 | Mode intent | `specs/foundation/modos-hogar-pro.md` |
 | Route map | `frontend/docs/route-map.md` |
 | Storybook IA | `frontend/docs/storybook-ia.md` |

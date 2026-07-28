@@ -17,7 +17,8 @@ Two layers in the sidebar:
 Foundations/Branding
 Primitives/Inputs
 Patterns/Shells | DashboardWidgets | AccountBanking | RecentEntries
-Charts/Donut              ← canonical BreakdownDonut
+Charts/Donut              ← canonical BreakdownDonut (+ Incomes/Outcomes)
+Charts/Bars               ← HogarIncomeExpenseBars + ProIncomeExpenseBars
 Charts/Reference          ← Stitch mocks (do not wire)
 Hogar/ShellAndPanels | QuickAdd | FinancesPyg
 PRO/EntryBuilder | ManualEntry | AccountsTreePro | FinancesPyg | Analysis
@@ -32,10 +33,12 @@ Experimental/Pacho
 
 ## View compositions
 
-- `Hogar/FinancesPyg` and `PRO/FinancesPyg`: **two typed** donuts — `BreakdownOutcomesDonut` (rose) + `BreakdownIncomesDonut` (green) — stacked in a **column**.
+- `Hogar/FinancesPyg`: `HogarIncomeExpenseBars` + typed donuts (rose/green) in a **column**.
+- `PRO/FinancesPyg`: `ProIncomeExpenseBars` (same bars until net line) + same donuts; filters on page.
 
 ## Related
 
+- Density: [`hogar-pro-density.md`](./hogar-pro-density.md)
 - Inventory: [`component-inventory.md`](./component-inventory.md)
 - Views: [`views/index.md`](./views/index.md)
 - Exceptions: [`ui-exceptions.md`](./ui-exceptions.md)

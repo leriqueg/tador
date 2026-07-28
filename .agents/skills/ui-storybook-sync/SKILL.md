@@ -19,7 +19,7 @@ Use for UI audits, Storybook↔frontend alignment, view-doc updates, exceptions,
 - Prefer reuse of canonical components. Page-only composition OK in `pages/`. New reusable UI ships with a story in the same work unit.
 - **Promote at 3 uses** (or Hogar+PRO): extract to `components/` + Storybook + inventory.
 - Exceptions only via `frontend/docs/ui-exceptions.md` (not per-exception ADRs).
-- Density: `.cursor/rules/hogar-pro-ui-density.mdc`.
+- Density: `frontend/docs/hogar-pro-density.md`.
 
 ## Decision Gates
 

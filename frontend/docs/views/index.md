@@ -2,6 +2,7 @@
 
 Per-route UI contracts for TADOR. **Policy:** [ADR 0007](../../../docs/adr/0007-ui-catalog-governance.md).  
 **Routes:** [`../route-map.md`](../route-map.md). **Exceptions:** [`../ui-exceptions.md`](../ui-exceptions.md).  
+**Density:** [`../hogar-pro-density.md`](../hogar-pro-density.md).  
 **Template:** [`_TEMPLATE.md`](./_TEMPLATE.md).
 
 Audits (agent `ui-design-governance`) walk this table view-by-view.

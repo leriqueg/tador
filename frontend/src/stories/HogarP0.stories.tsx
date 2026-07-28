@@ -8,7 +8,7 @@ import PositionPanel from '../components/dashboard/PositionPanel.tsx';
 import ApunteForm, { ApunteConfirm } from '../components/entries/ApunteForm.tsx';
 
 const meta = {
-  title: 'Hogar/P0 Foundations',
+  title: 'Hogar/ShellAndPanels',
   parameters: { layout: 'padded' },
 } satisfies Meta;
 
@@ -30,8 +30,20 @@ export const ValidationMessages: StoryObj = {
 
 export const Shell: StoryObj = {
   render: () => (
-    <AppShell activePath="/hogar/dashboard" userLabel="diego@tador.app">
+    <AppShell mode="hogar" activePath="/hogar/dashboard" userLabel="diego@tador.app">
       <p className="text-body-md text-on-surface-variant">Contenido del resumen (placeholder).</p>
+    </AppShell>
+  ),
+  parameters: { layout: 'fullscreen' },
+};
+
+export const ShellPro: StoryObj = {
+  name: 'Shell PRO (nav + analysis)',
+  render: () => (
+    <AppShell mode="pro" activePath="/pro/dashboard" userLabel="diego@tador.app">
+      <p className="text-body-md text-on-surface-variant">
+        Shell PRO — misma estructura; densidad de listados/reportes es deuda aparte.
+      </p>
     </AppShell>
   ),
   parameters: { layout: 'fullscreen' },

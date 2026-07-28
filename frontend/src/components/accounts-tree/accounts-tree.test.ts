@@ -5,6 +5,8 @@ import {
   friendlyAccountCreateError,
   listAllowedCreateMothers,
   manualCreateAccountTypes,
+  mothersForAccountType,
+  preferredMotherCodigo,
   resolveParentCodigo,
 } from './accounts-tree.ts';
 import type { AccountSummary, ChartGlobalNode } from '../../lib/api.ts';
@@ -96,6 +98,33 @@ describe('accounts-tree — create under mother (US4, T023)', () => {
   it('lists non-postable chart nodes as allowed mothers', () => {
     const mothers = listAllowedCreateMothers(chart);
     expect(mothers.map((m) => m.codigo)).toEqual(['11990000', '61000000']);
+  });
+
+  it('filters mothers by account class (income 4xxx / expense 6xxx)', () => {
+    const chart: ChartGlobalNode[] = [
+      chartNode({ id: 'g-act', codigo: '11110000', nombre: 'Efectivo', esPostable: false }),
+      chartNode({ id: 'g-ing', codigo: '41010000', nombre: 'Ingresos', esPostable: false }),
+      chartNode({ id: 'g-exp', codigo: '61000000', nombre: 'Gastos', esPostable: false }),
+    ];
+    expect(mothersForAccountType(chart, 'incomeCategory').map((m) => m.codigo)).toEqual([
+      '41010000',
+    ]);
+    expect(mothersForAccountType(chart, 'expenseCategory').map((m) => m.codigo)).toEqual([
+      '61000000',
+    ]);
+  });
+
+  it('prefers operational income/expense groups when available', () => {
+    const mothers = [
+      chartNode({ id: 'a', codigo: '41000000', nombre: 'Ingresos por trabajo' }),
+      chartNode({ id: 'b', codigo: '41010000', nombre: 'Sueldos' }),
+    ];
+    expect(preferredMotherCodigo(mothers, 'incomeCategory')).toBe('41010000');
+  });
+
+  it('lists income and expense before wallet/bridge in create types', () => {
+    expect(manualCreateAccountTypes()[0]).toBe('incomeCategory');
+    expect(manualCreateAccountTypes()).toContain('expenseCategory');
   });
 
   it('excludes bank/card from manual create types', () => {

@@ -1,0 +1,83 @@
+# TADOR — stack mínimo para migración / demo seed
+# Solo PostgreSQL + backend. Aislado del compose.yaml de desarrollo.
+#
+# Uso (desde la raíz del repo):
+#   docker compose -f migrations/docker-compose.yml up -d --build
+#   docker compose -f migrations/docker-compose.yml run --rm backend npm run db:migrate
+#   docker compose -f migrations/docker-compose.yml run --rm backend npm run seed:catalogos
+#   docker compose -f migrations/docker-compose.yml down -v   # borra el volumen de migrate
+#
+# Puertos por defecto distintos del stack principal (5432 / 3000)
+# para poder correr ambos en paralelo si hace falta.
+
+name: tador-migrate
+
+services:
+  postgres:
+    image: postgres:18.4-alpine
+    container_name: tador-migrate-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${MIGRATE_POSTGRES_DB:-tador_migrate}
+      POSTGRES_USER: ${MIGRATE_POSTGRES_USER:-tador}
+      POSTGRES_PASSWORD: ${MIGRATE_POSTGRES_PASSWORD:-tador_migrate_password}
+    ports:
+      - "${MIGRATE_POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - migrate_postgres_data:/var/lib/postgresql
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+      target: development
+    container_name: tador-migrate-backend
+    restart: unless-stopped
+    ports:
+      - "${MIGRATE_BACKEND_PORT:-3001}:3000"
+      - "${MIGRATE_STUDIO_PORT:-5556}:5555"
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      DEMO_SEED_ENABLED: ${DEMO_SEED_ENABLED:-true}
+      POSTGRES_USER: ${MIGRATE_POSTGRES_USER:-tador}
+      POSTGRES_PASSWORD: ${MIGRATE_POSTGRES_PASSWORD:-tador_migrate_password}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: ${MIGRATE_POSTGRES_DB:-tador_migrate}
+      SESSION_SECRET: ${SESSION_SECRET:-migrate-dev-secret}
+      PORT: 3000
+      HOST: 0.0.0.0
+      CHOKIDAR_USEPOLLING: "true"
+    volumes:
+      - ../backend:/app
+      - /app/node_modules
+      # CSV / artefactos de migración legibles desde el contenedor
+      - ./:/migrations:ro
+      - ../specs/foundation/plan-de-cuentas:/plan-de-cuentas:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:3000/health').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 18
+      start_period: 20s
+
+volumes:
+  migrate_postgres_data:

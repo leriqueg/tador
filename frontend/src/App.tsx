@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './lib/auth.tsx';
 import { I18nProvider } from './i18n/I18nProvider.tsx';
+import { routerBasename } from './lib/router-basename.ts';
 import ModeNamespaceGuard from './components/routing/ModeNamespaceGuard.tsx';
 import Landing from './pages/Landing.tsx';
 import Login from './pages/Login.tsx';
@@ -35,7 +36,7 @@ export default function App() {
   return (
     <AuthProvider>
       <I18nProvider>
-        <BrowserRouter>
+        <BrowserRouter basename={routerBasename()}>
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />

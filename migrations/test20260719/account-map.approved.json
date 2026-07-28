@@ -1,0 +1,698 @@
+{
+  "schemaVersion": "0.1.0",
+  "status": "approved_provisional",
+  "source": "migrations/test20260719/test20260719.csv",
+  "plan": "specs/foundation/plan-de-cuentas/plan-de-cuentas-final.csv",
+  "summary": {
+    "accounts": 50,
+    "bal": 28,
+    "pyg": 22,
+    "warning": "Provisional approval for demo/test migration. Review BAL names and PYG overrides."
+  },
+  "accounts": [
+    {
+      "legacyCodigo": "11110004",
+      "role": "bal",
+      "status": "approved_provisional",
+      "resolution": {
+        "kind": "cuenta_usuario",
+        "nombre": "Cuenta nomina / efectivo (11110004)",
+        "parentCodigo": "11110000",
+        "tipoCuenta": "wallet",
+        "entidadTipo": "wallet_platform",
+        "entidadNombre": "Cuenta nomina / efectivo (11110004)",
+        "clasificacion": "asset",
+        "legacyMadre": "11110000"
+      }
+    },
+    {
+      "legacyCodigo": "11120002",
+      "role": "bal",
+      "status": "approved_provisional",
+      "resolution": {
+        "kind": "cuenta_usuario",
+        "nombre": "Banco Romero / Ahorros (11120002)",
+        "parentCodigo": "11120000",
+        "tipoCuenta": "bank",
+        "entidadTipo": "bank",
+        "entidadNombre": "Banco Romero / Ahorros (11120002)",
+        "clasificacion": "asset",
+        "legacyMadre": "11120000"
+      }
+    },
+    {
+      "legacyCodigo": "11120005",
+      "role": "bal",
+      "status": "approved_provisional",
+      "resolution": {
+        "kind": "cuenta_usuario",
+        "nombre": "Banco JEP / Ahorros (11120005)",
+        "parentCodigo": "11120000",
+        "tipoCuenta": "bank",
+        "entidadTipo": "bank",
+        "entidadNombre": "Banco JEP / Ahorros (11120005)",
+        "clasificacion": "asset",
+        "legacyMadre": "11120000"
+      }
+    },
+    {
+      "legacyCodigo": "11120008",
+      "role": "bal",
+      "status": "approved_provisional",
+      "resolution": {
+        "kind": "cuenta_usuario",
+        "nombre": "Banco efectivo bridge (11120008)",
+        "parentCodigo": "11120000",
+        "tipoCuenta": "bank",
+        "entidadTipo": "bank",
+        "entidadNombre": "Banco efectivo bridge (11120008)",
+        "clasificacion": "asset",
+        "legacyMadre": "11120000"
+      }
+    },
+    {
+      "legacyCodigo": "11120012",
+      "role": "bal",
+      "status": "approved_provisional",
+      "resolution": {
+        "kind": "cuenta_usuario",
+        "nombre": "Banco MRomero (11120012)",
+        "parentCodigo": "11120000",
+        "tipoCuenta": "bank",
+        "entidadTipo": "bank",
+        "entidadNombre": "Banco MRomero (11120012)",
+        "clasificacion": "asset",
+        "legacyMadre": "11120000"
+      }
+    },
+    {
+      "legacyCodigo": "11120013",
+      "role": "bal",
+      "status": "approved_provisional",
+      "resolution": {
+        "kind": "cuenta_usuario",
+        "nombre": "Banco Bolivariano AH (11120013)",
+        "parentCodigo": "11120000",
+        "tipoCuenta": "bank",
+        "entidadTipo": "bank",
+        "entidadNombre": "Banco Bolivariano AH (11120013)",
+        "clasificacion": "asset",
+        "legacyMadre": "11120000"
+      }
+    },
+    {
+      "legacyCodigo": "11130001",
+      "role": "bal",
+      "status": "approved_provisional",
+      "resolution": {
+        "kind": "cuenta_usuario",
+        "nombre": "Caja efectivo (11130001)",
+        "parentCodigo": "11110000",
+        "tipoCuenta": "wallet",
+        "entidadTipo": null,
+        "entidadNombre": null,
+        "clasificacion": "asset",
+        "legacyMadre": "11130000"
+      }
+    },
+    {
+      "legacyCodigo": "11220003",
+      "role": "bal",
+      "status": "approved_provisional",
+      "resolution": {
+        "kind": "cuenta_usuario",
+        "nombre": "Inversion HAPI (11220003)",
+        "parentCodigo": "11220000",
+        "tipoCuenta": "wallet",
+        "entidadTipo": "bank",
+        "entidadNombre": "Inversion HAPI (11220003)",
+        "clasificacion": "asset",
+        "legacyMadre": "11220000"
+      }
+    },
+    {
+      "legacyCodigo": "11320005",
+      "role": "bal",
+      "status": "approved_provisional",
+      "resolution": {
+        "kind": "cuenta_usuario",
+        "nombre": "Modista",
+        "parentCodigo": "11320000",
+        "tipoCuenta": "wallet",
+        "entidadTipo": "person",
+        "entidadNombre": "Modista",
+        "clasificacion": "asset",
+        "legacyMadre": "11320000"
+      }
+    },
+    {
+      "legacyCodigo": "11320009",
+      "role": "bal",
+      "status": "approved_provisional",
+      "resolution": {
+        "kind": "cuenta_usuario",
+        "nombre": "Daisy",
+        "parentCodigo": "11320000",
+        "tipoCuenta": "wallet",
+        "entidadTipo": "person",
+        "entidadNombre": "Daisy",
+        "clasificacion": "asset",
+        "legacyMadre": "11320000"
+      }
+    },
+    {
+      "legacyCodigo": "11320010",
+      "role": "bal",
+      "status": "approved_provisional",
+      "resolution": {
+        "kind": "cuenta_usuario",
+        "nombre": "Tia Toya",
+        "parentCodigo": "11320000",
+        "tipoCuenta": "wallet",
+        "entidadTipo": "person",
+        "entidadNombre": "Tia Toya",
+        "clasificacion": "asset",
+        "legacyMadre": "11320000"
+      }
+    },
+    {
+      "legacyCodigo": "11320012",
+      "role": "bal",
+      "status": "approved_provisional",
+      "resolution": {
+        "kind": "cuenta_usuario",
+        "nombre": "Por cobrar / billetera bridge (11320012)",
+        "parentCodigo": "11320000",
+        "tipoCuenta": "wallet",
+        "entidadTipo": "person",
+        "entidadNombre": "Por cobrar / billetera bridge (11320012)",
+        "clasificacion": "asset",
+        "legacyMadre": "11320000"
+      }
+    },
+    {
+      "legacyCodigo": "11320013",
+      "role": "bal",
+      "status": "approved_provisional",
+      "resolution": {
+        "kind": "cuenta_usuario",
+        "nombre": "Por cobrar MercadoPago (11320013)",
+        "parentCodigo": "11320000",
+        "tipoCuenta": "wallet",
+        "entidadTipo": "person",
+        "entidadNombre": "Por cobrar MercadoPago (11320013)",
+        "clasificacion": "asset",
+        "legacyMadre": "11320000"
+      }
+    },
+    {
+      "legacyCodigo": "21300001",
+      "role": "bal",
+      "status": "approved_provisional",
+      "resolution": {
+        "kind": "cuenta_usuario",
+        "nombre": "CxP Alquiler / Diana (21300001)",
+        "parentCodigo": "21300000",
+        "tipoCuenta": "card",
+        "entidadTipo": "person",
+        "entidadNombre": "CxP Alquiler / Diana (21300001)",
+        "clasificacion": "liability",
+        "legacyMadre": "21300000"
+      }
+    },
+    {
+      "legacyCodigo": "21300011",
+      "role": "bal",
+      "status": "approved_provisional",
+      "resolution": {
+        "kind": "cuenta_usuario",
+        "nombre": "CxP Santi / envios (21300011)",
+        "parentCodigo": "21300000",
+        "tipoCuenta": "card",
+        "entidadTipo": "person",
+        "entidadNombre": "CxP Santi / envios (21300011)",
+        "clasificacion": "liability",
+        "legacyMadre": "21300000"
+      }
+    },
+    {
+      "legacyCodigo": "21300013",
+      "role": "bal",
+      "status": "approved_provisional",
+      "resolution": {
+        "kind": "cuenta_usuario",
+        "nombre": "Prestamo 566505900 (21300013)",
+        "parentCodigo": "21300000",
+        "tipoCuenta": "card",
+        "entidadTipo": "person",
+        "entidadNombre": "Prestamo 566505900 (21300013)",
+        "clasificacion": "liability",
+        "legacyMadre": "21300000"
+      }
+    },
+    {
+      "legacyCodigo": "21300017",
+      "role": "bal",
+      "status": "approved_provisional",
+      "resolution": {
+        "kind": "cuenta_usuario",
+        "nombre": "Pension Alimenticia por pagar",
+        "parentCodigo": "21300000",
+        "tipoCuenta": "card",
+        "entidadTipo": "person",
+        "entidadNombre": "Pension Alimenticia por pagar",
+        "clasificacion": "liability",
+        "legacyMadre": "21300000"
+      }
+    },
+    {
+      "legacyCodigo": "21310002",
+      "role": "bal",
+      "status": "approved_provisional",
+      "resolution": {
+        "kind": "cuenta_usuario",
+        "nombre": "TC mora 477045 (21310002)",
+        "parentCodigo": "21200000",
+        "tipoCuenta": "card",
+        "entidadTipo": "card_issuer",
+        "entidadNombre": "TC mora 477045 (21310002)",
+        "clasificacion": "liability",
+        "legacyMadre": "21310000"
+      }
+    },
+    {
+      "legacyCodigo": "21310003",
+      "role": "bal",
+      "status": "approved_provisional",
+      "resolution": {
+        "kind": "cuenta_usuario",
+        "nombre": "TC Luis Erique (21310003)",
+        "parentCodigo": "21200000",
+        "tipoCuenta": "card",
+        "entidadTipo": "card_issuer",
+        "entidadNombre": "TC Luis Erique (21310003)",
+        "clasificacion": "liability",
+        "legacyMadre": "21310000"
+      }
+    },
+    {
+      "legacyCodigo": "21310004",
+      "role": "bal",
+      "status": "approved_provisional",
+      "resolution": {
+        "kind": "cuenta_usuario",
+        "nombre": "TC Bankcard Mastercard (21310004)",
+        "parentCodigo": "21200000",
+        "tipoCuenta": "card",
+        "entidadTipo": "card_issuer",
+        "entidadNombre": "TC Bankcard Mastercard (21310004)",
+        "clasificacion": "liability",
+        "legacyMadre": "21310000"
+      }
+    },
+    {
+      "legacyCodigo": "21310005",
+      "role": "bal",
+      "status": "approved_provisional",
+      "resolution": {
+        "kind": "cuenta_usuario",
+        "nombre": "TC Checkpoint (21310005)",
+        "parentCodigo": "21200000",
+        "tipoCuenta": "card",
+        "entidadTipo": "card_issuer",
+        "entidadNombre": "TC Checkpoint (21310005)",
+        "clasificacion": "liability",
+        "legacyMadre": "21310000"
+      }
+    },
+    {
+      "legacyCodigo": "21310006",
+      "role": "bal",
+      "status": "approved_provisional",
+      "resolution": {
+        "kind": "cuenta_usuario",
+        "nombre": "TC Erique Guajala (21310006)",
+        "parentCodigo": "21200000",
+        "tipoCuenta": "card",
+        "entidadTipo": "card_issuer",
+        "entidadNombre": "TC Erique Guajala (21310006)",
+        "clasificacion": "liability",
+        "legacyMadre": "21310000"
+      }
+    },
+    {
+      "legacyCodigo": "21310007",
+      "role": "bal",
+      "status": "approved_provisional",
+      "resolution": {
+        "kind": "cuenta_usuario",
+        "nombre": "TC Visa Bankcard (21310007)",
+        "parentCodigo": "21200000",
+        "tipoCuenta": "card",
+        "entidadTipo": "card_issuer",
+        "entidadNombre": "TC Visa Bankcard (21310007)",
+        "clasificacion": "liability",
+        "legacyMadre": "21310000"
+      }
+    },
+    {
+      "legacyCodigo": "21400012",
+      "role": "bal",
+      "status": "approved_provisional",
+      "resolution": {
+        "kind": "cuenta_usuario",
+        "nombre": "Puente bypass 21400012",
+        "parentCodigo": "21110000",
+        "tipoCuenta": "bridge",
+        "entidadTipo": null,
+        "entidadNombre": null,
+        "clasificacion": "liability",
+        "legacyMadre": "21400000"
+      }
+    },
+    {
+      "legacyCodigo": "21400013",
+      "role": "bal",
+      "status": "approved_provisional",
+      "resolution": {
+        "kind": "cuenta_usuario",
+        "nombre": "Puente bypass 21400013",
+        "parentCodigo": "21110000",
+        "tipoCuenta": "bridge",
+        "entidadTipo": null,
+        "entidadNombre": null,
+        "clasificacion": "liability",
+        "legacyMadre": "21400000"
+      }
+    },
+    {
+      "legacyCodigo": "21400014",
+      "role": "bal",
+      "status": "approved_provisional",
+      "resolution": {
+        "kind": "cuenta_usuario",
+        "nombre": "Puente bypass 21400014",
+        "parentCodigo": "21110000",
+        "tipoCuenta": "bridge",
+        "entidadTipo": null,
+        "entidadNombre": null,
+        "clasificacion": "liability",
+        "legacyMadre": "21400000"
+      }
+    },
+    {
+      "legacyCodigo": "22130001",
+      "role": "bal",
+      "status": "approved_provisional",
+      "resolution": {
+        "kind": "cuenta_usuario",
+        "nombre": "Prestamo Quirografario 15230273",
+        "parentCodigo": "21310000",
+        "tipoCuenta": "card",
+        "entidadTipo": "bank",
+        "entidadNombre": "Prestamo Quirografario 15230273",
+        "clasificacion": "liability",
+        "legacyMadre": "22130000"
+      }
+    },
+    {
+      "legacyCodigo": "22130004",
+      "role": "bal",
+      "status": "approved_provisional",
+      "resolution": {
+        "kind": "cuenta_usuario",
+        "nombre": "Prestamo 066290407224",
+        "parentCodigo": "21310000",
+        "tipoCuenta": "card",
+        "entidadTipo": "bank",
+        "entidadNombre": "Prestamo 066290407224",
+        "clasificacion": "liability",
+        "legacyMadre": "22130000"
+      }
+    },
+    {
+      "legacyCodigo": "41000001",
+      "role": "pyg",
+      "status": "approved",
+      "resolution": {
+        "kind": "cuenta_global",
+        "codigo": "41010001",
+        "nombre": "Sueldo / Salario",
+        "clasificacion": "income"
+      },
+      "mapSource": "legacyCodigo"
+    },
+    {
+      "legacyCodigo": "41100003",
+      "role": "pyg",
+      "status": "approved",
+      "resolution": {
+        "kind": "cuenta_global",
+        "codigo": "41120001",
+        "nombre": "Intereses",
+        "clasificacion": "income"
+      },
+      "mapSource": "legacyCodigo"
+    },
+    {
+      "legacyCodigo": "61115001",
+      "role": "pyg",
+      "status": "approved",
+      "resolution": {
+        "kind": "cuenta_global",
+        "codigo": "61110001",
+        "nombre": "Alquiler / Arriendo de vivienda",
+        "clasificacion": "expense"
+      },
+      "mapSource": "legacyCodigo"
+    },
+    {
+      "legacyCodigo": "61150008",
+      "role": "pyg",
+      "status": "approved",
+      "resolution": {
+        "kind": "cuenta_global",
+        "codigo": "61140006",
+        "nombre": "Otros Gastos en Salud",
+        "clasificacion": "expense"
+      },
+      "mapSource": "legacyCodigo"
+    },
+    {
+      "legacyCodigo": "61213002",
+      "role": "pyg",
+      "status": "approved_provisional",
+      "resolution": {
+        "kind": "cuenta_global",
+        "codigo": "61180009",
+        "nombre": "Regalos",
+        "clasificacion": "expense"
+      },
+      "mapSource": "override"
+    },
+    {
+      "legacyCodigo": "61240001",
+      "role": "pyg",
+      "status": "approved",
+      "resolution": {
+        "kind": "cuenta_global",
+        "codigo": "61130001",
+        "nombre": "Supermercado / Tiendas",
+        "clasificacion": "expense"
+      },
+      "mapSource": "legacyCodigo"
+    },
+    {
+      "legacyCodigo": "61240002",
+      "role": "pyg",
+      "status": "approved",
+      "resolution": {
+        "kind": "cuenta_global",
+        "codigo": "61180002",
+        "nombre": "Restaurantes / Bares / Casinos",
+        "clasificacion": "expense"
+      },
+      "mapSource": "legacyCodigo"
+    },
+    {
+      "legacyCodigo": "61240004",
+      "role": "pyg",
+      "status": "approved",
+      "resolution": {
+        "kind": "cuenta_global",
+        "codigo": "61130003",
+        "nombre": "Desayunos y Almuerzos",
+        "clasificacion": "expense"
+      },
+      "mapSource": "legacyCodigo"
+    },
+    {
+      "legacyCodigo": "61260001",
+      "role": "pyg",
+      "status": "approved_provisional",
+      "resolution": {
+        "kind": "cuenta_global",
+        "codigo": "61160005",
+        "nombre": "Transporte Public / Metro / Tren",
+        "clasificacion": "expense"
+      },
+      "mapSource": "override"
+    },
+    {
+      "legacyCodigo": "61260002",
+      "role": "pyg",
+      "status": "approved",
+      "resolution": {
+        "kind": "cuenta_global",
+        "codigo": "61160001",
+        "nombre": "Taxi",
+        "clasificacion": "expense"
+      },
+      "mapSource": "legacyCodigo"
+    },
+    {
+      "legacyCodigo": "61280001",
+      "role": "pyg",
+      "status": "approved_provisional",
+      "resolution": {
+        "kind": "cuenta_global",
+        "codigo": "61190001",
+        "nombre": "Gastos No Identificados",
+        "clasificacion": "expense"
+      },
+      "mapSource": "override"
+    },
+    {
+      "legacyCodigo": "62130001",
+      "role": "pyg",
+      "status": "approved_provisional",
+      "resolution": {
+        "kind": "cuenta_global",
+        "codigo": "62010001",
+        "nombre": "Comisiones",
+        "clasificacion": "expense"
+      },
+      "mapSource": "override"
+    },
+    {
+      "legacyCodigo": "62130002",
+      "role": "pyg",
+      "status": "approved_provisional",
+      "resolution": {
+        "kind": "cuenta_global",
+        "codigo": "62010002",
+        "nombre": "Intereses",
+        "clasificacion": "expense"
+      },
+      "mapSource": "override"
+    },
+    {
+      "legacyCodigo": "62130003",
+      "role": "pyg",
+      "status": "approved_provisional",
+      "resolution": {
+        "kind": "cuenta_global",
+        "codigo": "62010003",
+        "nombre": "Multas",
+        "clasificacion": "expense"
+      },
+      "mapSource": "override"
+    },
+    {
+      "legacyCodigo": "63000003",
+      "role": "pyg",
+      "status": "approved",
+      "resolution": {
+        "kind": "cuenta_global",
+        "codigo": "63020001",
+        "nombre": "Pension Alimenticia",
+        "clasificacion": "expense"
+      },
+      "mapSource": "legacyCodigo"
+    },
+    {
+      "legacyCodigo": "63400002",
+      "role": "pyg",
+      "status": "approved_provisional",
+      "resolution": {
+        "kind": "cuenta_global",
+        "codigo": "61190001",
+        "nombre": "Gastos No Identificados",
+        "clasificacion": "expense"
+      },
+      "mapSource": "override"
+    },
+    {
+      "legacyCodigo": "63400004",
+      "role": "pyg",
+      "status": "approved",
+      "resolution": {
+        "kind": "cuenta_global",
+        "codigo": "61140005",
+        "nombre": "Primas de Seguros de Salud",
+        "clasificacion": "expense"
+      },
+      "mapSource": "legacyCodigo"
+    },
+    {
+      "legacyCodigo": "64000002",
+      "role": "pyg",
+      "status": "approved",
+      "resolution": {
+        "kind": "cuenta_global",
+        "codigo": "61180008",
+        "nombre": "Loterias y Apuestas",
+        "clasificacion": "expense"
+      },
+      "mapSource": "legacyCodigo"
+    },
+    {
+      "legacyCodigo": "64000005",
+      "role": "pyg",
+      "status": "approved",
+      "resolution": {
+        "kind": "cuenta_global",
+        "codigo": "61180006",
+        "nombre": "Licores",
+        "clasificacion": "expense"
+      },
+      "mapSource": "legacyCodigo"
+    },
+    {
+      "legacyCodigo": "64000006",
+      "role": "pyg",
+      "status": "approved",
+      "resolution": {
+        "kind": "cuenta_global",
+        "codigo": "61180007",
+        "nombre": "Cigarrillos",
+        "clasificacion": "expense"
+      },
+      "mapSource": "legacyCodigo"
+    },
+    {
+      "legacyCodigo": "64100001",
+      "role": "pyg",
+      "status": "approved",
+      "resolution": {
+        "kind": "cuenta_global",
+        "codigo": "61120004",
+        "nombre": "Telefono",
+        "clasificacion": "expense"
+      },
+      "mapSource": "legacyCodigo"
+    },
+    {
+      "legacyCodigo": "64100003",
+      "role": "pyg",
+      "status": "approved",
+      "resolution": {
+        "kind": "cuenta_global",
+        "codigo": "64020001",
+        "nombre": "Streaming Musica y Video",
+        "clasificacion": "expense"
+      },
+      "mapSource": "legacyCodigo"
+    }
+  ]
+}

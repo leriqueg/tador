@@ -3,8 +3,8 @@
 | Campo | Valor |
 |-------|-------|
 | **Documento** | Definición de modos Hogar y PRO |
-| **Versión** | 1.3.0 |
-| **Última actualización** | 2026-07-16 |
+| **Versión** | 1.4.0 |
+| **Última actualización** | 2026-07-22 |
 | **Estado** | Aprobado |
 | **Relación** | Complementa la constitución y el documento `mvp-scope.md` |
 
@@ -87,18 +87,18 @@ PRO no solo quiere ver "si hubo gasto", sino qué tipo de movimiento fue. Por ej
 | | **QuickAdd (Hogar)** | **EntryBuilder (PRO)** |
 |--|----------------------|-------------------------|
 | Pregunta mental | “¿Qué hice?” → reconozco un nombre | “¿Qué tipo de movimiento?” → clasifico y armo |
-| Entrada | Plantilla nombrada (tile / categoría / búsqueda) | Pasos: INGRESO \| EGRESO \| TRANSFERENCIA → … |
-| Formulario | Mini: cuenta, monto, concepto | Secuencia; pasos previos visibles y editables |
-| Complejidad visible | Oculta códigos y líneas | Más control; sin ERP |
-| Validez | La plantilla ya es válida | Validez por construcción al avanzar |
-| Burst | Conserva plantilla + cuenta | Conserva tipo + cuenta |
+| Entrada | Plantilla nombrada (tile / categoría / búsqueda) | Grafo de decisión: preguntas → cuentas/entidad acotadas → hoja (plantilla o libre) |
+| Formulario | Mini: cuenta, monto, concepto | Secuencia por nodos; pasos previos visibles y editables |
+| Complejidad visible | Oculta códigos y líneas | Más control; sin ERP; sin catálogo de plantillas |
+| Validez | La plantilla ya es válida | Validez por construcción al avanzar el grafo |
+| Burst | Conserva plantilla + cuenta | Conserva camino (hoja) + cuentas; limpia monto/concepto |
 | Escape | — | Asiento manual |
-| Backend típico | `POST /api/apuntes` + `templateCode` | Apunte con o sin plantilla, o asiento manual (`/api/entries`) |
+| Backend típico | `POST /api/apuntes` + `templateCode` | Apunte con o sin plantilla (hoja del grafo), o asiento manual (`/api/entries`) |
 | Rutas UI (decisión 2026-07-16) | Namespace `/hogar/*` | Namespace `/pro/*` |
 
-> Analogía: QuickAdd es **elegir una receta**; EntryBuilder es **cocinar con la misma cocina**, paso a paso (a veces sin receta con nombre).
+> Analogía: QuickAdd es **elegir una receta**; EntryBuilder es **cocinar con la misma cocina**, paso a paso (012: grafo estático; plantillas = hojas).
 
-> **Decisión 2026-07-13 / 2026-07-16**: No reutilizar EntryBuilder como UX de Hogar ni QuickAdd como UX primaria de PRO. Ambos modos ofrecen **“Guardar y registrar otro”** (burst entry). Detalle: `specs/006-frontend-hogar/spec.md` (US2) y `specs/007-frontend-pro-ligero/spec.md` (US2 EntryBuilder).
+> **Decisión 2026-07-21 (012)**: EntryBuilder MUST NOT usar chips de plantillas como UX primaria. El grafo hace las preguntas; las plantillas solo resuelven la hoja contable.
 
 ---
 
@@ -153,6 +153,21 @@ PRO no solo quiere ver "si hubo gasto", sino qué tipo de movimiento fue. Por ej
 
 ---
 
+## Densidad UI por superficie y viewport
+
+Regla operativa (no negociable en frontend): ver también [`frontend/docs/hogar-pro-density.md`](../../frontend/docs/hogar-pro-density.md).
+
+| Superficie | HOGAR | PRO móvil | PRO desktop |
+|------------|-------|-----------|-------------|
+| Captura | QuickAdd compacto | EntryBuilder para apuntes rápidos y concretos | EntryBuilder con más contexto de camino |
+| Historial de apuntes | Lista estrecha filtrable | Misma usabilidad rápida | **Usar el ancho**: más columnas, filtros visibles, filas densas — no clonar el layout móvil de Hogar |
+| Reportes / análisis | Paneles simples | Usable, no óptimo | Superficie principal de consumo |
+| Cuentas | Saldos agrupados sin códigos | — | Árbol + códigos |
+
+Compartir un componente de página vía `namespace` está bien; **misma densidad desktop Hogar/PRO en listados/reportes es deuda**, no el objetivo.
+
+Storybook es la fuente ejecutable del catálogo UI; el inventario markdown es índice. Workflow: skill/agent `ui-storybook-sync`.
+
 ## Relación con el modelo de datos
 
 Ambos modos operan sobre el **mismo modelo de datos**. No existe un modelo "Hogar" y otro "PRO". La diferencia es de **presentación, rutas UI y densidad**.
@@ -181,6 +196,7 @@ No se usan tipos `client` / `supplier` separados. Se usa **`organization`** con 
 
 | Fecha | Versión | Cambio |
 |------|---------|--------|
+| 2026-07-22 | 1.4.0 | Densidad UI por superficie/viewport; Storybook como SoT del catálogo; deuda PRO desktop |
 | 2026-07-16 | 1.3.0 | QuickAdd vs EntryBuilder; namespaces `/hogar` `/pro`; organization+capacidades; 008 IA fuera MVP; 009 avanzado |
 | 2026-07-13 | 1.2.0 | Captura: Hogar = plantillas; PRO = EntryBuilder; motor compartido; burst entry |
 | 2026-07-12 | 1.1.0 | Hogar incluye CxC/CxP informales; módulo documental post-MVP |

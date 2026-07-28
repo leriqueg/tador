@@ -1,0 +1,1441 @@
+{
+  "schemaVersion": "0.1.0",
+  "source": "migrations/test20260719/test20260719.csv",
+  "plan": "specs/foundation/plan-de-cuentas/plan-de-cuentas-final.csv",
+  "summary": {
+    "bal": 28,
+    "pyg": 22,
+    "needsConfirmation": 34,
+    "mapped": 17
+  },
+  "accounts": [
+    {
+      "legacyCodigo": "11110004",
+      "role": "bal",
+      "madreLegacy": "11110000",
+      "planCodigo": null,
+      "status": "propose_user_account",
+      "propose": {
+        "kind": "cuenta_usuario",
+        "nombre": "NÃ³mina- Sueldo- Salario",
+        "parentCodigo": "11110000",
+        "tipoCuenta": "wallet",
+        "entidadTipo": null,
+        "entidadNombre": null
+      },
+      "evidence": {
+        "nombres": {
+          "Comisiones Bancarias": 1,
+          "NÃ³mina- Sueldo- Salario": 2
+        },
+        "descripciones": [
+          "TRANSFERENCIAS RECIBIDAS (LOCALES / INTERNACIONALES)",
+          "N/D CARGO SERV.F.TRANSFERENCIA EXT",
+          "N/D CARGO SERV.F.TRANSFERENCIA EXT{Bolivariano 2026...}",
+          "Factura 001-100-000000165 - ROSAHOLICS LLC",
+          "Factura 001-100-000000164- ROSAHOLICS LLC - Comision Broker"
+        ],
+        "asiento_tipos": {
+          "traspaso": 3,
+          "egreso": 1,
+          "ingreso": 2
+        }
+      },
+      "confidence": "medium",
+      "needsConfirmation": true
+    },
+    {
+      "legacyCodigo": "11120002",
+      "role": "bal",
+      "madreLegacy": "11120000",
+      "planCodigo": null,
+      "status": "propose_user_account",
+      "propose": {
+        "kind": "cuenta_usuario",
+        "nombre": "Cuenta legacy 11120002",
+        "parentCodigo": "11120000",
+        "tipoCuenta": "bank",
+        "entidadTipo": "bank",
+        "entidadNombre": "Cuenta legacy 11120002"
+      },
+      "evidence": {
+        "nombres": {},
+        "descripciones": [
+          "TRANSFERENCIA PAGO DIRECTO DESDE CTA AHORRO - Romero",
+          "TRANSFERENCIA RECIBIDA - MRomero",
+          "Transferencia - MRomero",
+          "TRANSFERENCIA PAGO DIRECTO DESDE CTA AHORRO - MROMERO"
+        ],
+        "asiento_tipos": {
+          "traspaso": 4
+        }
+      },
+      "confidence": "low",
+      "needsConfirmation": true
+    },
+    {
+      "legacyCodigo": "11120005",
+      "role": "bal",
+      "madreLegacy": "11120000",
+      "planCodigo": null,
+      "status": "propose_user_account",
+      "propose": {
+        "kind": "cuenta_usuario",
+        "nombre": "PAGO DE PRESTAMO: 066290407224",
+        "parentCodigo": "11120000",
+        "tipoCuenta": "bank",
+        "entidadTipo": "bank",
+        "entidadNombre": "PAGO DE PRESTAMO: 066290407224"
+      },
+      "evidence": {
+        "nombres": {
+          "Comisiones Bancarias": 1,
+          "Rendimiento de Inversiones": 1
+        },
+        "descripciones": [
+          "PAGO TC EN MORA 477045XXXXXX9742",
+          "PAGO TC 477045XXXXXX9742",
+          "PAGO DE PRESTAMO: 066290407224",
+          "TRANSF. ENVI PAGODIR HD - JEP",
+          "PAGO TRANSFERENCIA INTERBANCARIA AMEX"
+        ],
+        "asiento_tipos": {
+          "traspaso": 7,
+          "egreso": 1,
+          "ingreso": 1
+        }
+      },
+      "confidence": "medium",
+      "needsConfirmation": true
+    },
+    {
+      "legacyCodigo": "11120008",
+      "role": "bal",
+      "madreLegacy": "11120000",
+      "planCodigo": null,
+      "status": "propose_user_account",
+      "propose": {
+        "kind": "cuenta_usuario",
+        "nombre": "Efectivo / Cajero (11120008)",
+        "parentCodigo": "11120000",
+        "tipoCuenta": "bank",
+        "entidadTipo": "bank",
+        "entidadNombre": "Efectivo / Cajero (11120008)"
+      },
+      "evidence": {
+        "nombres": {},
+        "descripciones": [
+          "RETITO EFE",
+          "Transferencia - MRomero",
+          "Deposito EFE - Tia Toya",
+          "RETIRO CAJEROS - El Dorado{Restaurantes y Bares...}"
+        ],
+        "asiento_tipos": {
+          "traspaso": 4
+        }
+      },
+      "confidence": "low",
+      "needsConfirmation": true
+    },
+    {
+      "legacyCodigo": "11120012",
+      "role": "bal",
+      "madreLegacy": "11120000",
+      "planCodigo": null,
+      "status": "propose_user_account",
+      "propose": {
+        "kind": "cuenta_usuario",
+        "nombre": "Prestamo Nro 566505900 - Cuota 17 de 60",
+        "parentCodigo": "11120000",
+        "tipoCuenta": "bank",
+        "entidadTipo": "bank",
+        "entidadNombre": "Prestamo Nro 566505900 - Cuota 17 de 60"
+      },
+      "evidence": {
+        "nombres": {},
+        "descripciones": [
+          "TRANSFERENCIA RECIBIDA - MRomero",
+          "Prestamo Nro 566505900 - Cuota 17 de 60"
+        ],
+        "asiento_tipos": {
+          "traspaso": 2
+        }
+      },
+      "confidence": "medium",
+      "needsConfirmation": true
+    },
+    {
+      "legacyCodigo": "11120013",
+      "role": "bal",
+      "madreLegacy": "11120000",
+      "planCodigo": null,
+      "status": "propose_user_account",
+      "propose": {
+        "kind": "cuenta_usuario",
+        "nombre": "Efectivo / Cajero (11120013)",
+        "parentCodigo": "11120000",
+        "tipoCuenta": "bank",
+        "entidadTipo": "bank",
+        "entidadNombre": "Efectivo / Cajero (11120013)"
+      },
+      "evidence": {
+        "nombres": {
+          "Comisiones Bancarias": 1
+        },
+        "descripciones": [
+          "RETIRO CAJEROS AH-BB",
+          "N/D PAGO TARJETA DE CREDITO - BANKCARD MASTERCARD",
+          "TRANSFERENCIAS RECIBIDAS (LOCALES / INTERNACIONALES)",
+          "N/D CARGO SERV.F.TRANSFERENCIA EXT{Comisiones Bancarias...}",
+          "TRANSFERENCIA PAGO DIRECTO DESDE CTA AHORRO - Romero"
+        ],
+        "asiento_tipos": {
+          "traspaso": 21,
+          "egreso": 1
+        }
+      },
+      "confidence": "low",
+      "needsConfirmation": true
+    },
+    {
+      "legacyCodigo": "11130001",
+      "role": "bal",
+      "madreLegacy": "11130000",
+      "planCodigo": null,
+      "status": "propose_user_account",
+      "propose": {
+        "kind": "cuenta_usuario",
+        "nombre": "Supermercado- AlimentaciÃ³n",
+        "parentCodigo": "11110000",
+        "tipoCuenta": "wallet",
+        "entidadTipo": null,
+        "entidadNombre": null
+      },
+      "evidence": {
+        "nombres": {
+          "Taxis": 1,
+          "LoterÃ­as y Apuestas": 1,
+          "Tabaco": 6,
+          "Almuerzos- Desayunos Diarios": 4,
+          "Transporte": 4,
+          "ElectrodomÃ©sticos- ElectrÃ³nica e InformÃ¡tica": 1,
+          "Supermercado- AlimentaciÃ³n": 6,
+          "No se o no quiero saber": 3,
+          "Diversiones Alcoholicas": 2
+        },
+        "descripciones": [
+          "RETITO EFE",
+          "RETIRO CAJEROS AH-BB",
+          "Envio de Dinero Santi por Wester Union",
+          "Taxi a Casa",
+          "Creeper Plush{Regalos...}"
+        ],
+        "asiento_tipos": {
+          "traspaso": 12,
+          "egreso": 28
+        }
+      },
+      "confidence": "medium",
+      "needsConfirmation": true
+    },
+    {
+      "legacyCodigo": "11220003",
+      "role": "bal",
+      "madreLegacy": "11220000",
+      "planCodigo": null,
+      "status": "propose_user_account",
+      "propose": {
+        "kind": "cuenta_usuario",
+        "nombre": "Cuenta legacy 11220003",
+        "parentCodigo": "11220000",
+        "tipoCuenta": "wallet",
+        "entidadTipo": "bank",
+        "entidadNombre": "Cuenta legacy 11220003"
+      },
+      "evidence": {
+        "nombres": {
+          "Comisiones Bancarias": 1,
+          "Rendimiento de Inversiones": 1
+        },
+        "descripciones": [
+          "HAPI CORP PIOTRKOWSKA 116 POL 840",
+          "N/D COMISION BANCARIA",
+          "Cuadre Mensual"
+        ],
+        "asiento_tipos": {
+          "traspaso": 1,
+          "egreso": 1,
+          "ingreso": 1
+        }
+      },
+      "confidence": "low",
+      "needsConfirmation": true
+    },
+    {
+      "legacyCodigo": "11320005",
+      "role": "bal",
+      "madreLegacy": "11320000",
+      "planCodigo": null,
+      "status": "propose_user_account",
+      "propose": {
+        "kind": "cuenta_usuario",
+        "nombre": "Cuenta legacy 11320005",
+        "parentCodigo": "11320000",
+        "tipoCuenta": "wallet",
+        "entidadTipo": "person",
+        "entidadNombre": "Cuenta legacy 11320005"
+      },
+      "evidence": {
+        "nombres": {},
+        "descripciones": [
+          "Modista"
+        ],
+        "asiento_tipos": {
+          "traspaso": 1
+        }
+      },
+      "confidence": "low",
+      "needsConfirmation": true
+    },
+    {
+      "legacyCodigo": "11320009",
+      "role": "bal",
+      "madreLegacy": "11320000",
+      "planCodigo": null,
+      "status": "propose_user_account",
+      "propose": {
+        "kind": "cuenta_usuario",
+        "nombre": "Cuenta legacy 11320009",
+        "parentCodigo": "11320000",
+        "tipoCuenta": "wallet",
+        "entidadTipo": "person",
+        "entidadNombre": "Cuenta legacy 11320009"
+      },
+      "evidence": {
+        "nombres": {},
+        "descripciones": [
+          "TRANSFERENCIA ENVIADA A CTA. AHORROS - Daisy",
+          "Transferencia Western Union - Santiago"
+        ],
+        "asiento_tipos": {
+          "traspaso": 3
+        }
+      },
+      "confidence": "low",
+      "needsConfirmation": true
+    },
+    {
+      "legacyCodigo": "11320010",
+      "role": "bal",
+      "madreLegacy": "11320000",
+      "planCodigo": null,
+      "status": "propose_user_account",
+      "propose": {
+        "kind": "cuenta_usuario",
+        "nombre": "Cuenta legacy 11320010",
+        "parentCodigo": "11320000",
+        "tipoCuenta": "wallet",
+        "entidadTipo": "person",
+        "entidadNombre": "Cuenta legacy 11320010"
+      },
+      "evidence": {
+        "nombres": {},
+        "descripciones": [
+          "Deposito EFE - Tia Toya"
+        ],
+        "asiento_tipos": {
+          "traspaso": 1
+        }
+      },
+      "confidence": "low",
+      "needsConfirmation": true
+    },
+    {
+      "legacyCodigo": "11320012",
+      "role": "bal",
+      "madreLegacy": "11320000",
+      "planCodigo": null,
+      "status": "propose_user_account",
+      "propose": {
+        "kind": "cuenta_usuario",
+        "nombre": "Efectivo / Cajero (11320012)",
+        "parentCodigo": "11320000",
+        "tipoCuenta": "wallet",
+        "entidadTipo": "person",
+        "entidadNombre": "Efectivo / Cajero (11320012)"
+      },
+      "evidence": {
+        "nombres": {
+          "Regalos": 2,
+          "Restaurantes y Bares": 1
+        },
+        "descripciones": [
+          "Creeper Plush",
+          "Creeper Plush{Billetera...}",
+          "TRANSFERENCIA PAGO DIRECTO DESDE CTA AHORRO - harumanga",
+          "Dinero Efectivo Alekey",
+          "RETIRO CAJEROS - El Dorado"
+        ],
+        "asiento_tipos": {
+          "egreso": 3,
+          "traspaso": 5
+        }
+      },
+      "confidence": "low",
+      "needsConfirmation": true
+    },
+    {
+      "legacyCodigo": "11320013",
+      "role": "bal",
+      "madreLegacy": "11320000",
+      "planCodigo": null,
+      "status": "propose_user_account",
+      "propose": {
+        "kind": "cuenta_usuario",
+        "nombre": "Supermercado- AlimentaciÃ³n",
+        "parentCodigo": "11320000",
+        "tipoCuenta": "wallet",
+        "entidadTipo": "person",
+        "entidadNombre": "Supermercado- AlimentaciÃ³n"
+      },
+      "evidence": {
+        "nombres": {
+          "Supermercado- AlimentaciÃ³n": 7,
+          "Transporte": 11,
+          "Restaurantes y Bares": 2,
+          "Almuerzos- Desayunos Diarios": 1
+        },
+        "descripciones": [
+          "MERPAGO*MERCADOLIBRE",
+          "MERPAGO*MERCADOLIBRE{VISA BGR...}",
+          "MERPAGO*OPEN25",
+          "MERPAGO*OPEN25 {VISA BGR...}",
+          "MERPAGO*OPEN25{VISA BGR...}"
+        ],
+        "asiento_tipos": {
+          "egreso": 21,
+          "traspaso": 21
+        }
+      },
+      "confidence": "medium",
+      "needsConfirmation": true
+    },
+    {
+      "legacyCodigo": "21300001",
+      "role": "bal",
+      "madreLegacy": "21300000",
+      "planCodigo": null,
+      "status": "propose_user_account",
+      "propose": {
+        "kind": "cuenta_usuario",
+        "nombre": "Cuenta legacy 21300001",
+        "parentCodigo": "21300000",
+        "tipoCuenta": "card",
+        "entidadTipo": "person",
+        "entidadNombre": "Cuenta legacy 21300001"
+      },
+      "evidence": {
+        "nombres": {
+          "Alquiler Vivienda": 1
+        },
+        "descripciones": [
+          "TRANSFERENCIA ENVIADA A CTA. AHORROS - Diana Sandoval",
+          "Canon de Arriendo Mensual 2026 - 06",
+          "CNEL GUAYAQUIL 24ONLINE"
+        ],
+        "asiento_tipos": {
+          "traspaso": 2,
+          "egreso": 1
+        }
+      },
+      "confidence": "low",
+      "needsConfirmation": true
+    },
+    {
+      "legacyCodigo": "21300011",
+      "role": "bal",
+      "madreLegacy": "21300000",
+      "planCodigo": null,
+      "status": "propose_user_account",
+      "propose": {
+        "kind": "cuenta_usuario",
+        "nombre": "Cuenta legacy 21300011",
+        "parentCodigo": "21300000",
+        "tipoCuenta": "card",
+        "entidadTipo": "person",
+        "entidadNombre": "Cuenta legacy 21300011"
+      },
+      "evidence": {
+        "nombres": {
+          "Comisiones Bancarias": 1
+        },
+        "descripciones": [
+          "Envio de Dinero Santi por Wester Union",
+          "Transferencia Western Union - Santiago",
+          "Comision Western Union",
+          "Descuento por Gastos de Estudios de Santiago - 2026-06"
+        ],
+        "asiento_tipos": {
+          "traspaso": 3,
+          "egreso": 1
+        }
+      },
+      "confidence": "low",
+      "needsConfirmation": true
+    },
+    {
+      "legacyCodigo": "21300013",
+      "role": "bal",
+      "madreLegacy": "21300000",
+      "planCodigo": null,
+      "status": "propose_user_account",
+      "propose": {
+        "kind": "cuenta_usuario",
+        "nombre": "Prestamo Nro 566505900 - Cuota 17 de 60",
+        "parentCodigo": "21300000",
+        "tipoCuenta": "card",
+        "entidadTipo": "person",
+        "entidadNombre": "Prestamo Nro 566505900 - Cuota 17 de 60"
+      },
+      "evidence": {
+        "nombres": {},
+        "descripciones": [
+          "Prestamo Nro 566505900 - Cuota 17 de 60"
+        ],
+        "asiento_tipos": {
+          "traspaso": 1
+        }
+      },
+      "confidence": "medium",
+      "needsConfirmation": true
+    },
+    {
+      "legacyCodigo": "21300017",
+      "role": "bal",
+      "madreLegacy": "21300000",
+      "planCodigo": null,
+      "status": "propose_user_account",
+      "propose": {
+        "kind": "cuenta_usuario",
+        "nombre": "Cuenta legacy 21300017",
+        "parentCodigo": "21300000",
+        "tipoCuenta": "card",
+        "entidadTipo": "person",
+        "entidadNombre": "Cuenta legacy 21300017"
+      },
+      "evidence": {
+        "nombres": {
+          "Pension Alimenticia": 1
+        },
+        "descripciones": [
+          "Pension Alimenticia - Canon 500 Mensuales",
+          "Descuento por Gastos de Estudios de Santiago - 2026-06"
+        ],
+        "asiento_tipos": {
+          "egreso": 1,
+          "traspaso": 1
+        }
+      },
+      "confidence": "low",
+      "needsConfirmation": true
+    },
+    {
+      "legacyCodigo": "21310002",
+      "role": "bal",
+      "madreLegacy": "21310000",
+      "planCodigo": null,
+      "status": "propose_user_account",
+      "propose": {
+        "kind": "cuenta_usuario",
+        "nombre": "Cuenta legacy 21310002",
+        "parentCodigo": "21200000",
+        "tipoCuenta": "card",
+        "entidadTipo": "card_issuer",
+        "entidadNombre": "Cuenta legacy 21310002"
+      },
+      "evidence": {
+        "nombres": {
+          "Comisiones Bancarias": 1,
+          "Intereses Por Financiamiento": 1
+        },
+        "descripciones": [
+          "PAGO TC EN MORA 477045XXXXXX9742",
+          "PAGO TC 477045XXXXXX9742",
+          "PAYPAL *SPOTIFY*P43319C GB 840{Servicios online...}",
+          "TIA ATARAZANA 598 EC 840{Supermercado- Alimen...}",
+          "CLIP STUDIO PAINT JP 840{Supermercado- Alimen...}"
+        ],
+        "asiento_tipos": {
+          "traspaso": 6,
+          "egreso": 2
+        }
+      },
+      "confidence": "low",
+      "needsConfirmation": true
+    },
+    {
+      "legacyCodigo": "21310003",
+      "role": "bal",
+      "madreLegacy": "21310000",
+      "planCodigo": null,
+      "status": "propose_user_account",
+      "propose": {
+        "kind": "cuenta_usuario",
+        "nombre": "Cuenta legacy 21310003",
+        "parentCodigo": "21200000",
+        "tipoCuenta": "card",
+        "entidadTipo": "card_issuer",
+        "entidadNombre": "Cuenta legacy 21310003"
+      },
+      "evidence": {
+        "nombres": {
+          "Comisiones Bancarias": 1,
+          "Intereses Por Financiamiento": 1
+        },
+        "descripciones": [
+          "TRANSFERENCIAS EXTERNAS|LUIS ERIQUE|BANCO GENERAL RUMINAHUI|202605",
+          "MERPAGO*MERCADOLIBRE{Supermercado- Alimen...}",
+          "MERPAGO*OPEN25 {Supermercado- Alimen...}",
+          "MERPAGO*OPEN25{Supermercado- Alimen...}",
+          "MERPAGO*CARREFOUR{Supermercado- Alimen...}"
+        ],
+        "asiento_tipos": {
+          "traspaso": 24,
+          "egreso": 2
+        }
+      },
+      "confidence": "low",
+      "needsConfirmation": true
+    },
+    {
+      "legacyCodigo": "21310004",
+      "role": "bal",
+      "madreLegacy": "21310000",
+      "planCodigo": null,
+      "status": "propose_user_account",
+      "propose": {
+        "kind": "cuenta_usuario",
+        "nombre": "N/D PAGO TARJETA DE CREDITO - BANKCARD MASTERCARD",
+        "parentCodigo": "21200000",
+        "tipoCuenta": "card",
+        "entidadTipo": "card_issuer",
+        "entidadNombre": "N/D PAGO TARJETA DE CREDITO - BANKCARD MASTERCARD"
+      },
+      "evidence": {
+        "nombres": {},
+        "descripciones": [
+          "N/D PAGO TARJETA DE CREDITO - BANKCARD MASTERCARD"
+        ],
+        "asiento_tipos": {
+          "traspaso": 1
+        }
+      },
+      "confidence": "medium",
+      "needsConfirmation": true
+    },
+    {
+      "legacyCodigo": "21310005",
+      "role": "bal",
+      "madreLegacy": "21310000",
+      "planCodigo": null,
+      "status": "propose_user_account",
+      "propose": {
+        "kind": "cuenta_usuario",
+        "nombre": "Cuenta legacy 21310005",
+        "parentCodigo": "21200000",
+        "tipoCuenta": "card",
+        "entidadTipo": "card_issuer",
+        "entidadNombre": "Cuenta legacy 21310005"
+      },
+      "evidence": {
+        "nombres": {
+          "Intereses Por Financiamiento": 2
+        },
+        "descripciones": [
+          "CHECKPOINT UTIL 1045.26 TOT 993.27",
+          "PAGO TRANSFERENCIA INTERBANCARIA AMEX",
+          "RUKITO AVALON - Alejandro{Restaurantes y Bares...}",
+          "UBER TRIP 840{Taxis...}",
+          "UBER TRIP 840 {Taxis...}"
+        ],
+        "asiento_tipos": {
+          "egreso": 2,
+          "traspaso": 6
+        }
+      },
+      "confidence": "low",
+      "needsConfirmation": true
+    },
+    {
+      "legacyCodigo": "21310006",
+      "role": "bal",
+      "madreLegacy": "21310000",
+      "planCodigo": null,
+      "status": "propose_user_account",
+      "propose": {
+        "kind": "cuenta_usuario",
+        "nombre": "Cuenta legacy 21310006",
+        "parentCodigo": "21200000",
+        "tipoCuenta": "card",
+        "entidadTipo": "card_issuer",
+        "entidadNombre": "Cuenta legacy 21310006"
+      },
+      "evidence": {
+        "nombres": {
+          "Multas": 1,
+          "Comisiones Bancarias": 1,
+          "Intereses Por Financiamiento": 1
+        },
+        "descripciones": [
+          "TRANSFERENCIAS EXTERNAS|ERIQUE GUAJALA|BANCO PRODUBANCO GRUPO PROMERICA|202605",
+          "HIPERMARKET EL DORADO CA ECU 840{Supermercado- Alimen...}",
+          "LA VIENESA PIAZZA C ECU 840{Supermercado- Alimen...}",
+          "MI COMISARIATO PEDRO M AV ECU 840{Supermercado- Alimen...}",
+          "TIA PLAZA TIA LA JOYA AV ECU 840{Supermercado- Alimen...}"
+        ],
+        "asiento_tipos": {
+          "traspaso": 9,
+          "egreso": 3
+        }
+      },
+      "confidence": "low",
+      "needsConfirmation": true
+    },
+    {
+      "legacyCodigo": "21310007",
+      "role": "bal",
+      "madreLegacy": "21310000",
+      "planCodigo": null,
+      "status": "propose_user_account",
+      "propose": {
+        "kind": "cuenta_usuario",
+        "nombre": "N/D PAGO TARJETA DE CREDITO - VISA BANKCARD",
+        "parentCodigo": "21200000",
+        "tipoCuenta": "card",
+        "entidadTipo": "card_issuer",
+        "entidadNombre": "N/D PAGO TARJETA DE CREDITO - VISA BANKCARD"
+      },
+      "evidence": {
+        "nombres": {
+          "Comisiones Bancarias": 2,
+          "Intereses Por Financiamiento": 1
+        },
+        "descripciones": [
+          "N/D PAGO TARJETA DE CREDITO - VISA BANKCARD",
+          "CONTRIBUCIÃ“N PARA EL FINANCIAMIENTO SOLCA",
+          "RENOVACION PRESTACIONES EN EL EXTERIOR",
+          "INTERES FINANCIAMIENTO CHECKPOINT UTIL 2142.54 TOTPAG 2142.54",
+          "PTP - BMI DEL ECUADOR COM EC 840 {Primas de Seguros...}"
+        ],
+        "asiento_tipos": {
+          "traspaso": 6,
+          "egreso": 3
+        }
+      },
+      "confidence": "medium",
+      "needsConfirmation": true
+    },
+    {
+      "legacyCodigo": "21400012",
+      "role": "bal",
+      "madreLegacy": "21400000",
+      "planCodigo": null,
+      "status": "propose_user_account",
+      "propose": {
+        "kind": "cuenta_usuario",
+        "nombre": "TelÃ©fono e Internet",
+        "parentCodigo": "21110000",
+        "tipoCuenta": "bridge",
+        "entidadTipo": null,
+        "entidadNombre": null
+      },
+      "evidence": {
+        "nombres": {
+          "TelÃ©fono e Internet": 1,
+          "Supermercado- AlimentaciÃ³n": 1
+        },
+        "descripciones": [
+          "N/D DEBITOS AUTOMATICOS CLARO",
+          "N/D DEBITOS AUTOMATICOS CLARO {Bolivariano 2026...}",
+          "Cafe Robusto",
+          "Cafe Robusto {Bolivariano 2026...}"
+        ],
+        "asiento_tipos": {
+          "egreso": 2,
+          "traspaso": 2
+        }
+      },
+      "confidence": "medium",
+      "needsConfirmation": true
+    },
+    {
+      "legacyCodigo": "21400013",
+      "role": "bal",
+      "madreLegacy": "21400000",
+      "planCodigo": null,
+      "status": "propose_user_account",
+      "propose": {
+        "kind": "cuenta_usuario",
+        "nombre": "Cuenta legacy 21400013",
+        "parentCodigo": "21110000",
+        "tipoCuenta": "bridge",
+        "entidadTipo": null,
+        "entidadNombre": null
+      },
+      "evidence": {
+        "nombres": {
+          "Restaurantes y Bares": 1
+        },
+        "descripciones": [
+          "Parrillada RSH"
+        ],
+        "asiento_tipos": {
+          "egreso": 1
+        }
+      },
+      "confidence": "low",
+      "needsConfirmation": true
+    },
+    {
+      "legacyCodigo": "21400014",
+      "role": "bal",
+      "madreLegacy": "21400000",
+      "planCodigo": null,
+      "status": "propose_user_account",
+      "propose": {
+        "kind": "cuenta_usuario",
+        "nombre": "Supermercado- AlimentaciÃ³n",
+        "parentCodigo": "21110000",
+        "tipoCuenta": "bridge",
+        "entidadTipo": null,
+        "entidadNombre": null
+      },
+      "evidence": {
+        "nombres": {
+          "Otros Gastos en Salud": 1,
+          "TelÃ©fono e Internet": 1,
+          "Restaurantes y Bares": 3,
+          "Taxis": 4,
+          "Supermercado- AlimentaciÃ³n": 8,
+          "Servicios online": 2,
+          "Primas de Seguros": 2
+        },
+        "descripciones": [
+          "TRANSF. ENVI PAGODIR HD - Cesar Sarmiento",
+          "TRANSF. ENVI PAGODIR HD - Cesar Sarmiento{Bolivariano 2026...}",
+          "N/D DEBITOS AUTOMATICOS CLARO",
+          "N/D DEBITOS AUTOMATICOS CLARO{Bolivariano 2026...}",
+          "RUKITO AVALON - Alejandro"
+        ],
+        "asiento_tipos": {
+          "egreso": 21,
+          "traspaso": 21
+        }
+      },
+      "confidence": "medium",
+      "needsConfirmation": true
+    },
+    {
+      "legacyCodigo": "22130001",
+      "role": "bal",
+      "madreLegacy": "22130000",
+      "planCodigo": null,
+      "status": "propose_user_account",
+      "propose": {
+        "kind": "cuenta_usuario",
+        "nombre": "Prestamo Quirografario 15230273 - 23/24",
+        "parentCodigo": "21310000",
+        "tipoCuenta": "card",
+        "entidadTipo": "bank",
+        "entidadNombre": "Prestamo Quirografario 15230273 - 23/24"
+      },
+      "evidence": {
+        "nombres": {},
+        "descripciones": [
+          "Prestamo Quirografario 15230273 - 23/24",
+          "Prestamo Quirografario 18705192 - 10/36"
+        ],
+        "asiento_tipos": {
+          "traspaso": 2
+        }
+      },
+      "confidence": "medium",
+      "needsConfirmation": true
+    },
+    {
+      "legacyCodigo": "22130004",
+      "role": "bal",
+      "madreLegacy": "22130000",
+      "planCodigo": null,
+      "status": "propose_user_account",
+      "propose": {
+        "kind": "cuenta_usuario",
+        "nombre": "PAGO DE PRESTAMO: 066290407224",
+        "parentCodigo": "21310000",
+        "tipoCuenta": "card",
+        "entidadTipo": "bank",
+        "entidadNombre": "PAGO DE PRESTAMO: 066290407224"
+      },
+      "evidence": {
+        "nombres": {},
+        "descripciones": [
+          "PAGO DE PRESTAMO: 066290407224"
+        ],
+        "asiento_tipos": {
+          "traspaso": 1
+        }
+      },
+      "confidence": "medium",
+      "needsConfirmation": true
+    },
+    {
+      "legacyCodigo": "41000001",
+      "role": "pyg",
+      "madreLegacy": "41000000",
+      "planCodigo": "41010001",
+      "status": "mapped_global",
+      "propose": {
+        "kind": "cuenta_global",
+        "codigo": "41010001",
+        "nombre": "Sueldo / Salario",
+        "esPostable": true
+      },
+      "evidence": {
+        "nombres": {
+          "NÃ³mina- Sueldo- Salario": 2
+        },
+        "descripciones": [
+          "Factura 001-100-000000165 - ROSAHOLICS LLC",
+          "Factura 001-100-000000164- ROSAHOLICS LLC - Comision Broker"
+        ]
+      },
+      "confidence": "high",
+      "needsConfirmation": false,
+      "warning": null
+    },
+    {
+      "legacyCodigo": "41100003",
+      "role": "pyg",
+      "madreLegacy": "41100000",
+      "planCodigo": "41120001",
+      "status": "mapped_global",
+      "propose": {
+        "kind": "cuenta_global",
+        "codigo": "41120001",
+        "nombre": "Intereses",
+        "esPostable": true
+      },
+      "evidence": {
+        "nombres": {
+          "Rendimiento de Inversiones": 2
+        },
+        "descripciones": [
+          "CAPITALIZACION DE INTERESES",
+          "Cuadre Mensual"
+        ]
+      },
+      "confidence": "high",
+      "needsConfirmation": false,
+      "warning": null
+    },
+    {
+      "legacyCodigo": "61115001",
+      "role": "pyg",
+      "madreLegacy": "61115000",
+      "planCodigo": "61110001",
+      "status": "mapped_global",
+      "propose": {
+        "kind": "cuenta_global",
+        "codigo": "61110001",
+        "nombre": "Alquiler / Arriendo de vivienda",
+        "esPostable": true
+      },
+      "evidence": {
+        "nombres": {
+          "Alquiler Vivienda": 1
+        },
+        "descripciones": [
+          "Canon de Arriendo Mensual 2026 - 06"
+        ]
+      },
+      "confidence": "high",
+      "needsConfirmation": false,
+      "warning": null
+    },
+    {
+      "legacyCodigo": "61150008",
+      "role": "pyg",
+      "madreLegacy": "61150000",
+      "planCodigo": "61140006",
+      "status": "mapped_global",
+      "propose": {
+        "kind": "cuenta_global",
+        "codigo": "61140006",
+        "nombre": "Otros Gastos en Salud",
+        "esPostable": true
+      },
+      "evidence": {
+        "nombres": {
+          "Otros Gastos en Salud": 1
+        },
+        "descripciones": [
+          "TRANSF. ENVI PAGODIR HD - Cesar Sarmiento"
+        ]
+      },
+      "confidence": "high",
+      "needsConfirmation": false,
+      "warning": null
+    },
+    {
+      "legacyCodigo": "61213002",
+      "role": "pyg",
+      "madreLegacy": "61213000",
+      "planCodigo": "61180009",
+      "status": "propose_global",
+      "propose": {
+        "kind": "cuenta_global",
+        "codigo": "61180009",
+        "nombre": "Regalos",
+        "createNew": false,
+        "suggestedParent": null
+      },
+      "evidence": {
+        "nombres": {
+          "Regalos": 2
+        },
+        "descripciones": [
+          "Creeper Plush",
+          "Para Alejandro"
+        ]
+      },
+      "confidence": "high",
+      "needsConfirmation": true
+    },
+    {
+      "legacyCodigo": "61240001",
+      "role": "pyg",
+      "madreLegacy": "61240000",
+      "planCodigo": "61130001",
+      "status": "mapped_global",
+      "propose": {
+        "kind": "cuenta_global",
+        "codigo": "61130001",
+        "nombre": "Supermercado / Tiendas",
+        "esPostable": true
+      },
+      "evidence": {
+        "nombres": {
+          "Supermercado- AlimentaciÃ³n": 22
+        },
+        "descripciones": [
+          "Tiendita hasta hoy",
+          "COMPRAS TUTI",
+          "Compras Tuti"
+        ]
+      },
+      "confidence": "high",
+      "needsConfirmation": false,
+      "warning": null
+    },
+    {
+      "legacyCodigo": "61240002",
+      "role": "pyg",
+      "madreLegacy": "61240000",
+      "planCodigo": "61180002",
+      "status": "mapped_global",
+      "propose": {
+        "kind": "cuenta_global",
+        "codigo": "61180002",
+        "nombre": "Restaurantes / Bares / Casinos",
+        "esPostable": true
+      },
+      "evidence": {
+        "nombres": {
+          "Restaurantes y Bares": 7
+        },
+        "descripciones": [
+          "RETIRO CAJEROS - El Dorado",
+          "Parrillada RSH",
+          "RUKITO AVALON - Alejandro"
+        ]
+      },
+      "confidence": "high",
+      "needsConfirmation": false,
+      "warning": null
+    },
+    {
+      "legacyCodigo": "61240004",
+      "role": "pyg",
+      "madreLegacy": "61240000",
+      "planCodigo": "61130003",
+      "status": "mapped_global",
+      "propose": {
+        "kind": "cuenta_global",
+        "codigo": "61130003",
+        "nombre": "Desayunos y Almuerzos",
+        "esPostable": true
+      },
+      "evidence": {
+        "nombres": {
+          "Almuerzos- Desayunos Diarios": 5
+        },
+        "descripciones": [
+          "Comidita hasta hoy",
+          "MERPAGO*PARRILLAELREY"
+        ]
+      },
+      "confidence": "high",
+      "needsConfirmation": false,
+      "warning": null
+    },
+    {
+      "legacyCodigo": "61260001",
+      "role": "pyg",
+      "madreLegacy": "61260000",
+      "planCodigo": "61160000",
+      "status": "mapped_global",
+      "propose": {
+        "kind": "cuenta_global",
+        "codigo": "61160000",
+        "nombre": "Transporte",
+        "esPostable": false
+      },
+      "evidence": {
+        "nombres": {
+          "Transporte": 15
+        },
+        "descripciones": [
+          "Busheta Hasta hoy",
+          "MERPAGO*SUBEVIAJES",
+          "BUENOS AYRES ESPRESS"
+        ]
+      },
+      "confidence": "medium",
+      "needsConfirmation": true,
+      "warning": "mapped target is not postable"
+    },
+    {
+      "legacyCodigo": "61260002",
+      "role": "pyg",
+      "madreLegacy": "61260000",
+      "planCodigo": "61160001",
+      "status": "mapped_global",
+      "propose": {
+        "kind": "cuenta_global",
+        "codigo": "61160001",
+        "nombre": "Taxi",
+        "esPostable": true
+      },
+      "evidence": {
+        "nombres": {
+          "Taxis": 5
+        },
+        "descripciones": [
+          "Taxi a Casa",
+          "UBER TRIP 840",
+          "UBER TRP 840"
+        ]
+      },
+      "confidence": "high",
+      "needsConfirmation": false,
+      "warning": null
+    },
+    {
+      "legacyCodigo": "61280001",
+      "role": "pyg",
+      "madreLegacy": "61280000",
+      "planCodigo": null,
+      "status": "needs_new_global",
+      "propose": {
+        "kind": "cuenta_global",
+        "codigo": null,
+        "nombre": "ElectrodomÃ©sticos- ElectrÃ³nica e InformÃ¡tica",
+        "createNew": true,
+        "suggestedParent": "61190000"
+      },
+      "evidence": {
+        "nombres": {
+          "ElectrodomÃ©sticos- ElectrÃ³nica e InformÃ¡tica": 1
+        },
+        "descripciones": [
+          "Cargador"
+        ]
+      },
+      "confidence": "low",
+      "needsConfirmation": true
+    },
+    {
+      "legacyCodigo": "62130001",
+      "role": "pyg",
+      "madreLegacy": "62130000",
+      "planCodigo": "62010001",
+      "status": "propose_global",
+      "propose": {
+        "kind": "cuenta_global",
+        "codigo": "62010001",
+        "nombre": "Comisiones",
+        "createNew": false,
+        "suggestedParent": "62010000"
+      },
+      "evidence": {
+        "nombres": {
+          "Comisiones Bancarias": 10
+        },
+        "descripciones": [
+          "N/D CARGO SERV.F.TRANSFERENCIA EXT",
+          "N/D COMISION BANCARIA",
+          "CONTRIBUCIÃ“N PARA EL FINANCIAMIENTO SOLCA"
+        ]
+      },
+      "confidence": "high",
+      "needsConfirmation": true
+    },
+    {
+      "legacyCodigo": "62130002",
+      "role": "pyg",
+      "madreLegacy": "62130000",
+      "planCodigo": "62010002",
+      "status": "propose_global",
+      "propose": {
+        "kind": "cuenta_global",
+        "codigo": "62010002",
+        "nombre": "Intereses",
+        "createNew": false,
+        "suggestedParent": "62010000"
+      },
+      "evidence": {
+        "nombres": {
+          "Intereses Por Financiamiento": 6
+        },
+        "descripciones": [
+          "CHECKPOINT UTIL 1045.26 TOT 993.27",
+          "INTERESES",
+          "INTERES FINANCIAMIENTO CHECKPOINT UTIL 2622.80 TOTPAG 2576.00"
+        ]
+      },
+      "confidence": "high",
+      "needsConfirmation": true
+    },
+    {
+      "legacyCodigo": "62130003",
+      "role": "pyg",
+      "madreLegacy": "62130000",
+      "planCodigo": "62010003",
+      "status": "propose_global",
+      "propose": {
+        "kind": "cuenta_global",
+        "codigo": "62010003",
+        "nombre": "Multas",
+        "createNew": false,
+        "suggestedParent": "62010000"
+      },
+      "evidence": {
+        "nombres": {
+          "Multas": 1
+        },
+        "descripciones": [
+          "TARIFA GESTION COBRANZA"
+        ]
+      },
+      "confidence": "high",
+      "needsConfirmation": true
+    },
+    {
+      "legacyCodigo": "63000003",
+      "role": "pyg",
+      "madreLegacy": "63000000",
+      "planCodigo": "63020001",
+      "status": "mapped_global",
+      "propose": {
+        "kind": "cuenta_global",
+        "codigo": "63020001",
+        "nombre": "Pension Alimenticia",
+        "esPostable": true
+      },
+      "evidence": {
+        "nombres": {
+          "Pension Alimenticia": 1
+        },
+        "descripciones": [
+          "Pension Alimenticia - Canon 500 Mensuales"
+        ]
+      },
+      "confidence": "high",
+      "needsConfirmation": false,
+      "warning": null
+    },
+    {
+      "legacyCodigo": "63400002",
+      "role": "pyg",
+      "madreLegacy": "63400000",
+      "planCodigo": "61190001",
+      "status": "mapped_global",
+      "propose": {
+        "kind": "cuenta_global",
+        "codigo": "61190001",
+        "nombre": "Gastos No Identificados",
+        "esPostable": true
+      },
+      "evidence": {
+        "nombres": {
+          "No se o no quiero saber": 3
+        },
+        "descripciones": [
+          "Checkpoint 9.75",
+          "Checkpoint  47.30",
+          "Checkpoint 7.60"
+        ]
+      },
+      "confidence": "high",
+      "needsConfirmation": false,
+      "warning": null
+    },
+    {
+      "legacyCodigo": "63400004",
+      "role": "pyg",
+      "madreLegacy": "63400000",
+      "planCodigo": "61140005",
+      "status": "mapped_global",
+      "propose": {
+        "kind": "cuenta_global",
+        "codigo": "61140005",
+        "nombre": "Primas de Seguros de Salud",
+        "esPostable": true
+      },
+      "evidence": {
+        "nombres": {
+          "Primas de Seguros": 2
+        },
+        "descripciones": [
+          "PTP - BMI DEL ECUADOR COM EC 840",
+          "SEGURO DE DESGRAVAMEN"
+        ]
+      },
+      "confidence": "high",
+      "needsConfirmation": false,
+      "warning": null
+    },
+    {
+      "legacyCodigo": "64000002",
+      "role": "pyg",
+      "madreLegacy": "64000000",
+      "planCodigo": "61180008",
+      "status": "mapped_global",
+      "propose": {
+        "kind": "cuenta_global",
+        "codigo": "61180008",
+        "nombre": "Loterias y Apuestas",
+        "esPostable": true
+      },
+      "evidence": {
+        "nombres": {
+          "LoterÃ­as y Apuestas": 1
+        },
+        "descripciones": [
+          "Lotto"
+        ]
+      },
+      "confidence": "high",
+      "needsConfirmation": false,
+      "warning": null
+    },
+    {
+      "legacyCodigo": "64000005",
+      "role": "pyg",
+      "madreLegacy": "64000000",
+      "planCodigo": "61180006",
+      "status": "mapped_global",
+      "propose": {
+        "kind": "cuenta_global",
+        "codigo": "61180006",
+        "nombre": "Licores",
+        "esPostable": true
+      },
+      "evidence": {
+        "nombres": {
+          "Diversiones Alcoholicas": 2
+        },
+        "descripciones": [
+          "Chelas"
+        ]
+      },
+      "confidence": "high",
+      "needsConfirmation": false,
+      "warning": null
+    },
+    {
+      "legacyCodigo": "64000006",
+      "role": "pyg",
+      "madreLegacy": "64000000",
+      "planCodigo": "61180007",
+      "status": "mapped_global",
+      "propose": {
+        "kind": "cuenta_global",
+        "codigo": "61180007",
+        "nombre": "Cigarrillos",
+        "esPostable": true
+      },
+      "evidence": {
+        "nombres": {
+          "Tabaco": 6
+        },
+        "descripciones": [
+          "Tommaco",
+          "tommaco"
+        ]
+      },
+      "confidence": "high",
+      "needsConfirmation": false,
+      "warning": null
+    },
+    {
+      "legacyCodigo": "64100001",
+      "role": "pyg",
+      "madreLegacy": "64100000",
+      "planCodigo": "61120004",
+      "status": "mapped_global",
+      "propose": {
+        "kind": "cuenta_global",
+        "codigo": "61120004",
+        "nombre": "Telefono",
+        "esPostable": true
+      },
+      "evidence": {
+        "nombres": {
+          "TelÃ©fono e Internet": 2
+        },
+        "descripciones": [
+          "N/D DEBITOS AUTOMATICOS CLARO"
+        ]
+      },
+      "confidence": "high",
+      "needsConfirmation": false,
+      "warning": null
+    },
+    {
+      "legacyCodigo": "64100003",
+      "role": "pyg",
+      "madreLegacy": "64100000",
+      "planCodigo": "64020001",
+      "status": "mapped_global",
+      "propose": {
+        "kind": "cuenta_global",
+        "codigo": "64020001",
+        "nombre": "Streaming Musica y Video",
+        "esPostable": true
+      },
+      "evidence": {
+        "nombres": {
+          "Servicios online": 2
+        },
+        "descripciones": [
+          "DISNEY PLUS 2400 WEST ALA USA 840",
+          "PAYPAL *SPOTIFY*P43319C GB 840"
+        ]
+      },
+      "confidence": "high",
+      "needsConfirmation": false,
+      "warning": null
+    }
+  ]
+}

@@ -11,7 +11,7 @@ import type { EmailService } from './ports/email-service.js';
 import type { PasswordHasher } from './ports/password-hasher.js';
 import type { AuthTokenRepository } from './ports/auth-token-repository.js';
 import type { User } from '../domain/user.js';
-import { isUserVerified } from '../domain/user.js';
+import { isUserVerified, isUserBlocked } from '../domain/user.js';
 import {
   generateVerificationToken,
   generateRecoveryToken,
@@ -96,6 +96,10 @@ export function createAuthApplicationService(
     async login(input: LoginInput): Promise<AuthResult> {
       const user = await userRepo.findByEmail(input.email);
       if (!user) {
+        throw new Error('Invalid email or password');
+      }
+
+      if (isUserBlocked(user)) {
         throw new Error('Invalid email or password');
       }
 

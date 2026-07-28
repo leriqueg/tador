@@ -1,11 +1,7 @@
 /**
- * EntryBuilder step state machine (PRO capture, Sprint 07 T013).
- *
- * Pure reducer — no side effects, no API calls. The five visible steps
- * mirror the formal EntryBuilder screen (specs/007-frontend-pro-ligero/spec.md,
- * US2): 1 TipoOperacion, 2 Subtipo/cuenta filtrada, 3 Entidad, 4 Concepto,
- * 5 Monto. TRANSFERENCIA has no counterparty entity, so "entidad" is skipped
- * for that operation type only.
+ * @deprecated Superseded by specs/012 decision graph (`decision-graph.ts` +
+ * `decision-walker.ts`). Kept only for legacy unit tests of the subtype-chip
+ * reducer; EntryBuilder UI no longer imports this module.
  */
 
 export type OperationType = 'INGRESO' | 'EGRESO' | 'TRANSFERENCIA';

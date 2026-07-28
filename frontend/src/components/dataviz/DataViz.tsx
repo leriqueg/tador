@@ -1,3 +1,4 @@
+/** Hardcoded Stitch mock — do not wire. Prefer a data-driven chart when elevating bars. */
 export function MonthlyEvolutionChart() {
   const months = [
     { label: 'Ene', height: 'h-24', active: false },
@@ -40,6 +41,7 @@ export function MonthlyEvolutionChart() {
   );
 }
 
+/** Hardcoded Stitch mock — do not wire. Use `charts/BreakdownDonut` (canonical). */
 export function PeriodBreakdownDonut() {
   const segments = [
     { color: 'bg-primary', label: 'Vivienda', pct: '45%' },

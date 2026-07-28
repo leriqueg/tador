@@ -41,11 +41,26 @@ export function createAuthMiddleware(
 
 /**
  * Cookie configuration for session token.
+ *
+ * `Secure` must match how the browser reaches the app:
+ * - HTTPS production → COOKIE_SECURE=true (or omit; defaults true when NODE_ENV=production)
+ * - HTTP demos (e.g. http://tador.nesis.tel) → COOKIE_SECURE=false or browsers drop the cookie
+ *   and login/register appear to fail (200 response, no session on the next request).
  */
+export function resolveSessionCookieSecure(
+  env: NodeJS.ProcessEnv = process.env,
+): boolean {
+  if (env.COOKIE_SECURE === 'true') return true;
+  if (env.COOKIE_SECURE === 'false') return false;
+  return env.NODE_ENV === 'production';
+}
+
 export const SESSION_COOKIE_OPTIONS = {
   path: '/',
   httpOnly: true,
   sameSite: 'lax' as const,
-  secure: process.env.NODE_ENV === 'production',
+  get secure() {
+    return resolveSessionCookieSecure();
+  },
   maxAge: 7 * 24 * 60 * 60, // 7 days in seconds
 };

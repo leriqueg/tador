@@ -10,7 +10,7 @@
 | 2 | `/pro/entries` | EntryBuilder | US2 | Pendiente |
 | 3 | `/pro/entries/manual` | Asiento manual | US3 | Pendiente |
 | 4 | `/pro/accounts` | Árbol + crear bajo madre | US4 | Pendiente |
-| 5 | `/pro/entities` | Entidades (org capabilities) | US1/US2 | Pendiente |
+| 5 | `/pro/entities` | Entidades (org capabilities) | US1/US2 | Hecho (T041 — mismo diseño Hogar + organization) |
 | 6 | `/pro/finances` | Landing | US5 | Pendiente |
 | 7 | `/pro/finances/pyg` | P&G base | US5 | Pendiente |
 | 8 | `/pro/finances/balance` | Posición | US5 | Pendiente |

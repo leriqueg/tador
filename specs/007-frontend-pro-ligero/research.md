@@ -24,7 +24,7 @@ Collapse client/supplier into `organization` with `can_be_customer`, `can_be_sup
 
 ## Decision: PRO onboarding
 
-Ask employment dependency only → create employer org. No clients/suppliers in onboarding. Freelance may finish empty-handed. Clients/suppliers JIT in EntryBuilder with careful inline UI.
+Ask employment dependency and freelance as **independent** flags (both / neither allowed) → create employer org only when dependency is set. No clients/suppliers in onboarding. Seed starter `CuentaUsuario` (default wallet + income/expense categories) so EntryBuilder is usable immediately. `/pro/entities` reuses Hogar Entities UI plus `organization` + capabilities (T041). Clients/suppliers JIT in EntryBuilder — polish deferred (T042).
 
 ## Decision: IA / 008
 

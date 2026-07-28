@@ -5,6 +5,14 @@ const E2E_PASSWORD = 'E2ePassword1!';
 
 export { E2E_PASSWORD };
 
+/** Mirrors frontend/src/lib/onboarding-starter-accounts.ts (FR-016). */
+const STARTER_ACCOUNTS = [
+  { tipoCuenta: 'wallet', nombre: 'Billetera' },
+  { tipoCuenta: 'incomeCategory', nombre: 'Sueldo' },
+  { tipoCuenta: 'incomeCategory', nombre: 'Otros ingresos' },
+  { tipoCuenta: 'expenseCategory', nombre: 'Gastos varios' },
+] as const;
+
 export async function waitForBackend(request: APIRequestContext): Promise<void> {
   const deadline = Date.now() + 30_000;
   while (Date.now() < deadline) {
@@ -19,6 +27,18 @@ export async function waitForBackend(request: APIRequestContext): Promise<void> 
   throw new Error(
     `Backend not reachable at ${BACKEND_URL}. Start Postgres + backend before E2E.`,
   );
+}
+
+async function seedStarterAccounts(request: APIRequestContext): Promise<void> {
+  for (const account of STARTER_ACCOUNTS) {
+    const res = await request.post(`${BACKEND_URL}/api/accounts`, {
+      data: account,
+    });
+    if (!res.ok()) {
+      const body = await res.text();
+      throw new Error(`Starter account create failed (${res.status()}): ${body}`);
+    }
+  }
 }
 
 /** Register, verify email, and mark book initialized (API-only setup). */
@@ -61,4 +81,6 @@ export async function createInitializedUser(
     const body = await config.text();
     throw new Error(`Onboarding patch failed (${config.status()}): ${body}`);
   }
+
+  await seedStarterAccounts(request);
 }

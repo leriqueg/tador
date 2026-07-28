@@ -49,6 +49,8 @@ function createFakes() {
         fullName: null,
         verifiedAt: null,
         createdAt: new Date(),
+        blockedAt: null,
+        blockedReason: null,
       };
       users.set(user.id, user);
       byEmail.set(user.email, user.id);

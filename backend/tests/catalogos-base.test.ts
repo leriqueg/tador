@@ -9,9 +9,25 @@
  * - 5.5: Edge cases
  */
 
+import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { describe, it, expect } from 'vitest';
 import { buildApp } from '../src/server.js';
 import type { FastifyInstance } from 'fastify';
+
+/** Chart length must track the seed file (migration/core grew it past 126). */
+const SEEDED_CHART_LENGTH = (
+  JSON.parse(
+    readFileSync(
+      join(
+        dirname(fileURLToPath(import.meta.url)),
+        '../data/plan-de-cuentas/plan-de-cuentas-final-seed.json',
+      ),
+      'utf8',
+    ),
+  ) as { accounts: unknown[] }
+).accounts.length;
 
 async function createTestApp(): Promise<FastifyInstance> {
   const app = await buildApp({ logger: false });
@@ -48,7 +64,7 @@ describe('5.1 — Chart activation (FR-009/010)', () => {
     const app = await createTestApp();
     const cookies = await registerAndVerify(app, 'chart-51@test.com');
 
-    // GET /api/chart — expect all 56 seeded groups + 70 postable = 126 accounts, no activations
+    // GET /api/chart — full seeded catalog, no activations yet
     const chartRes = await app.inject({
       method: 'GET',
       url: '/api/chart',
@@ -56,7 +72,7 @@ describe('5.1 — Chart activation (FR-009/010)', () => {
     });
     expect(chartRes.statusCode).toBe(200);
     const chartBody = chartRes.json();
-    expect(chartBody.chart).toHaveLength(126);
+    expect(chartBody.chart).toHaveLength(SEEDED_CHART_LENGTH);
     expect(chartBody.activations).toHaveLength(0);
 
     // Get a postable account (esPostable: true) to activate — not a group
@@ -75,7 +91,7 @@ describe('5.1 — Chart activation (FR-009/010)', () => {
     expect(activation.activa).toBe(true);
     expect(activation.userId).toBeDefined();
 
-    // GET /api/chart again — activation now appears, chart still has 126 entries
+    // GET /api/chart again — activation now appears, chart size unchanged
     const chartRes2 = await app.inject({
       method: 'GET',
       url: '/api/chart',
@@ -83,7 +99,7 @@ describe('5.1 — Chart activation (FR-009/010)', () => {
     });
     expect(chartRes2.statusCode).toBe(200);
     const chartBody2 = chartRes2.json();
-    expect(chartBody2.chart).toHaveLength(126);
+    expect(chartBody2.chart).toHaveLength(SEEDED_CHART_LENGTH);
     expect(chartBody2.activations).toHaveLength(1);
     expect(chartBody2.activations[0].globalId).toBe(firstChartId);
 

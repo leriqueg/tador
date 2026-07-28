@@ -1,62 +1,47 @@
 import { useEffect, useMemo, useReducer, useRef, useState, type RefObject } from 'react';
+import { Link } from 'react-router-dom';
 import Button from '../ui/Button.tsx';
+import Icon from '../ui/Icon.tsx';
 import TextInput from '../ui/TextInput.tsx';
 import ValidationMessage from '../ui/ValidationMessage.tsx';
-import Icon from '../ui/Icon.tsx';
 import EntityJitForm, { type EntityJitFormValues } from './EntityJitForm.tsx';
 import {
-  accountMemoryKey,
-  resolveStickyAccounts,
-  writeLastAccountPair,
-} from '../../lib/entry-builder-account-memory.ts';
+  ENTRY_DECISION_GRAPH,
+  getNode,
+  type DecisionNode,
+  type PickAccountNode,
+} from './decision-graph.ts';
 import {
-  CREDIT_LABEL,
-  DEBIT_LABEL,
-  creditAccountOptions,
-  debitAccountOptions,
-  excludeAccount,
-} from './account-filters.ts';
-import {
-  EGRESO_FINANCIAL_SUBTYPES,
-  FINANCIAL_PLANTILLA_LABELS,
-  INGRESO_FINANCIAL_SUBTYPES,
-} from '../../lib/financial-plantillas.ts';
-import {
+  advanceWithEntities,
   buildApunteSubmitPayload,
   canAdvance,
-  createInitialEntryBuilderState,
+  createInitialWalkerState,
+  currentNode,
+  decisionWalkerReducer,
   entityBlocksAdvance,
-  entryBuilderHasDraft,
-  entryBuilderReducer,
-  requiredEntityCapability,
-  stepOrderFor,
+  walkerHasDraft,
   type ApunteSubmitPayload,
-  type EntryStepId,
-  type EntrySubtype,
-  type OperationType,
-} from './entry-builder-state.ts';
-import type { AccountSummary, EntitySummary } from '../../lib/api.ts';
+  type WalkerAction,
+  type WalkerState,
+} from './decision-walker.ts';
+import { filterAccountsForPickNode } from './account-node-filter.ts';
+import type { AccountSummary, ChartGlobalNode, EntitySummary } from '../../lib/api.ts';
+
+export type { ApunteSubmitPayload };
 
 export interface EntryBuilderProps {
   accounts: AccountSummary[];
   entities: EntitySummary[];
+  chart?: ChartGlobalNode[];
   onSubmit: (payload: ApunteSubmitPayload) => Promise<void>;
   onCreateEntity: (values: EntityJitFormValues) => Promise<EntitySummary>;
-  /** Notifies parent for abandon-guard wiring (T029). */
   onDraftChange?: (hasDraft: boolean) => void;
 }
 
-const TIPO_LABEL: Record<OperationType, string> = {
-  INGRESO: 'Ingreso',
-  EGRESO: 'Egreso',
-  TRANSFERENCIA: 'Transferencia',
-};
-
-const TIPO_ICON: Record<OperationType, string> = {
-  INGRESO: 'arrow_downward',
-  EGRESO: 'arrow_upward',
-  TRANSFERENCIA: 'swap_horiz',
-};
+const SELECT_CLASS =
+  'w-full h-9 px-sm rounded-md border border-outline-variant bg-surface-container-lowest text-body-sm text-on-surface';
+const HEADING_CLASS =
+  'text-title-md text-on-surface font-semibold mb-sm focus:outline-none';
 
 function todayIso(): string {
   return new Date().toISOString().slice(0, 10);
@@ -67,19 +52,53 @@ function accountName(accounts: AccountSummary[], id: string | null): string {
   return accounts.find((a) => a.id === id)?.nombre ?? '—';
 }
 
-/**
- * EntryBuilder — PRO sequential capture (US2). Replaces QuickAdd for `/pro/entries`.
- * Previous steps stay visible as editable summaries; the newly revealed step
- * receives focus and the whole region is `aria-live` for screen readers.
- */
+function choiceLabel(node: DecisionNode, optionId: string | undefined): string {
+  if (!optionId || node.kind !== 'choice') return '—';
+  return node.options.find((o) => o.id === optionId)?.label ?? optionId;
+}
+
+/** Affirmation + value for a completed history node. */
+export function historyStepLabel(
+  nodeId: string,
+  state: WalkerState,
+  accounts: AccountSummary[],
+  entities: EntitySummary[],
+): { label: string; value: string } | null {
+  const histNode = getNode(ENTRY_DECISION_GRAPH, nodeId);
+  if (!histNode || histNode.kind === 'leaf') return null;
+  const prefix = histNode.affirmation ?? histNode.question ?? nodeId;
+  let value = '—';
+  if (histNode.kind === 'choice') {
+    value = choiceLabel(histNode, state.choices[nodeId]);
+  } else if (histNode.kind === 'pick_entity') {
+    value = entities.find((e) => e.id === state.entityId)?.nombre ?? '—';
+  } else if (histNode.kind === 'pick_account') {
+    const accId = histNode.role === 'debit' ? state.debitAccountId : state.creditAccountId;
+    value = accountName(accounts, accId);
+  } else if (histNode.kind === 'concept') {
+    value = state.concept.trim() || '—';
+  } else if (histNode.kind === 'amount') {
+    value = state.amount.trim() || '—';
+  }
+  return { label: prefix, value };
+}
+
+function reducer(state: WalkerState, action: WalkerAction): WalkerState {
+  return decisionWalkerReducer(state, action, ENTRY_DECISION_GRAPH);
+}
+
+/** PRO EntryBuilder — compact decision graph walker (specs/012). */
 export default function EntryBuilder({
   accounts,
   entities,
+  chart = [],
   onSubmit,
   onCreateEntity,
   onDraftChange,
 }: EntryBuilderProps) {
-  const [state, dispatch] = useReducer(entryBuilderReducer, createInitialEntryBuilderState());
+  const [state, dispatch] = useReducer(reducer, undefined, () =>
+    createInitialWalkerState(ENTRY_DECISION_GRAPH),
+  );
   const [localEntities, setLocalEntities] = useState<EntitySummary[]>(entities);
   const [showJit, setShowJit] = useState(false);
   const [jitSubmitting, setJitSubmitting] = useState(false);
@@ -90,68 +109,40 @@ export default function EntryBuilder({
   const [phase, setPhase] = useState<'builder' | 'success'>('builder');
 
   const stepHeadingRef = useRef<HTMLHeadingElement | null>(null);
+  const node = currentNode(state, ENTRY_DECISION_GRAPH);
+  const hasDraft = walkerHasDraft(state, ENTRY_DECISION_GRAPH);
+
   useEffect(() => {
     stepHeadingRef.current?.focus();
-  }, [state.step]);
+  }, [state.nodeId]);
 
   useEffect(() => {
-    onDraftChange?.(phase === 'builder' && entryBuilderHasDraft(state));
-  }, [state, phase, onDraftChange]);
+    onDraftChange?.(phase === 'builder' && hasDraft);
+  }, [hasDraft, phase, onDraftChange]);
 
   useEffect(() => {
-    if (state.step !== 'cuentas' || !state.tipo) return;
-    if (state.debitAccountId && state.creditAccountId) return;
+    setLocalEntities(entities);
+  }, [entities]);
 
-    const key = accountMemoryKey(state.tipo, state.subtype);
-    const debitOpts = excludeAccount(debitAccountOptions(accounts, state.tipo), state.creditAccountId);
-    const creditOpts = excludeAccount(creditAccountOptions(accounts, state.tipo), state.debitAccountId);
-    const sticky = resolveStickyAccounts(key, debitOpts, creditOpts);
-    if (!sticky) return;
+  const pickAccountOptions = useMemo(() => {
+    if (!node || node.kind !== 'pick_account') return [];
+    return filterAccountsForPickNode(accounts, node, chart);
+  }, [accounts, chart, node]);
 
-    if (!state.debitAccountId) {
-      dispatch({ type: 'SET_DEBIT_ACCOUNT', accountId: sticky.debitAccountId });
-    }
-    if (!state.creditAccountId) {
-      dispatch({ type: 'SET_CREDIT_ACCOUNT', accountId: sticky.creditAccountId });
-    }
-  }, [
-    state.step,
-    state.tipo,
-    state.subtype,
-    state.debitAccountId,
-    state.creditAccountId,
-    accounts,
-  ]);
+  const candidateEntities = useMemo(() => {
+    if (!node || node.kind !== 'pick_entity') return localEntities;
+    const required = node.requiredCapability;
+    if (!required) return localEntities;
+    return localEntities.filter((e) => (e.capabilities ?? []).includes(required));
+  }, [localEntities, node]);
 
-  const order = stepOrderFor(state.tipo);
-  const currentIndex = order.indexOf(state.step);
-  const visibleSteps = order.slice(0, currentIndex + 1);
-
-  const requiredCapability = requiredEntityCapability(state.subtype);
-  const candidateEntities = useMemo(
-    () =>
-      requiredCapability
-        ? localEntities.filter((e) => (e.capabilities ?? []).includes(requiredCapability))
-        : localEntities,
-    [localEntities, requiredCapability],
-  );
-
-  function selectTipo(tipo: OperationType) {
-    dispatch({ type: 'SELECT_TIPO', tipo });
-    dispatch({ type: 'ADVANCE' });
-  }
-
-  function editStep(step: EntryStepId) {
-    dispatch({ type: 'EDIT_STEP', step });
-  }
-
-  function continueFromEntidad() {
-    if (entityBlocksAdvance(state, localEntities)) {
-      setEntityError('Elegí una entidad válida para continuar.');
-      return;
-    }
+  function clearAll() {
+    dispatch({ type: 'RESET' });
+    setShowJit(false);
+    setJitError('');
     setEntityError('');
-    dispatch({ type: 'ADVANCE' });
+    setSubmitError('');
+    setPhase('builder');
   }
 
   async function handleCreateEntity(values: EntityJitFormValues) {
@@ -160,7 +151,7 @@ export default function EntryBuilder({
     try {
       const created = await onCreateEntity(values);
       setLocalEntities((prev) => [...prev, created]);
-      dispatch({ type: 'SELECT_ENTITY', entityId: created.id });
+      dispatch({ type: 'SET_ENTITY', entityId: created.id });
       setShowJit(false);
       setEntityError('');
     } catch (err) {
@@ -170,22 +161,31 @@ export default function EntryBuilder({
     }
   }
 
-  async function handleGuardar() {
-    const payload = buildApunteSubmitPayload(state, todayIso());
+  function continueEntity() {
+    if (entityBlocksAdvance(state, localEntities, ENTRY_DECISION_GRAPH)) {
+      setEntityError('Elegí una entidad válida para continuar.');
+      return;
+    }
+    setEntityError('');
+    dispatch({
+      type: 'HYDRATE',
+      state: advanceWithEntities(state, localEntities, ENTRY_DECISION_GRAPH),
+    });
+  }
+
+  async function handleSave(burst: boolean) {
+    const payload = buildApunteSubmitPayload(state, todayIso(), ENTRY_DECISION_GRAPH);
     if (!payload) return;
     setSubmitting(true);
     setSubmitError('');
     try {
       await onSubmit(payload);
-      if (state.tipo && state.debitAccountId && state.creditAccountId) {
-        writeLastAccountPair(
-          accountMemoryKey(state.tipo, state.subtype),
-          state.debitAccountId,
-          state.creditAccountId,
-        );
+      if (burst) {
+        dispatch({ type: 'BURST' });
+        setPhase('builder');
+      } else {
+        setPhase('success');
       }
-      setPhase('success');
-      onDraftChange?.(false);
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : 'No se pudo guardar el apunte');
     } finally {
@@ -193,463 +193,356 @@ export default function EntryBuilder({
     }
   }
 
-  function handleBurst() {
-    dispatch({ type: 'BURST' });
-    setPhase('builder');
-  }
-
-  function handleNuevoMovimiento() {
-    dispatch({ type: 'RESET' });
-    setShowJit(false);
-    setPhase('builder');
-    onDraftChange?.(false);
-  }
-
   if (phase === 'success') {
     return (
-      <section
-        className="rounded-xl border border-success-emerald/25 bg-success-emerald/10 p-lg space-y-md"
-        aria-live="polite"
-      >
-        <div className="flex items-center gap-sm">
-          <Icon name="check_circle" className="text-success-emerald text-2xl" filled />
-          <h2 className="text-headline-md text-on-surface font-bold">Apunte guardado</h2>
-        </div>
-        <p className="text-body-md text-on-surface-variant">
-          Quedó registrado en tu libro PRO.
-        </p>
-        <div className="flex flex-col sm:flex-row gap-sm">
-          <Button onClick={handleBurst}>Guardar y registrar otro</Button>
-          <Button variant="outline" onClick={handleNuevoMovimiento}>
-            Nuevo movimiento
-          </Button>
-        </div>
-      </section>
+      <div className="space-y-sm" aria-live="polite">
+        <ValidationMessage tone="success">Apunte guardado.</ValidationMessage>
+        <Button size="sm" onClick={clearAll}>
+          Registrar otro
+        </Button>
+      </div>
     );
   }
 
   return (
-    <div className="space-y-md" aria-live="polite">
-      {visibleSteps.map((stepId) => {
-        const isCurrent = stepId === state.step;
-
-        if (!isCurrent) {
-          return (
-            <StepSummaryRow
-              key={stepId}
-              stepId={stepId}
-              state={state}
-              accounts={accounts}
-              entities={localEntities}
-              onEdit={() => editStep(stepId)}
-            />
-          );
-        }
-
-        return (
-          <div key={stepId} aria-live="polite">
-            {stepId === 'tipo' && (
-              <section>
-                <h2
-                  ref={stepHeadingRef}
-                  tabIndex={-1}
-                  className="text-headline-md text-on-surface font-bold mb-md focus:outline-none"
-                >
-                  ¿Qué tipo de movimiento es?
-                </h2>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-sm">
-                  {(['INGRESO', 'EGRESO', 'TRANSFERENCIA'] as OperationType[]).map((tipo) => (
-                    <button
-                      key={tipo}
-                      type="button"
-                      onClick={() => selectTipo(tipo)}
-                      className="flex flex-col items-center gap-xs p-md rounded-xl border-2 border-outline-variant/40 hover:border-primary text-label-md font-semibold text-on-surface transition-colors"
-                    >
-                      <Icon name={TIPO_ICON[tipo]} className="text-2xl text-primary" />
-                      {TIPO_LABEL[tipo]}
-                    </button>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {stepId === 'cuentas' && state.tipo && (
-              <CuentasStep
-                headingRef={stepHeadingRef}
-                tipo={state.tipo}
-                subtype={state.subtype}
-                accounts={accounts}
-                debitAccountId={state.debitAccountId}
-                creditAccountId={state.creditAccountId}
-                onSelectSubtype={(subtype) => dispatch({ type: 'SELECT_SUBTYPE', subtype })}
-                onSelectDebit={(accountId) => dispatch({ type: 'SET_DEBIT_ACCOUNT', accountId })}
-                onSelectCredit={(accountId) => dispatch({ type: 'SET_CREDIT_ACCOUNT', accountId })}
-                onContinue={() => dispatch({ type: 'ADVANCE' })}
-                canContinue={canAdvance(state)}
-              />
-            )}
-
-            {stepId === 'entidad' && state.tipo && (
-              <EntidadStep
-                headingRef={stepHeadingRef}
-                requiredCapability={requiredCapability}
-                candidateEntities={candidateEntities}
-                allEntities={localEntities}
-                entityId={state.entityId}
-                showJit={showJit}
-                jitSubmitting={jitSubmitting}
-                jitError={jitError}
-                entityError={entityError}
-                onSelectEntity={(entityId) => {
-                  dispatch({ type: 'SELECT_ENTITY', entityId: entityId || null });
-                  setEntityError('');
-                }}
-                onOpenJit={() => setShowJit(true)}
-                onCancelJit={() => {
-                  setShowJit(false);
-                  setJitError('');
-                }}
-                onCreateEntity={handleCreateEntity}
-                onSkip={() => {
-                  dispatch({ type: 'SELECT_ENTITY', entityId: null });
-                  dispatch({ type: 'ADVANCE' });
-                }}
-                onContinue={continueFromEntidad}
-              />
-            )}
-
-            {stepId === 'concepto' && (
-              <section>
-                <h2
-                  ref={stepHeadingRef}
-                  tabIndex={-1}
-                  className="text-headline-md text-on-surface font-bold mb-md focus:outline-none"
-                >
-                  ¿Cuál es el concepto?
-                </h2>
-                <TextInput
-                  label="Concepto"
-                  id="entry-concepto"
-                  name="entry-concepto"
-                  value={state.concept}
-                  onChange={(e) => dispatch({ type: 'SET_CONCEPT', concept: e.target.value })}
-                  placeholder="Ej. Pago de internet de julio…"
-                  autoComplete="off"
-                />
-                <Button
-                  className="mt-md"
-                  disabled={!canAdvance(state)}
-                  onClick={() => dispatch({ type: 'ADVANCE' })}
-                >
-                  Continuar
-                </Button>
-              </section>
-            )}
-
-            {stepId === 'monto' && (
-              <section>
-                <h2
-                  ref={stepHeadingRef}
-                  tabIndex={-1}
-                  className="text-headline-md text-on-surface font-bold mb-md focus:outline-none"
-                >
-                  ¿Cuál es el monto?
-                </h2>
-                {submitError && (
-                  <div className="mb-md">
-                    <ValidationMessage tone="error">{submitError}</ValidationMessage>
-                  </div>
-                )}
-                <TextInput
-                  label="Monto"
-                  id="entry-monto"
-                  name="entry-monto"
-                  type="text"
-                  inputMode="decimal"
-                  autoComplete="off"
-                  value={state.amount}
-                  onChange={(e) => dispatch({ type: 'SET_AMOUNT', amount: e.target.value })}
-                  placeholder="0.00…"
-                />
-                <Button
-                  className="mt-md"
-                  disabled={!canAdvance(state) || submitting}
-                  onClick={() => void handleGuardar()}
-                >
-                  {submitting ? 'Guardando…' : 'Guardar'}
-                </Button>
-              </section>
+    <div className="space-y-sm text-body-sm" aria-live="polite">
+      <div className="flex items-center justify-end min-h-8">
+        {hasDraft && (
+          <button
+            type="button"
+            onClick={clearAll}
+            className="inline-flex items-center gap-xs text-label-sm text-on-surface-variant hover:text-error"
+            aria-label="Limpiar todo el apunte"
+          >
+                <Icon name="close" size="sm" className="!text-base" />
+                Limpiar todo
+              </button>
             )}
           </div>
-        );
-      })}
+
+          {state.history.length > 0 && (
+            <ol className="space-y-1 mb-sm">
+              {state.history.map((id) => {
+                const step = historyStepLabel(id, state, accounts, localEntities);
+                if (!step) return null;
+                return (
+                  <li
+                    key={id}
+                    className="flex items-center gap-sm py-1 px-sm rounded-md bg-surface-container-low/60"
+                  >
+                    <span className="flex-1 min-w-0 text-body-sm text-on-surface truncate">
+                      <span className="text-on-surface-variant">{step.label}:</span>{' '}
+                      <span className="font-medium">{step.value}</span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => dispatch({ type: 'JUMP_TO', nodeId: id })}
+                      className="shrink-0 inline-flex items-center justify-center size-7 rounded-md text-on-surface-variant hover:bg-outline-variant/30 hover:text-on-surface"
+                      aria-label={`Editar: ${step.label} ${step.value}`}
+                      title="Volver a este paso"
+                    >
+                      <Icon name="close" size="sm" className="!text-base" />
+                    </button>
+                  </li>
+                );
+              })}
+            </ol>
+          )}
+
+      {node?.kind === 'choice' && (
+        <ChoiceStep
+          headingRef={stepHeadingRef}
+          question={node.question}
+          options={node.options}
+          canGoBack={state.history.length > 0}
+          onChoose={(optionId) => dispatch({ type: 'CHOOSE', optionId })}
+          onBack={() => dispatch({ type: 'BACK' })}
+        />
+      )}
+
+      {node?.kind === 'pick_entity' && (
+        <EntityStep
+          headingRef={stepHeadingRef}
+          question={node.question}
+          requiredCapability={node.requiredCapability ?? null}
+          candidates={candidateEntities}
+          entityId={state.entityId}
+          showJit={showJit}
+          jitSubmitting={jitSubmitting}
+          jitError={jitError}
+          entityError={entityError}
+          onSelect={(id) => dispatch({ type: 'SET_ENTITY', entityId: id })}
+          onOpenJit={() => setShowJit(true)}
+          onCancelJit={() => setShowJit(false)}
+          onCreateEntity={handleCreateEntity}
+          onContinue={continueEntity}
+          onBack={() => dispatch({ type: 'BACK' })}
+          canContinue={canAdvance(state, localEntities, ENTRY_DECISION_GRAPH)}
+        />
+      )}
+
+      {node?.kind === 'pick_account' && (
+        <AccountStep
+          headingRef={stepHeadingRef}
+          node={node}
+          options={pickAccountOptions}
+          selectedId={node.role === 'debit' ? state.debitAccountId : state.creditAccountId}
+          onSelect={(accountId) => dispatch({ type: 'SET_ACCOUNT', accountId })}
+          onContinue={() => dispatch({ type: 'ADVANCE' })}
+          onBack={() => dispatch({ type: 'BACK' })}
+          canContinue={canAdvance(state, localEntities, ENTRY_DECISION_GRAPH)}
+        />
+      )}
+
+      {node?.kind === 'concept' && (
+        <FieldStep
+          headingRef={stepHeadingRef}
+          title="Concepto"
+          label="Concepto"
+          inputId="entry-concept"
+          value={state.concept}
+          onChange={(concept) => dispatch({ type: 'SET_CONCEPT', concept })}
+          onContinue={() => dispatch({ type: 'ADVANCE' })}
+          onBack={() => dispatch({ type: 'BACK' })}
+          canContinue={canAdvance(state, localEntities, ENTRY_DECISION_GRAPH)}
+        />
+      )}
+
+      {node?.kind === 'amount' && (
+        <FieldStep
+          headingRef={stepHeadingRef}
+          title="Monto"
+          label="Monto"
+          inputId="entry-amount"
+          value={state.amount}
+          inputMode="decimal"
+          onChange={(amount) => dispatch({ type: 'SET_AMOUNT', amount })}
+          onContinue={() => dispatch({ type: 'ADVANCE' })}
+          onBack={() => dispatch({ type: 'BACK' })}
+          canContinue={canAdvance(state, localEntities, ENTRY_DECISION_GRAPH)}
+        />
+      )}
+
+      {node?.kind === 'leaf' && (
+        <LeafStep
+          headingRef={stepHeadingRef}
+          flowSummary={
+            state.debitAccountId && state.creditAccountId
+              ? {
+                  from: accountName(accounts, state.creditAccountId),
+                  to: accountName(accounts, state.debitAccountId),
+                  amount: state.amount,
+                }
+              : null
+          }
+          submitting={submitting}
+          submitError={submitError}
+          onSave={() => void handleSave(false)}
+          onBurst={() => void handleSave(true)}
+          onBack={() => dispatch({ type: 'BACK' })}
+        />
+      )}
     </div>
   );
 }
 
-// ---------------------------------------------------------------------------
-// Step 2 — Subtipo / cuenta filtrada
-// ---------------------------------------------------------------------------
-
-interface CuentasStepProps {
-  headingRef: RefObject<HTMLHeadingElement | null>;
-  tipo: OperationType;
-  subtype: EntrySubtype;
-  accounts: AccountSummary[];
-  debitAccountId: string | null;
-  creditAccountId: string | null;
-  onSelectSubtype: (subtype: EntrySubtype) => void;
-  onSelectDebit: (accountId: string) => void;
-  onSelectCredit: (accountId: string) => void;
-  onContinue: () => void;
-  canContinue: boolean;
-}
-
-function CuentasStep({
-  headingRef,
-  tipo,
-  subtype,
-  accounts,
-  debitAccountId,
-  creditAccountId,
-  onSelectSubtype,
-  onSelectDebit,
-  onSelectCredit,
+function StepNav({
+  onBack,
   onContinue,
   canContinue,
-}: CuentasStepProps) {
-  const debitOptions = excludeAccount(debitAccountOptions(accounts, tipo), creditAccountId);
-  const creditOptions = excludeAccount(creditAccountOptions(accounts, tipo), debitAccountId);
+  continueLabel = 'Continuar',
+}: {
+  onBack: () => void;
+  onContinue?: () => void;
+  canContinue?: boolean;
+  continueLabel?: string;
+}) {
+  return (
+    <div className="flex flex-wrap items-center gap-xs mt-sm">
+      <Button variant="outline" size="sm" onClick={onBack}>
+        Volver
+      </Button>
+      {onContinue && (
+        <Button size="sm" disabled={!canContinue} onClick={onContinue}>
+          {continueLabel}
+        </Button>
+      )}
+    </div>
+  );
+}
 
+function ChoiceStep({
+  headingRef,
+  question,
+  options,
+  canGoBack,
+  onChoose,
+  onBack,
+}: {
+  headingRef: RefObject<HTMLHeadingElement | null>;
+  question: string;
+  options: { id: string; label: string }[];
+  canGoBack: boolean;
+  onChoose: (id: string) => void;
+  onBack: () => void;
+}) {
   return (
     <section>
-      <h2
-        ref={headingRef}
-        tabIndex={-1}
-        className="text-headline-md text-on-surface font-bold mb-md focus:outline-none"
-      >
-        Cuentas del movimiento
+      <h2 ref={headingRef} tabIndex={-1} className={HEADING_CLASS}>
+        {question}
       </h2>
-
-      {tipo === 'INGRESO' && (
-        <div className="flex flex-wrap gap-sm mb-md">
-          <SubtypeChip
-            active={subtype === 'salario'}
-            label="Sueldo"
-            onClick={() => onSelectSubtype('salario')}
-          />
-          <SubtypeChip
-            active={subtype === 'general'}
-            label="Otro ingreso"
-            onClick={() => onSelectSubtype('general')}
-          />
-          {INGRESO_FINANCIAL_SUBTYPES.map((code) => (
-            <SubtypeChip
-              key={code}
-              active={subtype === code}
-              label={FINANCIAL_PLANTILLA_LABELS[code]}
-              onClick={() => onSelectSubtype(code)}
-            />
-          ))}
-        </div>
-      )}
-
-      {tipo === 'EGRESO' && (
-        <div className="flex flex-wrap gap-sm mb-md">
-          <SubtypeChip
-            active={subtype === 'general'}
-            label="Gasto general"
-            onClick={() => onSelectSubtype('general')}
-          />
-          {EGRESO_FINANCIAL_SUBTYPES.map((code) => (
-            <SubtypeChip
-              key={code}
-              active={subtype === code}
-              label={FINANCIAL_PLANTILLA_LABELS[code]}
-              onClick={() => onSelectSubtype(code)}
-            />
-          ))}
-        </div>
-      )}
-
-      <div className="space-y-md">
-        <div>
-          <label
-            htmlFor="entry-debit-account"
-            className="text-label-md text-on-surface-variant mb-xs block"
+      <div className="flex flex-wrap items-center gap-xs">
+        {options.map((opt) => (
+          <button
+            key={opt.id}
+            type="button"
+            onClick={() => onChoose(opt.id)}
+            className="px-sm py-1.5 rounded-md border border-outline-variant/60 hover:border-primary hover:bg-primary/5 text-label-sm font-semibold text-on-surface"
           >
-            {DEBIT_LABEL[tipo]}
-          </label>
-          <select
-            id="entry-debit-account"
-            value={debitAccountId ?? ''}
-            onChange={(e) => onSelectDebit(e.target.value)}
-            className="w-full h-12 px-md rounded-lg border border-outline-variant bg-surface-container-lowest text-body-md"
-          >
-            <option value="" disabled>
-              Elegí una cuenta…
-            </option>
-            {debitOptions.map((a) => (
-              <option key={a.id} value={a.id}>
-                {a.nombre}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label
-            htmlFor="entry-credit-account"
-            className="text-label-md text-on-surface-variant mb-xs block"
-          >
-            {CREDIT_LABEL[tipo]}
-          </label>
-          <select
-            id="entry-credit-account"
-            value={creditAccountId ?? ''}
-            onChange={(e) => onSelectCredit(e.target.value)}
-            className="w-full h-12 px-md rounded-lg border border-outline-variant bg-surface-container-lowest text-body-md"
-          >
-            <option value="" disabled>
-              Elegí una cuenta…
-            </option>
-            {creditOptions.map((a) => (
-              <option key={a.id} value={a.id}>
-                {a.nombre}
-              </option>
-            ))}
-          </select>
-        </div>
+            {opt.label}
+          </button>
+        ))}
+        {canGoBack && (
+          <Button variant="ghost" size="sm" onClick={onBack} className="!h-8 !px-sm">
+            Volver
+          </Button>
+        )}
       </div>
-
-      <Button className="mt-md" disabled={!canContinue} onClick={onContinue}>
-        Continuar
-      </Button>
     </section>
   );
 }
 
-function SubtypeChip({
-  active,
-  label,
-  onClick,
+function AccountStep({
+  headingRef,
+  node,
+  options,
+  selectedId,
+  onSelect,
+  onContinue,
+  onBack,
+  canContinue,
 }: {
-  active: boolean;
-  label: string;
-  onClick: () => void;
+  headingRef: RefObject<HTMLHeadingElement | null>;
+  node: PickAccountNode;
+  options: AccountSummary[];
+  selectedId: string | null;
+  onSelect: (id: string) => void;
+  onContinue: () => void;
+  onBack: () => void;
+  canContinue: boolean;
 }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`p-sm rounded-lg border-2 text-label-md font-semibold ${
-        active ? 'border-primary text-primary' : 'border-outline-variant/40'
-      }`}
-    >
-      {label}
-    </button>
+    <section>
+      <h2 ref={headingRef} tabIndex={-1} className={HEADING_CLASS}>
+        {node.question}
+      </h2>
+      {options.length === 0 ? (
+        <ValidationMessage tone="error">
+          No hay cuentas para este paso. Revisá{' '}
+          <Link to="/pro/accounts" className="underline font-semibold">
+            Cuentas
+          </Link>{' '}
+          o{' '}
+          <Link to="/pro/entities" className="underline font-semibold">
+            Entidades
+          </Link>
+          .
+        </ValidationMessage>
+      ) : (
+        <select
+          id={`entry-account-${node.role}`}
+          aria-label={node.question}
+          value={selectedId ?? ''}
+          onChange={(e) => onSelect(e.target.value)}
+          className={SELECT_CLASS}
+        >
+          <option value="" disabled>
+            Elegí una cuenta…
+          </option>
+          {options.map((a) => (
+            <option key={a.id} value={a.id}>
+              {a.nombre}
+            </option>
+          ))}
+        </select>
+      )}
+      <StepNav onBack={onBack} onContinue={onContinue} canContinue={canContinue} />
+    </section>
   );
 }
 
-// ---------------------------------------------------------------------------
-// Step 3 — Entidad (JIT + salary capability gate)
-// ---------------------------------------------------------------------------
-
-interface EntidadStepProps {
-  headingRef: RefObject<HTMLHeadingElement | null>;
-  requiredCapability: string | null;
-  candidateEntities: EntitySummary[];
-  allEntities: EntitySummary[];
-  entityId: string | null;
-  showJit: boolean;
-  jitSubmitting: boolean;
-  jitError: string;
-  entityError: string;
-  onSelectEntity: (entityId: string) => void;
-  onOpenJit: () => void;
-  onCancelJit: () => void;
-  onCreateEntity: (values: EntityJitFormValues) => void;
-  onSkip: () => void;
-  onContinue: () => void;
-}
-
-function EntidadStep({
+function EntityStep({
   headingRef,
+  question,
   requiredCapability,
-  candidateEntities,
-  allEntities,
+  candidates,
   entityId,
   showJit,
   jitSubmitting,
   jitError,
   entityError,
-  onSelectEntity,
+  onSelect,
   onOpenJit,
   onCancelJit,
   onCreateEntity,
-  onSkip,
   onContinue,
-}: EntidadStepProps) {
-  const blocked = requiredCapability !== null && candidateEntities.length === 0;
-  const options = requiredCapability ? candidateEntities : allEntities;
-
+  onBack,
+  canContinue,
+}: {
+  headingRef: RefObject<HTMLHeadingElement | null>;
+  question: string;
+  requiredCapability: string | null;
+  candidates: EntitySummary[];
+  entityId: string | null;
+  showJit: boolean;
+  jitSubmitting: boolean;
+  jitError: string;
+  entityError: string;
+  onSelect: (id: string) => void;
+  onOpenJit: () => void;
+  onCancelJit: () => void;
+  onCreateEntity: (v: EntityJitFormValues) => void;
+  onContinue: () => void;
+  onBack: () => void;
+  canContinue: boolean;
+}) {
   return (
     <section>
-      <h2
-        ref={headingRef}
-        tabIndex={-1}
-        className="text-headline-md text-on-surface font-bold mb-md focus:outline-none"
-      >
-        ¿Con quién es este movimiento?
+      <h2 ref={headingRef} tabIndex={-1} className={HEADING_CLASS}>
+        {question}
       </h2>
-
-      {blocked ? (
-        <div className="space-y-sm">
-          <ValidationMessage tone="error" title="Falta la organización empleadora">
-            Necesitás una organización con la capacidad de relación de dependencia para registrar
-            un sueldo.
-          </ValidationMessage>
-          <Button onClick={onOpenJit}>Crear organización empleadora</Button>
-        </div>
+      {entityError && <ValidationMessage tone="error">{entityError}</ValidationMessage>}
+      {candidates.length === 0 ? (
+        <ValidationMessage tone="error">
+          No hay entidades aptas. Creá una abajo
+          {requiredCapability === 'is_employment_dependency' ? ' (empleador)' : ''}.
+        </ValidationMessage>
       ) : (
-        <div className="space-y-sm">
-          {entityError && <ValidationMessage tone="error">{entityError}</ValidationMessage>}
-          <label
-            htmlFor="entry-entity"
-            className="text-label-md text-on-surface-variant mb-xs block"
-          >
-            {requiredCapability ? 'Organización empleadora' : 'Entidad (opcional)'}
-          </label>
-          <select
-            id="entry-entity"
-            value={entityId ?? ''}
-            onChange={(e) => onSelectEntity(e.target.value)}
-            className="w-full h-12 px-md rounded-lg border border-outline-variant bg-surface-container-lowest text-body-md"
-          >
-            <option value="">Sin entidad</option>
-            {options.map((e) => (
-              <option key={e.id} value={e.id}>
-                {e.nombre}
-              </option>
-            ))}
-          </select>
-
-          <div className="flex gap-sm">
-            <Button variant="outline" size="sm" onClick={onOpenJit}>
-              + Nueva entidad
-            </Button>
-            {!requiredCapability && (
-              <Button variant="ghost" size="sm" onClick={onSkip}>
-                Omitir
-              </Button>
-            )}
-          </div>
-
-          <Button onClick={onContinue}>Continuar</Button>
-        </div>
+        <select
+          aria-label={
+            requiredCapability === 'is_employment_dependency'
+              ? 'organización empleadora'
+              : question
+          }
+          value={entityId ?? ''}
+          onChange={(e) => onSelect(e.target.value)}
+          className={`${SELECT_CLASS} mb-sm`}
+        >
+          <option value="" disabled>
+            Elegí…
+          </option>
+          {candidates.map((e) => (
+            <option key={e.id} value={e.id}>
+              {e.nombre}
+            </option>
+          ))}
+        </select>
       )}
-
-      {showJit && (
+      {!showJit ? (
+        <Button variant="outline" size="sm" onClick={onOpenJit}>
+          Crear entidad
+        </Button>
+      ) : (
         <EntityJitForm
           lockedCapability={requiredCapability}
           submitting={jitSubmitting}
@@ -658,56 +551,101 @@ function EntidadStep({
           onCancel={onCancelJit}
         />
       )}
+      <StepNav onBack={onBack} onContinue={onContinue} canContinue={canContinue} />
     </section>
   );
 }
 
-// ---------------------------------------------------------------------------
-// Completed step summary row (previous steps stay visible + editable)
-// ---------------------------------------------------------------------------
-
-interface StepSummaryRowProps {
-  stepId: EntryStepId;
-  state: ReturnType<typeof createInitialEntryBuilderState>;
-  accounts: AccountSummary[];
-  entities: EntitySummary[];
-  onEdit: () => void;
-}
-
-function StepSummaryRow({ stepId, state, accounts, entities, onEdit }: StepSummaryRowProps) {
-  const label = summaryLabel(stepId, state, accounts, entities);
+function FieldStep({
+  headingRef,
+  title,
+  label,
+  inputId,
+  value,
+  onChange,
+  onContinue,
+  onBack,
+  canContinue,
+  inputMode,
+}: {
+  headingRef: RefObject<HTMLHeadingElement | null>;
+  title: string;
+  label: string;
+  inputId: string;
+  value: string;
+  onChange: (v: string) => void;
+  onContinue: () => void;
+  onBack: () => void;
+  canContinue: boolean;
+  inputMode?: 'decimal';
+}) {
   return (
-    <div className="flex items-center justify-between gap-md p-sm rounded-lg bg-surface-container-lowest border border-outline-variant/30">
-      <span className="text-body-md text-on-surface">{label}</span>
-      <button
-        type="button"
-        onClick={onEdit}
-        className="text-label-sm text-secondary font-semibold cursor-pointer"
-      >
-        Editar
-      </button>
-    </div>
+    <section>
+      <h2 ref={headingRef} tabIndex={-1} className={HEADING_CLASS}>
+        {title}
+      </h2>
+      <TextInput
+        label={label}
+        id={inputId}
+        name={inputId}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        inputMode={inputMode}
+        autoComplete="off"
+        className="!h-9 !text-body-sm"
+      />
+      <StepNav onBack={onBack} onContinue={onContinue} canContinue={canContinue} />
+    </section>
   );
 }
 
-function summaryLabel(
-  stepId: EntryStepId,
-  state: ReturnType<typeof createInitialEntryBuilderState>,
-  accounts: AccountSummary[],
-  entities: EntitySummary[],
-): string {
-  switch (stepId) {
-    case 'tipo':
-      return `Tipo: ${state.tipo ? TIPO_LABEL[state.tipo] : '—'}`;
-    case 'cuentas':
-      return `${accountName(accounts, state.debitAccountId)} → ${accountName(accounts, state.creditAccountId)}`;
-    case 'entidad': {
-      const entity = entities.find((e) => e.id === state.entityId);
-      return `Entidad: ${entity?.nombre ?? 'Sin entidad'}`;
-    }
-    case 'concepto':
-      return `Concepto: ${state.concept || '—'}`;
-    default:
-      return '';
-  }
+function LeafStep({
+  headingRef,
+  flowSummary,
+  submitting,
+  submitError,
+  onSave,
+  onBurst,
+  onBack,
+}: {
+  headingRef: RefObject<HTMLHeadingElement | null>;
+  flowSummary: { from: string; to: string; amount: string } | null;
+  submitting: boolean;
+  submitError: string;
+  onSave: () => void;
+  onBurst: () => void;
+  onBack: () => void;
+}) {
+  return (
+    <section>
+      <h2 ref={headingRef} tabIndex={-1} className={HEADING_CLASS}>
+        Confirmar
+      </h2>
+      {flowSummary && (
+        <p className="text-body-sm text-on-surface mb-sm rounded-md bg-surface-container-low/80 px-sm py-2">
+          Sale de <span className="font-semibold">{flowSummary.from}</span>
+          {' → '}
+          Entra a <span className="font-semibold">{flowSummary.to}</span>
+          {flowSummary.amount.trim() ? (
+            <>
+              {' '}
+              (<span className="font-semibold">{flowSummary.amount}</span>)
+            </>
+          ) : null}
+        </p>
+      )}
+      {submitError && <ValidationMessage tone="error">{submitError}</ValidationMessage>}
+      <div className="flex flex-wrap gap-xs mt-sm">
+        <Button variant="outline" size="sm" onClick={onBack} disabled={submitting}>
+          Volver
+        </Button>
+        <Button size="sm" onClick={onSave} disabled={submitting}>
+          {submitting ? 'Guardando…' : 'Guardar'}
+        </Button>
+        <Button variant="outline" size="sm" onClick={onBurst} disabled={submitting}>
+          Guardar y registrar otro
+        </Button>
+      </div>
+    </section>
+  );
 }

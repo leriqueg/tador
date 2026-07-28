@@ -73,7 +73,7 @@ describe('OnboardingWizard — PRO branch (T010-T012, T035)', () => {
   it('collects the employer org when dependency is marked (T010)', async () => {
     const user = userEvent.setup();
     let result: OnboardingResult | null = null;
-    render(<OnboardingWizard onComplete={(r) => (result = r)} />);
+    renderWizard(<OnboardingWizard onComplete={(r) => (result = r)} />);
 
     await advanceToStep5(user, 'Modo PRO');
     await user.click(screen.getByLabelText(/Relación de dependencia/i));
@@ -93,7 +93,7 @@ describe('OnboardingWizard — PRO branch (T010-T012, T035)', () => {
   it('allows dependency and freelance together (T035)', async () => {
     const user = userEvent.setup();
     let result: OnboardingResult | null = null;
-    render(<OnboardingWizard onComplete={(r) => (result = r)} />);
+    renderWizard(<OnboardingWizard onComplete={(r) => (result = r)} />);
 
     await advanceToStep5(user, 'Modo PRO');
     await user.click(screen.getByLabelText(/Relación de dependencia/i));

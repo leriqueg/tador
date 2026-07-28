@@ -6,18 +6,18 @@
 | Mode | `pro` |
 | Page module | `frontend/src/pages/FinancesPyg.tsx` (`namespace="pro"`) |
 | Shell | `AppShell mode="pro"` |
-| Audit status | debt |
-| Last audit | 2026-07-22 |
+| Audit status | aligned |
+| Last audit | 2026-07-28 |
 
 ## Purpose
 
-P&G operativo con filtros por cuenta/entidad; misma base visual que Hogar hoy.
+P&G operativo con filtros por cuenta/entidad; misma base visual de barras que Hogar hasta definir el neto arrastrado.
 
 ## Primary use case
 
 1. Filtrar P&G por cuenta y/o entidad.
 2. Leer neto e ingresos/gastos del período.
-3. Ver top cuentas (año) y barras mensuales.
+3. Ver top cuentas (año) y barras mensuales (`ProIncomeExpenseBars`).
 
 ## APIs / data
 
@@ -30,25 +30,25 @@ P&G operativo con filtros por cuenta/entidad; misma base visual que Hogar hoy.
 
 | Role | Component / story | Class |
 |------|-------------------|-------|
-| Charts | `BreakdownDonut` ×2 · **PRO/FinancesPyg** (column) | canonical composition |
+| Period bars | `ProIncomeExpenseBars` · Charts/Bars · PRO/FinancesPyg | canonical |
+| Charts (donuts) | `BreakdownOutcomesDonut` + `BreakdownIncomesDonut` · column | canonical |
 | Filters | Inline on page | page-only |
-| Product today | `SimplePieChart` grid | exception until wired |
 
 ## Density
 
 - Mobile: usable; charts in column.
-- Desktop: view story uses `max-w-3xl`; page may widen further later — charts stay column.
-- PRO-specific: account/entity filters on page.
+- Desktop: charts in column; page chrome `max-w-2xl` (optional widen later).
+- Bars: same as Hogar until accounting defines “neto arrastrado” (line series). Do not invent the line.
+- Policy: [`../hogar-pro-density.md`](../hogar-pro-density.md).
 
 ## Gaps / exceptions
 
-| Priority | Type | Finding | Action |
-|----------|------|---------|--------|
-| P0 | apply | Same as Hogar — wire BreakdownDonut column | See hogar-finances-pyg |
-| P1 | density | Page chrome still `max-w-2xl` | Optional widen on `md+` |
+- Pending: cumulative / carried net line on `ProIncomeExpenseBars` (accounting definition).
 
 ## Audit log
 
 | Date | Result | Notes |
 |------|--------|-------|
-| 2026-07-22 | debt | Aligned to Storybook IA; waiting on product wire. |
+| 2026-07-22 | debt | Storybook composition defined. |
+| 2026-07-26 | aligned | Shared `FinancesPyg` uses BreakdownDonut column. |
+| 2026-07-28 | aligned | Separate `ProIncomeExpenseBars` (wraps Hogar bars for now). |

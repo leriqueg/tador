@@ -1,0 +1,16 @@
+{
+  "login": {
+    "subtitle": "Ingresá tus datos para gestionar tu economía.",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "submit": "Ingresar",
+    "submitting": "Ingresando…",
+    "noAccount": "¿No tenés cuenta?",
+    "register": "Registrate"
+  },
+  "settings": {
+    "namePlaceholder": "Cómo querés que te llamemos"
+  },
+  "onboarding": {
+    "currencyTimeDescription": "Elegí la moneda principal, la zona horaria y el idioma de la interfaz. La zona se detecta desde tu navegador cuando podemos. Después de registrar movimientos, la moneda no se podrá cambiar."
+  }
+}

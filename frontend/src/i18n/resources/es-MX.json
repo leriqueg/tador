@@ -1,0 +1,8 @@
+{
+  "login": {
+    "subtitle": "Ingresa tus datos para gestionar tu economía."
+  },
+  "settings": {
+    "namePlaceholder": "Cómo quieres que te llamemos"
+  }
+}

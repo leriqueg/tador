@@ -4,50 +4,36 @@
 |-------|-------|
 | Route | `/pro/finances` |
 | Mode | `pro` |
-| Page module | `frontend/src/pages/pro/ProFinances*.tsx / Finances` |
-| Shell | `AppShell` |
-| Audit status | stub |
-| Last audit | — |
+| Page module | `frontend/src/pages/pro/ProFinances.tsx` → `Finances namespace="pro"` |
+| Shell | `AppShell mode="pro"` |
+| Audit status | audited |
+| Last audit | 2026-07-27 |
 
 ## Purpose
 
-Hub Estado en modo PRO.
+Hub Estado PRO (mismas tres puertas que Hogar).
 
 ## Primary use case
 
-1. (Completar en auditoría)
-
-## APIs / data
-
-| Need | Source |
-|------|--------|
-| TBD | TBD |
+1. Elegir P&G, Balance o Revisar apuntes en modo PRO.
 
 ## Composition (must use)
 
 | Role | Component / story | Class |
 |------|-------------------|-------|
-| TBD | TBD | TBD |
+| Same as Hogar hub | [`hogar-finances.md`](./hogar-finances.md) | — |
 
 ## Density
 
-- Mobile: TBD
-- Desktop: TBD
-- PRO-specific: debt:pro-desktop-density where applicable
-
-## States to cover
-
-- [ ] Loading
-- [ ] Empty
-- [ ] Error
-- [ ] Populated
+- Hub cards at `max-w-lg` — acceptable (chooser, not report workstation).
+- Downstream: P&G aligned; **apuntes** still density debt.
 
 ## Gaps / exceptions
 
-- See [`../ui-exceptions.md`](../ui-exceptions.md) if listed.
+None on the hub itself.
 
 ## Audit log
 
 | Date | Result | Notes |
 |------|--------|-------|
-| | | |
+| 2026-07-27 | audited | Shared hub OK; debt lives in apuntes child. |

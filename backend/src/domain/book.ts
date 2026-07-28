@@ -3,6 +3,8 @@
  * Represents a user's financial book with configurable settings.
  */
 
+import { isSupportedLocale, DEFAULT_LOCALE } from './locales.js';
+
 export type BookMode = 'hogar' | 'pro';
 
 export interface Book {
@@ -51,7 +53,7 @@ export function createDefaultBookConfig(): BookConfig {
     id: '',
     bookId: '',
     currency: 'USD',
-    locale: 'en-US',
+    locale: DEFAULT_LOCALE,
     format: 'symbol',
     currencyLocked: false,
     mode: 'hogar',
@@ -67,7 +69,7 @@ export function createDefaultBookConfig(): BookConfig {
 export function defaultBookConfigCreateInput() {
   return {
     currency: 'USD',
-    locale: 'en-US',
+    locale: DEFAULT_LOCALE,
     format: 'symbol',
     currencyLocked: false,
     mode: 'hogar',
@@ -100,6 +102,9 @@ export function applyBookConfigUpdate(
   }
 
   if (input.locale !== undefined) {
+    if (!isSupportedLocale(input.locale)) {
+      throw new Error('Invalid locale');
+    }
     current.locale = input.locale;
   }
 

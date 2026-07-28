@@ -32,7 +32,7 @@ Shared pre-mode: `/onboarding`, `/login`, `/register`, landing.
 
 Per-route purpose, composition, and audit status: [`views/index.md`](./views/index.md).  
 Exceptions (product ≠ Storybook): [`ui-exceptions.md`](./ui-exceptions.md).  
-Policy: [`docs/adr/0006-ui-catalog-governance.md`](../../docs/adr/0006-ui-catalog-governance.md).
+Policy: [`docs/adr/0007-ui-catalog-governance.md`](../../docs/adr/0007-ui-catalog-governance.md).
 
 ## Specs
 

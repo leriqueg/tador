@@ -6,8 +6,8 @@
 | Mode | `hogar` |
 | Page module | `frontend/src/pages/FinancesPyg.tsx` (`namespace="hogar"`) |
 | Shell | `AppShell mode="hogar"` |
-| Audit status | debt |
-| Last audit | 2026-07-22 |
+| Audit status | aligned |
+| Last audit | 2026-07-28 |
 
 ## Purpose
 
@@ -16,7 +16,7 @@ Mostrar el resultado financiero del período (ingresos, gastos, neto) y el top d
 ## Primary use case
 
 1. Elegir ejercicio o mes y ver neto + totales.
-2. Comparar ingresos vs egresos en barras mensuales.
+2. Comparar ingresos vs egresos en barras mensuales adyacentes (Recharts).
 3. En vista año, revisar top 10 egresos e ingresos por cuenta (sin códigos).
 
 ## APIs / data
@@ -32,33 +32,33 @@ Mostrar el resultado financiero del período (ingresos, gastos, neto) y el top d
 |------|-------------------|-------|
 | Shell | `AppShell` · Patterns/Shells / Hogar/ShellAndPanels | canonical |
 | Errors | `ValidationMessage` | canonical |
-| Top egresos | `BreakdownDonut` · **Hogar/FinancesPyg** (column) | canonical composition |
-| Top ingresos | `BreakdownDonut` · same view story | canonical composition |
-| Stitch toggle mock | Charts/Reference → PeriodBreakdownDonut | **reference** — do not wire |
-| Product today | `SimplePieChart` (row on md) | page-only · exception until wired |
+| Income vs expenses bars | `HogarIncomeExpenseBars` · Charts/Bars · Hogar/FinancesPyg | canonical |
+| Top egresos | `BreakdownOutcomesDonut` (rose) · Hogar/FinancesPyg | canonical |
+| Top ingresos | `BreakdownIncomesDonut` (green) · Hogar/FinancesPyg | canonical |
 
 ## Density
 
 - Mobile: `max-w-2xl` — OK for Hogar.
-- Desktop: charts **stacked in column** (not side-by-side) — Storybook view composition is SoT.
+- Desktop: charts **stacked in column** — matches Storybook view composition.
+- Bars: adjacent green/rose; scale via grid (no Y tick labels); tooltip for values; **no** cumulative net line.
 - PRO-specific: N/A here — see [`pro-finances-pyg.md`](./pro-finances-pyg.md).
+- Policy: [`../hogar-pro-density.md`](../hogar-pro-density.md).
 
 ## States to cover
 
 - [x] Loading (text “Cargando…”)
-- [ ] Empty (donut empty states exist in Charts/Donut + view story)
+- [x] Empty (bars + BreakdownDonut empty states)
 - [x] Error (`ValidationMessage`)
 - [x] Populated
 
 ## Gaps / exceptions
 
-| Priority | Type | Finding | Action |
-|----------|------|---------|--------|
-| P0 | apply | Product still uses `SimplePieChart` in a 2-col grid | Wire `BreakdownDonut` ×2 in **column** per Hogar/FinancesPyg; clear exception |
-| P2 | optional | Inline monthly bars vs Charts/Reference MonthlyEvolution | Defer until bars have a canonical chart |
+None open for charts (P0 closed 2026-07-26; Recharts bars 2026-07-28).
 
 ## Audit log
 
 | Date | Result | Notes |
 |------|--------|-------|
-| 2026-07-22 | debt | First audit; then Storybook IA reorganized. Canonical = BreakdownDonut + view composition. |
+| 2026-07-22 | debt | Storybook IA + canonical donut defined. |
+| 2026-07-26 | aligned | Product wired to `BreakdownDonut` ×2 in column. |
+| 2026-07-28 | aligned | `HogarIncomeExpenseBars` (Recharts); wired in P&G + PygPanelHogar. |

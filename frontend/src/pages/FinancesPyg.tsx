@@ -1,15 +1,27 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import AppShell from '../components/layout/AppShell.tsx';
-import SimplePieChart from '../components/dashboard/SimplePieChart.tsx';
+import BreakdownIncomesDonut from '../components/charts/BreakdownIncomesDonut.tsx';
+import BreakdownOutcomesDonut from '../components/charts/BreakdownOutcomesDonut.tsx';
+import HogarIncomeExpenseBars from '../components/charts/HogarIncomeExpenseBars.tsx';
+import ProIncomeExpenseBars from '../components/charts/ProIncomeExpenseBars.tsx';
+import type { BreakdownDonutItem } from '../components/charts/BreakdownDonut.tsx';
 import ValidationMessage from '../components/ui/ValidationMessage.tsx';
-import { reports, accounts, entities, type PyGReport, type AccountSummary, type EntitySummary } from '../lib/api.ts';
+import { reports, accounts, entities, type PyGReport, type PyGTopAccount, type AccountSummary, type EntitySummary } from '../lib/api.ts';
 import { useAuth } from '../lib/auth.tsx';
 import { useBookGate } from '../lib/use-book-gate.ts';
 import { formatMoney, MONTH_LABELS, monthFromSeries } from '../lib/finance.ts';
 import { namespacePaths, type AppNamespace } from '../lib/namespace-paths.ts';
 
 type Scope = 'year' | 'month';
+
+function toDonutItems(accounts: PyGTopAccount[]): BreakdownDonutItem[] {
+  return accounts.map((a) => ({
+    id: a.accountId,
+    label: a.accountName,
+    value: a.accumulated,
+  }));
+}
 
 export interface FinancesPygProps {
   namespace?: AppNamespace;
@@ -107,11 +119,6 @@ export default function FinancesPyg({ namespace = 'hogar' }: FinancesPygProps) {
 
   if (!user) return <Navigate to="/login" replace />;
   if (gate.redirectTo) return <Navigate to={gate.redirectTo} replace />;
-
-  const maxBar = Math.max(
-    1,
-    ...(display?.series.flatMap((p) => [p.income, p.expenses]) ?? [1]),
-  );
 
   return (
     <AppShell
@@ -240,45 +247,30 @@ export default function FinancesPyg({ namespace = 'hogar' }: FinancesPygProps) {
               )}
             </div>
 
-            <div className="rounded-xl border border-outline-variant/30 bg-surface-container-lowest p-md">
-              <h3 className="text-headline-md font-semibold mb-md">Ingresos vs egresos</h3>
-              <div className="h-40 flex items-end gap-1">
-                {display.series.map((p) => (
-                  <div
-                    key={p.month}
-                    className="flex-1 flex flex-col justify-end gap-0.5 min-w-0 relative"
-                  >
-                    <div
-                      className="w-full bg-success-emerald/70 rounded-t-sm"
-                      style={{
-                        height: `${(p.income / maxBar) * 70}%`,
-                        minHeight: p.income ? 4 : 0,
-                      }}
-                      title={`Ingresos ${MONTH_LABELS[p.month] ?? p.month}`}
-                    />
-                    <div
-                      className="w-full bg-expense-rose/70 rounded-t-sm"
-                      style={{
-                        height: `${(p.expenses / maxBar) * 70}%`,
-                        minHeight: p.expenses ? 4 : 0,
-                      }}
-                      title={`Gastos ${MONTH_LABELS[p.month] ?? p.month}`}
-                    />
-                    <span className="text-[10px] text-center text-outline mt-xs truncate">
-                      {scope === 'year' ? MONTH_LABELS[p.month] : 'Mes'}
-                    </span>
-                  </div>
-                ))}
-              </div>
-              <p className="text-label-sm text-on-surface-variant mt-sm">
-                Verde = ingresos · Rosa = egresos · Neto del período: {fmt(display.net)}
-              </p>
-            </div>
+            {namespace === 'pro' ? (
+              <ProIncomeExpenseBars
+                series={display.series}
+                currency={currency}
+                caption={`Verde = ingresos · Rosa = egresos · Neto del período: ${fmt(display.net)}`}
+              />
+            ) : (
+              <HogarIncomeExpenseBars
+                series={display.series}
+                currency={currency}
+                caption={`Verde = ingresos · Rosa = egresos · Neto del período: ${fmt(display.net)}`}
+              />
+            )}
 
             {scope === 'year' && pyg && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
-                <SimplePieChart title="Top 10 egresos" items={pyg.topExpenses} />
-                <SimplePieChart title="Top 10 ingresos" items={pyg.topIncome} />
+              <div className="flex flex-col gap-md">
+                <BreakdownOutcomesDonut
+                  items={toDonutItems(pyg.topExpenses)}
+                  currency={currency}
+                />
+                <BreakdownIncomesDonut
+                  items={toDonutItems(pyg.topIncome)}
+                  currency={currency}
+                />
               </div>
             )}
           </>

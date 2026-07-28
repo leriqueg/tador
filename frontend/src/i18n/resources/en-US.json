@@ -1,0 +1,56 @@
+{
+  "meta": {
+    "localeLabels": {
+      "es": "Spanish (neutral)",
+      "es-MX": "Spanish (Mexico)",
+      "es-AR": "Spanish (Argentina)",
+      "es-ES": "Spanish (Spain)",
+      "en-US": "English (US)"
+    }
+  },
+  "common": {
+    "loading": "Loading…",
+    "save": "Save",
+    "saving": "Saving…",
+    "saved": "Saved.",
+    "continue": "Continue",
+    "back": "Back",
+    "errorSave": "Could not save",
+    "errorSaveConfig": "Could not save settings"
+  },
+  "login": {
+    "title": "Welcome back!",
+    "subtitle": "Enter your details to manage your finances.",
+    "email": "Email",
+    "password": "Password",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "forgotPassword": "Forgot your password?",
+    "submit": "Sign in",
+    "submitting": "Signing in…",
+    "noAccount": "Don't have an account?",
+    "register": "Sign up",
+    "error": "Sign-in failed"
+  },
+  "settings": {
+    "title": "Settings",
+    "description": "Profile and book preferences. Email and password cannot be changed in this MVP.",
+    "name": "Name",
+    "namePlaceholder": "What should we call you?",
+    "email": "Email",
+    "currency": "Book currency",
+    "currencyLocked": "Locked because there are already transactions.",
+    "currencyOnboarding": "Chosen during onboarding; read-only in Settings afterward.",
+    "timeZone": "Time zone",
+    "language": "Interface language",
+    "languageHint": "Affects on-screen copy, tone, and date/number formats."
+  },
+  "onboarding": {
+    "currencyTimeTitle": "Currency, time zone, and language",
+    "currencyTimeDescription": "You can change time zone and language later in Settings. Currency locks after the first transaction.",
+    "currency": "Currency",
+    "timeZone": "Time zone",
+    "language": "Language",
+    "stepOf": "Step {{current}} of {{total}}"
+  }
+}

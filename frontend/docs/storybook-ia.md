@@ -1,7 +1,7 @@
 # Storybook information architecture
 
 **Última actualización:** 2026-07-22  
-**Policy:** [ADR 0006](../../docs/adr/0006-ui-catalog-governance.md)
+**Policy:** [ADR 0007](../../docs/adr/0007-ui-catalog-governance.md)
 
 Two layers in the sidebar:
 
@@ -17,7 +17,8 @@ Two layers in the sidebar:
 Foundations/Branding
 Primitives/Inputs
 Patterns/Shells | DashboardWidgets | AccountBanking | RecentEntries
-Charts/Donut              ← canonical BreakdownDonut
+Charts/Donut              ← canonical BreakdownDonut (+ Incomes/Outcomes)
+Charts/Bars               ← HogarIncomeExpenseBars + ProIncomeExpenseBars
 Charts/Reference          ← Stitch mocks (do not wire)
 Hogar/ShellAndPanels | QuickAdd | FinancesPyg
 PRO/EntryBuilder | ManualEntry | AccountsTreePro | FinancesPyg | Analysis
@@ -32,10 +33,12 @@ Experimental/Pacho
 
 ## View compositions
 
-- `Hogar/FinancesPyg` and `PRO/FinancesPyg`: **two** donuts — Top egresos + Top ingresos — stacked in a **column** (not a generic Ingresos/Gastos toggle).
+- `Hogar/FinancesPyg`: `HogarIncomeExpenseBars` + typed donuts (rose/green) in a **column**.
+- `PRO/FinancesPyg`: `ProIncomeExpenseBars` (same bars until net line) + same donuts; filters on page.
 
 ## Related
 
+- Density: [`hogar-pro-density.md`](./hogar-pro-density.md)
 - Inventory: [`component-inventory.md`](./component-inventory.md)
 - Views: [`views/index.md`](./views/index.md)
 - Exceptions: [`ui-exceptions.md`](./ui-exceptions.md)

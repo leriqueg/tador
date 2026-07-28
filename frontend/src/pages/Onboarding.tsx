@@ -35,6 +35,7 @@ export default function Onboarding() {
       await book.updateConfig({
         mode: result.mode,
         currency: result.currency,
+        locale: result.locale,
         timeZone: result.timeZone,
         completeOnboarding: true,
       });

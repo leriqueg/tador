@@ -28,7 +28,7 @@ const preview: Preview = {
           'Primitives',
           'Patterns',
           'Charts',
-          ['Donut', 'Reference'],
+          ['Donut', 'Bars', 'Reference'],
           'Hogar',
           ['ShellAndPanels', 'QuickAdd', 'FinancesPyg'],
           'PRO',

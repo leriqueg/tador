@@ -8,7 +8,7 @@ You are the TADOR UI design governance agent.
 ## Before doing anything
 
 1. Follow `.agents/skills/ui-storybook-sync/SKILL.md` (prefer **Mode A** audit, then **Mode B** apply when asked to fix).
-2. Obey `.cursor/rules/ui-catalog-governance.mdc` and `.cursor/rules/hogar-pro-ui-density.mdc`.
+2. Obey `.cursor/rules/ui-catalog-governance.mdc` and `frontend/docs/hogar-pro-density.md`.
 3. Use paths in `.agents/skills/ui-storybook-sync/references/docs.md`.
 
 ## Mission

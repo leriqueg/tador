@@ -8,7 +8,7 @@ You are the TADOR Storybook sync agent (drift catch-up).
 ## Before doing anything
 
 1. Follow `.agents/skills/ui-storybook-sync/SKILL.md` **Mode C** (and Mode A if asking for a quick gap list).
-2. Obey catalog + density rules under `.cursor/rules/`.
+2. Obey catalog governance (`.cursor/rules/ui-catalog-governance.mdc`) and density doc (`frontend/docs/hogar-pro-density.md`).
 3. Prefer delegating full view audits / Storybook→front polish to agent `ui-design-governance`.
 
 ## Mission

@@ -7,17 +7,17 @@
 | Page module | `frontend/src/pages/FinancesPyg.tsx` (`namespace="pro"`) |
 | Shell | `AppShell mode="pro"` |
 | Audit status | aligned |
-| Last audit | 2026-07-26 |
+| Last audit | 2026-07-28 |
 
 ## Purpose
 
-P&G operativo con filtros por cuenta/entidad; misma base visual que Hogar hoy.
+P&G operativo con filtros por cuenta/entidad; misma base visual de barras que Hogar hasta definir el neto arrastrado.
 
 ## Primary use case
 
 1. Filtrar P&G por cuenta y/o entidad.
 2. Leer neto e ingresos/gastos del período.
-3. Ver top cuentas (año) y barras mensuales.
+3. Ver top cuentas (año) y barras mensuales (`ProIncomeExpenseBars`).
 
 ## APIs / data
 
@@ -30,18 +30,20 @@ P&G operativo con filtros por cuenta/entidad; misma base visual que Hogar hoy.
 
 | Role | Component / story | Class |
 |------|-------------------|-------|
-| Charts | `BreakdownOutcomesDonut` + `BreakdownIncomesDonut` · PRO/FinancesPyg (column) | canonical |
+| Period bars | `ProIncomeExpenseBars` · Charts/Bars · PRO/FinancesPyg | canonical |
+| Charts (donuts) | `BreakdownOutcomesDonut` + `BreakdownIncomesDonut` · column | canonical |
 | Filters | Inline on page | page-only |
 
 ## Density
 
 - Mobile: usable; charts in column.
 - Desktop: charts in column; page chrome `max-w-2xl` (optional widen later).
-- PRO-specific: account/entity filters on page.
+- Bars: same as Hogar until accounting defines “neto arrastrado” (line series). Do not invent the line.
+- Policy: [`../hogar-pro-density.md`](../hogar-pro-density.md).
 
 ## Gaps / exceptions
 
-None open for charts (inherits Hogar wire 2026-07-26).
+- Pending: cumulative / carried net line on `ProIncomeExpenseBars` (accounting definition).
 
 ## Audit log
 
@@ -49,3 +51,4 @@ None open for charts (inherits Hogar wire 2026-07-26).
 |------|--------|-------|
 | 2026-07-22 | debt | Storybook composition defined. |
 | 2026-07-26 | aligned | Shared `FinancesPyg` uses BreakdownDonut column. |
+| 2026-07-28 | aligned | Separate `ProIncomeExpenseBars` (wraps Hogar bars for now). |

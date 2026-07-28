@@ -29,5 +29,5 @@ Stitch mockups and Storybook produced polished UI patterns, but product pages so
 ## Consequences
 
 - Audits are per-view against `views/*.md` + Storybook.
-- Density Hogar/PRO rules stay in `.cursor/rules/hogar-pro-ui-density.mdc` and `modos-hogar-pro.md`.
+- Density Hogar/PRO rules live in `frontend/docs/hogar-pro-density.md` (governance) and intent in `modos-hogar-pro.md` — not as a Cursor agent rule file.
 - Agents must refuse strong visual forks without an exception row or a promote/elevate plan.

@@ -155,7 +155,7 @@ PRO no solo quiere ver "si hubo gasto", sino qué tipo de movimiento fue. Por ej
 
 ## Densidad UI por superficie y viewport
 
-Regla operativa (no negociable en frontend): ver también `.cursor/rules/hogar-pro-ui-density.mdc`.
+Regla operativa (no negociable en frontend): ver también [`frontend/docs/hogar-pro-density.md`](../../frontend/docs/hogar-pro-density.md).
 
 | Superficie | HOGAR | PRO móvil | PRO desktop |
 |------------|-------|-----------|-------------|

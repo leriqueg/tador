@@ -43,6 +43,8 @@ Thin index. **IA:** [`storybook-ia.md`](./storybook-ia.md). **Policy:** [ADR 000
 | **BreakdownDonut** | `charts/BreakdownDonut.tsx` | Charts/Donut | **canonical** (base) | exists |
 | **BreakdownIncomesDonut** | `charts/BreakdownIncomesDonut.tsx` | Charts/Donut → Incomes, Hogar\|PRO/FinancesPyg | **canonical** | exists · wired (green) |
 | **BreakdownOutcomesDonut** | `charts/BreakdownOutcomesDonut.tsx` | Charts/Donut → Outcomes, Hogar\|PRO/FinancesPyg | **canonical** | exists · wired (rose) |
+| **HogarIncomeExpenseBars** | `charts/HogarIncomeExpenseBars.tsx` | Charts/Bars; Hogar/FinancesPyg; PygPanelHogar | **canonical** | exists · Recharts · wired |
+| **ProIncomeExpenseBars** | `charts/ProIncomeExpenseBars.tsx` | Charts/Bars; PRO/FinancesPyg | **canonical** | exists · wraps Hogar until net line |
 | PeriodBreakdownDonut / MonthlyEvolutionChart | `dataviz/DataViz.tsx` | Charts/Reference | **reference** | exists |
 
 ---
@@ -53,8 +55,8 @@ Thin index. **IA:** [`storybook-ia.md`](./storybook-ia.md). **Policy:** [ADR 000
 |------------|-------|-------|-------|
 | Hogar/QuickAdd | `/hogar/entries` | Frequent + nav + mini-form | canonical |
 | Hogar/ShellAndPanels | shell / dashboard panels | Onboarding, PYG panel, Position | canonical |
-| **Hogar/FinancesPyg** | `/hogar/finances/pyg` | **2 donuts column: egresos + ingresos** | canonical composition |
-| **PRO/FinancesPyg** | `/pro/finances/pyg` | Same chart composition; filters on page | canonical composition |
+| **Hogar/FinancesPyg** | `/hogar/finances/pyg` | Bars + 2 donuts column | canonical composition |
+| **PRO/FinancesPyg** | `/pro/finances/pyg` | `ProIncomeExpenseBars` + donuts; filters on page | canonical composition |
 | PRO/EntryBuilder | `/pro/entries` | | canonical |
 | PRO/ManualEntry | `/pro/entries/manual` | | canonical |
 | PRO/AccountsTreePro | `/pro/accounts` | | canonical |
@@ -75,8 +77,7 @@ Thin index. **IA:** [`storybook-ia.md`](./storybook-ia.md). **Policy:** [ADR 000
 
 ## Open debt
 
-1. PRO historial density (`Patterns/RecentEntries`).
-2. Optional: data-driven bar chart to replace inline P&G bars / reference MonthlyEvolution.
+1. PRO historial density (`Patterns/RecentEntries`) — paused pending PRO column definition.
 
 ## Agent checklist
 

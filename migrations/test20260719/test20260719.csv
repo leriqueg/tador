@@ -1,28 +1,42 @@
 ﻿oid;tipo_asiento;asiento_simple;asiento_tipo;movimiento_id ;Descripcion ;Importe;fecha;codigo_cuenta_pyg;nombre_cuenta_pyg;codigo_cuenta_madre_pyg;nombre_cuenta_madre_a_pyg;codigo_cuenta_bal;nombre_cuenta_bal;codigo_cuenta_madre_bal;nombre_cuenta_madre_bal
-19863;directo;19863;egreso;19863;CHECKPOINT UTIL 1045.26 TOT 993.27;-5.99;2026-06-27;62130002;Intereses Por Financiamiento;NULL;NULL;21310005;American Express;NULL;Creditos de Cpnsumo
-20013;traspaso;20012;traspaso;20013;PAGO TRANSFERENCIA INTERBANCARIA AMEX;100;2026-06-16;NULL;NULL;NULL;NULL;21310005;American Express;NULL;Creditos de Cpnsumo
-20016;bypass;20014;traspaso;20016;RUKITO AVALON - Alejandro{Restaurantes y Bares...};-38.6;2026-06-08;NULL;NULL;NULL;NULL;21310005;American Express;NULL;Creditos de Cpnsumo
-20019;bypass;20017;traspaso;20019;UBER TRIP 840{Taxis...};-4.59;2026-06-08;NULL;NULL;NULL;NULL;21310005;American Express;NULL;Creditos de Cpnsumo
-20022;bypass;20020;traspaso;20022;UBER TRIP 840{Taxis...};-2.47;2026-06-14;NULL;NULL;NULL;NULL;21310005;American Express;NULL;Creditos de Cpnsumo
-20025;bypass;20023;traspaso;20025; UBER TRIP 840 {Taxis...};-16.02;2026-06-15;NULL;NULL;NULL;NULL;21310005;American Express;NULL;Creditos de Cpnsumo
-20028;bypass;20026;traspaso;20028;UBER TRP 840{Taxis...};-9.06;2026-06-21;NULL;NULL;NULL;NULL;21310005;American Express;NULL;Creditos de Cpnsumo
-20029;directo;20029;egreso;20029;INTERESES;-10.71;2026-06-26;62130002;Intereses Por Financiamiento;NULL;NULL;21310005;American Express;NULL;Creditos de Cpnsumo
+19701;traspaso;19701;traspaso;19701;PAGO TC EN MORA 477045XXXXXX9742;-70.83;2026-06-04;NULL;NULL;NULL;NULL;11120005;JEP;NULL;Ahorros Bancos y Cooperativas
+19702;traspaso;19701;traspaso;19702;PAGO TC EN MORA 477045XXXXXX9742;70.83;2026-06-04;NULL;NULL;NULL;NULL;21310002;VISA JEP;NULL;Creditos de Cpnsumo
+19703;traspaso;19703;traspaso;19703;PAGO TC 477045XXXXXX9742;-82.59;2026-06-05;NULL;NULL;NULL;NULL;11120005;JEP;NULL;Ahorros Bancos y Cooperativas
+19704;traspaso;19703;traspaso;19704;PAGO TC 477045XXXXXX9742;82.59;2026-06-05;NULL;NULL;NULL;NULL;21310002;VISA JEP;NULL;Creditos de Cpnsumo
+19705;traspaso;19705;traspaso;19705;PAGO DE PRESTAMO: 066290407224;-178.18;2026-06-05;NULL;NULL;NULL;NULL;11120005;JEP;NULL;Ahorros Bancos y Cooperativas
+19706;traspaso;19705;traspaso;19706;PAGO DE PRESTAMO: 066290407224;178.18;2026-06-05;NULL;NULL;NULL;NULL;22130004;Prestamo JEP;NULL;Prestamos 
 19717;traspaso;19717;traspaso;19717;RETITO EFE;-150;2026-06-01;NULL;NULL;NULL;NULL;11120008;Banco Pacifico 2023;NULL;Ahorros Bancos y Cooperativas
-19936;traspaso;19935;traspaso;19936;Transferencia - MRomero;50;2026-06-11;NULL;NULL;NULL;NULL;11120008;Banco Pacifico 2023;NULL;Ahorros Bancos y Cooperativas
-19938;traspaso;19937;traspaso;19938;Deposito EFE - Tia Toya;100;2026-06-21;NULL;NULL;NULL;NULL;11120008;Banco Pacifico 2023;NULL;Ahorros Bancos y Cooperativas
-19941;bypass;19939;traspaso;19941;RETIRO CAJEROS - El Dorado{Restaurantes y Bares...};-10;2026-06-25;NULL;NULL;NULL;NULL;11120008;Banco Pacifico 2023;NULL;Ahorros Bancos y Cooperativas
-19921;traspaso;19920;traspaso;19921;TRANSFERENCIA RECIBIDA - MRomero;241;2026-06-24;NULL;NULL;NULL;NULL;11120012;Banco Pichincha;NULL;Ahorros Bancos y Cooperativas
-19962;traspaso;19962;traspaso;19962;Prestamo Nro 566505900 - Cuota 17 de 60;-234.93;2026-06-24;NULL;NULL;NULL;NULL;11120012;Banco Pichincha;NULL;Ahorros Bancos y Cooperativas
-19754;traspaso;19753;traspaso;19754;TRANSFERENCIA PAGO DIRECTO DESDE CTA AHORRO - Romero;240.41;2026-06-08;NULL;NULL;NULL;NULL;11120002;BanGuajala;NULL;Ahorros Bancos y Cooperativas
-19920;traspaso;19920;traspaso;19920;TRANSFERENCIA RECIBIDA - MRomero;-241;2026-06-24;NULL;NULL;NULL;NULL;11120002;BanGuajala;NULL;Ahorros Bancos y Cooperativas
-19935;traspaso;19935;traspaso;19935;Transferencia - MRomero;-50;2026-06-11;NULL;NULL;NULL;NULL;11120002;BanGuajala;NULL;Ahorros Bancos y Cooperativas
-19953;traspaso;19952;traspaso;19953;TRANSFERENCIA PAGO DIRECTO DESDE CTA AHORRO - MROMERO;51.11;2026-06-29;NULL;NULL;NULL;NULL;11120002;BanGuajala;NULL;Ahorros Bancos y Cooperativas
 19718;traspaso;19717;traspaso;19718;RETITO EFE;150;2026-06-01;NULL;NULL;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
+19724;traspaso;19724;traspaso;19724;RETIRO CAJEROS AH-BB;-30;2026-06-01;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
 19725;traspaso;19724;traspaso;19725;RETIRO CAJEROS AH-BB;30;2026-06-01;NULL;NULL;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
+19726;traspaso;19726;traspaso;19726;N/D PAGO TARJETA DE CREDITO - BANKCARD MASTERCARD;-200;2026-06-01;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
+19727;traspaso;19726;traspaso;19727;N/D PAGO TARJETA DE CREDITO - BANKCARD MASTERCARD;200;2026-06-01;NULL;NULL;NULL;NULL;21310004;MasterCard BANKCARD;NULL;Creditos de Cpnsumo
+19728;traspaso;19728;traspaso;19728;RETIRO CAJEROS AH-BB;-200;2026-06-01;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
 19729;traspaso;19728;traspaso;19729;RETIRO CAJEROS AH-BB;200;2026-06-01;NULL;NULL;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
 19746;traspaso;19746;traspaso;19746;Envio de Dinero Santi por Wester Union;-310.35;2026-06-01;NULL;NULL;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
+19747;traspaso;19746;traspaso;19747;Envio de Dinero Santi por Wester Union;310.35;2026-06-01;NULL;NULL;NULL;NULL;21300011;Proyecto UP - Santiago;NULL;Obligaciones Adquiridas
+19748;traspaso;19748;traspaso;19748;TRANSFERENCIAS RECIBIDAS (LOCALES / INTERNACIONALES);-1970;2026-06-08;NULL;NULL;NULL;NULL;11110004;Trabajos Realizados 2025;NULL;Honorarios por Cobrar
+19749;traspaso;19748;traspaso;19749;TRANSFERENCIAS RECIBIDAS (LOCALES / INTERNACIONALES);1970;2026-06-08;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
+19750;bypass;19750;egreso;19750;N/D CARGO SERV.F.TRANSFERENCIA EXT;-10.27;2026-06-08;62130001;Comisiones Bancarias;NULL;NULL;11110004;Trabajos Realizados 2025;NULL;Honorarios por Cobrar
+19751;bypass;19750;traspaso;19751;N/D CARGO SERV.F.TRANSFERENCIA EXT{Bolivariano 2026...};10.27;2026-06-08;NULL;NULL;NULL;NULL;11110004;Trabajos Realizados 2025;NULL;Honorarios por Cobrar
+19752;bypass;19750;traspaso;19752;N/D CARGO SERV.F.TRANSFERENCIA EXT{Comisiones Bancarias...};-10.27;2026-06-08;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
+19753;traspaso;19753;traspaso;19753;TRANSFERENCIA PAGO DIRECTO DESDE CTA AHORRO - Romero;-240.41;2026-06-08;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
+19754;traspaso;19753;traspaso;19754;TRANSFERENCIA PAGO DIRECTO DESDE CTA AHORRO - Romero;240.41;2026-06-08;NULL;NULL;NULL;NULL;11120002;BanGuajala;NULL;Ahorros Bancos y Cooperativas
+19755;traspaso;19755;traspaso;19755;RETIRO CAJEROS AH-BB;-50;2026-06-08;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
 19756;traspaso;19755;traspaso;19756;RETIRO CAJEROS AH-BB;50;2026-06-08;NULL;NULL;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
+19757;bypass;19757;egreso;19757;TRANSF. ENVI PAGODIR HD - Cesar Sarmiento;-35.41;2026-06-09;61150008;Otros Gastos en Salud;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
+19758;bypass;19757;traspaso;19758;TRANSF. ENVI PAGODIR HD - Cesar Sarmiento{Bolivariano 2026...};35.41;2026-06-09;NULL;NULL;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
+19759;bypass;19757;traspaso;19759;TRANSF. ENVI PAGODIR HD - Cesar Sarmiento{Otros Gastos en Salu...};-35.41;2026-06-09;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
+19760;traspaso;19760;traspaso;19760;TRANSFERENCIA ENVIADA A CTA. AHORROS - Diana Sandoval;-200;2026-06-10;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
+19761;traspaso;19760;traspaso;19761;TRANSFERENCIA ENVIADA A CTA. AHORROS - Diana Sandoval;200;2026-06-10;NULL;NULL;NULL;NULL;21300001;Vivienda;NULL;Obligaciones Adquiridas
+19762;traspaso;19762;traspaso;19762;N/D PAGO TARJETA DE CREDITO - VISA BANKCARD;-80;2026-06-10;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
+19763;traspaso;19762;traspaso;19763;N/D PAGO TARJETA DE CREDITO - VISA BANKCARD;80;2026-06-10;NULL;NULL;NULL;NULL;21310007;VISA BANKCARD;NULL;Creditos de Cpnsumo
+19764;traspaso;19764;traspaso;19764;TRANSF. ENVI PAGODIR HD - JEP;-550;2026-06-10;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
+19765;traspaso;19764;traspaso;19765;TRANSF. ENVI PAGODIR HD - JEP;550;2026-06-10;NULL;NULL;NULL;NULL;11120005;JEP;NULL;Ahorros Bancos y Cooperativas
+19766;directo;19766;egreso;19766;N/D COMISION BANCARIA;-0.41;2026-06-10;62130001;Comisiones Bancarias;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
 19767;directo;19767;egreso;19767;Taxi a Casa;-8;2026-06-08;61260002;Taxis;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
+19768;bypass;19768;egreso;19768;Creeper Plush;-10;2026-06-05;61213002;Regalos;NULL;NULL;11320012;Cuenta Alekey;NULL;Cuentas Personales por Cobrar
+19769;bypass;19768;traspaso;19769;Creeper Plush{Billetera...};10;2026-06-05;NULL;NULL;NULL;NULL;11320012;Cuenta Alekey;NULL;Cuentas Personales por Cobrar
 19770;bypass;19768;traspaso;19770;Creeper Plush{Regalos...};-10;2026-06-05;NULL;NULL;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
 19771;directo;19771;egreso;19771;Lotto;-4.5;2026-06-10;64000002;LoterÃ­as y Apuestas;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
 19772;directo;19772;egreso;19772;Tommaco;-2;2026-06-08;64000006;Tabaco;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
@@ -35,9 +49,28 @@
 19780;directo;19780;egreso;19780;Tiendita hasta hoy;-6;2026-06-07;61240001;Supermercado, AlimentaciÃ³n;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
 19781;directo;19781;egreso;19781;Checkpoint 9.75;-3.4;2026-06-07;63400002;No se o no quiero saber;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
 19782;directo;19782;egreso;19782;Chelas;-4;2026-06-04;64000005;Diversiones Alcoholicas;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
+19863;directo;19863;egreso;19863;CHECKPOINT UTIL 1045.26 TOT 993.27;-5.99;2026-06-27;62130002;Intereses Por Financiamiento;NULL;NULL;21310005;AMEX;NULL;Creditos de Cpnsumo
+19864;directo;19864;egreso;19864;Canon de Arriendo Mensual 2026 - 06;-200;2026-06-01;61115001;Alquiler Vivienda;NULL;NULL;21300001;Vivienda;NULL;Obligaciones Adquiridas
+19865;directo;19865;egreso;19865;Canon de Arriendo Mensual 2026 - 07;-200;2026-07-01;61115001;Alquiler Vivienda;NULL;NULL;21300001;Vivienda;NULL;Obligaciones Adquiridas
+19869;directo;19869;egreso;19869;Pension Alimenticia - Canon 500 Mensuales;-500;2026-06-01;63000003;Pension Alimenticia;NULL;NULL;21300017;PensiÃ³n 2026;NULL;Obligaciones Adquiridas
+19870;directo;19870;egreso;19870;Pension Alimenticia - Canon 500 Mensuales;-500;2026-07-01;63000003;Pension Alimenticia;NULL;NULL;21300017;PensiÃ³n 2026;NULL;Obligaciones Adquiridas
+19880;traspaso;19880;traspaso;19880;RETITO AH BANRED;-50;2026-06-12;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
 19881;traspaso;19880;traspaso;19881;RETITO AH BANRED;50;2026-06-12;NULL;NULL;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
 19882;traspaso;19882;traspaso;19882;Modista;-5;2026-06-20;NULL;NULL;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
+19883;traspaso;19882;traspaso;19883;Modista;5;2026-06-20;NULL;NULL;NULL;NULL;11320005;Jessica x Pagar;NULL;Cuentas Personales por Cobrar
+19884;traspaso;19884;traspaso;19884;TRANSFERENCIA ENVIADA A CTA. AHORROS - Daisy;-135;2026-06-17;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
+19885;traspaso;19884;traspaso;19885;TRANSFERENCIA ENVIADA A CTA. AHORROS - Daisy;135;2026-06-17;NULL;NULL;NULL;NULL;11320009;Cuenta Daisy;NULL;Cuentas Personales por Cobrar
+19886;traspaso;19886;traspaso;19886;TRANSFERENCIA ENVIADA A CTA. AHORROS - Daisy;-5;2026-06-17;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
+19887;traspaso;19886;traspaso;19887;TRANSFERENCIA ENVIADA A CTA. AHORROS - Daisy;5;2026-06-17;NULL;NULL;NULL;NULL;11320009;Cuenta Daisy;NULL;Cuentas Personales por Cobrar
+19888;traspaso;19888;traspaso;19888;Transferencia Western Union - Santiago;-134.49;2026-06-17;NULL;NULL;NULL;NULL;11320009;Cuenta Daisy;NULL;Cuentas Personales por Cobrar
+19889;traspaso;19888;traspaso;19889;Transferencia Western Union - Santiago;134.49;2026-06-17;NULL;NULL;NULL;NULL;21300011;Proyecto UP - Santiago;NULL;Obligaciones Adquiridas
+19890;traspaso;19890;traspaso;19890;RETIRO CAJEROS AH-BB;-50;2026-06-19;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
 19891;traspaso;19890;traspaso;19891;RETIRO CAJEROS AH-BB;50;2026-06-19;NULL;NULL;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
+19892;traspaso;19892;traspaso;19892;TRANSFERENCIA PAGO DIRECTO DESDE CTA AHORRO - harumanga;-27.41;2026-06-20;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
+19893;traspaso;19892;traspaso;19893;TRANSFERENCIA PAGO DIRECTO DESDE CTA AHORRO - harumanga;27.41;2026-06-20;NULL;NULL;NULL;NULL;11320012;Cuenta Alekey;NULL;Cuentas Personales por Cobrar
+19894;bypass;19894;egreso;19894;N/D DEBITOS AUTOMATICOS CLARO;-17.56;2026-06-14;64100001;TelÃ©fono e Internet;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
+19895;bypass;19894;traspaso;19895;N/D DEBITOS AUTOMATICOS CLARO{Bolivariano 2026...};17.56;2026-06-14;NULL;NULL;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
+19896;bypass;19894;traspaso;19896;N/D DEBITOS AUTOMATICOS CLARO{TelÃ©fono e Internet...};-17.56;2026-06-14;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
 19897;directo;19897;egreso;19897;Chelas;-3;2026-06-20;64000005;Diversiones Alcoholicas;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
 19898;directo;19898;egreso;19898;Tommaco;-2;2026-06-18;64000006;Tabaco;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
 19899;directo;19899;egreso;19899;Tommaco;-2;2026-06-12;64000006;Tabaco;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
@@ -53,218 +86,344 @@
 19909;directo;19909;egreso;19909;Tommaco;-1.75;2026-06-27;64000006;Tabaco;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
 19910;directo;19910;egreso;19910;tommaco;-1.75;2026-06-22;64000006;Tabaco;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
 19911;directo;19911;egreso;19911;Compras Tuti;-6;2026-06-22;61240001;Supermercado, AlimentaciÃ³n;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
-19916;traspaso;19915;traspaso;19916;RETIRO CAJEROS AH-BB;30;2026-06-26;NULL;NULL;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
-19923;traspaso;19922;traspaso;19923;Dinero Efectivo Alekey;20;2026-06-21;NULL;NULL;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
-19924;directo;19924;egreso;19924;Checkpoint 7.60;-4.4;2026-06-28;63400002;No se o no quiero saber;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
-19944;bypass;19942;traspaso;19944;Para Alejandro{Regalos...};-3;2026-06-30;NULL;NULL;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
-19724;traspaso;19724;traspaso;19724;RETIRO CAJEROS AH-BB;-30;2026-06-01;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
-19726;traspaso;19726;traspaso;19726;N/D PAGO TARJETA DE CREDITO - BANKCARD MASTERCARD;-200;2026-06-01;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
-19728;traspaso;19728;traspaso;19728;RETIRO CAJEROS AH-BB;-200;2026-06-01;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
-19749;traspaso;19748;traspaso;19749;TRANSFERENCIAS RECIBIDAS (LOCALES / INTERNACIONALES);1970;2026-06-08;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
-19752;bypass;19750;traspaso;19752;N/D CARGO SERV.F.TRANSFERENCIA EXT{Comisiones Bancarias...};-10.27;2026-06-08;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
-19753;traspaso;19753;traspaso;19753;TRANSFERENCIA PAGO DIRECTO DESDE CTA AHORRO - Romero;-240.41;2026-06-08;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
-19755;traspaso;19755;traspaso;19755;RETIRO CAJEROS AH-BB;-50;2026-06-08;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
-19759;bypass;19757;traspaso;19759;TRANSF. ENVI PAGODIR HD - Cesar Sarmiento{Otros Gastos en Salu...};-35.41;2026-06-09;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
-19760;traspaso;19760;traspaso;19760;TRANSFERENCIA ENVIADA A CTA. AHORROS - Diana Sandoval;-200;2026-06-10;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
-19762;traspaso;19762;traspaso;19762;N/D PAGO TARJETA DE CREDITO - VISA BANKCARD;-80;2026-06-10;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
-19764;traspaso;19764;traspaso;19764;TRANSF. ENVI PAGODIR HD - JEP;-550;2026-06-10;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
-19766;directo;19766;egreso;19766;N/D COMISION BANCARIA;-0.41;2026-06-10;62130001;Comisiones Bancarias;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
-19880;traspaso;19880;traspaso;19880;RETITO AH BANRED;-50;2026-06-12;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
-19884;traspaso;19884;traspaso;19884;TRANSFERENCIA ENVIADA A CTA. AHORROS - Daisy;-135;2026-06-17;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
-19886;traspaso;19886;traspaso;19886;TRANSFERENCIA ENVIADA A CTA. AHORROS - Daisy;-5;2026-06-17;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
-19890;traspaso;19890;traspaso;19890;RETIRO CAJEROS AH-BB;-50;2026-06-19;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
-19892;traspaso;19892;traspaso;19892;TRANSFERENCIA PAGO DIRECTO DESDE CTA AHORRO - harumanga;-27.41;2026-06-20;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
-19896;bypass;19894;traspaso;19896;N/D DEBITOS AUTOMATICOS CLARO{TelÃ©fono e Internet...};-17.56;2026-06-14;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
-19914;bypass;19912;traspaso;19914; N/D DEBITOS AUTOMATICOS CLARO {TelÃ©fono e Internet...};-15.71;2026-06-20;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
-19915;traspaso;19915;traspaso;19915;RETIRO CAJEROS AH-BB;-30;2026-06-26;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
-19919;bypass;19917;traspaso;19919; Cafe Robusto {Supermercado, Alimen...};-7.91;2026-06-23;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
-19952;traspaso;19952;traspaso;19952;TRANSFERENCIA PAGO DIRECTO DESDE CTA AHORRO - MROMERO;-51.11;2026-06-29;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
-19981;directo;19981;egreso;19981;Parrillada RSH;-20.41;2026-06-14;61240002;Restaurantes y Bares;NULL;NULL;21400013;Comidita A Credito;NULL;Consumos por Pagar
-20162;traspaso;20161;traspaso;20162;Prestamo Quirografario 15230273 - 23/24;33.1;2026-06-17;NULL;NULL;NULL;NULL;22130001;Creditos;NULL;Prestamos 
-20164;traspaso;20163;traspaso;20164;Prestamo Quirografario 18705192 - 10/36;45.66;2026-06-17;NULL;NULL;NULL;NULL;22130001;Creditos;NULL;Prestamos 
-19768;bypass;19768;egreso;19768;Creeper Plush;-10;2026-06-05;61213002;Regalos;NULL;NULL;11320012;Cuenta Alekey;NULL;Cuentas Personales por Cobrar
-19769;bypass;19768;traspaso;19769;Creeper Plush{Billetera...};10;2026-06-05;NULL;NULL;NULL;NULL;11320012;Cuenta Alekey;NULL;Cuentas Personales por Cobrar
-19893;traspaso;19892;traspaso;19893;TRANSFERENCIA PAGO DIRECTO DESDE CTA AHORRO - harumanga;27.41;2026-06-20;NULL;NULL;NULL;NULL;11320012;Cuenta Alekey;NULL;Cuentas Personales por Cobrar
-19922;traspaso;19922;traspaso;19922;Dinero Efectivo Alekey;-20;2026-06-21;NULL;NULL;NULL;NULL;11320012;Cuenta Alekey;NULL;Cuentas Personales por Cobrar
-19939;bypass;19939;egreso;19939;RETIRO CAJEROS - El Dorado;-10;2026-06-25;61240002;Restaurantes y Bares;NULL;NULL;11320012;Cuenta Alekey;NULL;Cuentas Personales por Cobrar
-19940;bypass;19939;traspaso;19940;RETIRO CAJEROS - El Dorado{Banco Pacifico 2023...};10;2026-06-25;NULL;NULL;NULL;NULL;11320012;Cuenta Alekey;NULL;Cuentas Personales por Cobrar
-19942;bypass;19942;egreso;19942;Para Alejandro;-3;2026-06-30;61213002;Regalos;NULL;NULL;11320012;Cuenta Alekey;NULL;Cuentas Personales por Cobrar
-19943;bypass;19942;traspaso;19943;Para Alejandro{Billetera...};3;2026-06-30;NULL;NULL;NULL;NULL;11320012;Cuenta Alekey;NULL;Cuentas Personales por Cobrar
-19885;traspaso;19884;traspaso;19885;TRANSFERENCIA ENVIADA A CTA. AHORROS - Daisy;135;2026-06-17;NULL;NULL;NULL;NULL;11320009;Cuenta Daisy;NULL;Cuentas Personales por Cobrar
-19887;traspaso;19886;traspaso;19887;TRANSFERENCIA ENVIADA A CTA. AHORROS - Daisy;5;2026-06-17;NULL;NULL;NULL;NULL;11320009;Cuenta Daisy;NULL;Cuentas Personales por Cobrar
-19888;traspaso;19888;traspaso;19888;Transferencia Western Union - Santiago;-134.49;2026-06-17;NULL;NULL;NULL;NULL;11320009;Cuenta Daisy;NULL;Cuentas Personales por Cobrar
-20079;bypass;20079;egreso;20079;MERPAGO*MERCADOLIBRE;-12.11;2026-06-25;61240001;Supermercado, AlimentaciÃ³n;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
-20080;bypass;20079;traspaso;20080;MERPAGO*MERCADOLIBRE{VISA BGR...};12.11;2026-06-25;NULL;NULL;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
-20082;bypass;20082;egreso;20082;MERPAGO*OPEN25 ;-5.88;2026-06-05;61240001;Supermercado, AlimentaciÃ³n;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
-20083;bypass;20082;traspaso;20083;MERPAGO*OPEN25 {VISA BGR...};5.88;2026-06-05;NULL;NULL;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
-20085;bypass;20085;egreso;20085;MERPAGO*OPEN25;-8.82;2026-06-13;61240001;Supermercado, AlimentaciÃ³n;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
-20086;bypass;20085;traspaso;20086;MERPAGO*OPEN25{VISA BGR...};8.82;2026-06-13;NULL;NULL;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
-20088;bypass;20088;egreso;20088;MERPAGO*OPEN25;-5.18;2026-06-24;61240001;Supermercado, AlimentaciÃ³n;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
-20089;bypass;20088;traspaso;20089;MERPAGO*OPEN25{VISA BGR...};5.18;2026-06-24;NULL;NULL;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
-20091;bypass;20091;egreso;20091;MERPAGO*CARREFOUR;-2.09;2026-06-10;61240001;Supermercado, AlimentaciÃ³n;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
-20092;bypass;20091;traspaso;20092;MERPAGO*CARREFOUR{VISA BGR...};2.09;2026-06-10;NULL;NULL;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
-20094;bypass;20094;egreso;20094;MERPAGO*SUBEVIAJES;-0.66;2026-06-17;61260001;Transporte ;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
-20095;bypass;20094;traspaso;20095;MERPAGO*SUBEVIAJES{VISA BGR...};0.66;2026-06-17;NULL;NULL;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
-20097;bypass;20097;egreso;20097;MERPAGO*SUBEVIAJES;-0.72;2026-06-17;61260001;Transporte ;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
-20098;bypass;20097;traspaso;20098;MERPAGO*SUBEVIAJES{VISA BGR...};0.72;2026-06-17;NULL;NULL;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
-20100;bypass;20100;egreso;20100;MERPAGO*SUBEVIAJES;-0.78;2026-06-27;61260001;Transporte ;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
-20101;bypass;20100;traspaso;20101;MERPAGO*SUBEVIAJES{VISA BGR...};0.78;2026-06-27;NULL;NULL;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
-20103;bypass;20103;egreso;20103;MERPAGO*SUBEVIAJES;-3.37;2026-06-27;61260001;Transporte ;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
-20104;bypass;20103;traspaso;20104;MERPAGO*SUBEVIAJES{VISA BGR...};3.37;2026-06-27;NULL;NULL;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
-20106;bypass;20106;egreso;20106;BUENOS AYRES ESPRESS;-4.96;2026-06-03;61260001;Transporte ;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
-20107;bypass;20106;traspaso;20107;BUENOS AYRES ESPRESS{VISA BGR...};4.96;2026-06-03;NULL;NULL;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
-20109;bypass;20109;egreso;20109;BUENOS AYRES ESPRESS;-2.53;2026-06-16;61260001;Transporte ;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
-20110;bypass;20109;traspaso;20110;BUENOS AYRES ESPRESS{VISA BGR...};2.53;2026-06-16;NULL;NULL;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
-20112;bypass;20112;egreso;20112;MERPAGO*OPEN25;-2.88;2026-06-16;61260001;Transporte ;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
-20113;bypass;20112;traspaso;20113;MERPAGO*OPEN25{VISA BGR...};2.88;2026-06-16;NULL;NULL;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
-20115;bypass;20115;egreso;20115;MERPAGO*ESTANIELPIERRELOM;-6.26;2026-06-25;61240001;Supermercado, AlimentaciÃ³n;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
-20116;bypass;20115;traspaso;20116;MERPAGO*ESTANIELPIERRELOM{VISA BGR...};6.26;2026-06-25;NULL;NULL;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
-20118;bypass;20118;egreso;20118;MERPAGO*EMOVASUBTE;-1.18;2026-06-16;61260001;Transporte ;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
-20119;bypass;20118;traspaso;20119;MERPAGO*EMOVASUBTE{VISA BGR...};1.18;2026-06-16;NULL;NULL;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
-20121;bypass;20121;egreso;20121;MERPAGO*EMOVASUBTE;-1.13;2026-06-26;61260001;Transporte ;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
-20122;bypass;20121;traspaso;20122;MERPAGO*EMOVASUBTE{VISA BGR...};1.13;2026-06-26;NULL;NULL;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
-20124;bypass;20124;egreso;20124;MERPAGO*EMOVASUBTE;-1.13;2026-06-27;61260001;Transporte ;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
-20125;bypass;20124;traspaso;20125;MERPAGO*EMOVASUBTE{VISA BGR...};1.13;2026-06-27;NULL;NULL;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
-20127;bypass;20127;egreso;20127;MERPAGO*ARCOSDORADOSARGEB;-1.81;2026-06-05;61260001;Transporte ;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
-20128;bypass;20127;traspaso;20128;MERPAGO*ARCOSDORADOSARGEB{VISA BGR...};1.81;2026-06-05;NULL;NULL;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
-20130;bypass;20130;egreso;20130;MERPAGO*DAVIDNICOLASBETAB;-4.87;2026-06-11;61240002;Restaurantes y Bares;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
-20131;bypass;20130;traspaso;20131;MERPAGO*DAVIDNICOLASBETAB{VISA BGR...};4.87;2026-06-11;NULL;NULL;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
-20133;bypass;20133;egreso;20133;MERPAGO*ELCONDADO;-3.63;2026-06-27;61240002;Restaurantes y Bares;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
-20134;bypass;20133;traspaso;20134;MERPAGO*ELCONDADO{VISA BGR...};3.63;2026-06-27;NULL;NULL;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
-20136;bypass;20136;egreso;20136;MERPAGO*KIOSCOASTRO;-2.62;2026-06-28;61240001;Supermercado, AlimentaciÃ³n;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
-20137;bypass;20136;traspaso;20137;MERPAGO*KIOSCOASTRO{VISA BGR...};2.62;2026-06-28;NULL;NULL;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
-20139;bypass;20139;egreso;20139;MERPAGO*PARRILLAELREY;-2.9;2026-06-29;61240004;Almuerzos, Desayunos Diarios;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
-20140;bypass;20139;traspaso;20140;MERPAGO*PARRILLAELREY{VISA BGR...};2.9;2026-06-29;NULL;NULL;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
-19937;traspaso;19937;traspaso;19937;Deposito EFE - Tia Toya;-100;2026-06-21;NULL;NULL;NULL;NULL;11320010;Cuenta Tia Toya;NULL;Cuentas Personales por Cobrar
 19912;bypass;19912;egreso;19912; N/D DEBITOS AUTOMATICOS CLARO ;-15.71;2026-06-20;64100001;TelÃ©fono e Internet;NULL;NULL;21400012;Gastos Varios 2025;NULL;Consumos por Pagar
 19913;bypass;19912;traspaso;19913; N/D DEBITOS AUTOMATICOS CLARO {Bolivariano 2026...};15.71;2026-06-20;NULL;NULL;NULL;NULL;21400012;Gastos Varios 2025;NULL;Consumos por Pagar
+19914;bypass;19912;traspaso;19914; N/D DEBITOS AUTOMATICOS CLARO {TelÃ©fono e Internet...};-15.71;2026-06-20;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
+19915;traspaso;19915;traspaso;19915;RETIRO CAJEROS AH-BB;-30;2026-06-26;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
+19916;traspaso;19915;traspaso;19916;RETIRO CAJEROS AH-BB;30;2026-06-26;NULL;NULL;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
 19917;bypass;19917;egreso;19917; Cafe Robusto ;-7.91;2026-06-23;61240001;Supermercado, AlimentaciÃ³n;NULL;NULL;21400012;Gastos Varios 2025;NULL;Consumos por Pagar
 19918;bypass;19917;traspaso;19918; Cafe Robusto {Bolivariano 2026...};7.91;2026-06-23;NULL;NULL;NULL;NULL;21400012;Gastos Varios 2025;NULL;Consumos por Pagar
-19757;bypass;19757;egreso;19757;TRANSF. ENVI PAGODIR HD - Cesar Sarmiento;-35.41;2026-06-09;61150008;Otros Gastos en Salud;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
-19758;bypass;19757;traspaso;19758;TRANSF. ENVI PAGODIR HD - Cesar Sarmiento{Bolivariano 2026...};35.41;2026-06-09;NULL;NULL;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
-19894;bypass;19894;egreso;19894;N/D DEBITOS AUTOMATICOS CLARO;-17.56;2026-06-14;64100001;TelÃ©fono e Internet;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
-19895;bypass;19894;traspaso;19895;N/D DEBITOS AUTOMATICOS CLARO{Bolivariano 2026...};17.56;2026-06-14;NULL;NULL;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
+19919;bypass;19917;traspaso;19919; Cafe Robusto {Supermercado, Alimen...};-7.91;2026-06-23;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
+19920;traspaso;19920;traspaso;19920;TRANSFERENCIA RECIBIDA - MRomero;-241;2026-06-24;NULL;NULL;NULL;NULL;11120002;BanGuajala;NULL;Ahorros Bancos y Cooperativas
+19921;traspaso;19920;traspaso;19921;TRANSFERENCIA RECIBIDA - MRomero;241;2026-06-24;NULL;NULL;NULL;NULL;11120012;Banco Pichincha;NULL;Ahorros Bancos y Cooperativas
+19922;traspaso;19922;traspaso;19922;Dinero Efectivo Alekey;-20;2026-06-21;NULL;NULL;NULL;NULL;11320012;Cuenta Alekey;NULL;Cuentas Personales por Cobrar
+19923;traspaso;19922;traspaso;19923;Dinero Efectivo Alekey;20;2026-06-21;NULL;NULL;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
+19924;directo;19924;egreso;19924;Checkpoint 7.60;-4.4;2026-06-28;63400002;No se o no quiero saber;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
+19925;traspaso;19925;traspaso;19925;Dinero Efectivo Alekey;-20;2026-07-02;NULL;NULL;NULL;NULL;11320012;Cuenta Alekey;NULL;Cuentas Personales por Cobrar
+19926;traspaso;19925;traspaso;19926;Dinero Efectivo Alekey;20;2026-07-02;NULL;NULL;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
+19927;directo;19927;egreso;19927;COMPRAS TUTI;-8;2026-07-05;61240001;Supermercado, AlimentaciÃ³n;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
+19928;directo;19928;egreso;19928;Impresiones;-1.5;2026-07-05;61160002;Material Escolar;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
+19929;bypass;19929;egreso;19929;Humitaas;-6;2026-07-01;61240004;Almuerzos, Desayunos Diarios;NULL;NULL;21400013;Comidita A Credito;NULL;Consumos por Pagar
+19930;bypass;19929;traspaso;19930;Humitaas{Billetera...};6;2026-07-01;NULL;NULL;NULL;NULL;21400013;Comidita A Credito;NULL;Consumos por Pagar
+19931;bypass;19929;traspaso;19931;Humitaas{Almuerzos, Desayunos...};-6;2026-07-01;NULL;NULL;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
+19932;directo;19932;egreso;19932;Comidita hasta hoy ;-25.6;2026-07-05;61240004;Almuerzos, Desayunos Diarios;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
+19933;directo;19933;egreso;19933;Lotto;-1;2026-07-02;64000002;LoterÃ­as y Apuestas;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
+19934;directo;19934;egreso;19934;Tiendita hasta hoy;-9;2026-07-05;61240001;Supermercado, AlimentaciÃ³n;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
+19935;traspaso;19935;traspaso;19935;Transferencia - MRomero;-50;2026-06-11;NULL;NULL;NULL;NULL;11120002;BanGuajala;NULL;Ahorros Bancos y Cooperativas
+19936;traspaso;19935;traspaso;19936;Transferencia - MRomero;50;2026-06-11;NULL;NULL;NULL;NULL;11120008;Banco Pacifico 2023;NULL;Ahorros Bancos y Cooperativas
+19937;traspaso;19937;traspaso;19937;Deposito EFE - Tia Toya;-100;2026-06-21;NULL;NULL;NULL;NULL;11320010;Cuenta Tia Toya;NULL;Cuentas Personales por Cobrar
+19938;traspaso;19937;traspaso;19938;Deposito EFE - Tia Toya;100;2026-06-21;NULL;NULL;NULL;NULL;11120008;Banco Pacifico 2023;NULL;Ahorros Bancos y Cooperativas
+19939;bypass;19939;egreso;19939;RETIRO CAJEROS - El Dorado;-10;2026-06-25;61240002;Restaurantes y Bares;NULL;NULL;11320012;Cuenta Alekey;NULL;Cuentas Personales por Cobrar
+19940;bypass;19939;traspaso;19940;RETIRO CAJEROS - El Dorado{Banco Pacifico 2023...};10;2026-06-25;NULL;NULL;NULL;NULL;11320012;Cuenta Alekey;NULL;Cuentas Personales por Cobrar
+19941;bypass;19939;traspaso;19941;RETIRO CAJEROS - El Dorado{Restaurantes y Bares...};-10;2026-06-25;NULL;NULL;NULL;NULL;11120008;Banco Pacifico 2023;NULL;Ahorros Bancos y Cooperativas
+19942;bypass;19942;egreso;19942;Para Alejandro;-3;2026-06-30;61213002;Regalos;NULL;NULL;11320012;Cuenta Alekey;NULL;Cuentas Personales por Cobrar
+19943;bypass;19942;traspaso;19943;Para Alejandro{Billetera...};3;2026-06-30;NULL;NULL;NULL;NULL;11320012;Cuenta Alekey;NULL;Cuentas Personales por Cobrar
+19944;bypass;19942;traspaso;19944;Para Alejandro{Regalos...};-3;2026-06-30;NULL;NULL;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
+19945;bypass;19945;egreso;19945;Transferencia Marjorie;-20.41;2026-07-03;61160001;EducaciÃ³n;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
+19946;bypass;19945;traspaso;19946;Transferencia Marjorie{Banco Pacifico 2023...};20.41;2026-07-03;NULL;NULL;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
+19947;bypass;19945;traspaso;19947;Transferencia Marjorie{EducaciÃ³n...};-20.41;2026-07-03;NULL;NULL;NULL;NULL;11120008;Banco Pacifico 2023;NULL;Ahorros Bancos y Cooperativas
+19948;traspaso;19948;traspaso;19948;DEPOSITO EFE - DAISY;-40;2026-07-03;NULL;NULL;NULL;NULL;11320009;Cuenta Daisy;NULL;Cuentas Personales por Cobrar
+19949;traspaso;19948;traspaso;19949;DEPOSITO EFE - DAISY;40;2026-07-03;NULL;NULL;NULL;NULL;11120008;Banco Pacifico 2023;NULL;Ahorros Bancos y Cooperativas
+19950;traspaso;19950;traspaso;19950;RETITO EFE;-50;2026-07-05;NULL;NULL;NULL;NULL;11120008;Banco Pacifico 2023;NULL;Ahorros Bancos y Cooperativas
+19951;traspaso;19950;traspaso;19951;RETITO EFE;50;2026-07-05;NULL;NULL;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
+19952;traspaso;19952;traspaso;19952;TRANSFERENCIA PAGO DIRECTO DESDE CTA AHORRO - MROMERO;-51.11;2026-06-29;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
+19953;traspaso;19952;traspaso;19953;TRANSFERENCIA PAGO DIRECTO DESDE CTA AHORRO - MROMERO;51.11;2026-06-29;NULL;NULL;NULL;NULL;11120002;BanGuajala;NULL;Ahorros Bancos y Cooperativas
+19954;traspaso;19954;traspaso;19954;TRANSFERENCIA ENVIADA A CTA. AHORROS - Daisy;-320;2026-07-01;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
+19955;traspaso;19954;traspaso;19955;TRANSFERENCIA ENVIADA A CTA. AHORROS - Daisy;320;2026-07-01;NULL;NULL;NULL;NULL;21300017;PensiÃ³n 2026;NULL;Obligaciones Adquiridas
+19956;traspaso;19956;traspaso;19956;TRANSFERENCIA RECIBIDA DE CTA. AHORROS - Jessica;-110;2026-07-01;NULL;NULL;NULL;NULL;11320005;Jessica x Pagar;NULL;Cuentas Personales por Cobrar
+19957;traspaso;19956;traspaso;19957;TRANSFERENCIA RECIBIDA DE CTA. AHORROS - Jessica;110;2026-07-01;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
+19958;traspaso;19958;traspaso;19958;N/D PAGO TARJETA DE CREDITO;-200.23;2026-07-01;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
+19959;traspaso;19958;traspaso;19959;N/D PAGO TARJETA DE CREDITO;200.23;2026-07-01;NULL;NULL;NULL;NULL;21310004;MasterCard BANKCARD;NULL;Creditos de Cpnsumo
+19960;traspaso;19960;traspaso;19960;Transferencia - MRomero;-51;2026-07-01;NULL;NULL;NULL;NULL;11120002;BanGuajala;NULL;Ahorros Bancos y Cooperativas
+19961;traspaso;19960;traspaso;19961;Transferencia - MRomero;51;2026-07-01;NULL;NULL;NULL;NULL;11120012;Banco Pichincha;NULL;Ahorros Bancos y Cooperativas
+19962;traspaso;19962;traspaso;19962;Prestamo Nro 566505900 - Cuota 17 de 60;-234.93;2026-06-24;NULL;NULL;NULL;NULL;11120012;Banco Pichincha;NULL;Ahorros Bancos y Cooperativas
+19963;traspaso;19962;traspaso;19963;Prestamo Nro 566505900 - Cuota 17 de 60;234.93;2026-06-24;NULL;NULL;NULL;NULL;21300013;Prestamo Pichincha 2025;NULL;Obligaciones Adquiridas
+19965;directo;19965;egreso;19965;Tommaco;-3;2026-07-02;64000006;Tabaco;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
+19966;directo;19966;egreso;19966;Busheta Hasta hoy;-9;2026-07-05;61260001;Transporte ;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
+19967;traspaso;19967;traspaso;19967;RETITO EFE;-30;2026-07-02;NULL;NULL;NULL;NULL;11120008;Banco Pacifico 2023;NULL;Ahorros Bancos y Cooperativas
+19968;traspaso;19967;traspaso;19968;RETITO EFE;30;2026-07-02;NULL;NULL;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
+19969;directo;19969;egreso;19969;Checkpoint 41.00;-0.5;2026-07-05;63400002;No se o no quiero saber;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
+19970;directo;19970;ingreso;19970;Factura 001-100-000000165 - ROSAHOLICS LLC;2000;2026-06-29;41000001;NÃ³mina, Sueldo, Salario;NULL;NULL;11110004;Trabajos Realizados 2025;NULL;Honorarios por Cobrar
+19971;directo;19971;ingreso;19971;Factura 001-100-000000164- ROSAHOLICS LLC - Comision Broker;-30;2026-06-29;41000001;NÃ³mina, Sueldo, Salario;NULL;NULL;11110004;Trabajos Realizados 2025;NULL;Honorarios por Cobrar
+19972;traspaso;19972;traspaso;19972;TRANSFERENCIAS RECIBIDAS (LOCALES / INTERNACIONALES);-1970;2026-07-06;NULL;NULL;NULL;NULL;11110004;Trabajos Realizados 2025;NULL;Honorarios por Cobrar
+19973;traspaso;19972;traspaso;19973;TRANSFERENCIAS RECIBIDAS (LOCALES / INTERNACIONALES);1970;2026-07-06;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
+19974;bypass;19974;egreso;19974;N/D CARGO SERV.F.TRANSFERENCIA EXT;-10.27;2026-07-06;62130001;Comisiones Bancarias;NULL;NULL;11110004;Trabajos Realizados 2025;NULL;Honorarios por Cobrar
+19975;bypass;19974;traspaso;19975;N/D CARGO SERV.F.TRANSFERENCIA EXT{Bolivariano 2026...};10.27;2026-07-06;NULL;NULL;NULL;NULL;11110004;Trabajos Realizados 2025;NULL;Honorarios por Cobrar
+19976;bypass;19974;traspaso;19976;N/D CARGO SERV.F.TRANSFERENCIA EXT{Comisiones Bancarias...};-10.27;2026-07-06;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
+19977;traspaso;19977;traspaso;19977;TRANSFERENCIA ENVIADA A CTA. AHORROS - Jessica;-140;2026-07-08;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
+19978;traspaso;19977;traspaso;19978;TRANSFERENCIA ENVIADA A CTA. AHORROS - Jessica;140;2026-07-08;NULL;NULL;NULL;NULL;11320005;Jessica x Pagar;NULL;Cuentas Personales por Cobrar
+19979;traspaso;19979;traspaso;19979;TRANSFERENCIA ENVIADA A CTA. AHORROS - Diana Sandoval;-200;2026-07-08;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
+19980;traspaso;19979;traspaso;19980;TRANSFERENCIA ENVIADA A CTA. AHORROS - Diana Sandoval;200;2026-07-08;NULL;NULL;NULL;NULL;21300001;Vivienda;NULL;Obligaciones Adquiridas
+19981;directo;19981;egreso;19981;Parrillada RSH;-20.41;2026-06-14;61240002;Restaurantes y Bares;NULL;NULL;21400013;Comidita A Credito;NULL;Consumos por Pagar
+19982;traspaso;19982;traspaso;19982;TRANSF. ENVI PAGODIR HD - Kein ;-20.41;2026-07-08;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
+19983;traspaso;19982;traspaso;19983;TRANSF. ENVI PAGODIR HD - Kein ;20.41;2026-07-08;NULL;NULL;NULL;NULL;21400013;Comidita A Credito;NULL;Consumos por Pagar
+19984;traspaso;19984;traspaso;19984;TRANSF. ENVI PAGODIR HD - JEP;-500;2026-07-08;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
+19985;traspaso;19984;traspaso;19985;TRANSF. ENVI PAGODIR HD - JEP;500;2026-07-08;NULL;NULL;NULL;NULL;11120005;JEP;NULL;Ahorros Bancos y Cooperativas
+19986;directo;19986;egreso;19986;N/D COMISION BANCARIA;-0.41;2026-07-08;62130001;Comisiones Bancarias;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
+19987;traspaso;19987;traspaso;19987;RETIRO CAJEROS AH-BB;-50;2026-07-11;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
+19988;traspaso;19987;traspaso;19988;RETIRO CAJEROS AH-BB;50;2026-07-11;NULL;NULL;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
+19989;traspaso;19989;traspaso;19989;Transferencia - Jeremy Bagua;-10;2026-07-12;NULL;NULL;NULL;NULL;11120012;Banco Pichincha;NULL;Ahorros Bancos y Cooperativas
+19990;traspaso;19989;traspaso;19990;Transferencia - Jeremy Bagua;10;2026-07-12;NULL;NULL;NULL;NULL;21300010;Santi Estudios;NULL;Obligaciones Adquiridas
+19991;bypass;19991;egreso;19991; Transferencia - Jeremy Bagua ;-10;2026-07-12;63400001;Donativos;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
+19992;bypass;19991;traspaso;19992; Transferencia - Jeremy Bagua {Banco Pichincha...};10;2026-07-12;NULL;NULL;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
+19993;bypass;19991;traspaso;19993; Transferencia - Jeremy Bagua {Donativos...};-10;2026-07-12;NULL;NULL;NULL;NULL;11120012;Banco Pichincha;NULL;Ahorros Bancos y Cooperativas
+19994;traspaso;19994;traspaso;19994;Efectivo - Jessica;-10;2026-07-11;NULL;NULL;NULL;NULL;11320005;Jessica x Pagar;NULL;Cuentas Personales por Cobrar
+19995;traspaso;19994;traspaso;19995;Efectivo - Jessica;10;2026-07-11;NULL;NULL;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
+19996;traspaso;19996;traspaso;19996;Efectivo - Jessica;-6;2026-07-12;NULL;NULL;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
+19997;traspaso;19996;traspaso;19997;Efectivo - Jessica;6;2026-07-12;NULL;NULL;NULL;NULL;11320005;Jessica x Pagar;NULL;Cuentas Personales por Cobrar
+19998;traspaso;19998;traspaso;19998;Comida de Anastasia;-4;2026-07-12;NULL;NULL;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
+19999;traspaso;19998;traspaso;19999;Comida de Anastasia;4;2026-07-12;NULL;NULL;NULL;NULL;11320005;Jessica x Pagar;NULL;Cuentas Personales por Cobrar
+20000;directo;20000;egreso;20000;Tiendita hasta hoy;-14;2026-07-12;61240001;Supermercado, AlimentaciÃ³n;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
+20001;directo;20001;egreso;20001;Comidita hasta hoy ;-7;2026-07-12;61240004;Almuerzos, Desayunos Diarios;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
+20002;bypass;20002;egreso;20002;Almuerzos RSH;-13;2026-07-07;61240004;Almuerzos, Desayunos Diarios;NULL;NULL;21400013;Comidita A Credito;NULL;Consumos por Pagar
+20003;bypass;20002;traspaso;20003;Almuerzos RSH{Billetera...};13;2026-07-07;NULL;NULL;NULL;NULL;21400013;Comidita A Credito;NULL;Consumos por Pagar
+20004;bypass;20002;traspaso;20004;Almuerzos RSH{Almuerzos, Desayunos...};-13;2026-07-07;NULL;NULL;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
+20005;directo;20005;egreso;20005;Chelas;-3;2026-07-10;64000005;Diversiones Alcoholicas;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
+20006;directo;20006;egreso;20006;Tommaco;-1.5;2026-07-10;64000006;Tabaco;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
+20007;directo;20007;egreso;20007;Busheta Hasta hoy;-12;2026-07-12;61260001;Transporte ;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
+20008;bypass;20008;egreso;20008;Mecatos;-2;2026-07-10;61213002;Regalos;NULL;NULL;11320012;Cuenta Alekey;NULL;Cuentas Personales por Cobrar
+20009;bypass;20008;traspaso;20009;Mecatos{Billetera...};2;2026-07-10;NULL;NULL;NULL;NULL;11320012;Cuenta Alekey;NULL;Cuentas Personales por Cobrar
+20010;bypass;20008;traspaso;20010;Mecatos{Regalos...};-2;2026-07-10;NULL;NULL;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
+20011;directo;20011;egreso;20011;Checkpoint 35.90;-2.6;2026-07-12;63400002;No se o no quiero saber;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
+20012;traspaso;20012;traspaso;20012;PAGO TRANSFERENCIA INTERBANCARIA AMEX;-100;2026-06-16;NULL;NULL;NULL;NULL;11120005;JEP;NULL;Ahorros Bancos y Cooperativas
+20013;traspaso;20012;traspaso;20013;PAGO TRANSFERENCIA INTERBANCARIA AMEX;100;2026-06-16;NULL;NULL;NULL;NULL;21310005;AMEX;NULL;Creditos de Cpnsumo
 20014;bypass;20014;egreso;20014;RUKITO AVALON - Alejandro;-38.6;2026-06-08;61240002;Restaurantes y Bares;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
 20015;bypass;20014;traspaso;20015;RUKITO AVALON - Alejandro{AMEX...};38.6;2026-06-08;NULL;NULL;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
+20016;bypass;20014;traspaso;20016;RUKITO AVALON - Alejandro{Restaurantes y Bares...};-38.6;2026-06-08;NULL;NULL;NULL;NULL;21310005;AMEX;NULL;Creditos de Cpnsumo
 20017;bypass;20017;egreso;20017;UBER TRIP 840;-4.59;2026-06-08;61260002;Taxis;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
 20018;bypass;20017;traspaso;20018;UBER TRIP 840{AMEX...};4.59;2026-06-08;NULL;NULL;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
+20019;bypass;20017;traspaso;20019;UBER TRIP 840{Taxis...};-4.59;2026-06-08;NULL;NULL;NULL;NULL;21310005;AMEX;NULL;Creditos de Cpnsumo
 20020;bypass;20020;egreso;20020;UBER TRIP 840;-2.47;2026-06-14;61260002;Taxis;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
 20021;bypass;20020;traspaso;20021;UBER TRIP 840{AMEX...};2.47;2026-06-14;NULL;NULL;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
+20022;bypass;20020;traspaso;20022;UBER TRIP 840{Taxis...};-2.47;2026-06-14;NULL;NULL;NULL;NULL;21310005;AMEX;NULL;Creditos de Cpnsumo
 20023;bypass;20023;egreso;20023; UBER TRIP 840 ;-16.02;2026-06-15;61260002;Taxis;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
 20024;bypass;20023;traspaso;20024; UBER TRIP 840 {AMEX...};16.02;2026-06-15;NULL;NULL;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
+20025;bypass;20023;traspaso;20025; UBER TRIP 840 {Taxis...};-16.02;2026-06-15;NULL;NULL;NULL;NULL;21310005;AMEX;NULL;Creditos de Cpnsumo
 20026;bypass;20026;egreso;20026;UBER TRP 840;-9.06;2026-06-21;61260002;Taxis;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
 20027;bypass;20026;traspaso;20027;UBER TRP 840{AMEX...};9.06;2026-06-21;NULL;NULL;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
-20053;bypass;20053;egreso;20053;HIPERMARKET EL DORADO CA ECU 840;-35.79;2026-06-08;61240001;Supermercado, AlimentaciÃ³n;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
-20054;bypass;20053;traspaso;20054;HIPERMARKET EL DORADO CA ECU 840{MasterCard PRODUBANC...};35.79;2026-06-08;NULL;NULL;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
-20056;bypass;20056;egreso;20056;LA VIENESA PIAZZA C ECU 840;-5.75;2026-06-12;61240001;Supermercado, AlimentaciÃ³n;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
-20057;bypass;20056;traspaso;20057;LA VIENESA PIAZZA C ECU 840{MasterCard PRODUBANC...};5.75;2026-06-12;NULL;NULL;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
-20059;bypass;20059;egreso;20059;MI COMISARIATO PEDRO M AV ECU 840;-16.55;2026-06-14;61240001;Supermercado, AlimentaciÃ³n;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
-20060;bypass;20059;traspaso;20060;MI COMISARIATO PEDRO M AV ECU 840{MasterCard PRODUBANC...};16.55;2026-06-14;NULL;NULL;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
-20062;bypass;20062;egreso;20062;TIA PLAZA TIA LA JOYA AV ECU 840;-14.3;2026-06-14;61240001;Supermercado, AlimentaciÃ³n;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
-20063;bypass;20062;traspaso;20063;TIA PLAZA TIA LA JOYA AV ECU 840{MasterCard PRODUBANC...};14.3;2026-06-14;NULL;NULL;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
-20067;bypass;20067;egreso;20067;TIA ATARAZANA 598 CD ECU 840 ;-22.89;2026-06-21;61240001;Supermercado, AlimentaciÃ³n;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
-20068;bypass;20067;traspaso;20068;TIA ATARAZANA 598 CD ECU 840 {MasterCard PRODUBANC...};22.89;2026-06-21;NULL;NULL;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
-20070;bypass;20070;egreso;20070;PASTELES Y COMPANIA SL 1A ECU 840;-4.6;2026-06-24;61240002;Restaurantes y Bares;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
-20071;bypass;20070;traspaso;20071;PASTELES Y COMPANIA SL 1A ECU 840{MasterCard PRODUBANC...};4.6;2026-06-24;NULL;NULL;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
-20073;bypass;20073;egreso;20073;DISNEY PLUS 2400 WEST ALA USA 840;-13.21;2026-06-28;64100003;Servicios online;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
-20074;bypass;20073;traspaso;20074;DISNEY PLUS 2400 WEST ALA USA 840{MasterCard PRODUBANC...};13.21;2026-06-28;NULL;NULL;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
-20142;bypass;20142;egreso;20142;ALMACENES TIA;-2.28;2026-06-07;61240001;Supermercado, AlimentaciÃ³n;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
-20143;bypass;20142;traspaso;20143;ALMACENES TIA{VISA BGR...};2.28;2026-06-07;NULL;NULL;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
-20145;bypass;20145;egreso;20145;PedidosYa*Korea Chicken;-5.85;2026-06-07;61240002;Restaurantes y Bares;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
-20146;bypass;20145;traspaso;20146;PedidosYa*Korea Chicken{VISA BGR...};5.85;2026-06-07;NULL;NULL;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
-20153;bypass;20153;egreso;20153;PTP - BMI DEL ECUADOR COM EC 840 ;-25;2026-06-01;63400004;Primas de Seguros;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
-20154;bypass;20153;traspaso;20154;PTP - BMI DEL ECUADOR COM EC 840 {VISA BANKCARD...};25;2026-06-01;NULL;NULL;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
-20171;bypass;20171;egreso;20171;PAYPAL *SPOTIFY*P43319C GB 840;-13.79;2026-06-05;64100003;Servicios online;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
-20172;bypass;20171;traspaso;20172;PAYPAL *SPOTIFY*P43319C GB 840{VISA JEP...};13.79;2026-06-05;NULL;NULL;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
-20174;bypass;20174;egreso;20174;TIA ATARAZANA 598 EC 840;-41.98;2026-06-06;61240001;Supermercado, AlimentaciÃ³n;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
-20175;bypass;20174;traspaso;20175;TIA ATARAZANA 598 EC 840{VISA JEP...};41.98;2026-06-06;NULL;NULL;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
-20177;bypass;20177;egreso;20177;CLIP STUDIO PAINT JP 840;-10.34;2026-06-18;61240001;Supermercado, AlimentaciÃ³n;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
-20178;bypass;20177;traspaso;20178;CLIP STUDIO PAINT JP 840{VISA JEP...};10.34;2026-06-18;NULL;NULL;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
-20180;bypass;20180;egreso;20180;SEGURO DE DESGRAVAMEN;-0.89;2026-06-18;63400004;Primas de Seguros;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
-20181;bypass;20180;traspaso;20181;SEGURO DE DESGRAVAMEN{VISA JEP...};0.89;2026-06-18;NULL;NULL;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
-20066;traspaso;20065;traspaso;20066;HAPI CORP PIOTRKOWSKA 116 POL 840 ;62.99;2026-06-21;NULL;NULL;NULL;NULL;11220003;Inversiones DCA - Hapi;NULL;Inversiones
-20213;directo;20213;egreso;20213;N/D COMISION BANCARIA;-2.99;2026-06-21;62130001;Comisiones Bancarias;NULL;NULL;11220003;Inversiones DCA - Hapi;NULL;Inversiones
-20214;directo;20214;ingreso;20214;Cuadre Mensual;-4.96;2026-06-30;41100003;Rendimiento de Inversiones;NULL;NULL;11220003;Inversiones DCA - Hapi;NULL;Inversiones
-19701;traspaso;19701;traspaso;19701;PAGO TC EN MORA 477045XXXXXX9742;-70.83;2026-06-04;NULL;NULL;NULL;NULL;11120005;JEP;NULL;Ahorros Bancos y Cooperativas
-19703;traspaso;19703;traspaso;19703;PAGO TC 477045XXXXXX9742;-82.59;2026-06-05;NULL;NULL;NULL;NULL;11120005;JEP;NULL;Ahorros Bancos y Cooperativas
-19705;traspaso;19705;traspaso;19705;PAGO DE PRESTAMO: 066290407224;-178.18;2026-06-05;NULL;NULL;NULL;NULL;11120005;JEP;NULL;Ahorros Bancos y Cooperativas
-19765;traspaso;19764;traspaso;19765;TRANSF. ENVI PAGODIR HD - JEP;550;2026-06-10;NULL;NULL;NULL;NULL;11120005;JEP;NULL;Ahorros Bancos y Cooperativas
-20012;traspaso;20012;traspaso;20012;PAGO TRANSFERENCIA INTERBANCARIA AMEX;-100;2026-06-16;NULL;NULL;NULL;NULL;11120005;JEP;NULL;Ahorros Bancos y Cooperativas
+20028;bypass;20026;traspaso;20028;UBER TRP 840{Taxis...};-9.06;2026-06-21;NULL;NULL;NULL;NULL;21310005;AMEX;NULL;Creditos de Cpnsumo
+20029;directo;20029;egreso;20029;INTERESES;-10.71;2026-06-26;62130002;Intereses Por Financiamiento;NULL;NULL;21310005;AMEX;NULL;Creditos de Cpnsumo
+20036;traspaso;20036;traspaso;20036;TRANSFERENCIAS EXTERNAS|LUIS ERIQUE|BANCO DE GUAYAQUIL S.A|202606;-100;2026-07-14;NULL;NULL;NULL;NULL;11120005;JEP;NULL;Ahorros Bancos y Cooperativas
+20037;traspaso;20036;traspaso;20037;TRANSFERENCIAS EXTERNAS|LUIS ERIQUE|BANCO DE GUAYAQUIL S.A|202606;100;2026-07-14;NULL;NULL;NULL;NULL;21310005;AMEX;NULL;Creditos de Cpnsumo
 20038;traspaso;20038;traspaso;20038;TRANSFERENCIAS EXTERNAS|ERIQUE GUAJALA|BANCO PRODUBANCO GRUPO PROMERICA|202605;-70;2026-06-16;NULL;NULL;NULL;NULL;11120005;JEP;NULL;Ahorros Bancos y Cooperativas
+20039;traspaso;20038;traspaso;20039;TRANSFERENCIAS EXTERNAS|ERIQUE GUAJALA|BANCO PRODUBANCO GRUPO PROMERICA|202605;70;2026-06-16;NULL;NULL;NULL;NULL;21310006;MasterCard PRODUBANCO;NULL;Creditos de Cpnsumo
 20040;traspaso;20040;traspaso;20040;TRANSFERENCIAS EXTERNAS|LUIS ERIQUE|BANCO GENERAL RUMINAHUI|202605;-100;2026-06-16;NULL;NULL;NULL;NULL;11120005;JEP;NULL;Ahorros Bancos y Cooperativas
+20041;traspaso;20040;traspaso;20041;TRANSFERENCIAS EXTERNAS|LUIS ERIQUE|BANCO GENERAL RUMINAHUI|202605;100;2026-06-16;NULL;NULL;NULL;NULL;21310003;VISA BGR;NULL;Creditos de Cpnsumo
 20042;directo;20042;egreso;20042;N/D COMISION BANCARIA;-1.23;2026-06-16;62130001;Comisiones Bancarias;NULL;NULL;11120005;JEP;NULL;Ahorros Bancos y Cooperativas
 20043;directo;20043;ingreso;20043;CAPITALIZACION DE INTERESES;0.24;2026-06-30;41100003;Rendimiento de Inversiones;NULL;NULL;11120005;JEP;NULL;Ahorros Bancos y Cooperativas
-19883;traspaso;19882;traspaso;19883;Modista;5;2026-06-20;NULL;NULL;NULL;NULL;11320005;Jessica x Pagar;NULL;Cuentas Personales por Cobrar
-19727;traspaso;19726;traspaso;19727;N/D PAGO TARJETA DE CREDITO - BANKCARD MASTERCARD;200;2026-06-01;NULL;NULL;NULL;NULL;21310004;MasterCard BANKCARD;NULL;Creditos de Cpnsumo
-20039;traspaso;20038;traspaso;20039;TRANSFERENCIAS EXTERNAS|ERIQUE GUAJALA|BANCO PRODUBANCO GRUPO PROMERICA|202605;70;2026-06-16;NULL;NULL;NULL;NULL;21310006;MasterCard PRODUBANCO;NULL;Creditos de Cpnsumo
+20044;traspaso;20044;traspaso;20044;TRANSFERENCIAS EXTERNAS|ERIQUE GUAJALA|BANCO PRODUBANCO GRUPO PROMERICA|202606;-90;2026-07-14;NULL;NULL;NULL;NULL;11120005;JEP;NULL;Ahorros Bancos y Cooperativas
+20045;traspaso;20044;traspaso;20045;TRANSFERENCIAS EXTERNAS|ERIQUE GUAJALA|BANCO PRODUBANCO GRUPO PROMERICA|202606;90;2026-07-14;NULL;NULL;NULL;NULL;21310006;MasterCard PRODUBANCO;NULL;Creditos de Cpnsumo
+20046;traspaso;20046;traspaso;20046;TRANSFERENCIAS EXTERNAS|LUIS ERIQUE|BANCO GENERAL RUMINAHUI|202606;-90;2026-07-14;NULL;NULL;NULL;NULL;11120005;JEP;NULL;Ahorros Bancos y Cooperativas
+20047;traspaso;20046;traspaso;20047;TRANSFERENCIAS EXTERNAS|LUIS ERIQUE|BANCO GENERAL RUMINAHUI|202606;90;2026-07-14;NULL;NULL;NULL;NULL;21310003;VISA BGR;NULL;Creditos de Cpnsumo
+20048;directo;20048;egreso;20048;N/D COMISION BANCARIA;-1.23;2026-07-14;62130001;Comisiones Bancarias;NULL;NULL;11120005;JEP;NULL;Ahorros Bancos y Cooperativas
+20049;traspaso;20049;traspaso;20049;PAGO DE PRESTAMO: 066290407224;-178.18;2026-07-05;NULL;NULL;NULL;NULL;11120005;JEP;NULL;Ahorros Bancos y Cooperativas
+20050;traspaso;20049;traspaso;20050;PAGO DE PRESTAMO: 066290407224;178.18;2026-07-05;NULL;NULL;NULL;NULL;22130004;Prestamo JEP;NULL;Prestamos 
+20051;traspaso;20051;traspaso;20051;PAGO TC 477045XXXXXX9742;-90;2026-07-01;NULL;NULL;NULL;NULL;11120005;JEP;NULL;Ahorros Bancos y Cooperativas
+20052;traspaso;20051;traspaso;20052;PAGO TC 477045XXXXXX9742;90;2026-07-01;NULL;NULL;NULL;NULL;21310002;VISA JEP;NULL;Creditos de Cpnsumo
+20053;bypass;20053;egreso;20053;HIPERMARKET EL DORADO CA ECU 840;-35.79;2026-06-08;61240001;Supermercado, AlimentaciÃ³n;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
+20054;bypass;20053;traspaso;20054;HIPERMARKET EL DORADO CA ECU 840{MasterCard PRODUBANC...};35.79;2026-06-08;NULL;NULL;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
 20055;bypass;20053;traspaso;20055;HIPERMARKET EL DORADO CA ECU 840{Supermercado, Alimen...};-35.79;2026-06-08;NULL;NULL;NULL;NULL;21310006;MasterCard PRODUBANCO;NULL;Creditos de Cpnsumo
+20056;bypass;20056;egreso;20056;LA VIENESA PIAZZA C ECU 840;-5.75;2026-06-12;61240001;Supermercado, AlimentaciÃ³n;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
+20057;bypass;20056;traspaso;20057;LA VIENESA PIAZZA C ECU 840{MasterCard PRODUBANC...};5.75;2026-06-12;NULL;NULL;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
 20058;bypass;20056;traspaso;20058;LA VIENESA PIAZZA C ECU 840{Supermercado, Alimen...};-5.75;2026-06-12;NULL;NULL;NULL;NULL;21310006;MasterCard PRODUBANCO;NULL;Creditos de Cpnsumo
+20059;bypass;20059;egreso;20059;MI COMISARIATO PEDRO M AV ECU 840;-16.55;2026-06-14;61240001;Supermercado, AlimentaciÃ³n;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
+20060;bypass;20059;traspaso;20060;MI COMISARIATO PEDRO M AV ECU 840{MasterCard PRODUBANC...};16.55;2026-06-14;NULL;NULL;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
 20061;bypass;20059;traspaso;20061;MI COMISARIATO PEDRO M AV ECU 840{Supermercado, Alimen...};-16.55;2026-06-14;NULL;NULL;NULL;NULL;21310006;MasterCard PRODUBANCO;NULL;Creditos de Cpnsumo
+20062;bypass;20062;egreso;20062;TIA PLAZA TIA LA JOYA AV ECU 840;-14.3;2026-06-14;61240001;Supermercado, AlimentaciÃ³n;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
+20063;bypass;20062;traspaso;20063;TIA PLAZA TIA LA JOYA AV ECU 840{MasterCard PRODUBANC...};14.3;2026-06-14;NULL;NULL;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
 20064;bypass;20062;traspaso;20064;TIA PLAZA TIA LA JOYA AV ECU 840{Supermercado, Alimen...};-14.3;2026-06-14;NULL;NULL;NULL;NULL;21310006;MasterCard PRODUBANCO;NULL;Creditos de Cpnsumo
 20065;traspaso;20065;traspaso;20065;HAPI CORP PIOTRKOWSKA 116 POL 840 ;-62.99;2026-06-21;NULL;NULL;NULL;NULL;21310006;MasterCard PRODUBANCO;NULL;Creditos de Cpnsumo
+20066;traspaso;20065;traspaso;20066;HAPI CORP PIOTRKOWSKA 116 POL 840 ;62.99;2026-06-21;NULL;NULL;NULL;NULL;11220003;Inversiones DCA - Hapi;NULL;Inversiones
+20067;bypass;20067;egreso;20067;TIA ATARAZANA 598 CD ECU 840 ;-22.89;2026-06-21;61240001;Supermercado, AlimentaciÃ³n;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
+20068;bypass;20067;traspaso;20068;TIA ATARAZANA 598 CD ECU 840 {MasterCard PRODUBANC...};22.89;2026-06-21;NULL;NULL;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
 20069;bypass;20067;traspaso;20069;TIA ATARAZANA 598 CD ECU 840 {Supermercado, Alimen...};-22.89;2026-06-21;NULL;NULL;NULL;NULL;21310006;MasterCard PRODUBANCO;NULL;Creditos de Cpnsumo
+20070;bypass;20070;egreso;20070;PASTELES Y COMPANIA SL 1A ECU 840;-4.6;2026-06-24;61240002;Restaurantes y Bares;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
+20071;bypass;20070;traspaso;20071;PASTELES Y COMPANIA SL 1A ECU 840{MasterCard PRODUBANC...};4.6;2026-06-24;NULL;NULL;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
 20072;bypass;20070;traspaso;20072;PASTELES Y COMPANIA SL 1A ECU 840{Restaurantes y Bares...};-4.6;2026-06-24;NULL;NULL;NULL;NULL;21310006;MasterCard PRODUBANCO;NULL;Creditos de Cpnsumo
+20073;bypass;20073;egreso;20073;DISNEY PLUS 2400 WEST ALA USA 840;-13.21;2026-06-28;64100003;Servicios online;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
+20074;bypass;20073;traspaso;20074;DISNEY PLUS 2400 WEST ALA USA 840{MasterCard PRODUBANC...};13.21;2026-06-28;NULL;NULL;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
 20075;bypass;20073;traspaso;20075;DISNEY PLUS 2400 WEST ALA USA 840{Servicios online...};-13.21;2026-06-28;NULL;NULL;NULL;NULL;21310006;MasterCard PRODUBANCO;NULL;Creditos de Cpnsumo
 20076;directo;20076;egreso;20076;TARIFA GESTION COBRANZA;-7.34;2026-06-06;62130003;Multas;NULL;NULL;21310006;MasterCard PRODUBANCO;NULL;Creditos de Cpnsumo
 20077;directo;20077;egreso;20077;CONTRIBUCIÃ“N PARA EL FINANCIAMIENTO SOLCA;-1;2026-06-16;62130001;Comisiones Bancarias;NULL;NULL;21310006;MasterCard PRODUBANCO;NULL;Creditos de Cpnsumo
 20078;directo;20078;egreso;20078;INTERES FINANCIAMIENTO CHECKPOINT UTIL 2622.80 TOTPAG 2576.00;-32.13;2026-06-30;62130002;Intereses Por Financiamiento;NULL;NULL;21310006;MasterCard PRODUBANCO;NULL;Creditos de Cpnsumo
-19869;directo;19869;egreso;19869;Pension Alimenticia - Canon 500 Mensuales;-500;2026-06-01;63000003;Pension Alimenticia;NULL;NULL;21300017;PensiÃ³n 2026;NULL;Obligaciones Adquiridas
-20192;traspaso;20191;traspaso;20192;Descuento por Gastos de Estudios de Santiago - 2026-06;400;2026-06-30;NULL;NULL;NULL;NULL;21300017;PensiÃ³n 2026;NULL;Obligaciones Adquiridas
-19706;traspaso;19705;traspaso;19706;PAGO DE PRESTAMO: 066290407224;178.18;2026-06-05;NULL;NULL;NULL;NULL;22130004;Prestamo JEP;NULL;Prestamos 
-19963;traspaso;19962;traspaso;19963;Prestamo Nro 566505900 - Cuota 17 de 60;234.93;2026-06-24;NULL;NULL;NULL;NULL;21300013;Prestamo Pichincha 2025;NULL;Obligaciones Adquiridas
-19747;traspaso;19746;traspaso;19747;Envio de Dinero Santi por Wester Union;310.35;2026-06-01;NULL;NULL;NULL;NULL;21300011;Proyecto UP - Santiago;NULL;Obligaciones Adquiridas
-19889;traspaso;19888;traspaso;19889;Transferencia Western Union - Santiago;134.49;2026-06-17;NULL;NULL;NULL;NULL;21300011;Proyecto UP - Santiago;NULL;Obligaciones Adquiridas
-20187;directo;20187;egreso;20187;Comision Western Union;-10.35;2026-06-01;62130001;Comisiones Bancarias;NULL;NULL;21300011;Proyecto UP - Santiago;NULL;Obligaciones Adquiridas
-20191;traspaso;20191;traspaso;20191;Descuento por Gastos de Estudios de Santiago - 2026-06;-400;2026-06-30;NULL;NULL;NULL;NULL;21300011;Proyecto UP - Santiago;NULL;Obligaciones Adquiridas
-19748;traspaso;19748;traspaso;19748;TRANSFERENCIAS RECIBIDAS (LOCALES / INTERNACIONALES);-1970;2026-06-08;NULL;NULL;NULL;NULL;11110004;Trabajos Realizados 2025;NULL;Honorarios por Cobrar
-19750;bypass;19750;egreso;19750;N/D CARGO SERV.F.TRANSFERENCIA EXT;-10.27;2026-06-08;62130001;Comisiones Bancarias;NULL;NULL;11110004;Trabajos Realizados 2025;NULL;Honorarios por Cobrar
-19751;bypass;19750;traspaso;19751;N/D CARGO SERV.F.TRANSFERENCIA EXT{Bolivariano 2026...};10.27;2026-06-08;NULL;NULL;NULL;NULL;11110004;Trabajos Realizados 2025;NULL;Honorarios por Cobrar
-19970;directo;19970;ingreso;19970;Factura 001-100-000000165 - ROSAHOLICS LLC;2000;2026-06-29;41000001;NÃ³mina, Sueldo, Salario;NULL;NULL;11110004;Trabajos Realizados 2025;NULL;Honorarios por Cobrar
-19971;directo;19971;ingreso;19971;Factura 001-100-000000164- ROSAHOLICS LLC - Comision Broker;-30;2026-06-29;41000001;NÃ³mina, Sueldo, Salario;NULL;NULL;11110004;Trabajos Realizados 2025;NULL;Honorarios por Cobrar
-20160;traspaso;20159;traspaso;20160;RECAUDACION IESS 24BB;85.68;2026-06-20;NULL;NULL;NULL;NULL;11110004;Trabajos Realizados 2025;NULL;Honorarios por Cobrar
-19763;traspaso;19762;traspaso;19763;N/D PAGO TARJETA DE CREDITO - VISA BANKCARD;80;2026-06-10;NULL;NULL;NULL;NULL;21310007;VISA BANKCARD;NULL;Creditos de Cpnsumo
-20150;directo;20150;egreso;20150;CONTRIBUCIÃ“N PARA EL FINANCIAMIENTO SOLCA;-0.79;2026-06-16;62130001;Comisiones Bancarias;NULL;NULL;21310007;VISA BANKCARD;NULL;Creditos de Cpnsumo
-20151;directo;20151;egreso;20151;RENOVACION PRESTACIONES EN EL EXTERIOR;-12.65;2026-06-20;62130001;Comisiones Bancarias;NULL;NULL;21310007;VISA BANKCARD;NULL;Creditos de Cpnsumo
-20152;directo;20152;egreso;20152;INTERES FINANCIAMIENTO CHECKPOINT UTIL 2142.54 TOTPAG 2142.54;-22.85;2026-06-30;62130002;Intereses Por Financiamiento;NULL;NULL;21310007;VISA BANKCARD;NULL;Creditos de Cpnsumo
-20155;bypass;20153;traspaso;20155;PTP - BMI DEL ECUADOR COM EC 840 {Primas de Seguros...};-25;2026-06-01;NULL;NULL;NULL;NULL;21310007;VISA BANKCARD;NULL;Creditos de Cpnsumo
-20156;traspaso;20156;traspaso;20156;CNEL GUAYAQUIL 24ONLINE;-22.83;2026-06-05;NULL;NULL;NULL;NULL;21310007;VISA BANKCARD;NULL;Creditos de Cpnsumo
-20159;traspaso;20159;traspaso;20159;RECAUDACION IESS 24BB;-85.68;2026-06-20;NULL;NULL;NULL;NULL;21310007;VISA BANKCARD;NULL;Creditos de Cpnsumo
-20161;traspaso;20161;traspaso;20161;Prestamo Quirografario 15230273 - 23/24;-33.1;2026-06-17;NULL;NULL;NULL;NULL;21310007;VISA BANKCARD;NULL;Creditos de Cpnsumo
-20163;traspaso;20163;traspaso;20163;Prestamo Quirografario 18705192 - 10/36;-45.66;2026-06-17;NULL;NULL;NULL;NULL;21310007;VISA BANKCARD;NULL;Creditos de Cpnsumo
-20041;traspaso;20040;traspaso;20041;TRANSFERENCIAS EXTERNAS|LUIS ERIQUE|BANCO GENERAL RUMINAHUI|202605;100;2026-06-16;NULL;NULL;NULL;NULL;21310003;VISA BGR;NULL;Creditos de Cpnsumo
+20079;bypass;20079;egreso;20079;MERPAGO*MERCADOLIBRE;-12.11;2026-06-25;61240001;Supermercado, AlimentaciÃ³n;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
+20080;bypass;20079;traspaso;20080;MERPAGO*MERCADOLIBRE{VISA BGR...};12.11;2026-06-25;NULL;NULL;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
 20081;bypass;20079;traspaso;20081;MERPAGO*MERCADOLIBRE{Supermercado, Alimen...};-12.11;2026-06-25;NULL;NULL;NULL;NULL;21310003;VISA BGR;NULL;Creditos de Cpnsumo
+20082;bypass;20082;egreso;20082;MERPAGO*OPEN25 ;-5.88;2026-06-05;61240001;Supermercado, AlimentaciÃ³n;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
+20083;bypass;20082;traspaso;20083;MERPAGO*OPEN25 {VISA BGR...};5.88;2026-06-05;NULL;NULL;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
 20084;bypass;20082;traspaso;20084;MERPAGO*OPEN25 {Supermercado, Alimen...};-5.88;2026-06-05;NULL;NULL;NULL;NULL;21310003;VISA BGR;NULL;Creditos de Cpnsumo
+20085;bypass;20085;egreso;20085;MERPAGO*OPEN25;-8.82;2026-06-13;61240001;Supermercado, AlimentaciÃ³n;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
+20086;bypass;20085;traspaso;20086;MERPAGO*OPEN25{VISA BGR...};8.82;2026-06-13;NULL;NULL;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
 20087;bypass;20085;traspaso;20087;MERPAGO*OPEN25{Supermercado, Alimen...};-8.82;2026-06-13;NULL;NULL;NULL;NULL;21310003;VISA BGR;NULL;Creditos de Cpnsumo
+20088;bypass;20088;egreso;20088;MERPAGO*OPEN25;-5.18;2026-06-24;61240001;Supermercado, AlimentaciÃ³n;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
+20089;bypass;20088;traspaso;20089;MERPAGO*OPEN25{VISA BGR...};5.18;2026-06-24;NULL;NULL;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
 20090;bypass;20088;traspaso;20090;MERPAGO*OPEN25{Supermercado, Alimen...};-5.18;2026-06-24;NULL;NULL;NULL;NULL;21310003;VISA BGR;NULL;Creditos de Cpnsumo
+20091;bypass;20091;egreso;20091;MERPAGO*CARREFOUR;-2.09;2026-06-10;61240001;Supermercado, AlimentaciÃ³n;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
+20092;bypass;20091;traspaso;20092;MERPAGO*CARREFOUR{VISA BGR...};2.09;2026-06-10;NULL;NULL;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
 20093;bypass;20091;traspaso;20093;MERPAGO*CARREFOUR{Supermercado, Alimen...};-2.09;2026-06-10;NULL;NULL;NULL;NULL;21310003;VISA BGR;NULL;Creditos de Cpnsumo
+20094;bypass;20094;egreso;20094;MERPAGO*SUBEVIAJES;-0.66;2026-06-17;61260001;Transporte ;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
+20095;bypass;20094;traspaso;20095;MERPAGO*SUBEVIAJES{VISA BGR...};0.66;2026-06-17;NULL;NULL;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
 20096;bypass;20094;traspaso;20096;MERPAGO*SUBEVIAJES{Transporte ...};-0.66;2026-06-17;NULL;NULL;NULL;NULL;21310003;VISA BGR;NULL;Creditos de Cpnsumo
+20097;bypass;20097;egreso;20097;MERPAGO*SUBEVIAJES;-0.72;2026-06-17;61260001;Transporte ;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
+20098;bypass;20097;traspaso;20098;MERPAGO*SUBEVIAJES{VISA BGR...};0.72;2026-06-17;NULL;NULL;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
 20099;bypass;20097;traspaso;20099;MERPAGO*SUBEVIAJES{Transporte ...};-0.72;2026-06-17;NULL;NULL;NULL;NULL;21310003;VISA BGR;NULL;Creditos de Cpnsumo
+20100;bypass;20100;egreso;20100;MERPAGO*SUBEVIAJES;-0.78;2026-06-27;61260001;Transporte ;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
+20101;bypass;20100;traspaso;20101;MERPAGO*SUBEVIAJES{VISA BGR...};0.78;2026-06-27;NULL;NULL;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
 20102;bypass;20100;traspaso;20102;MERPAGO*SUBEVIAJES{Transporte ...};-0.78;2026-06-27;NULL;NULL;NULL;NULL;21310003;VISA BGR;NULL;Creditos de Cpnsumo
+20103;bypass;20103;egreso;20103;MERPAGO*SUBEVIAJES;-3.37;2026-06-27;61260001;Transporte ;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
+20104;bypass;20103;traspaso;20104;MERPAGO*SUBEVIAJES{VISA BGR...};3.37;2026-06-27;NULL;NULL;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
 20105;bypass;20103;traspaso;20105;MERPAGO*SUBEVIAJES{Transporte ...};-3.37;2026-06-27;NULL;NULL;NULL;NULL;21310003;VISA BGR;NULL;Creditos de Cpnsumo
+20106;bypass;20106;egreso;20106;BUENOS AYRES ESPRESS;-4.96;2026-06-03;61260001;Transporte ;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
+20107;bypass;20106;traspaso;20107;BUENOS AYRES ESPRESS{VISA BGR...};4.96;2026-06-03;NULL;NULL;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
 20108;bypass;20106;traspaso;20108;BUENOS AYRES ESPRESS{Transporte ...};-4.96;2026-06-03;NULL;NULL;NULL;NULL;21310003;VISA BGR;NULL;Creditos de Cpnsumo
+20109;bypass;20109;egreso;20109;BUENOS AYRES ESPRESS;-2.53;2026-06-16;61260001;Transporte ;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
+20110;bypass;20109;traspaso;20110;BUENOS AYRES ESPRESS{VISA BGR...};2.53;2026-06-16;NULL;NULL;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
 20111;bypass;20109;traspaso;20111;BUENOS AYRES ESPRESS{Transporte ...};-2.53;2026-06-16;NULL;NULL;NULL;NULL;21310003;VISA BGR;NULL;Creditos de Cpnsumo
+20112;bypass;20112;egreso;20112;MERPAGO*OPEN25;-2.88;2026-06-16;61260001;Transporte ;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
+20113;bypass;20112;traspaso;20113;MERPAGO*OPEN25{VISA BGR...};2.88;2026-06-16;NULL;NULL;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
 20114;bypass;20112;traspaso;20114;MERPAGO*OPEN25{Transporte ...};-2.88;2026-06-16;NULL;NULL;NULL;NULL;21310003;VISA BGR;NULL;Creditos de Cpnsumo
+20115;bypass;20115;egreso;20115;MERPAGO*ESTANIELPIERRELOM;-6.26;2026-06-25;61240001;Supermercado, AlimentaciÃ³n;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
+20116;bypass;20115;traspaso;20116;MERPAGO*ESTANIELPIERRELOM{VISA BGR...};6.26;2026-06-25;NULL;NULL;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
 20117;bypass;20115;traspaso;20117;MERPAGO*ESTANIELPIERRELOM{Supermercado, Alimen...};-6.26;2026-06-25;NULL;NULL;NULL;NULL;21310003;VISA BGR;NULL;Creditos de Cpnsumo
+20118;bypass;20118;egreso;20118;MERPAGO*EMOVASUBTE;-1.18;2026-06-16;61260001;Transporte ;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
+20119;bypass;20118;traspaso;20119;MERPAGO*EMOVASUBTE{VISA BGR...};1.18;2026-06-16;NULL;NULL;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
 20120;bypass;20118;traspaso;20120;MERPAGO*EMOVASUBTE{Transporte ...};-1.18;2026-06-16;NULL;NULL;NULL;NULL;21310003;VISA BGR;NULL;Creditos de Cpnsumo
+20121;bypass;20121;egreso;20121;MERPAGO*EMOVASUBTE;-1.13;2026-06-26;61260001;Transporte ;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
+20122;bypass;20121;traspaso;20122;MERPAGO*EMOVASUBTE{VISA BGR...};1.13;2026-06-26;NULL;NULL;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
 20123;bypass;20121;traspaso;20123;MERPAGO*EMOVASUBTE{Transporte ...};-1.13;2026-06-26;NULL;NULL;NULL;NULL;21310003;VISA BGR;NULL;Creditos de Cpnsumo
+20124;bypass;20124;egreso;20124;MERPAGO*EMOVASUBTE;-1.13;2026-06-27;61260001;Transporte ;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
+20125;bypass;20124;traspaso;20125;MERPAGO*EMOVASUBTE{VISA BGR...};1.13;2026-06-27;NULL;NULL;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
 20126;bypass;20124;traspaso;20126;MERPAGO*EMOVASUBTE{Transporte ...};-1.13;2026-06-27;NULL;NULL;NULL;NULL;21310003;VISA BGR;NULL;Creditos de Cpnsumo
+20127;bypass;20127;egreso;20127;MERPAGO*ARCOSDORADOSARGEB;-1.81;2026-06-05;61260001;Transporte ;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
+20128;bypass;20127;traspaso;20128;MERPAGO*ARCOSDORADOSARGEB{VISA BGR...};1.81;2026-06-05;NULL;NULL;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
 20129;bypass;20127;traspaso;20129;MERPAGO*ARCOSDORADOSARGEB{Transporte ...};-1.81;2026-06-05;NULL;NULL;NULL;NULL;21310003;VISA BGR;NULL;Creditos de Cpnsumo
+20130;bypass;20130;egreso;20130;MERPAGO*DAVIDNICOLASBETAB;-4.87;2026-06-11;61240002;Restaurantes y Bares;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
+20131;bypass;20130;traspaso;20131;MERPAGO*DAVIDNICOLASBETAB{VISA BGR...};4.87;2026-06-11;NULL;NULL;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
 20132;bypass;20130;traspaso;20132;MERPAGO*DAVIDNICOLASBETAB{Restaurantes y Bares...};-4.87;2026-06-11;NULL;NULL;NULL;NULL;21310003;VISA BGR;NULL;Creditos de Cpnsumo
+20133;bypass;20133;egreso;20133;MERPAGO*ELCONDADO;-3.63;2026-06-27;61240002;Restaurantes y Bares;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
+20134;bypass;20133;traspaso;20134;MERPAGO*ELCONDADO{VISA BGR...};3.63;2026-06-27;NULL;NULL;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
 20135;bypass;20133;traspaso;20135;MERPAGO*ELCONDADO{Restaurantes y Bares...};-3.63;2026-06-27;NULL;NULL;NULL;NULL;21310003;VISA BGR;NULL;Creditos de Cpnsumo
+20136;bypass;20136;egreso;20136;MERPAGO*KIOSCOASTRO;-2.62;2026-06-28;61240001;Supermercado, AlimentaciÃ³n;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
+20137;bypass;20136;traspaso;20137;MERPAGO*KIOSCOASTRO{VISA BGR...};2.62;2026-06-28;NULL;NULL;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
 20138;bypass;20136;traspaso;20138;MERPAGO*KIOSCOASTRO{Supermercado, Alimen...};-2.62;2026-06-28;NULL;NULL;NULL;NULL;21310003;VISA BGR;NULL;Creditos de Cpnsumo
+20139;bypass;20139;egreso;20139;MERPAGO*PARRILLAELREY;-2.9;2026-06-29;61240004;Almuerzos, Desayunos Diarios;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
+20140;bypass;20139;traspaso;20140;MERPAGO*PARRILLAELREY{VISA BGR...};2.9;2026-06-29;NULL;NULL;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
 20141;bypass;20139;traspaso;20141;MERPAGO*PARRILLAELREY{Almuerzos, Desayunos...};-2.9;2026-06-29;NULL;NULL;NULL;NULL;21310003;VISA BGR;NULL;Creditos de Cpnsumo
+20142;bypass;20142;egreso;20142;ALMACENES TIA;-2.28;2026-06-07;61240001;Supermercado, AlimentaciÃ³n;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
+20143;bypass;20142;traspaso;20143;ALMACENES TIA{VISA BGR...};2.28;2026-06-07;NULL;NULL;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
 20144;bypass;20142;traspaso;20144;ALMACENES TIA{Supermercado, Alimen...};-2.28;2026-06-07;NULL;NULL;NULL;NULL;21310003;VISA BGR;NULL;Creditos de Cpnsumo
+20145;bypass;20145;egreso;20145;PedidosYa*Korea Chicken;-5.85;2026-06-07;61240002;Restaurantes y Bares;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
+20146;bypass;20145;traspaso;20146;PedidosYa*Korea Chicken{VISA BGR...};5.85;2026-06-07;NULL;NULL;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
 20147;bypass;20145;traspaso;20147;PedidosYa*Korea Chicken{Restaurantes y Bares...};-5.85;2026-06-07;NULL;NULL;NULL;NULL;21310003;VISA BGR;NULL;Creditos de Cpnsumo
 20148;directo;20148;egreso;20148;CONT_FIN_SOLCA_C.ROT;-0.44;2026-06-30;62130001;Comisiones Bancarias;NULL;NULL;21310003;VISA BGR;NULL;Creditos de Cpnsumo
 20149;directo;20149;egreso;20149;INT. FINANCIAMIENTO - Checkpoint UTIL 1143.62 TOT 1143.62;-13.76;2026-06-30;62130002;Intereses Por Financiamiento;NULL;NULL;21310003;VISA BGR;NULL;Creditos de Cpnsumo
-19702;traspaso;19701;traspaso;19702;PAGO TC EN MORA 477045XXXXXX9742;70.83;2026-06-04;NULL;NULL;NULL;NULL;21310002;VISA JEP;NULL;Creditos de Cpnsumo
-19704;traspaso;19703;traspaso;19704;PAGO TC 477045XXXXXX9742;82.59;2026-06-05;NULL;NULL;NULL;NULL;21310002;VISA JEP;NULL;Creditos de Cpnsumo
+20150;directo;20150;egreso;20150;CONTRIBUCIÃ“N PARA EL FINANCIAMIENTO SOLCA;-0.79;2026-06-16;62130001;Comisiones Bancarias;NULL;NULL;21310007;VISA BANKCARD;NULL;Creditos de Cpnsumo
+20151;directo;20151;egreso;20151;RENOVACION PRESTACIONES EN EL EXTERIOR;-12.65;2026-06-20;62130001;Comisiones Bancarias;NULL;NULL;21310007;VISA BANKCARD;NULL;Creditos de Cpnsumo
+20152;directo;20152;egreso;20152;INTERES FINANCIAMIENTO CHECKPOINT UTIL 2142.54 TOTPAG 2142.54;-22.85;2026-06-30;62130002;Intereses Por Financiamiento;NULL;NULL;21310007;VISA BANKCARD;NULL;Creditos de Cpnsumo
+20153;bypass;20153;egreso;20153;PTP - BMI DEL ECUADOR COM EC 840 ;-25;2026-06-01;63400004;Primas de Seguros;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
+20154;bypass;20153;traspaso;20154;PTP - BMI DEL ECUADOR COM EC 840 {VISA BANKCARD...};25;2026-06-01;NULL;NULL;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
+20155;bypass;20153;traspaso;20155;PTP - BMI DEL ECUADOR COM EC 840 {Primas de Seguros...};-25;2026-06-01;NULL;NULL;NULL;NULL;21310007;VISA BANKCARD;NULL;Creditos de Cpnsumo
+20156;traspaso;20156;traspaso;20156;CNEL GUAYAQUIL 24ONLINE;-22.83;2026-06-05;NULL;NULL;NULL;NULL;21310007;VISA BANKCARD;NULL;Creditos de Cpnsumo
+20157;traspaso;20156;traspaso;20157;CNEL GUAYAQUIL 24ONLINE;22.83;2026-06-05;NULL;NULL;NULL;NULL;21300001;Vivienda;NULL;Obligaciones Adquiridas
+20159;traspaso;20159;traspaso;20159;RECAUDACION IESS 24BB;-85.68;2026-06-20;NULL;NULL;NULL;NULL;21310007;VISA BANKCARD;NULL;Creditos de Cpnsumo
+20160;traspaso;20159;traspaso;20160;RECAUDACION IESS 24BB;85.68;2026-06-20;NULL;NULL;NULL;NULL;11110004;Trabajos Realizados 2025;NULL;Honorarios por Cobrar
+20161;traspaso;20161;traspaso;20161;Prestamo Quirografario 15230273 - 23/24;-33.1;2026-06-17;NULL;NULL;NULL;NULL;21310007;VISA BANKCARD;NULL;Creditos de Cpnsumo
+20162;traspaso;20161;traspaso;20162;Prestamo Quirografario 15230273 - 23/24;33.1;2026-06-17;NULL;NULL;NULL;NULL;22130001;Creditos;NULL;Prestamos 
+20163;traspaso;20163;traspaso;20163;Prestamo Quirografario 18705192 - 10/36;-45.66;2026-06-17;NULL;NULL;NULL;NULL;21310007;VISA BANKCARD;NULL;Creditos de Cpnsumo
+20164;traspaso;20163;traspaso;20164;Prestamo Quirografario 18705192 - 10/36;45.66;2026-06-17;NULL;NULL;NULL;NULL;22130001;Creditos;NULL;Prestamos 
+20171;bypass;20171;egreso;20171;PAYPAL *SPOTIFY*P43319C GB 840;-13.79;2026-06-05;64100003;Servicios online;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
+20172;bypass;20171;traspaso;20172;PAYPAL *SPOTIFY*P43319C GB 840{VISA JEP...};13.79;2026-06-05;NULL;NULL;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
 20173;bypass;20171;traspaso;20173;PAYPAL *SPOTIFY*P43319C GB 840{Servicios online...};-13.79;2026-06-05;NULL;NULL;NULL;NULL;21310002;VISA JEP;NULL;Creditos de Cpnsumo
+20174;bypass;20174;egreso;20174;TIA ATARAZANA 598 EC 840;-41.98;2026-06-06;61240001;Supermercado, AlimentaciÃ³n;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
+20175;bypass;20174;traspaso;20175;TIA ATARAZANA 598 EC 840{VISA JEP...};41.98;2026-06-06;NULL;NULL;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
 20176;bypass;20174;traspaso;20176;TIA ATARAZANA 598 EC 840{Supermercado, Alimen...};-41.98;2026-06-06;NULL;NULL;NULL;NULL;21310002;VISA JEP;NULL;Creditos de Cpnsumo
+20177;bypass;20177;egreso;20177;CLIP STUDIO PAINT JP 840;-10.34;2026-06-18;61240001;Supermercado, AlimentaciÃ³n;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
+20178;bypass;20177;traspaso;20178;CLIP STUDIO PAINT JP 840{VISA JEP...};10.34;2026-06-18;NULL;NULL;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
 20179;bypass;20177;traspaso;20179;CLIP STUDIO PAINT JP 840{Supermercado, Alimen...};-10.34;2026-06-18;NULL;NULL;NULL;NULL;21310002;VISA JEP;NULL;Creditos de Cpnsumo
+20180;bypass;20180;egreso;20180;SEGURO DE DESGRAVAMEN;-0.89;2026-06-18;63400004;Primas de Seguros;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
+20181;bypass;20180;traspaso;20181;SEGURO DE DESGRAVAMEN{VISA JEP...};0.89;2026-06-18;NULL;NULL;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
 20182;bypass;20180;traspaso;20182;SEGURO DE DESGRAVAMEN{Primas de Seguros...};-0.89;2026-06-18;NULL;NULL;NULL;NULL;21310002;VISA JEP;NULL;Creditos de Cpnsumo
 20183;directo;20183;egreso;20183;CONTRIBUCIÃ“N PARA EL FINANCIAMIENTO SOLCA;-0.44;2026-06-04;62130001;Comisiones Bancarias;NULL;NULL;21310002;VISA JEP;NULL;Creditos de Cpnsumo
 20184;directo;20184;egreso;20184;INTERES FINANCIAMIENTO CHECKPOINT UTIL 1010.58 TOTPAG 1010.58;-12.67;2026-06-18;62130002;Intereses Por Financiamiento;NULL;NULL;21310002;VISA JEP;NULL;Creditos de Cpnsumo
-19761;traspaso;19760;traspaso;19761;TRANSFERENCIA ENVIADA A CTA. AHORROS - Diana Sandoval;200;2026-06-10;NULL;NULL;NULL;NULL;21300001;Vivienda;NULL;Obligaciones Adquiridas
-19864;directo;19864;egreso;19864;Canon de Arriendo Mensual 2026 - 06;-200;2026-06-01;61115001;Alquiler Vivienda;NULL;NULL;21300001;Vivienda;NULL;Obligaciones Adquiridas
-20157;traspaso;20156;traspaso;20157;CNEL GUAYAQUIL 24ONLINE;22.83;2026-06-05;NULL;NULL;NULL;NULL;21300001;Vivienda;NULL;Obligaciones Adquiridas
+20185;traspaso;20185;traspaso;20185;Envio de Dinero Santi por Wester Union;-310.15;2026-07-01;NULL;NULL;NULL;NULL;21300017;PensiÃ³n 2026;NULL;Obligaciones Adquiridas
+20186;traspaso;20185;traspaso;20186;Envio de Dinero Santi por Wester Union;310.15;2026-07-01;NULL;NULL;NULL;NULL;21300011;Proyecto UP - Santiago;NULL;Obligaciones Adquiridas
+20187;directo;20187;egreso;20187;Comision Western Union;-10.35;2026-06-01;62130001;Comisiones Bancarias;NULL;NULL;21300011;Proyecto UP - Santiago;NULL;Obligaciones Adquiridas
+20188;directo;20188;egreso;20188;Comision Western Union;-10.35;2026-07-01;62130001;Comisiones Bancarias;NULL;NULL;21300011;Proyecto UP - Santiago;NULL;Obligaciones Adquiridas
+20191;traspaso;20191;traspaso;20191;Descuento por Gastos de Estudios de Santiago - 2026-06;-400;2026-06-30;NULL;NULL;NULL;NULL;21300011;Proyecto UP - Santiago;NULL;Obligaciones Adquiridas
+20192;traspaso;20191;traspaso;20192;Descuento por Gastos de Estudios de Santiago - 2026-06;400;2026-06-30;NULL;NULL;NULL;NULL;21300017;PensiÃ³n 2026;NULL;Obligaciones Adquiridas
+20193;traspaso;20193;traspaso;20193;Descuento por Gastos de Estudios de Santiago - 2026-07;-400;2026-07-31;NULL;NULL;NULL;NULL;21300011;Proyecto UP - Santiago;NULL;Obligaciones Adquiridas
+20194;traspaso;20193;traspaso;20194;Descuento por Gastos de Estudios de Santiago - 2026-07;400;2026-07-31;NULL;NULL;NULL;NULL;21300017;PensiÃ³n 2026;NULL;Obligaciones Adquiridas
+20213;directo;20213;egreso;20213;N/D COMISION BANCARIA;-2.99;2026-06-21;62130001;Comisiones Bancarias;NULL;NULL;11220003;Inversiones DCA - Hapi;NULL;Inversiones
+20214;directo;20214;ingreso;20214;Cuadre Mensual;-4.96;2026-06-30;41100003;Rendimiento de Inversiones;NULL;NULL;11220003;Inversiones DCA - Hapi;NULL;Inversiones
+20215;bypass;20215;egreso;20215;N/D DEBITOS AUTOMATICOS CLARO;-17.56;2026-07-13;64100001;TelÃ©fono e Internet;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
+20216;bypass;20215;traspaso;20216;N/D DEBITOS AUTOMATICOS CLARO{Bolivariano 2026...};17.56;2026-07-13;NULL;NULL;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
+20217;bypass;20215;traspaso;20217;N/D DEBITOS AUTOMATICOS CLARO{TelÃ©fono e Internet...};-17.56;2026-07-13;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
+20218;traspaso;20218;traspaso;20218;N/D PAGO TARJETA DE CREDITO;-70;2026-07-14;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
+20219;traspaso;20218;traspaso;20219;N/D PAGO TARJETA DE CREDITO;70;2026-07-14;NULL;NULL;NULL;NULL;21310007;VISA BANKCARD;NULL;Creditos de Cpnsumo
+20220;traspaso;20220;traspaso;20220;RETIRO CAJEROS AH-BB;-160;2026-07-17;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
+20221;traspaso;20220;traspaso;20221;RETIRO CAJEROS AH-BB;160;2026-07-17;NULL;NULL;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
+20222;traspaso;20222;traspaso;20222;TRANSFERENCIA PAGO DIRECTO DESDE CTA AHORRO - PICHINCHA;-260;2026-07-20;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
+20223;traspaso;20222;traspaso;20223;TRANSFERENCIA PAGO DIRECTO DESDE CTA AHORRO - PICHINCHA;260;2026-07-20;NULL;NULL;NULL;NULL;11120012;Banco Pichincha;NULL;Ahorros Bancos y Cooperativas
+20224;directo;20224;egreso;20224;N/D COMISION BANCARIA;-0.41;2026-07-18;62130001;Comisiones Bancarias;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
+20225;bypass;20225;egreso;20225;RETIRO CAJEROS AH-BB;-10;2026-07-18;64000008;Fiestas y Eventos;NULL;NULL;11320012;Cuenta Alekey;NULL;Cuentas Personales por Cobrar
+20226;bypass;20225;traspaso;20226;RETIRO CAJEROS AH-BB{Bolivariano 2026...};10;2026-07-18;NULL;NULL;NULL;NULL;11320012;Cuenta Alekey;NULL;Cuentas Personales por Cobrar
+20227;bypass;20225;traspaso;20227;RETIRO CAJEROS AH-BB{Fiestas y Eventos...};-10;2026-07-18;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
+20228;traspaso;20228;traspaso;20228;Efectivo - Fiorella;-20;2026-07-18;NULL;NULL;NULL;NULL;11120002;BanGuajala;NULL;Ahorros Bancos y Cooperativas
+20229;traspaso;20228;traspaso;20229;Efectivo - Fiorella;20;2026-07-18;NULL;NULL;NULL;NULL;11120013;Bolivariano 2026;NULL;Ahorros Bancos y Cooperativas
+20230;bypass;20230;egreso;20230;Transf. Directa a Chile Guallochico ;-43;2026-07-20;61213002;Regalos;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
+20231;bypass;20230;traspaso;20231;Transf. Directa a Chile Guallochico {Banco Pichincha...};43;2026-07-20;NULL;NULL;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
+20232;bypass;20230;traspaso;20232;Transf. Directa a Chile Guallochico {Regalos...};-43;2026-07-20;NULL;NULL;NULL;NULL;11120012;Banco Pichincha;NULL;Ahorros Bancos y Cooperativas
+20233;bypass;20233;egreso;20233;Transf. DIrecta Zambrano Slacichay;-10;2026-07-13;63400001;Donativos;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
+20234;bypass;20233;traspaso;20234;Transf. DIrecta Zambrano Slacichay{Banco Pichincha...};10;2026-07-13;NULL;NULL;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
+20235;bypass;20233;traspaso;20235;Transf. DIrecta Zambrano Slacichay{Donativos...};-10;2026-07-13;NULL;NULL;NULL;NULL;11120012;Banco Pichincha;NULL;Ahorros Bancos y Cooperativas
+20236;traspaso;20236;traspaso;20236;Prestamo Nro 566505900 - Cuota 18 de 60;-234.93;2026-07-24;NULL;NULL;NULL;NULL;11120012;Banco Pichincha;NULL;Ahorros Bancos y Cooperativas
+20237;traspaso;20236;traspaso;20237;Prestamo Nro 566505900 - Cuota 18 de 60;234.93;2026-07-24;NULL;NULL;NULL;NULL;21300013;Prestamo Pichincha 2025;NULL;Obligaciones Adquiridas
+20238;traspaso;20238;traspaso;20238;Transferencia Western Union - Santiago;-103.45;2026-07-17;NULL;NULL;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
+20239;traspaso;20238;traspaso;20239;Transferencia Western Union - Santiago;103.45;2026-07-17;NULL;NULL;NULL;NULL;21300011;Proyecto UP - Santiago;NULL;Obligaciones Adquiridas
+20240;directo;20240;egreso;20240;Comision Western Union;-3.45;2026-07-17;62130001;Comisiones Bancarias;NULL;NULL;21300011;Proyecto UP - Santiago;NULL;Obligaciones Adquiridas
+20241;directo;20241;egreso;20241;Corte de Cabello;-6;2026-07-17;61150005;Belleza, peluquerÃ­a, spa;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
+20242;directo;20242;egreso;20242;Busheta Hasta hoy;-8;2026-07-24;61260001;Transporte ;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
+20243;directo;20243;egreso;20243;Comidita hasta hoy ;-8.1;2026-07-24;61240004;Almuerzos, Desayunos Diarios;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
+20244;directo;20244;egreso;20244;Lotto;-1.5;2026-07-23;64000002;LoterÃ­as y Apuestas;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
+20245;directo;20245;egreso;20245;Tiendita hasta hoy;-6;2026-07-23;61240001;Supermercado, AlimentaciÃ³n;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
+20246;directo;20246;egreso;20246;Tommaco;-2;2026-07-23;64000006;Tabaco;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
+20247;directo;20247;egreso;20247;Busheta Hasta hoy;-10;2026-07-19;61260001;Transporte ;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
+20248;directo;20248;egreso;20248;Comidita hasta hoy ;-15;2026-07-19;61240004;Almuerzos, Desayunos Diarios;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
+20249;directo;20249;egreso;20249;Tiendita hasta hoy;-10;2026-07-19;61240001;Supermercado, AlimentaciÃ³n;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
+20250;directo;20250;egreso;20250;Mecatos;-4;2026-07-17;61240001;Supermercado, AlimentaciÃ³n;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
+20251;directo;20251;egreso;20251;mecatos;-1.85;2026-07-20;63400002;No se o no quiero saber;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
+20252;directo;20252;egreso;20252;Tommaco;-3;2026-07-16;64000006;Tabaco;NULL;NULL;11130001;Billetera;NULL;Efectivo Corriente
+20274;directo;20274;egreso;20274;DESGRAVAMEN TC PLAN A DE ECU 840 ;-3.3;2026-06-05;63400004;Primas de Seguros;NULL;NULL;21310004;MasterCard BANKCARD;NULL;Creditos de Cpnsumo
+20275;directo;20275;egreso;20275;INTERES FINANCIAMIENTO CHECKPOINT UTIL 5400.30 TOTPAG 5400.30;-71;2026-06-15;63400004;Primas de Seguros;NULL;NULL;21310004;MasterCard BANKCARD;NULL;Creditos de Cpnsumo
+20277;directo;20277;egreso;20277;CONTRIBUCIÃ“N PARA EL FINANCIAMIENTO SOLCA;-2.18;2026-06-02;62130001;Comisiones Bancarias;NULL;NULL;21310004;MasterCard BANKCARD;NULL;Creditos de Cpnsumo
+20278;bypass;20278;egreso;20278;COURSERA.ORG 381 EAST EVE USA 840 ;-33.35;2026-06-17;61160001;EducaciÃ³n;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
+20279;bypass;20278;traspaso;20279;COURSERA.ORG 381 EAST EVE USA 840 {MasterCard BANKCARD...};33.35;2026-06-17;NULL;NULL;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
+20280;bypass;20278;traspaso;20280;COURSERA.ORG 381 EAST EVE USA 840 {EducaciÃ³n...};-33.35;2026-06-17;NULL;NULL;NULL;NULL;21310004;MasterCard BANKCARD;NULL;Creditos de Cpnsumo
+20281;bypass;20281;egreso;20281;NETFLIX.COM 100 WINCHESTE USA 840 ;-14.93;2026-06-21;64100003;Servicios online;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
+20282;bypass;20281;traspaso;20282;NETFLIX.COM 100 WINCHESTE USA 840 {MasterCard BANKCARD...};14.93;2026-06-21;NULL;NULL;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
+20283;bypass;20281;traspaso;20283;NETFLIX.COM 100 WINCHESTE USA 840 {Servicios online...};-14.93;2026-06-21;NULL;NULL;NULL;NULL;21310004;MasterCard BANKCARD;NULL;Creditos de Cpnsumo
+20284;bypass;20284;egreso;20284;  PAYU*AR*UBER RO ARG 032  ;-4.52;2026-06-24;61260002;Taxis;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
+20285;bypass;20284;traspaso;20285;  PAYU*AR*UBER RO ARG 032  {MasterCard BANKCARD...};4.52;2026-06-24;NULL;NULL;NULL;NULL;11320013;Cuenta Santi;NULL;Cuentas Personales por Cobrar
+20286;bypass;20284;traspaso;20286;  PAYU*AR*UBER RO ARG 032  {Taxis...};-4.52;2026-06-24;NULL;NULL;NULL;NULL;21310004;MasterCard BANKCARD;NULL;Creditos de Cpnsumo
+20287;traspaso;20287;traspaso;20287;TIPTI04 EU ECU 840;-40.17;2026-06-27;NULL;NULL;NULL;NULL;21310004;MasterCard BANKCARD;NULL;Creditos de Cpnsumo
+20288;traspaso;20287;traspaso;20288;TIPTI04 EU ECU 840;40.17;2026-06-27;NULL;NULL;NULL;NULL;11320009;Cuenta Daisy;NULL;Cuentas Personales por Cobrar
+20289;traspaso;20289;traspaso;20289;CNEL GUAYAQUIL 24ONLINE;-24.2;2026-06-30;NULL;NULL;NULL;NULL;21310004;MasterCard BANKCARD;NULL;Creditos de Cpnsumo
+20290;traspaso;20289;traspaso;20290;CNEL GUAYAQUIL 24ONLINE;24.2;2026-06-30;NULL;NULL;NULL;NULL;21300001;Vivienda;NULL;Obligaciones Adquiridas
+20291;directo;20291;egreso;20291;DESGRAVAMEN TC PLAN A DE ECU 84;-3.3;2026-07-13;63400004;Primas de Seguros;NULL;NULL;21310004;MasterCard BANKCARD;NULL;Creditos de Cpnsumo
+20292;directo;20292;egreso;20292;CONTRIBUCIÃ“N PARA EL FINANCIAMIENTO SOLCA;-2.17;2026-07-02;62130001;Comisiones Bancarias;NULL;NULL;21310004;MasterCard BANKCARD;NULL;Creditos de Cpnsumo
+20293;directo;20293;egreso;20293;INTERES FINANCIAMIENTO CHECKPOINT UTIL 5395.03 TOTPAG 5395.03 ;-72.82;2026-07-15;62130002;Intereses Por Financiamiento;NULL;NULL;21310004;MasterCard BANKCARD;NULL;Creditos de Cpnsumo
+20294;bypass;20294;egreso;20294;HOSPITAL DE ESPECIALIDADE EC 840 ;-36.04;2026-07-04;61150007;MÃ©dicos, ClÃ­nicas;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
+20295;bypass;20294;traspaso;20295;HOSPITAL DE ESPECIALIDADE EC 840 {VISA JEP...};36.04;2026-07-04;NULL;NULL;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
+20296;bypass;20294;traspaso;20296;HOSPITAL DE ESPECIALIDADE EC 840 {MÃ©dicos, ClÃ­nicas...};-36.04;2026-07-04;NULL;NULL;NULL;NULL;21310002;VISA JEP;NULL;Creditos de Cpnsumo
+20297;bypass;20297;egreso;20297;PAYPAL *SPOTIFY*P444416 GB 840;-13.79;2026-07-05;64100003;Servicios online;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
+20298;bypass;20297;traspaso;20298;PAYPAL *SPOTIFY*P444416 GB 840{VISA JEP...};13.79;2026-07-05;NULL;NULL;NULL;NULL;21400014;Gastos Varios 2026;NULL;Consumos por Pagar
+20299;bypass;20297;traspaso;20299;PAYPAL *SPOTIFY*P444416 GB 840{Servicios online...};-13.79;2026-07-05;NULL;NULL;NULL;NULL;21310002;VISA JEP;NULL;Creditos de Cpnsumo
+20300;traspaso;20300;traspaso;20300;STEAMGAMES.COM 4259522985 US 840;-21.13;2026-07-06;NULL;NULL;NULL;NULL;21310002;VISA JEP;NULL;Creditos de Cpnsumo
+20301;traspaso;20300;traspaso;20301;STEAMGAMES.COM 4259522985 US 840;21.13;2026-07-06;NULL;NULL;NULL;NULL;11320012;Cuenta Alekey;NULL;Cuentas Personales por Cobrar
+20302;traspaso;20302;traspaso;20302;HANASKA - COALSE PGX EC 840;-5;2026-07-10;NULL;NULL;NULL;NULL;21310002;VISA JEP;NULL;Creditos de Cpnsumo
+20303;traspaso;20302;traspaso;20303;HANASKA - COALSE PGX EC 840;5;2026-07-10;NULL;NULL;NULL;NULL;21300017;PensiÃ³n 2026;NULL;Obligaciones Adquiridas
+20304;traspaso;20304;traspaso;20304;DIFARE S A EC 84;-6.37;2026-07-11;NULL;NULL;NULL;NULL;21310002;VISA JEP;NULL;Creditos de Cpnsumo
+20305;traspaso;20304;traspaso;20305;DIFARE S A EC 84;6.37;2026-07-11;NULL;NULL;NULL;NULL;11320005;Jessica x Pagar;NULL;Cuentas Personales por Cobrar
+20306;directo;20306;egreso;20306;CONTRIBUCIÃ“N PARA EL FINANCIAMIENTO SOLCA;-0.38;2026-07-04;62130001;Comisiones Bancarias;NULL;NULL;21310002;VISA JEP;NULL;Creditos de Cpnsumo
+20307;directo;20307;egreso;20307;SEGURO DE DESGRAVAMEN;-0.89;2026-07-17;63400004;Primas de Seguros;NULL;NULL;21310002;VISA JEP;NULL;Creditos de Cpnsumo
+20308;directo;20308;egreso;20308;INTERES FINANCIAMIENTO CHECKPOINT UTIL 1024.67 TOTPAG 1,015.68;-11.5;2026-07-17;62130002;Intereses Por Financiamiento;NULL;NULL;21310002;VISA JEP;NULL;Creditos de Cpnsumo

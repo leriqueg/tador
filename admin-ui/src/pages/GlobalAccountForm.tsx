@@ -10,6 +10,7 @@ import {
   Textarea,
   Title,
   Anchor,
+  Group,
 } from '@mantine/core'
 import { AdminApiError, adminFetch } from '../services/admin-api'
 
@@ -20,6 +21,8 @@ interface AccountRow {
   descripcion: string
   esPostable: boolean
   parentId: string | null
+  reportRole?: 'normal' | 'contra'
+  deprecatedAt?: string | null
 }
 
 export default function GlobalAccountFormPage() {
@@ -31,6 +34,8 @@ export default function GlobalAccountFormPage() {
   const [descripcion, setDescripcion] = useState('')
   const [esPostable, setEsPostable] = useState(true)
   const [parentId, setParentId] = useState<string | null>(null)
+  const [reportRole, setReportRole] = useState<'normal' | 'contra'>('normal')
+  const [deprecatedAt, setDeprecatedAt] = useState<string | null>(null)
   const [parents, setParents] = useState<AccountRow[]>([])
   const [error, setError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
@@ -51,6 +56,8 @@ export default function GlobalAccountFormPage() {
           setDescripcion(detail.account.descripcion)
           setEsPostable(detail.account.esPostable)
           setParentId(detail.account.parentId)
+          setReportRole(detail.account.reportRole ?? 'normal')
+          setDeprecatedAt(detail.account.deprecatedAt ?? null)
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Error al cargar')
@@ -63,17 +70,18 @@ export default function GlobalAccountFormPage() {
     setError(null)
     try {
       if (isEdit && id) {
-        await adminFetch(`/api/admin/global-accounts/${id}`, {
-          method: 'PATCH',
+        await adminFetch('/api/admin/chart/commands/rename', {
+          method: 'POST',
           body: JSON.stringify({
+            accountId: id,
             nombre,
             descripcion,
-            esPostable,
-            parentId,
+            reportRole,
+            dryRun: false,
           }),
         })
       } else {
-        await adminFetch('/api/admin/global-accounts', {
+        await adminFetch('/api/admin/chart/commands/create', {
           method: 'POST',
           body: JSON.stringify({
             codigo,
@@ -81,6 +89,8 @@ export default function GlobalAccountFormPage() {
             descripcion,
             esPostable,
             parentId,
+            reportRole,
+            dryRun: false,
           }),
         })
       }
@@ -91,6 +101,23 @@ export default function GlobalAccountFormPage() {
       } else {
         setError('No se pudo guardar')
       }
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function deprecate() {
+    if (!id) return
+    setSaving(true)
+    setError(null)
+    try {
+      await adminFetch('/api/admin/chart/commands/deprecate', {
+        method: 'POST',
+        body: JSON.stringify({ accountId: id, dryRun: false }),
+      })
+      navigate('/global-accounts')
+    } catch (err) {
+      setError(err instanceof AdminApiError ? err.message : 'Error al deprecar')
     } finally {
       setSaving(false)
     }
@@ -126,22 +153,52 @@ export default function GlobalAccountFormPage() {
         label="Postable"
         checked={esPostable}
         onChange={(e) => setEsPostable(e.currentTarget.checked)}
+        disabled={isEdit}
       />
       <Select
-        label="Cuenta padre (grupo)"
-        data={parents.map((p) => ({
-          value: p.id,
-          label: `${p.codigo} — ${p.nombre}`,
-        }))}
-        value={parentId}
-        onChange={setParentId}
-        searchable
-        clearable
+        label="Rol de reporte"
+        data={[
+          { value: 'normal', label: 'Normal' },
+          { value: 'contra', label: 'Contra (futuro neteo)' },
+        ]}
+        value={reportRole}
+        onChange={(v) => setReportRole((v as 'normal' | 'contra') ?? 'normal')}
       />
+      {!isEdit && (
+        <Select
+          label="Cuenta padre (grupo)"
+          data={parents.map((p) => ({
+            value: p.id,
+            label: `${p.codigo} — ${p.nombre}`,
+          }))}
+          value={parentId}
+          onChange={setParentId}
+          searchable
+          clearable
+        />
+      )}
+      {isEdit && (
+        <Text size="sm" c="dimmed">
+          Para cambiar de padre usa Mover en el árbol (reparent + recode).
+          {deprecatedAt ? ` Deprecada desde ${deprecatedAt}.` : ''}
+        </Text>
+      )}
       {error && <Text c="red">{error}</Text>}
-      <Button loading={saving} onClick={() => void save()}>
-        Guardar
-      </Button>
+      <Group>
+        <Button loading={saving} onClick={() => void save()}>
+          Guardar
+        </Button>
+        {isEdit && !deprecatedAt && (
+          <Button
+            color="orange"
+            variant="light"
+            loading={saving}
+            onClick={() => void deprecate()}
+          >
+            Deprecar
+          </Button>
+        )}
+      </Group>
     </Stack>
   )
 }

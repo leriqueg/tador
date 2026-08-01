@@ -1,9 +1,9 @@
 # 014 — Chart of Accounts Engine (Plan de cuentas)
 
-**Status**: Pre-Speckit draft (needs + ADR locked for review)  
+**Status**: Implemented (MVP Phase 1) — Speckit complete; releases deferred.  
 **Branch**: `feat/chart-of-accounts-engine`  
 **Depends on**: Spec 013 (admin platform), Spec 002 (catálogos), foundation `plan-de-cuentas`  
-**Speckit**: **Do not run** `/speckit.specify` / plan / tasks until this draft is reviewed and approved.
+**Speckit**: specify / plan / tasks done. Implement MVP delivered on this branch.
 
 ## Artifacts
 

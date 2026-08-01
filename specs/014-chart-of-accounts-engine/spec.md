@@ -2,7 +2,7 @@
 
 **Feature Branch**: `feat/chart-of-accounts-engine`  
 **Created**: 2026-08-01  
-**Status**: Specified (Speckit)  
+**Status**: Implemented (MVP Phase 1)  
 **Input**: Backend chart engine with cascade reparent/recode, dry-run, command API, admin-ui client; future releases designed but not built in MVP.
 
 ## Clarifications

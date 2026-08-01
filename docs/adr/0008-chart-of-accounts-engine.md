@@ -2,7 +2,7 @@
 
 ## Status
 
-Proposed (2026-08-01) — draft paired with `specs/014-chart-of-accounts-engine/` (pre-Speckit).
+Accepted (Phase 1 implemented 2026-08-01) — draft paired with `specs/014-chart-of-accounts-engine/` (pre-Speckit).
 
 ## Date
 

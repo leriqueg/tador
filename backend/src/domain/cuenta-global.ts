@@ -1,9 +1,8 @@
 /**
- * CuentaGlobal domain entity.
- * Represents a global chart-of-accounts entry with hierarchical structure.
- * These are the 27 group accounts from legacy normalized data.
- * Leaf accounts (esPostable = true) can be posted to; groups cannot.
+ * CuentaGlobal domain entity + chart helpers.
  */
+
+export type ReportRole = 'normal' | 'contra';
 
 export interface CuentaGlobal {
   id: string;
@@ -14,6 +13,8 @@ export interface CuentaGlobal {
   esPostable: boolean;
   legacyId: number | null;
   legacyCode: string | null;
+  deprecatedAt: Date | null;
+  reportRole: ReportRole;
   createdAt: Date;
   updatedAt: Date;
 }

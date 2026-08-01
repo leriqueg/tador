@@ -1,8 +1,12 @@
+# Dev default: restart "no" — containers stay down after reboot / docker stop
+# until you start them again (`make up` / `docker compose up -d`).
+# Staging: set COMPOSE_RESTART_POLICY=unless-stopped (e.g. in .env.staging)
+# or use the staging compose file that pins unless-stopped.
 services:
   postgres:
     image: postgres:18.4-alpine
     container_name: tador-postgres
-    restart: unless-stopped
+    restart: no
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-tador_dev}
       POSTGRES_USER: ${POSTGRES_USER:-tador}
@@ -24,7 +28,7 @@ services:
       dockerfile: Dockerfile
       target: development
     container_name: tador-backend
-    restart: unless-stopped
+    restart: no
     ports:
       - "${BACKEND_PORT:-3000}:3000"
       - "5555:5555"
@@ -69,7 +73,7 @@ services:
       dockerfile: Dockerfile
       target: development
     container_name: tador-frontend
-    restart: unless-stopped
+    restart: no
     ports:
       - "${FRONTEND_PORT:-5173}:5173"
     environment:
@@ -102,7 +106,7 @@ services:
       dockerfile: Dockerfile
       target: development
     container_name: tador-admin-ui
-    restart: unless-stopped
+    restart: no
     ports:
       - "${ADMIN_UI_PORT:-5174}:5174"
     environment:

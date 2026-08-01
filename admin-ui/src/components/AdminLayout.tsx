@@ -35,6 +35,17 @@ export default function AdminLayout() {
       header={{ height: 56 }}
       navbar={{ width: 220, breakpoint: 'sm' }}
       padding="md"
+      styles={{
+        main: { backgroundColor: '#ebe6e0', minHeight: '100vh' },
+        header: {
+          backgroundColor: '#f4f2ef',
+          borderBottom: '1px solid #d4cfc8',
+        },
+        navbar: {
+          backgroundColor: '#f4f2ef',
+          borderRight: '1px solid #d4cfc8',
+        },
+      }}
     >
       <AppShell.Header px="md">
         <Group h="100%" justify="space-between">

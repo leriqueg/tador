@@ -7,8 +7,8 @@
 
 @theme {
   /* ── Brand (DESIGN.md) ──────────────────────────── */
-  --color-primary: #006565;
-  --color-primary-container: #008080;
+  --color-primary: #005555;
+  --color-primary-container: #007575;
   --color-on-primary: #ffffff;
   --color-on-primary-container: #e3fffe;
   --color-inverse-primary: #76d6d5;
@@ -17,17 +17,17 @@
   --color-on-primary-fixed: #002020;
   --color-on-primary-fixed-variant: #004f4f;
 
-  --color-secondary: #8d4f11;
-  --color-secondary-container: #feac67;
+  --color-secondary: #7a440e;
+  --color-secondary-container: #f0a05a;
   --color-on-secondary: #ffffff;
-  --color-on-secondary-container: #773e00;
+  --color-on-secondary-container: #5c2f00;
   --color-secondary-fixed: #ffdcc3;
   --color-secondary-fixed-dim: #ffb77d;
   --color-on-secondary-fixed: #2f1500;
   --color-on-secondary-fixed-variant: #6e3900;
 
-  --color-tertiary: #9e380d;
-  --color-tertiary-container: #bf5025;
+  --color-tertiary: #8a300a;
+  --color-tertiary-container: #b04820;
   --color-on-tertiary: #ffffff;
   --color-on-tertiary-container: #fff8f6;
   --color-tertiary-fixed: #ffdbcf;
@@ -36,26 +36,26 @@
   --color-on-tertiary-fixed-variant: #822800;
 
   /* ── Surface / Background ───────────────────────── */
-  --color-surface: #fdf8f5;
-  --color-surface-dim: #ded9d6;
-  --color-surface-bright: #fdf8f5;
+  --color-surface: #f3ebe4;
+  --color-surface-dim: #cfc6bf;
+  --color-surface-bright: #faf6f2;
   --color-surface-container-lowest: #ffffff;
-  --color-surface-container-low: #f8f3f0;
-  --color-surface-container: #f2edea;
-  --color-surface-container-high: #ece7e4;
-  --color-surface-container-highest: #e6e2df;
-  --color-on-surface: #1c1b1a;
-  --color-on-surface-variant: #3e4949;
-  --color-background: #fdf8f5;
-  --color-on-background: #1c1b1a;
-  --color-inverse-surface: #32302e;
+  --color-surface-container-low: #ebe3db;
+  --color-surface-container: #e0d7ce;
+  --color-surface-container-high: #d4cbc2;
+  --color-surface-container-highest: #c9c0b7;
+  --color-on-surface: #141312;
+  --color-on-surface-variant: #2a3333;
+  --color-background: #f3ebe4;
+  --color-on-background: #141312;
+  --color-inverse-surface: #2a2826;
   --color-inverse-on-surface: #f5f0ed;
-  --color-surface-variant: #e6e2df;
+  --color-surface-variant: #c9c0b7;
 
   /* ── Outline / Border ──────────────────────────── */
-  --color-outline: #6e7979;
-  --color-outline-variant: #bdc9c8;
-  --color-surface-tint: #006a6a;
+  --color-outline: #5a6565;
+  --color-outline-variant: #9aa6a5;
+  --color-surface-tint: #005c5c;
 
   /* ── Semantic ──────────────────────────────────── */
   --color-error: #ba1a1a;
@@ -65,8 +65,8 @@
   --color-success-emerald: #10b981;
   --color-warning-amber: #f59e0b;
   --color-expense-rose: #e11d48;
-  --color-text-muted: #7c6a68;
-  --color-text-main: #1c1b1a;
+  --color-text-muted: #5c4f4d;
+  --color-text-main: #141312;
 
   /* ── Typography ─────────────────────────────────── */
   --font-sans: "Manrope", sans-serif;

@@ -102,3 +102,27 @@ jobs:
       - name: Coverage
         working-directory: frontend
         run: npm run test:coverage
+
+  admin-ui:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: admin-ui/package-lock.json
+
+      - name: Install admin-ui dependencies
+        working-directory: admin-ui
+        run: npm ci
+
+      - name: Type check and build
+        working-directory: admin-ui
+        run: npm run build
+
+      - name: Lint
+        working-directory: admin-ui
+        run: npm run lint

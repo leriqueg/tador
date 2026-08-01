@@ -133,17 +133,26 @@ model AuthToken {
   @@map("auth_tokens")
 }
 
+enum ReportRole {
+  normal
+  contra
+
+  @@map("report_role")
+}
+
 model CuentaGlobal {
-  id          String   @id @default(cuid())
-  parentId    String?
-  codigo      String   @unique
-  nombre      String
-  descripcion String   @default("")
-  esPostable  Boolean  @default(false)
-  legacyId    Int?
-  legacyCode  String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id           String     @id @default(cuid())
+  parentId     String?
+  codigo       String     @unique
+  nombre       String
+  descripcion  String     @default("")
+  esPostable   Boolean    @default(false)
+  legacyId     Int?
+  legacyCode   String?
+  deprecatedAt DateTime?
+  reportRole   ReportRole @default(normal)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
 
   parent          CuentaGlobal?            @relation("GlobalAccountHierarchy", fields: [parentId], references: [id])
   children        CuentaGlobal[]            @relation("GlobalAccountHierarchy")

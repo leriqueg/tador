@@ -81,7 +81,7 @@ cd backend && npx vitest run --config vitest.integration.config.ts tests/admin/
 | US5.3 | Support sees aggregates (no PII export) | Route RBAC + support probes; no export API in MVP | ⚠️ PARTIAL |
 | CC-ADMIN-001 | Login / invalid / blocked operator | `auth.test.ts` T031, T033 | ✅ COMPLIANT |
 | CC-ADMIN-002 | Fail-closed authz | `auth` + `security-matrix` | ✅ COMPLIANT |
-| CC-ADMIN-003 | User block (+ idempotent) | T046 (idempotent re-block not explicit) | ⚠️ PARTIAL |
+| CC-ADMIN-003 | User block (+ idempotent) | T046 + `CC-ADMIN-003 re-block…idempotent` | ✅ COMPLIANT |
 | CC-ADMIN-004 | Force password recovery | T049 | ✅ COMPLIANT |
 | CC-ADMIN-005 | Global account validation / delete deps | T071, T072 | ✅ COMPLIANT |
 | CC-ADMIN-006 | Template preview parity | T060 | ✅ COMPLIANT |
@@ -93,7 +93,7 @@ cd backend && npx vitest run --config vitest.integration.config.ts tests/admin/
 | SC-001 / SC-005 | Latency / UX timing | Not automated | ➖ Manual / N/A |
 | Constitution E2E smoke | Operator login + one workflow | No Playwright admin E2E in this change | ⚠️ PARTIAL (integration covers API) |
 
-**Compliance summary**: **22 COMPLIANT** / **0 UNTESTED** / **3 PARTIAL** / timing criteria not automated.
+**Compliance summary**: **23 COMPLIANT** / **0 UNTESTED** / **2 PARTIAL** / timing criteria not automated.
 
 ### Correctness (Static Evidence)
 
@@ -158,15 +158,21 @@ cd backend && npx vitest run --config vitest.integration.config.ts tests/admin/
 **CRITICAL**: None
 
 **WARNING**:
-1. **CC-ADMIN-003 PARTIAL** — Idempotent re-block (`200` on already-blocked user) not explicitly asserted (block happy-path covered by T046).
-2. **US5.3 PARTIAL** — Support read access + no export API in MVP; no dedicated “aggregates-only / no PII dump” assertion beyond RBAC.
-3. **No admin E2E smoke** — Constitution prefers E2E; API integration covers authz/workflows instead.
-4. **Statistics indexes migration** — Local DBs up to date; **staging/prod still require** `prisma migrate deploy` for `20260722183333_admin_statistics_created_at_indexes`.
+1. **US5.3 PARTIAL** — Support read access + no export API in MVP; no dedicated “aggregates-only / no PII dump” assertion beyond RBAC.
+2. **No admin E2E smoke** — Constitution prefers E2E; API integration covers authz/workflows instead.
+3. **Statistics indexes migration** — Local DBs up to date; **staging/prod still require** `prisma migrate deploy` for `20260722183333_admin_statistics_created_at_indexes`.
 
 **SUGGESTION**:
-1. Optional: assert idempotent re-block (CC-ADMIN-003 second call).
-2. Optional Playwright smoke: operator login → one mutation.
-3. Document migrate-deploy checklist for staging/prod promote.
+1. Optional Playwright smoke: operator login → one mutation.
+2. Document migrate-deploy checklist for staging/prod promote.
+
+### Closure follow-up (2026-08-01)
+
+| Item | Status |
+|------|--------|
+| CC-ADMIN-003 idempotent re-block integration | ✅ Added |
+| CI `admin-ui` job (build + lint) | ✅ Added |
+| Spec 013 feature code on `main` | ✅ Via PR #24; this branch is verify/CI closure only |
 
 ### Verdict
 

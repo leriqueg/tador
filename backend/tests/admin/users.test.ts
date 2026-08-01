@@ -122,6 +122,45 @@ describe('Admin users US2', () => {
     await app.close();
   });
 
+  /** CC-ADMIN-003 — re-block is idempotent (200, same blockedAt, still audited). */
+  it('CC-ADMIN-003 re-block on already-blocked user → 200 idempotent', async () => {
+    await seedOperator('admin');
+    const app = await createTestApp();
+    const reg = await app.inject({
+      method: 'POST',
+      url: '/auth/register',
+      payload: { email: 'reblock@test.com', password: 'password123' },
+    });
+    const userId = reg.json().user.id;
+    const cookie = await loginOperator(app, 'admin@localhost');
+
+    const first = await app.inject({
+      method: 'POST',
+      url: `/api/admin/users/${userId}/block`,
+      headers: { cookie },
+      payload: { reason: 'first' },
+    });
+    expect(first.statusCode).toBe(200);
+    const blockedAt = first.json().user.blockedAt;
+    expect(blockedAt).toBeTruthy();
+
+    const second = await app.inject({
+      method: 'POST',
+      url: `/api/admin/users/${userId}/block`,
+      headers: { cookie },
+      payload: { reason: 'second-ignored' },
+    });
+    expect(second.statusCode).toBe(200);
+    expect(second.json().user.blockedAt).toBe(blockedAt);
+    expect(second.json().user.blockedReason).toBe('first');
+
+    const audits = await prisma.adminAuditLog.count({
+      where: { action: 'user.block', targetId: userId },
+    });
+    expect(audits).toBe(2);
+    await app.close();
+  });
+
   it('T047 blocked user product login fails generically', async () => {
     await seedOperator('admin');
     const app = await createTestApp();

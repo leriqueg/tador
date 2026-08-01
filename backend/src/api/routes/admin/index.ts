@@ -9,10 +9,12 @@ import type { AdminTemplateApplicationService } from '../../../application/admin
 import type { AdminGlobalAccountApplicationService } from '../../../application/admin/admin-global-account-service.js';
 import type { AdminStatisticsApplicationService } from '../../../application/admin/admin-statistics-service.js';
 import type { AdminAuditLogRepository } from '../../../application/ports/admin-audit-repository.js';
+import type { ChartCommandService } from '../../../application/chart/chart-command-service.js';
 import { registerAdminAuthRoutes } from './auth.js';
 import { registerAdminUserRoutes } from './users.js';
 import { registerAdminTemplateRoutes } from './templates.js';
 import { registerAdminGlobalAccountRoutes } from './global-accounts.js';
+import { registerAdminChartCommandRoutes } from './chart-commands.js';
 import { registerAdminStatisticsRoutes } from './statistics.js';
 import { registerAdminAuditRoutes } from './audit.js';
 
@@ -23,6 +25,7 @@ export interface AdminRouteDeps {
   adminGlobalAccounts: AdminGlobalAccountApplicationService;
   adminStatistics: AdminStatisticsApplicationService;
   adminAuditRepo: AdminAuditLogRepository;
+  chartCommands: ChartCommandService;
 }
 
 export function registerAdminRoutes(
@@ -37,6 +40,7 @@ export function registerAdminRoutes(
     deps.operatorAuth,
     deps.adminGlobalAccounts,
   );
+  registerAdminChartCommandRoutes(app, deps.operatorAuth, deps.chartCommands);
   registerAdminStatisticsRoutes(app, deps.operatorAuth, deps.adminStatistics);
   registerAdminAuditRoutes(app, deps.operatorAuth, deps.adminAuditRepo);
 }

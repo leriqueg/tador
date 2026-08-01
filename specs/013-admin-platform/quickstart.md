@@ -55,6 +55,8 @@ npm run admin:bootstrap
 Apply nginx path map from [`docs/deploy-nginx-path-routing.snippet.conf`](../../docs/deploy-nginx-path-routing.snippet.conf) behind HAProxy.  
 **Do not** publish Vite ports publicly. Set `FRONTEND_BASE_PATH=/webapp/` and `ADMIN_UI_BASE_PATH=/admin-ui/` on those builds.
 
+**Promote checklist**: run `npm run db:migrate:deploy` before admin traffic (includes statistics `createdAt` indexes from migration `20260722183333_admin_statistics_created_at_indexes`).
+
 | Variable | Required | Purpose |
 |----------|----------|---------|
 | `ADMIN_INITIAL_EMAIL` | **Yes** | Pre-created superadmin email |

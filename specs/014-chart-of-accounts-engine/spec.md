@@ -2,101 +2,135 @@
 
 **Feature Branch**: `feat/chart-of-accounts-engine`  
 **Created**: 2026-08-01  
-**Status**: Draft (pre-Speckit — do not treat as Speckit SoT until `/speckit.specify`)  
-**Input**: Needs for a backend chart engine with cascade reparent/recode, dry-run, and future versioning; admin-ui as client.
+**Status**: Specified (Speckit)  
+**Input**: Backend chart engine with cascade reparent/recode, dry-run, command API, admin-ui client; future releases designed but not built in MVP.
 
-## Purpose
+## Clarifications
 
-Provide a **Chart of Accounts Engine** in the TADOR backend that owns global catalog invariants and structural mutations. The admin platform (013) becomes a client of this engine. Phase 1 mutates the single live chart in place (pre-production). Phase 2 packages the same commands into chart releases and migration jobs.
+### Session 2026-08-01
 
-## User Scenarios & Testing
+- Q: ¿Reescribir `CuentaUsuario.codigo` en cascada? → A: Dry-run siempre reporta impacto. Apply usa `cascadeUserCodigos` (default **true** en Phase 1 / pre-prod).
+- Q: ¿Deprecate vs delete? → A: Phase 1 añade `deprecatedAt` (soft). Delete hard sigue con guard de dependencias (013).
+- Q: ¿Releases parciales Phase 2? → A: Global cutover + subset de ops. `Book.chartReleaseId` **diferido** (no en 014 MVP).
+- Q: ¿`reportRole` contra-ingreso? → A: Campo opcional `normal` \| `contra` (default `normal`), **inerte** para P&G en 014; solo editable/persistido.
+- Q: ¿Scope MVP? → A: Phase 1 only (commands + UI). ChartRelease tables/jobs = out of MVP tasks (documented in ADR/plan).
 
-### User Story 1 — Structural reparent with cascade recode (Priority: P1)
+## User Scenarios & Testing *(mandatory)*
 
-As a catalog administrator, I need to move an account (or subtree) under a new parent and have codes recalculated, so the tree stays consistent with `[A][BBB][C][DDD]` without losing account identity.
+### User Story 1 — Reparent with cascade recode (Priority: P1)
 
-**Independent Test**: Dry-run shows old→new codes for node + descendants; apply persists `parentId` + `codigo`, keeps `id`; journal lines still resolve by id.
+As a catalog administrator, I need to move an account under a new parent and have codes recalculated for the node and descendants, so the chart stays consistent with `[A][BBB][C][DDD]` without losing account identity.
 
-**Acceptance Scenarios**:
+**Why this priority**: Core structural fix for a misplaced catalog before production users.
 
-1. **Given** a postable account under group A, **When** operator reparents it under group B (same class), **Then** its `codigo` (and children’s) update to B’s group segment with free sequences; `id` unchanged.
-2. **Given** a reparent that would change class digit `[A]`, **When** dry-run or apply is requested, **Then** the engine rejects with a domain error (no partial write).
-3. **Given** plantillas referencing old group codes in the affected set, **When** dry-run runs, **Then** the impact list includes those plantilla codes.
-
-### User Story 2 — Command-oriented API + audit (Priority: P1)
-
-As an engineer, I need structural changes expressed as explicit commands with audit, so CLI/batch and future releases reuse the same path as the UI.
-
-**Independent Test**: `reparent` / `recode` / `create` produce mutation log + `AdminAuditLog` (or dedicated chart mutation log); generic PATCH is not the only way to change hierarchy.
+**Independent Test**: Dry-run returns old→new codes; apply persists `parentId` + `codigo`, keeps `id`; existing journal lines still resolve by id.
 
 **Acceptance Scenarios**:
 
-1. **Given** an authenticated admin operator, **When** they `POST .../reparent` with `dryRun: true`, **Then** no DB mutation occurs and a preview payload is returned.
-2. **Given** `dryRun: false`, **When** apply succeeds, **Then** an append-only record of the op exists with before/after snapshots.
+1. **Given** a postable under group A, **When** reparent to group B (same class `[A]`), **Then** codes update under B’s `[BBB]` with free `[DDD]` sequences; `id` unchanged.
+2. **Given** a reparent that would change class `[A]`, **When** dry-run or apply, **Then** `400` domain error and no DB write.
+3. **Given** plantillas with `groupCode` in the affected code set, **When** dry-run, **Then** impact lists those plantilla codes.
+4. **Given** `cascadeUserCodigos: true`, **When** apply reparent, **Then** user accounts hanging under affected globals get new `codigo` values consistent with the new parent group.
 
-### User Story 3 — Fluid tree editing in admin-ui (Priority: P1)
+---
 
-As an operator on desktop, I need a hierarchical chart UI to create, rename, reparent, and preview impact, so I can correct the catalog before production users arrive.
+### User Story 2 — Command API, dry-run, audit (Priority: P1)
 
-**Independent Test**: Tree view loads full chart; reparent flow shows preview then apply; mobile layout remains usable (AppShell collapse).
+As an engineer/operator tooling consumer, I need structural mutations as explicit commands with dry-run and audit, so UI, CLI, and future releases share one path.
 
-### User Story 4 — Chart releases & partial migration (Priority: P2 — specify now, implement later)
+**Independent Test**: `POST .../commands/reparent` with `dryRun: true` mutates nothing; `false` applies and audits.
 
-As an operations lead, I need versioned chart releases and the ability to apply migrations partially (by op subset or by book), so production catalog changes are governed.
+**Acceptance Scenarios**:
 
-**Independent Test** (Phase 2): Publish draft ops as release vN→vN+1; apply job can target one book or a subset of ops; dry-run available under maintenance.
+1. **Given** admin operator, **When** `dryRun: true`, **Then** `200` preview only; DB unchanged.
+2. **Given** `dryRun: false`, **When** apply succeeds, **Then** `AdminAuditLog` (and structured mutation payload) records before/after.
+3. **Given** support role, **When** structural command, **Then** `403`.
+4. **Given** create/rename/recode/deprecate commands, **When** validated, **Then** same dry-run/apply/audit pattern.
 
-**Acceptance Scenarios** (Phase 2):
+---
 
-1. **Given** a draft release with N ops, **When** published, **Then** the live chart is not mutated until apply.
-2. **Given** two books, **When** migration is partial by book, **Then** book A can be on release v2 while book B remains on v1 (if multi-release binding is chosen — see ADR 0008).
+### User Story 3 — Admin tree UI (Priority: P1)
 
-## Requirements
+As an operator on desktop, I need a hierarchical chart UI to browse, create, rename, reparent (with preview), and deprecate, so I can correct the catalog fluently.
 
-### Functional
+**Why this priority**: Without UI, the engine is unused for day-to-day catalog work.
 
-- **FR-001**: System MUST expose chart commands: at least `create`, `rename`, `reparent`, `recode`, `deprecate` (Phase 1 may map deprecate to soft-flag or delete-with-deps guard).
-- **FR-002**: `reparent` MUST cascade recode for the node and descendants according to foundation rules in `specs/foundation/plan-de-cuentas/reglas-plan-cuentas.md`.
-- **FR-003**: System MUST NOT allow changing accounting class `[A]` via reparent/recode on an existing node.
-- **FR-004**: System MUST keep `CuentaGlobal.id` stable across reparent/recode.
-- **FR-005**: System MUST NOT rewrite `LineaAsiento` account FKs as part of normal recode.
-- **FR-006**: Dry-run MUST report affected accounts, proposed codes, plantilla `groupCode` hits, and optional `CuentaUsuario.codigo` impacts.
-- **FR-007**: Admin HTTP adapters MUST call the chart application service; no Prisma chart mutations in route handlers.
-- **FR-008**: All applied structural commands MUST be audit-logged.
-- **FR-009** (Phase 2): System SHOULD persist command batches as `ChartRelease` artifacts reusing Phase 1 op schema.
-- **FR-010** (Phase 2): System SHOULD support maintenance/batch apply of a release.
+**Independent Test**: Tree loads; reparent modal shows preview then apply; AppShell remains usable on narrow widths.
 
-### Non-functional
+**Acceptance Scenarios**:
 
-- Desktop-first admin UX; usable on narrow viewports.
-- Exact money rules unchanged (engine does not compute balances).
-- Spanish operator labels; English code identifiers and routes.
+1. **Given** admin role, **When** opens Global accounts, **Then** sees expandable tree (not only flat table).
+2. **Given** selecting move, **When** chooses new parent, **Then** sees impact preview before confirm.
+3. **Given** support role, **When** opens chart routes, **Then** read-only or denied mutate (aligned with 013 RBAC).
 
-## Key Entities (Phase 1)
+---
 
-- **CuentaGlobal** (existing): id, parentId, codigo, nombre, esPostable, …
-- **ChartCommand**: serializable op (`type`, payload, optional `dryRun`)
-- **ChartImpactPreview**: proposed mutations + dependency hits
-- **ChartMutationLog** (new or via AdminAuditLog with structured payload): append-only applied ops
+### User Story 4 — Chart releases (Priority: P2 — specify only, not MVP implement)
 
-## Key Entities (Phase 2 — reserved)
+As an operations lead, I need versioned releases of command batches for governed production migrations later.
 
-- **ChartRelease**: version, status (`draft`\|`published`\|`applied`), ops[]
-- **Book.chartReleaseId** (optional binding strategy — ADR)
+**Why this priority**: Design constraint for op schema; implementation deferred.
+
+**Independent Test**: Deferred — ADR 0008 + plan document op schema compatibility only.
+
+**Acceptance Scenarios**: Documented in ADR; no MVP code required.
+
+---
+
+### Edge Cases
+
+- Reparent into own descendant → reject (cycle).
+- Reparent onto postable parent → reject (parent must be group / non-postable).
+- Recode to existing codigo → reject uniqueness.
+- Concurrent two operators editing same node → last-write-wins with audit; prefer `updatedAt` check if cheap.
+- Empty chart / leaf-only move → still works.
+- Deprecated account → excluded from default plantilla availability matching when `deprecatedAt` set.
+
+## Requirements *(mandatory)*
+
+### Functional Requirements
+
+- **FR-001**: Chart engine MUST expose commands: `create`, `rename`, `reparent`, `recode`, `deprecate`.
+- **FR-002**: `reparent` MUST cascade recode node + descendants per foundation segmentation rules.
+- **FR-003**: Engine MUST reject class `[A]` changes on existing nodes via reparent/recode.
+- **FR-004**: `CuentaGlobal.id` MUST remain stable across reparent/recode.
+- **FR-005**: Engine MUST NOT rewrite `LineaAsiento` FKs on recode.
+- **FR-006**: Dry-run MUST report affected accounts, proposed codes, plantilla `groupCode` hits, and user-codigo impacts.
+- **FR-007**: Admin HTTP MUST call chart application services only (no Prisma in routes).
+- **FR-008**: Applied commands MUST audit via `AdminAuditLog` with structured before/after.
+- **FR-009**: `cascadeUserCodigos` MUST default true in Phase 1 apply; dry-run always lists would-be user code changes.
+- **FR-010**: `deprecatedAt` soft-deprecate MUST be supported; hard delete keeps 013 dependency guards.
+- **FR-011**: Optional `reportRole` (`normal` \| `contra`) MUST persist; P&G behavior unchanged in 014.
+- **FR-012**: Admin-ui MUST provide tree + reparent preview/apply for admin+.
+
+### Key Entities
+
+- **CuentaGlobal** (extended): + `deprecatedAt?`, + `reportRole`
+- **ChartCommand** / impact preview DTOs (application)
+- Existing **AdminAuditLog** for applied ops
+
+## Success Criteria *(mandatory)*
+
+### Measurable Outcomes
+
+- **SC-001**: Reparent+cascade of a subtree ≤ 50 nodes completes apply in < 3s on local/staging fixtures.
+- **SC-002**: 100% of dry-run requests leave DB unchanged (integration assertion).
+- **SC-003**: 100% of applied structural commands produce audit entries.
+- **SC-004**: Cross-class attempts fail closed in unit + integration tests.
+- **SC-005**: Operator completes move+preview+apply in admin-ui without manual codigo typing.
 
 ## Assumptions
 
-- Pre-production: single live chart; in-place apply is acceptable.
-- Cross-class correction = deprecate + create new account (not move).
-- Plantillas remain JSON in repo in Phase 1; impact is advisory unless a rewrite helper is explicitly scoped.
-- Contra-income metadata is optional Phase 1 field, inert until report engine consumes it.
+- Pre-production single live chart; in-place apply OK.
+- Plantilla JSON remains in repo; Phase 1 impact is advisory (no auto git rewrite).
+- ChartRelease persistence is out of 014 MVP implementation.
 
-## Out of Scope (Phase 1)
+## Out of Scope (MVP)
 
-- Speckit-generated tasks (until draft approved).
-- Full multi-version coexistence in product reports.
-- Impersonation / tenant chart forks.
-- Automatic rewrite of all plantilla JSON in git from admin UI.
+- `ChartRelease` tables / batch jobs / per-book binding.
+- Rewriting plantilla files from admin UI.
+- Changing P&G for `reportRole=contra`.
+- Speckit clarify beyond locked session above.
 
 ## References
 
@@ -104,4 +138,4 @@ As an operations lead, I need versioned chart releases and the ability to apply 
 - [research.md](./research.md)
 - [ADR 0008](../../docs/adr/0008-chart-of-accounts-engine.md)
 - [reglas-plan-cuentas.md](../foundation/plan-de-cuentas/reglas-plan-cuentas.md)
-- [013 admin inventory](../013-admin-platform/inventory-views-endpoints.md) — current CRUD surface to evolve
+- [013 admin](../013-admin-platform/spec.md)

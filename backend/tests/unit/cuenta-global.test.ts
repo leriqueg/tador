@@ -25,6 +25,8 @@ function makeCuenta(overrides: Partial<CuentaGlobal> = {}): CuentaGlobal {
     esPostable: true,
     legacyId: null,
     legacyCode: null,
+    deprecatedAt: null,
+    reportRole: 'normal',
     createdAt: new Date('2026-01-01'),
     updatedAt: new Date('2026-01-01'),
     ...overrides,

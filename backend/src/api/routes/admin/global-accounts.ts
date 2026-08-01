@@ -35,6 +35,24 @@ export function registerAdminGlobalAccountRoutes(
     },
   );
 
+  /** Seed-shaped JSON for promoting the live chart (register before :id). */
+  app.get(
+    '/api/admin/global-accounts/export/seed',
+    { preHandler: readGate },
+    async (request, reply) => {
+      const payload = await service.exportSeed(request.operatorId!);
+      const stamp = payload.exportedAt.slice(0, 10);
+      reply.header(
+        'content-disposition',
+        `attachment; filename="plan-de-cuentas-export-${stamp}.json"`,
+      );
+      return reply
+        .status(200)
+        .type('application/json; charset=utf-8')
+        .send(payload);
+    },
+  );
+
   app.get(
     '/api/admin/global-accounts/:id',
     { preHandler: readGate },

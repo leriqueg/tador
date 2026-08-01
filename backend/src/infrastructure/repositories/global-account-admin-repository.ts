@@ -18,10 +18,25 @@ function toDomain(row: {
   esPostable: boolean;
   legacyId: number | null;
   legacyCode: string | null;
+  deprecatedAt: Date | null;
+  reportRole: string;
   createdAt: Date;
   updatedAt: Date;
 }): CuentaGlobal {
-  return { ...row };
+  return {
+    id: row.id,
+    parentId: row.parentId,
+    codigo: row.codigo,
+    nombre: row.nombre,
+    descripcion: row.descripcion,
+    esPostable: row.esPostable,
+    legacyId: row.legacyId,
+    legacyCode: row.legacyCode,
+    deprecatedAt: row.deprecatedAt,
+    reportRole: row.reportRole as CuentaGlobal['reportRole'],
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  };
 }
 
 export function createGlobalAccountAdminRepository(): GlobalAccountAdminRepository {

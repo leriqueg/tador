@@ -54,6 +54,8 @@ import { createOperatorAuthApplicationService } from './application/admin/operat
 import { createAdminUserApplicationService } from './application/admin/admin-user-service.js';
 import { createAdminTemplateApplicationService } from './application/admin/admin-template-service.js';
 import { createAdminGlobalAccountApplicationService } from './application/admin/admin-global-account-service.js';
+import { createChartCommandService } from './application/chart/chart-command-service.js';
+import { createChartRepository } from './infrastructure/repositories/chart-repository.js';
 import { createAdminStatisticsApplicationService } from './application/admin/admin-statistics-service.js';
 import { createGlobalAccountAdminRepository } from './infrastructure/repositories/global-account-admin-repository.js';
 import { createAdminStatisticsReadRepository } from './infrastructure/repositories/admin-statistics-read-repository.js';
@@ -212,6 +214,10 @@ export async function buildApp(opts?: { logger?: boolean | object }) {
     createGlobalAccountAdminRepository(),
     adminAuditService,
   );
+  const chartCommandService = createChartCommandService(
+    createChartRepository(),
+    adminAuditService,
+  );
   const adminStatisticsService = createAdminStatisticsApplicationService(
     createAdminStatisticsReadRepository(),
   );
@@ -257,6 +263,7 @@ export async function buildApp(opts?: { logger?: boolean | object }) {
       adminGlobalAccounts: adminGlobalAccountService,
       adminStatistics: adminStatisticsService,
       adminAuditRepo: adminAuditRepo,
+      chartCommands: chartCommandService,
     });
   }
 

@@ -1,12 +1,15 @@
 # Reglas iniciales del plan de cuentas
 
-## Fuente de verdad (2026-07-17)
+## Fuente de verdad (actualizado 2026-08-01)
 
-| Archivo | Rol |
+| Archivo / superficie | Rol |
 |---------|-----|
-| `plan-de-cuentas-final.csv` | Estructura canónica editable |
-| `plan-de-cuentas-final-seed.json` | Catálogo runtime (+ metadatos); copiar a `backend/data/plan-de-cuentas/` antes de re-seed |
-| `plan-de-cuentas-legacy.csv` / `.normalized.json` | Solo migración / referencia |
+| Admin chart commands (`/api/admin/chart/commands/*`) | Edición viva del catálogo `CuentaGlobal` (fuente operativa) |
+| `GET /api/admin/global-accounts/export/seed` | Export JSON para feedback del próximo seed |
+| `backend/data/plan-de-cuentas/plan-de-cuentas-final-seed.json` | Seed runtime (promote desde el export al re-seedear) |
+| `plan-de-cuentas-legacy.csv` / `.normalized.json` | Solo migración / referencia histórica |
+
+Esta carpeta `specs/foundation/plan-de-cuentas/` **ya no es espejo** del catálogo: quedó deprecada como SoT editable; las reglas de segmento/código abajo siguen vigentes en dominio.
 
 `plan-de-cuentas-seed.csv` fue **eliminado** (legado anterior al análisis final). No usarlo.
 

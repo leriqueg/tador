@@ -9,6 +9,10 @@ import type {
   GlobalAccountDependencies,
 } from '../ports/global-account-admin-repository.js';
 import type { AdminAuditService } from './admin-audit-service.js';
+import {
+  buildChartSeedExport,
+  type ChartSeedExport,
+} from '../chart/chart-seed-export.js';
 
 export class GlobalAccountValidationError extends Error {
   constructor(message: string) {
@@ -44,6 +48,7 @@ export interface GlobalAccountUpdateInput {
 
 export interface AdminGlobalAccountApplicationService {
   listTree(): Promise<{ accounts: CuentaGlobal[] }>;
+  exportSeed(operatorId: string): Promise<ChartSeedExport>;
   get(
     id: string,
   ): Promise<{
@@ -69,6 +74,23 @@ export function createAdminGlobalAccountApplicationService(
   return {
     async listTree() {
       return { accounts: await repo.listAll() };
+    },
+
+    async exportSeed(operatorId) {
+      const accounts = await repo.listAll();
+      const payload = buildChartSeedExport(accounts);
+      await audit.append({
+        operatorId,
+        action: 'chart.export_seed',
+        targetType: 'CuentaGlobal',
+        targetId: 'catalog',
+        payloadAfter: {
+          totalAccounts: payload.summary.totalAccounts,
+          schemaVersion: payload.schemaVersion,
+          exportedAt: payload.exportedAt,
+        },
+      });
+      return payload;
     },
 
     async get(id) {

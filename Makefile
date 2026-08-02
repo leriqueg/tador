@@ -191,12 +191,13 @@ staging-logs:             ## Logs staging (follow)
 
 .PHONY: staging-db-setup
 staging-db-setup:         ## Staging: migrate deploy + generate + seed catálogo
-	$(COMPOSE_STG) run --rm backend npx prisma migrate deploy
-	$(RUN_STG_SEED) sh -c 'npm ci && npx prisma generate && npm run seed:catalogos'
+	# Use seed (development target): production image omits prisma CLI / scripts.
+	$(RUN_STG_SEED) sh -c 'npm ci && npx prisma generate && npm run db:migrate:deploy && npm run seed:catalogos'
 
 .PHONY: staging-admin-bootstrap
 staging-admin-bootstrap:  ## Staging: idempotent operator bootstrap
-	$(COMPOSE_STG) run --rm backend npm run admin:bootstrap
+	# Production backend image has no scripts/ or tsx — run via seed tooling image.
+	$(RUN_STG_SEED) sh -c 'npm ci && npx prisma generate && npm run admin:bootstrap'
 
 .PHONY: staging-demo-migrate
 staging-demo-migrate:     ## Staging: usuarios demo + asientos test20260719

@@ -18,7 +18,10 @@ services:
       - staging_seed_node_modules:/app/node_modules
       - ./migrations:/migrations:ro
     environment:
+      # Tooling image (dev deps + bind-mounted source). APP_ENV keeps
+      # admin bootstrap in staging/production credential mode.
       NODE_ENV: development
+      APP_ENV: ${APP_ENV:-staging}
       DEMO_SEED_ENABLED: "true"
       MIGRATE_DATA_DIR: /migrations/test20260719
       POSTGRES_HOST: postgres
@@ -28,6 +31,10 @@ services:
       POSTGRES_PORT: "5432"
       DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required}
       SESSION_SECRET: ${SESSION_SECRET:-seed-only-not-for-runtime}
+      OPERATOR_SESSION_SECRET: ${OPERATOR_SESSION_SECRET:-seed-only-not-for-runtime}
+      DEPLOYMENT_PROFILE: ${DEPLOYMENT_PROFILE:-full}
+      ADMIN_INITIAL_EMAIL: ${ADMIN_INITIAL_EMAIL:-}
+      ADMIN_INITIAL_PASSWORD: ${ADMIN_INITIAL_PASSWORD:-}
     working_dir: /app
     depends_on:
       postgres:

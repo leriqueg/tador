@@ -33,9 +33,14 @@ Desde la raíz del repo, con secretos en `.env` (o `STAGING_ENV=…`):
 | Target | Qué hace |
 |--------|----------|
 | `make staging-up` | Build + levanta **postgres / backend / frontend / admin-ui** |
-| `make staging-db-setup` | `migrate deploy` + `prisma generate` + seed catálogo |
-| `make staging-admin-bootstrap` | Operador inicial idempotente (`ADMIN_INITIAL_*`) |
+| `make staging-db-setup` | `migrate deploy` + seed catálogo (vía imagen tooling `seed`) |
+| `make staging-admin-bootstrap` | Operador inicial idempotente (`ADMIN_INITIAL_*`, vía `seed`) |
 | `make staging-demo-migrate` | Usuarios demo + asientos `test20260719` (one-shot) |
+
+Ops one-shots (`db-setup`, `admin-bootstrap`, demo migrate) usan
+`compose.staging.seed.yaml` (target **development** + bind-mount del
+backend). La imagen **production** del backend solo sirve la API (`dist/`)
+y no incluye `scripts/` ni `tsx`.
 | `make staging-restart` | Reinicia contenedores (sin rebuild) |
 | `make staging-down` | Baja el stack (conserva volúmenes) |
 | `make staging-ps` / `staging-logs` | Estado / logs |

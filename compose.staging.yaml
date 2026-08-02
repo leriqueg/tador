@@ -6,7 +6,7 @@
 #   make staging-db-setup STAGING_ENV=.env          # via compose.staging.seed.yaml
 #   make staging-admin-bootstrap STAGING_ENV=.env   # via compose.staging.seed.yaml
 # (Ops scripts need the seed/tooling image — production backend has no scripts/.)
-L# Frontend joins external network rsh-net-prod so modular HAProxy can reach
+# Frontend joins external network rsh-net-prod so modular HAProxy can reach
 # container_name tador-stg-frontend:80. Path split (/api|/auth|/book|/health|/admin-ui)
 # is done by frontend/nginx.conf → backend:3000 or admin-ui:80.
 #

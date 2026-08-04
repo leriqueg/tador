@@ -19,6 +19,7 @@ legacyCodigo;legacyNombre;codigoTador;codigoTadorPadre;crear_nombre;nueva_entida
 11320013;Cuenta Santi;11321005;11320000;Cuenta Santi;Santiago
 21300001;Vivienda;21111001;21110000;Vivienda;
 21300010;Santi Estudios;11321005;11320000;Cuenta Santi;Santiago
+11320008;Cuenta Steve;11321008;11320000;Cuenta Steve;Steve
 21300011;Proyecto UP - Santiago;21111002;21110000;Proyecto UP - Santiago;
 21300013;Prestamo Pichincha 2025;21111003;21110000;Prestamo Pichincha;
 21300016;Pension 2019;21111004;21110000;Pension Hijos;
@@ -50,6 +51,7 @@ legacyCodigo;legacyNombre;codigoTador;codigoTadorPadre;crear_nombre;nueva_entida
 61160002;Material Escolar;61150002;61150000;;
 61160003;Libros, Revistas y Prensa;61150003;61150000;;
 61211002;Energia;61120002;61120000;;
+61213001;Donativos;61191001;61190000;Donativos;
 61213002;Regalos;61180009;61180000;;
 61240001;Supermercados;61130001;61130000;;
 61240002;Restaurantes y Bares;61180002;61180000;;
@@ -57,6 +59,7 @@ legacyCodigo;legacyNombre;codigoTador;codigoTadorPadre;crear_nombre;nueva_entida
 61260001;Transporte;61160005;61160000;;
 61260002;Taxi;61160001;61160000;;
 61280001;Electrodomesticos, Electronica e Informatica;61190001;61190000;;
+61280004;Mantenimiento y Reparaciones;61190001;61190000;;
 61280006;Ropa y complementos;61170001;61170000;;
 62130001;Comisiones Bancarias;62010001;62010000;;
 62130002;Intereses Por Financiamiento;62010002;62010000;;

@@ -33,7 +33,7 @@ legacyCodigo;legacyNombre;codigoTador;codigoTadorPadre;crear_nombre;nueva_entida
 21400001;Otros Gastos;61190001;61190000;;
 21400012;Gastos Varios 2025;21111005;21110000;Gastos Varios;
 21400013;Comidita A Credito;21111006;21110000;Comida a Credito;
-21400014;Gastos Varios 2026;21111007;21110000;Gastos Varios;
+21400014;Gastos Varios 2026;21111005;21110000;Gastos Varios;
 21600001;Impuestos IVA;63011001;63010000;IVA por Pagar;
 22130001;Prestamo IEES;21311001;21310000;Prestamo IEES;IESS
 22130004;Prestamo JEP;21311002;21310000;Prestamo JEP;Prestamo JEP
